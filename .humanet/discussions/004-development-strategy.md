@@ -52,8 +52,8 @@ Build features vertically: backend + frontend + database together, not layer by 
 
 ### Package Management
 - **Install via CLI only** — Never directly edit package.json
-- Use `npm install <pkg>` for dependencies
-- Use `npm install -D <pkg>` for dev dependencies
+- Use `pnpm install <pkg>` for dependencies
+- Use `pnpm install -D <pkg>` for dev dependencies
 
 ### Documentation Rules
 - Update COPILOT.md for new constraints

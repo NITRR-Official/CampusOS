@@ -100,10 +100,10 @@ Before implementing ANY feature:
 ### Package Management
 
 * **Install packages via CLI only**:
-  * `npm install <package-name>`
-  * `npm install -D <package-name>` (dev dependencies)
+  * `pnpm install <package-name>`
+  * `pnpm install -D <package-name>` (dev dependencies)
 * **DO NOT directly edit package.json** for version management
-* Use `npm update` for version updates
+* Use `pnpm update` for version updates
 * Pin major versions, use `^` for minor/patch
 * All package decisions must be justified
 

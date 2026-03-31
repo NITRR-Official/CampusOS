@@ -68,7 +68,7 @@ Instead of building "just another event management tool," CampusOS provides the 
 ### Prerequisites
 
 - **Node.js** v18.0.0 or higher
-- **npm** v9.0.0 or higher
+- **pnpm** v8.0.0 or higher
 - **MongoDB** (local or cloud instance)
 - **Git**
 

@@ -48,7 +48,7 @@ Set up development environment, architecture, and documentation.
 ### Repository Setup
 
 * [ ] Initialize Git repository
-* [ ] Setup monorepo structure with npm workspaces
+* [ ] Setup monorepo structure with pnpm workspaces
 * [ ] Create folders:
 
   * [ ] `/backend`

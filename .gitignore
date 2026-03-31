@@ -64,7 +64,7 @@ config.local.js
 # ESLint
 .eslintcache
 
-# Dependencies lock files (use npm ci for reproducible installs)
+# Dependencies lock files (use pnpm install for reproducible installs)
 # Uncomment if you prefer to commit lock files
 # package-lock.json
 # pnpm-lock.yaml

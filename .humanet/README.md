@@ -82,4 +82,4 @@ This documentation is licensed under MIT.
 
 ---
 
-*Generated with [create-humanet](https://www.npmjs.com/package/create-humanet)*
+*Generated with [create-humanet](https://www.npmjs.com/package/create-humanet) • Managed with pnpm*

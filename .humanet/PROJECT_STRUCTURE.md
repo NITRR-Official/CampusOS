@@ -61,7 +61,8 @@ campus-os/
 ├── .humanet/                  # Humanet documentation
 ├── COPILOT.md                 # Copilot system rules
 ├── ROADMAP.md                 # Development roadmap
-├── package.json               # Root package.json with workspace configuration
+├── package.json               # Root package.json with pnpm workspace configuration
+├── pnpm-workspace.yaml        # pnpm monorepo workspace config
 ├── .gitignore
 └── README.md
 ```
