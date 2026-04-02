@@ -1,0 +1,39 @@
+{
+  "name": "@campus-os/backend",
+  "version": "0.0.1",
+  "description": "Express backend server with plugin architecture",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "jest",
+    "lint": "eslint src --ext .js",
+    "format": "prettier --write src"
+  },
+  "keywords": [
+    "express",
+    "plugin-architecture",
+    "api-server"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "packageManager": "pnpm@10.25.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.0",
+    "express": "^5.2.1",
+    "joi": "^18.1.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "eslint": "^10.1.0",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.1",
+    "supertest": "^7.2.2"
+  }
+}

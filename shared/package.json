@@ -1,0 +1,32 @@
+{
+  "name": "@campus-os/shared",
+  "version": "0.0.1",
+  "description": "Shared utilities and types for CampusOS",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint src --ext .js",
+    "format": "prettier --write src"
+  },
+  "keywords": [
+    "utilities",
+    "shared",
+    "types"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "packageManager": "pnpm@10.25.0",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "eslint": "^10.1.0",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.1"
+  }
+}

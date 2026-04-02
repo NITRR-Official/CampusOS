@@ -38,23 +38,23 @@ Set up development environment, architecture, and documentation.
 
 ### Humanet Setup
 
-* [ ] Run `humanet init`
-* [ ] Fill `problem_statement.md`
-* [ ] Fill `idea.md`
-* [ ] Fill `scope.md`
+* [x] Run `humanet init`
+* [x] Fill `problem_statement.md`
+* [x] Fill `idea.md`
+* [x] Fill `scope.md`
 
 ---
 
 ### Repository Setup
 
-* [ ] Initialize Git repository
-* [ ] Setup monorepo structure with pnpm workspaces
-* [ ] Create folders:
+* [x] Initialize Git repository
+* [x] Setup monorepo structure with pnpm workspaces
+* [x] Create folders:
 
-  * [ ] `/backend`
-  * [ ] `/frontend`
-  * [ ] `/apps`
-  * [ ] `/shared`
+  * [x] `/backend`
+  * [x] `/frontend`
+  * [x] `/apps`
+  * [x] `/shared`
 
 ---
 

@@ -1,0 +1,44 @@
+{
+  "name": "@campus-os/monorepo",
+  "version": "0.0.1",
+  "description": "The Operating System for Campus Management — A modular, scalable platform for managing the complete lifecycle of campus activities.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.25.0",
+  "scripts": {
+    "dev": "pnpm -r --filter './apps/*' --filter './backend' --filter './frontend' run dev",
+    "build": "pnpm -r --filter './apps/*' --filter './frontend' run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "keywords": [
+    "campus-management",
+    "event-management",
+    "club-management",
+    "modular-architecture",
+    "plugin-system",
+    "open-source"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NITRR-Official/CampusOS"
+  },
+  "homepage": "https://github.com/NITRR-Official/CampusOS#readme",
+  "bugs": {
+    "url": "https://github.com/NITRR-Official/CampusOS/issues"
+  },
+  "workspaces": [
+    "apps/*",
+    "backend",
+    "frontend",
+    "shared"
+  ]
+}
