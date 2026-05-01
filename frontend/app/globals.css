@@ -121,10 +121,100 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    @apply font-sans;
+  }
+  
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
+
+  /* Typography Styles */
+  
+  /* Display Headings */
+  .display-lg {
+    @apply text-display-lg font-bold text-neutral-900;
+  }
+  .dark .display-lg {
+    @apply text-neutral-50;
+  }
+  
+  .display-md {
+    @apply text-display-md font-bold text-neutral-900;
+  }
+  .dark .display-md {
+    @apply text-neutral-50;
+  }
+  
+  .display-sm {
+    @apply text-display-sm font-bold text-neutral-900;
+  }
+  .dark .display-sm {
+    @apply text-neutral-50;
+  }
+  
+  /* Heading Styles */
+  h1 {
+    @apply text-heading-lg font-bold text-neutral-900;
+  }
+  .dark h1 {
+    @apply text-neutral-50;
+  }
+  
+  h2 {
+    @apply text-heading-md font-semibold text-neutral-900;
+  }
+  .dark h2 {
+    @apply text-neutral-50;
+  }
+  
+  h3 {
+    @apply text-heading-sm font-semibold text-neutral-900;
+  }
+  .dark h3 {
+    @apply text-neutral-50;
+  }
+  
+  h4 {
+    @apply text-heading-xs font-semibold text-neutral-800;
+  }
+  .dark h4 {
+    @apply text-neutral-100;
+  }
+  
+  h5, h6 {
+    @apply text-label-md font-semibold text-neutral-800;
+  }
+  .dark h5, .dark h6 {
+    @apply text-neutral-100;
+  }
+  
+  /* Body Text */
+  p {
+    @apply text-body-md text-neutral-700;
+  }
+  .dark p {
+    @apply text-neutral-300;
+  }
+  
+  small {
+    @apply text-body-xs text-neutral-600;
+  }
+  .dark small {
+    @apply text-neutral-400;
+  }
+  
+  /* Links */
+  a {
+    @apply text-primary-500 hover:text-primary-600 transition-colors duration-200 cursor-pointer;
+  }
+  .dark a {
+    @apply text-primary-400 hover:text-primary-300;
+  }
+  
+  /* Button Base */
+  button {
+    @apply transition-colors duration-200;
   }
 }
