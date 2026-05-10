@@ -3,21 +3,28 @@
  * Verifies JWT tokens and attaches user context to request
  */
 
+// used set because it is easy to search
 const PUBLIC_ROUTES = new Set([
   '/health',
   '/api/v1/auth/signup',
   '/api/v1/auth/login'
 ]);
 
+/**
+ * Checks whether an event route is public or not
+ * @param {*} req
+ * @returns {boolean}
+ */
 function isPublicEventRoute(req) {
+  // event listing route
   if (req.method === 'GET' && req.path === '/api/v1/events') {
     return true;
   }
-
+  // public event route
   if (req.method === 'GET' && /^\/api\/v1\/events\/[^/]+$/.test(req.path)) {
     return true;
   }
-
+  // registrations for that event
   if (
     req.method === 'POST' &&
     /^\/api\/v1\/events\/[^/]+\/registrations$/.test(req.path)
@@ -44,7 +51,7 @@ export function authMiddleware(req, res, next) {
   }
 
   const token = authHeader.substring(7);
-  const registry = req.app?.locals?.registry;
+  const registry = req.app?.locals?.registry; // optional chaining in case the properties are not present
   const jwtAuthenticator = registry?.getAuthenticator('jwt');
 
   if (!jwtAuthenticator) {
@@ -59,7 +66,7 @@ export function authMiddleware(req, res, next) {
     const decoded = jwtAuthenticator.verify(token);
 
     req.user = {
-      id: decoded.sub || decoded.id || null,
+      id: decoded.sub || decoded.id || null, // both sub and id for wider compatibility
       email: decoded.email || null,
       role: decoded.role || 'user'
     };

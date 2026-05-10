@@ -10,8 +10,8 @@
   },
   "packageManager": "pnpm@10.25.0",
   "scripts": {
-    "dev": "pnpm -r --filter './apps/*' --filter './backend' --filter './frontend' run dev",
-    "build": "pnpm -r --filter './apps/*' --filter './frontend' run build",
+    "dev": "pnpm -r --filter backend --filter frontend run dev",
+    "build": "pnpm -r --filter frontend run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -40,5 +40,11 @@
     "backend",
     "frontend",
     "shared"
-  ]
+  ],
+  "dependencies": {
+    "mongoose": "^9.6.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.1.0"
+  }
 }

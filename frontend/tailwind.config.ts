@@ -7,6 +7,31 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    fontFamily: {
+      sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+      mono: ["var(--font-mono)", "monospace"],
+    },
+    fontSize: {
+      // Heading Sizes
+      "display-lg": ["3.5rem", { lineHeight: "1.1", fontWeight: "700" }],
+      "display-md": ["3rem", { lineHeight: "1.15", fontWeight: "700" }],
+      "display-sm": ["2.5rem", { lineHeight: "1.2", fontWeight: "700" }],
+      "heading-lg": ["2rem", { lineHeight: "1.3", fontWeight: "700" }],
+      "heading-md": ["1.5rem", { lineHeight: "1.4", fontWeight: "600" }],
+      "heading-sm": ["1.25rem", { lineHeight: "1.5", fontWeight: "600" }],
+      "heading-xs": ["1.125rem", { lineHeight: "1.6", fontWeight: "600" }],
+      // Body Text Sizes
+      "body-lg": ["1.125rem", { lineHeight: "1.6", fontWeight: "400" }],
+      "body-md": ["1rem", { lineHeight: "1.6", fontWeight: "400" }],
+      "body-sm": ["0.875rem", { lineHeight: "1.5", fontWeight: "400" }],
+      "body-xs": ["0.8125rem", { lineHeight: "1.5", fontWeight: "400" }],
+      // Label/Caption Sizes
+      "label-lg": ["1rem", { lineHeight: "1.5", fontWeight: "600" }],
+      "label-md": ["0.875rem", { lineHeight: "1.5", fontWeight: "600" }],
+      "label-sm": ["0.8125rem", { lineHeight: "1.5", fontWeight: "600" }],
+      "caption-md": ["0.875rem", { lineHeight: "1.4", fontWeight: "400" }],
+      "caption-sm": ["0.8125rem", { lineHeight: "1.4", fontWeight: "400" }],
+    },
     extend: {
       // Design System Colors
       colors: {
@@ -167,10 +192,6 @@ const config: Config = {
         full: "9999px",
       },
       // Additional Design System Tokens
-      fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
-      },
       boxShadow: {
         // Subtle shadows for depth
         xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",

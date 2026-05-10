@@ -36,7 +36,7 @@ export function createAuthController({ registry }) {
     });
   }
 
-  function signup(req, res, next) {
+  async function signup(req, res, next) {
     const { errors, value } = validateSignupPayload(req.body);
 
     if (errors.length > 0) {
@@ -52,7 +52,7 @@ export function createAuthController({ registry }) {
     }
 
     try {
-      const user = authService.createUser(value);
+      const user = await authService.createUser(value);
       const accessToken = signAccessToken(user);
 
       res.status(201).json({
@@ -79,7 +79,7 @@ export function createAuthController({ registry }) {
     }
   }
 
-  function login(req, res, next) {
+  async function login(req, res, next) {
     const { errors, value } = validateLoginPayload(req.body);
 
     if (errors.length > 0) {
@@ -94,29 +94,33 @@ export function createAuthController({ registry }) {
       return;
     }
 
-    const user = authService.authenticateUser(value);
+    try {
+      const user = await authService.authenticateUser(value);
 
-    if (!user) {
-      next(
-        createHttpError(
-          401,
-          'Invalid email or password',
-          'INVALID_CREDENTIALS'
-        )
-      );
-      return;
-    }
-
-    const accessToken = signAccessToken(user);
-
-    res.status(200).json({
-      success: true,
-      data: {
-        user,
-        accessToken,
-        tokenType: 'Bearer'
+      if (!user) {
+        next(
+          createHttpError(
+            401,
+            'Invalid email or password',
+            'INVALID_CREDENTIALS'
+          )
+        );
+        return;
       }
-    });
+
+      const accessToken = signAccessToken(user);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          user,
+          accessToken,
+          tokenType: 'Bearer'
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   return {

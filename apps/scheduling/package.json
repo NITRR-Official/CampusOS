@@ -1,0 +1,21 @@
+{
+  "name": "@campus-os/scheduling",
+  "version": "0.0.1",
+  "description": "Scheduling module for CampusOS - Resource and venue scheduling with conflict detection",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "scheduling",
+    "resource-booking",
+    "time-slot",
+    "conflict-detection"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@campus-os/resource",
+  "version": "0.0.1",
+  "description": "Resource module for CampusOS - Equipment and resource management",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "resource",
+    "equipment",
+    "inventory",
+    "availability"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}

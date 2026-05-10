@@ -1,0 +1,21 @@
+{
+  "name": "@campus-os/budget",
+  "version": "0.0.1",
+  "description": "Budget module for CampusOS - Event budget allocation and expense tracking",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "budget",
+    "expenses",
+    "financial-tracking",
+    "cost-management"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}
