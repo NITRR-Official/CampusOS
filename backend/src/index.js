@@ -6,9 +6,13 @@
 import registry from './utils/registry.js';
 import { createApp } from './app.js';
 import { startServer } from './server.js';
+import { connectDB } from './database/connection.js';
 
 async function main() {
   try {
+    // Connect to MongoDB
+    await connectDB();
+
     // Create Express app with middleware and loaded plugins
     const app = await createApp(registry);
 

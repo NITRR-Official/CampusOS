@@ -40,5 +40,11 @@
     "backend",
     "frontend",
     "shared"
-  ]
+  ],
+  "dependencies": {
+    "mongoose": "^9.6.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.1.0"
+  }
 }

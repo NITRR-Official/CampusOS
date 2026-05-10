@@ -1,70 +1,101 @@
 import crypto from 'node:crypto';
+import { promisify } from 'node:util';
+import { User } from '../../../../backend/src/database/schemas/user.schema.js';
 
-const usersByEmail = new Map();
+const scryptAsync = promisify(crypto.scrypt);
 
-function createPasswordHash(password) {
+async function createPasswordHash(password) {
   const salt = crypto.randomBytes(16).toString('hex');
-  const derivedKey = crypto.scryptSync(password, salt, 64).toString('hex');
-  return `${salt}:${derivedKey}`;
+  const derivedKey = await scryptAsync(
+    password,
+    salt,
+    64
+  );
+  return `${salt}:${derivedKey.toString('hex')}`;
 }
 
-function verifyPassword(password, passwordHash) {
+async function verifyPassword(password, passwordHash) {
   const [salt, storedKey] = passwordHash.split(':');
 
   if (!salt || !storedKey) {
     return false;
   }
 
-  const incomingKey = crypto.scryptSync(password, salt, 64).toString('hex');
+  const incomingKey = await scryptAsync(
+    password,
+    salt,
+    64
+  );
 
   return crypto.timingSafeEqual(
-    Buffer.from(incomingKey, 'hex'),
+    incomingKey,
     Buffer.from(storedKey, 'hex')
   );
 }
 
 function toPublicUser(user) {
+  if (!user) {
+    return null;
+  }
+
+  const createdAt = user.createdAt
+    ? new Date(user.createdAt).toISOString()
+    : null;
+
   return {
-    id: user.id,
+    id: user.id || user._id,
     name: user.name,
     email: user.email,
     role: user.role,
-    createdAt: user.createdAt
+    createdAt
   };
 }
 
 class AuthService {
-  createUser({ name, email, password }) {
+  async createUser({ name, email, password }) {
     const normalizedEmail = email.toLowerCase();
 
-    if (usersByEmail.has(normalizedEmail)) {
+    const existingUser = await User.findOne({ email: normalizedEmail }).lean();
+    if (existingUser) {
       const error = new Error('Email is already registered');
       error.code = 'EMAIL_ALREADY_EXISTS';
       throw error;
     }
 
-    const user = {
-      id: crypto.randomUUID(),
-      name,
-      email: normalizedEmail,
-      passwordHash: createPasswordHash(password),
-      role: usersByEmail.size === 0 ? 'admin' : 'volunteer',
-      createdAt: new Date().toISOString()
-    };
+    const passwordHash = await createPasswordHash(password);
+    const hasUsers = await User.exists({});
+    const role = hasUsers ? 'volunteer' : 'admin';
 
-    usersByEmail.set(normalizedEmail, user);
-    return toPublicUser(user);
+    try {
+      const user = await User.create({
+        name,
+        email: normalizedEmail,
+        passwordHash,
+        role
+      });
+
+      return toPublicUser(user);
+    } catch (error) {
+      if (error?.code === 11000) {
+        const duplicateError = new Error('Email is already registered');
+        duplicateError.code = 'EMAIL_ALREADY_EXISTS';
+        throw duplicateError;
+      }
+
+      throw error;
+    }
   }
 
-  authenticateUser({ email, password }) {
+  async authenticateUser({ email, password }) {
     const normalizedEmail = email.toLowerCase();
-    const user = usersByEmail.get(normalizedEmail);
+    const user = await User.findOne({ email: normalizedEmail }).lean();
 
     if (!user) {
       return null;
     }
 
-    if (!verifyPassword(password, user.passwordHash)) {
+    const isValid = await verifyPassword(password, user.passwordHash);
+    if (!isValid) {
       return null;
     }
 

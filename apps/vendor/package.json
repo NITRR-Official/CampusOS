@@ -1,0 +1,21 @@
+{
+  "name": "@campus-os/vendor",
+  "version": "0.0.1",
+  "description": "Vendor module for CampusOS - Event vendor and supplier management",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "vendor",
+    "supplier",
+    "event-management",
+    "vendor-tracking"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}

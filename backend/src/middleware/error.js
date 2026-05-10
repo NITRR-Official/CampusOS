@@ -1,6 +1,8 @@
 /**
  * Error Handling Middleware
+ * 
  * Catches all errors and formats them consistently
+ * 
  * MUST be placed last in middleware chain
  */
 
