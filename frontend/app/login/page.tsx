@@ -2,9 +2,12 @@
 
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import AuthShell from '@/app/components/auth/AuthShell';
 import { ApiError, login } from '@/lib/auth-api';
 import { storeAuthSession } from '@/lib/auth-session';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,40 +44,48 @@ export default function LoginPage() {
       alternateActionLabel="Need an account?"
       alternateActionText="Sign up"
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div>
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <div className="space-y-1.5">
           <label
             htmlFor="email"
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300"
+            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
           >
             Email
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40"
             placeholder="you@campus.edu"
             required
+            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
           />
         </div>
 
-        <div>
-          <label
-            htmlFor="password"
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300"
-          >
-            Password
-          </label>
-          <input
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label
+              htmlFor="password"
+              className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
+            >
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-cyan-400 hover:text-cyan-300"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40"
             placeholder="Enter your password"
             required
+            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
           />
         </div>
 
@@ -84,13 +95,13 @@ export default function LoginPage() {
           </p>
         ) : null}
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full h-10 mt-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-semibold"
         >
           {isLoading ? 'Logging in...' : 'Login'}
-        </button>
+        </Button>
       </form>
     </AuthShell>
   );
