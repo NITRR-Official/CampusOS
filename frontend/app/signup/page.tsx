@@ -1,35 +1,49 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AuthShell from '@/app/components/auth/AuthShell';
 import { ApiError, signup } from '@/lib/auth-api';
 import { storeAuthSession } from '@/lib/auth-session';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const form = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
+
+  async function onSubmit(data: SignupFormData) {
     setError('');
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const authData = await signup({ name, email, password });
+      const authData = await signup({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
       storeAuthSession(authData);
       router.push('/');
     } catch (err) {
@@ -51,99 +65,106 @@ export default function SignupPage() {
       alternateActionLabel="Already have an account?"
       alternateActionText="Login"
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <div className="space-y-1.5">
-          <label
-            htmlFor="name"
-            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
-          >
-            Full Name
-          </label>
-          <Input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Your full name"
-            minLength={2}
-            maxLength={80}
-            required
-            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+      <Form {...form}>
+        <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="block text-xs font-semibold uppercase tracking-wide text-slate-300">
+                  Full Name
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Your full name"
+                    className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-rose-400 text-xs" />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="email"
-            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
-          >
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@campus.edu"
-            required
-            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="block text-xs font-semibold uppercase tracking-wide text-slate-300">
+                  Email
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@campus.edu"
+                    className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-rose-400 text-xs" />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="password"
-            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
-          >
-            Password
-          </label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="At least 8 characters"
-            minLength={8}
-            maxLength={128}
-            required
-            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="block text-xs font-semibold uppercase tracking-wide text-slate-300">
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="At least 8 characters"
+                    className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-rose-400 text-xs" />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="confirmPassword"
-            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
-          >
-            Confirm Password
-          </label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            placeholder="Re-enter password"
-            minLength={8}
-            maxLength={128}
-            required
-            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="block text-xs font-semibold uppercase tracking-wide text-slate-300">
+                  Confirm Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Re-enter password"
+                    className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-rose-400 text-xs" />
+              </FormItem>
+            )}
           />
-        </div>
 
-        {error ? (
-          <p className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-            {error}
-          </p>
-        ) : null}
+          {error ? (
+            <p className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+              {error}
+            </p>
+          ) : null}
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="w-full h-10 mt-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-semibold"
-        >
-          {isLoading ? 'Creating account...' : 'Create account'}
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-10 mt-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-semibold"
+          >
+            {isLoading ? 'Creating account...' : 'Create account'}
+          </Button>
+        </form>
+      </Form>
     </AuthShell>
   );
 }

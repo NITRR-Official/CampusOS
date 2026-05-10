@@ -1,17 +1,33 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AuthShell from '@/app/components/auth/AuthShell';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validations/auth';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const form = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  async function onSubmit(data: ForgotPasswordFormData) {
     setIsLoading(true);
 
     // Mock API call delay
@@ -31,7 +47,7 @@ export default function ForgotPasswordPage() {
         alternateActionText="Login"
       >
         <div className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
-          If an account exists for <span className="font-semibold">{email}</span>, you will receive reset instructions shortly.
+          If an account exists for <span className="font-semibold">{form.getValues().email}</span>, you will receive reset instructions shortly.
         </div>
       </AuthShell>
     );
@@ -45,33 +61,39 @@ export default function ForgotPasswordPage() {
       alternateActionLabel="Remember your password?"
       alternateActionText="Login"
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <div className="space-y-1.5">
-          <label
-            htmlFor="email"
-            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
-          >
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@campus.edu"
-            required
-            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+      <Form {...form}>
+        <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="block text-xs font-semibold uppercase tracking-wide text-slate-300">
+                  Email
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@campus.edu"
+                    className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-rose-400 text-xs" />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className="w-full h-10 mt-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-semibold"
-        >
-          {isLoading ? 'Sending...' : 'Send reset link'}
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full h-10 mt-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-semibold"
+          >
+            {isLoading ? 'Sending...' : 'Send reset link'}
+          </Button>
+        </form>
+      </Form>
     </AuthShell>
   );
 }
+
