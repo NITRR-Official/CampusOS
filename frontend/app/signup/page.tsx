@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import AuthShell from '@/app/components/auth/AuthShell';
 import { ApiError, signup } from '@/lib/auth-api';
 import { storeAuthSession } from '@/lib/auth-session';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -49,82 +51,82 @@ export default function SignupPage() {
       alternateActionLabel="Already have an account?"
       alternateActionText="Login"
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div>
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <div className="space-y-1.5">
           <label
             htmlFor="name"
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300"
+            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
           >
             Full Name
           </label>
-          <input
+          <Input
             id="name"
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40"
             placeholder="Your full name"
             minLength={2}
             maxLength={80}
             required
+            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
           />
         </div>
 
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="email"
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300"
+            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
           >
             Email
           </label>
-          <input
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40"
             placeholder="you@campus.edu"
             required
+            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
           />
         </div>
 
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300"
+            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
           >
             Password
           </label>
-          <input
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40"
             placeholder="At least 8 characters"
             minLength={8}
             maxLength={128}
             required
+            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
           />
         </div>
 
-        <div>
+        <div className="space-y-1.5">
           <label
             htmlFor="confirmPassword"
-            className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-300"
+            className="block text-xs font-semibold uppercase tracking-wide text-slate-300"
           >
             Confirm Password
           </label>
-          <input
+          <Input
             id="confirmPassword"
             type="password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            className="w-full rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/40"
             placeholder="Re-enter password"
             minLength={8}
             maxLength={128}
             required
+            className="border-slate-600 bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus-visible:ring-cyan-400/40 focus-visible:border-cyan-400"
           />
         </div>
 
@@ -134,13 +136,13 @@ export default function SignupPage() {
           </p>
         ) : null}
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full h-10 mt-2 bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-semibold"
         >
           {isLoading ? 'Creating account...' : 'Create account'}
-        </button>
+        </Button>
       </form>
     </AuthShell>
   );
