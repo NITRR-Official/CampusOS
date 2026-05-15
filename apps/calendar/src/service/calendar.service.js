@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-
+// TODO - DB implementation in this plugin
 const calendarEventsById = new Map();
 
 class CalendarService {

@@ -4,6 +4,7 @@ import {
 } from '../schema/calendar.schema.js';
 import { getCalendarService } from '../service/calendar.service.js';
 
+// the below code is repeating across plugins
 function createHttpError(status, message, code, details) {
   const error = new Error(message);
   error.status = status;

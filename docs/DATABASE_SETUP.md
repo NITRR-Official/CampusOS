@@ -1,8 +1,16 @@
-# Database Setup & MongoDB Migration Guide
+# Database Setup (MongoDB)
 
-## Overview
+## Purpose
 
-Phase 5 modules (Vendor, Resource, Scheduling, Budget) have been migrated from in-memory Map storage to MongoDB for data persistence.
+Provide a single, consistent setup guide for MongoDB used by the Phase 5 modules (Vendor, Resource, Scheduling, Budget).
+
+## Audience
+
+Developers running CampusOS locally or in CI who need a working MongoDB connection and baseline operational guidance.
+
+## Status
+
+Migration complete; this document covers setup and operations. See the migration guide for step-by-step changes.
 
 ## Prerequisites
 
@@ -146,73 +154,7 @@ Event
 
 ## Migration Steps
 
-### Phase A: Connection Setup
-- [x] Install mongoose (v9.6.1)
-- [x] Install mongodb-memory-server (for testing)
-- [x] Create database/connection.js
-- [x] Update backend/src/index.js to initialize DB
-
-### Phase B: Schema Creation
-- [x] Create vendor.schema.js
-- [x] Create resource.schema.js
-- [x] Create scheduling.schema.js
-- [x] Create budget.schema.js
-- [x] Add database indexes
-
-### Phase C: Service Migration (Complete)
-
-#### Vendor Service
-**File**: `apps/vendor/src/service/vendor.service.js`
-
-Changes:
-1. Import Vendor model
-2. Make all methods async
-3. Replace `#vendorStorage.set(id, vendor)` with `new Vendor(data).save()`
-4. Replace `#vendorStorage.get(id)` with `Vendor.findById(id)`
-5. Replace array iteration with `Vendor.find(query)`
-6. Update tests to use async/await
-
-**Key methods to update**:
-- `createVendor()` → use `Vendor.create()`
-- `getAllVendors()` → use `Vendor.find()`
-- `getVendorById()` → use `Vendor.findById()`
-- `assignVendorToEvent()` → use `Vendor.updateOne()` with array push
-
-#### Resource Service
-**File**: `apps/resource/src/service/resource.service.js`
-
-Changes:
-1. Import Resource model
-2. Make all methods async
-3. Update allocation tracking to use array operations
-4. Replace Map operations with Model operations
-
-#### Scheduling Service
-**File**: `apps/scheduling/src/service/scheduling.service.js`
-
-Changes:
-1. Import TimeSlot, Conflict models
-2. Split Map storage into two collections
-3. Make all methods async
-4. Update conflict detection to query across documents
-
-#### Budget Service
-**File**: `apps/budget/src/service/budget.service.js`
-
-Changes:
-1. Import Budget, Expense models
-2. Split storage into two collections
-3. Make all methods async
-4. Update expense aggregations to use MongoDB queries
-
-### Phase D: Controller Updates (Complete)
-- Update all controllers to await service calls
-- Add error handling for DB operations
-
-### Phase E: Test Updates (Complete)
-- Update all service tests to use async/await
-- Use mongodb-memory-server for testing
-- Clear collections between tests
+See the migration guide for the step-by-step implementation details, service changes, and test updates.
 
 ## Database Connection Options
 
@@ -299,12 +241,8 @@ await Resource.syncIndexes()
 
 ## Next Steps
 
-1. ✅ Migrate all services to MongoDB
-2. ✅ Update controllers to async/await
-3. ✅ Update tests to use mongodb-memory-server
-4. ✅ Verify CRUD operations and conflict scenarios
-5. → Add `/health/db` endpoint for runtime checks
-6. → Add CI/CD test execution and coverage reports
+1. Add `/health/db` endpoint for runtime checks
+2. Add CI/CD test execution and coverage reports
 
 ## Files Modified/Created
 
@@ -325,5 +263,7 @@ backend/src/
 
 ---
 
-**Status**: Migration complete with updated services, controllers, and tests.
-**Next**: Add health check, CI coverage, and production readiness steps.
+## Related Docs
+
+- See [docs/MONGODB_MIGRATION.md](docs/MONGODB_MIGRATION.md) for migration steps and service-level details.
+- See [docs/phase5/README.md](docs/phase5/README.md) for Phase 5 documentation index.
