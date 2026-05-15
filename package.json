@@ -14,6 +14,8 @@
     "build": "pnpm -r --filter frontend run build",
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
+    "lint:fix": "pnpm -r run lint --fix",
+    "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
@@ -45,6 +47,9 @@
     "mongoose": "^9.6.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0",
     "mongodb-memory-server": "^11.1.0"
   }
 }
