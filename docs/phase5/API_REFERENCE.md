@@ -1,6 +1,18 @@
-# Phase 5: Operations Layer - API Reference
+# Phase 5 API Reference
 
-## 🎯 Overview
+## Purpose
+
+Provide endpoint-level documentation for Phase 5 modules.
+
+## Audience
+
+Backend and frontend developers integrating with Phase 5 services.
+
+## Status
+
+Reference documentation for the completed Phase 5 API surface.
+
+## Overview
 
 Phase 5 introduces 4 comprehensive modules for managing event operations:
 - **Vendor Management** - Event vendors and suppliers
@@ -10,7 +22,7 @@ Phase 5 introduces 4 comprehensive modules for managing event operations:
 
 ---
 
-## 📦 Vendor Module
+## Vendor Module
 
 ### Vendor CRUD
 
@@ -55,7 +67,7 @@ Phase 5 introduces 4 comprehensive modules for managing event operations:
 
 ---
 
-## 🎛️ Resource Module
+## Resource Module
 
 ### Resource CRUD
 
@@ -105,7 +117,7 @@ Phase 5 introduces 4 comprehensive modules for managing event operations:
 
 ---
 
-## 📅 Scheduling Module
+## Scheduling Module
 
 ### Time Slot Management
 
@@ -150,7 +162,7 @@ Phase 5 introduces 4 comprehensive modules for managing event operations:
 
 ---
 
-## 💰 Budget Module
+## Budget Module
 
 ### Budget Management
 
@@ -218,7 +230,7 @@ Phase 5 introduces 4 comprehensive modules for managing event operations:
 
 ---
 
-## 🔐 RBAC Rules
+## RBAC Rules
 
 ### Public Access
 - GET vendors, resources, schedule info
@@ -239,7 +251,7 @@ Phase 5 introduces 4 comprehensive modules for managing event operations:
 
 ---
 
-## 📝 Example Workflows
+## Example Workflows
 
 ### Assigning a Vendor to Event
 ```bash
@@ -286,7 +298,7 @@ GET /api/v1/budget/bdg-456/summary
 
 ---
 
-## 🔗 Integration with Other Modules
+## Integration with Other Modules
 
 ### Vendor ↔ Event
 - Vendors assigned to events
@@ -302,7 +314,7 @@ GET /api/v1/budget/bdg-456/summary
 
 ---
 
-## 🚀 Frontend Integration
+## Frontend Integration
 
 See `/frontend/lib/`:
 - `vendor-api.ts` - Vendor API client

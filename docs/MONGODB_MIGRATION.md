@@ -1,10 +1,18 @@
-# MongoDB Migration Implementation Guide
+# MongoDB Migration Guide
 
-## Overview
+## Purpose
 
-This guide walks through migrating CampusOS modules from in-memory Map storage to MongoDB. Migration is complete and services now persist data in MongoDB.
+Describe the completed migration from in-memory Map storage to MongoDB for Phase 5 modules, including service changes and testing updates.
 
-## Completed Setup ✅
+## Audience
+
+Backend developers and maintainers who need to understand or reproduce the migration steps.
+
+## Status
+
+Migration complete; use this document as a reference for implementation details.
+
+## Completed Setup
 
 ### Database Infrastructure
 - [x] MongoDB connection manager (`backend/src/database/connection.js`)
@@ -186,31 +194,7 @@ async createVendor(vendorData) {
 
 ## Environment Setup
 
-### .env (Backend)
-
-```env
-# MongoDB
-MONGODB_URI=mongodb://localhost:27017/campusos
-NODE_ENV=development
-PORT=4000
-
-# Optional: MongoDB Atlas
-# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/campusos
-```
-
-### Local MongoDB Setup
-
-```bash
-# Option 1: Docker
-docker run -d -p 27017:27017 --name mongodb mongo:latest
-
-# Option 2: Local installation (macOS)
-brew install mongodb-community
-brew services start mongodb-community
-
-# Option 3: Local installation (Windows)
-# Download from https://www.mongodb.com/try/download/community
-```
+See [docs/DATABASE_SETUP.md](docs/DATABASE_SETUP.md) for environment configuration and local MongoDB setup.
 
 ## Testing Strategy
 
@@ -379,15 +363,12 @@ volumes:
 
 ## Next Steps
 
-1. ✅ MongoDB migration complete for all Phase 5 services
-2. ✅ Unit tests passing with mongodb-memory-server
-3. → Add CI/CD integration for test runs
-4. → Add API integration tests for controllers
-5. → Add health check endpoint and monitoring
-6. → Production deployment readiness
+1. Add CI/CD integration for test runs
+2. Add API integration tests for controllers
+3. Add health check endpoint and monitoring
+4. Production deployment readiness
 
----
+## Related Docs
 
-**Current Status**: Migration complete. Services, controllers, and tests are updated for MongoDB.
-
-**Recommendation**: Add CI coverage and integration tests, then proceed to production readiness tasks.
+- See [docs/DATABASE_SETUP.md](docs/DATABASE_SETUP.md) for setup and operations.
+- See [docs/phase5/README.md](docs/phase5/README.md) for Phase 5 documentation index.
