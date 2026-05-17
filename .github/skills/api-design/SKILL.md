@@ -7,6 +7,7 @@ argument-hint: 'endpoint-path, http-method, request-schema'
 # API Design
 
 ## When to Use
+
 - Designing API endpoints for new features
 - Planning request and response formats
 - Structuring error handling responses
@@ -15,11 +16,13 @@ argument-hint: 'endpoint-path, http-method, request-schema'
 - Documenting API contracts
 
 ## What This Skill Does
+
 Establishes CampusOS REST API design patterns, request/response conventions, authentication requirements, HTTP status codes, and versioning strategy.
 
 ## Procedure
 
 ### Phase 1: Endpoint Planning
+
 1. Identify resource (e.g., `/activities`, `/submissions`, `/users`)
 2. Define standard HTTP methods:
    - GET /resource - List all
@@ -31,6 +34,7 @@ Establishes CampusOS REST API design patterns, request/response conventions, aut
 4. Use plural nouns: `/activities` not `/activity`
 
 ### Phase 2: Request Schema
+
 1. Define request body shape (JSON)
 2. Specify required vs optional fields
 3. Include data types and constraints:
@@ -41,6 +45,7 @@ Establishes CampusOS REST API design patterns, request/response conventions, aut
 4. Document query parameters for filtering/pagination
 
 ### Phase 3: Response Format
+
 1. Standardize response structure:
    ```json
    {
@@ -55,6 +60,7 @@ Establishes CampusOS REST API design patterns, request/response conventions, aut
 3. Wrap single objects and arrays consistently
 
 ### Phase 4: Error Handling
+
 1. Use appropriate HTTP status codes:
    - 200 OK - Success
    - 201 Created - Resource created
@@ -74,6 +80,7 @@ Establishes CampusOS REST API design patterns, request/response conventions, aut
    ```
 
 ### Phase 5: Authentication
+
 1. Use Bearer tokens in Authorization header: `Authorization: Bearer <token>`
 2. Validate token on protected endpoints
 3. Return 401 for missing/invalid tokens
@@ -81,12 +88,14 @@ Establishes CampusOS REST API design patterns, request/response conventions, aut
 5. Document which endpoints require authentication
 
 ### Phase 6: Pagination & Filtering
+
 1. Query parameters: `?page=1&limit=10&sort=created_at&order=desc`
 2. Return metadata: `meta: { total, page, limit, hasMore }`
 3. Support common filters: status, role, date range
 4. Validate limit range (max 100)
 
 ## Quick Reference
+
 ```bash
 # Test endpoint
 curl -X GET http://localhost:3000/api/v1/activities \
@@ -100,12 +109,13 @@ curl -X POST http://localhost:3000/api/v1/activities \
 ```
 
 ## Common Issues
-| Issue | Solution |
-|-------|----------|
-| 400 Bad Request | Check request body schema, verify required fields present |
-| 401 Unauthorized | Verify token format and validity, check Authorization header |
-| 403 Forbidden | Check user permissions/role, verify resource ownership |
-| Inconsistent response format | Standardize all responses with status/data/meta structure |
-| Missing pagination | Add limit/offset to list endpoints, return total count |
-| No error details | Include `code` and `details` array in error responses |
-| Missing API documentation | Document in OpenAPI/Swagger spec alongside code |
+
+| Issue                        | Solution                                                     |
+| ---------------------------- | ------------------------------------------------------------ |
+| 400 Bad Request              | Check request body schema, verify required fields present    |
+| 401 Unauthorized             | Verify token format and validity, check Authorization header |
+| 403 Forbidden                | Check user permissions/role, verify resource ownership       |
+| Inconsistent response format | Standardize all responses with status/data/meta structure    |
+| Missing pagination           | Add limit/offset to list endpoints, return total count       |
+| No error details             | Include `code` and `details` array in error responses        |
+| Missing API documentation    | Document in OpenAPI/Swagger spec alongside code              |

@@ -7,7 +7,14 @@
   "properties": {
     "humanet": {
       "type": "object",
-      "required": ["version", "name", "status", "domains", "maintainers", "license"],
+      "required": [
+        "version",
+        "name",
+        "status",
+        "domains",
+        "maintainers",
+        "license"
+      ],
       "properties": {
         "version": {
           "type": "string",
@@ -45,7 +52,14 @@
         },
         "status": {
           "type": "string",
-          "enum": ["provisional", "validated", "active", "dormant", "archived", "deprecated"],
+          "enum": [
+            "provisional",
+            "validated",
+            "active",
+            "dormant",
+            "archived",
+            "deprecated"
+          ],
           "description": "Current lifecycle status"
         },
         "status_history": {
@@ -219,7 +233,13 @@
         },
         "license": {
           "type": "string",
-          "enum": ["CC-BY-4.0", "CC-BY-SA-4.0", "MIT", "Unlicense", "Apache-2.0"]
+          "enum": [
+            "CC-BY-4.0",
+            "CC-BY-SA-4.0",
+            "MIT",
+            "Unlicense",
+            "Apache-2.0"
+          ]
         },
         "accepting_contributions": {
           "type": "boolean"

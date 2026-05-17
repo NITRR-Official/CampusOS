@@ -5,17 +5,20 @@ This directory contains visual documentation for your idea.
 ## Recommended Diagram Types
 
 ### Architecture Diagrams
+
 - System architecture
 - Component relationships
 - Data flow
 
 ### User Experience
+
 - User flows
 - Wireframes
 - Mockups
 - Prototypes
 
 ### Process Diagrams
+
 - Workflows
 - State machines
 - Sequence diagrams
@@ -23,6 +26,7 @@ This directory contains visual documentation for your idea.
 ## Tools
 
 Consider using these tools for creating diagrams:
+
 - **Mermaid** - Text-based diagrams (can embed in markdown)
 - **Excalidraw** - Hand-drawn style diagrams
 - **Figma** - UI/UX design
@@ -35,14 +39,15 @@ You can embed Mermaid diagrams directly in markdown:
 
 \`\`\`mermaid
 graph LR
-    A[User] --> B[Frontend]
-    B --> C[API]
-    C --> D[Database]
+A[User] --> B[Frontend]
+B --> C[API]
+C --> D[Database]
 \`\`\`
 
 ## File Organization
 
 Organize your diagrams by type:
+
 - `architecture/` - System architecture
 - `ux/` - User experience designs
 - `flow/` - Process flows

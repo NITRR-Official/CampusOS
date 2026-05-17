@@ -2,6 +2,8 @@ import Link from 'next/link';
 import MainLayout from '../components/MainLayout';
 import { fetchEvents } from '@/lib/event-api';
 
+export const dynamic = 'force-dynamic';
+
 function formatDate(isoDate: string) {
   const date = new Date(isoDate);
   return date.toLocaleString();
@@ -32,7 +34,9 @@ export default async function EventsPage() {
                 className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-xl font-semibold text-gray-900">{event.title}</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {event.title}
+                  </h2>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       event.status === 'published'

@@ -16,7 +16,9 @@ export function startServer(app, port = 3000) {
 
   // Handle termination signals
   const gracefulShutdown = (signal) => {
-    console.log(`\n📍 Received ${signal} signal, starting graceful shutdown...`);
+    console.log(
+      `\n📍 Received ${signal} signal, starting graceful shutdown...`
+    );
 
     server.close(() => {
       console.log('✓ HTTP server closed');

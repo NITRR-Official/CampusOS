@@ -6,6 +6,7 @@ description: 'Build React components in Next.js using CampusOS patterns. Use whe
 # Frontend Patterns
 
 ## When to Use
+
 - Building new React components or pages
 - Refactoring components for reusability
 - Setting up state with Zustand or Context API
@@ -15,7 +16,9 @@ description: 'Build React components in Next.js using CampusOS patterns. Use whe
 ## Procedure
 
 ### 1. Component Structure
+
 Create modular components in `src/components/<domain>/`:
+
 ```tsx
 // src/components/Course/CourseCard.tsx
 import { memo } from 'react';
@@ -30,7 +33,7 @@ interface CourseCardProps {
 export const CourseCard = memo(function CourseCard({
   id,
   title,
-  enrolled = false,
+  enrolled = false
 }: CourseCardProps) {
   return (
     <div className={styles.card}>
@@ -42,6 +45,7 @@ export const CourseCard = memo(function CourseCard({
 ```
 
 ### 2. State Management with Zustand
+
 ```tsx
 // src/stores/courseStore.ts
 import { create } from 'zustand';
@@ -49,11 +53,12 @@ import { create } from 'zustand';
 export const useCourseStore = create((set) => ({
   courses: [],
   setCourses: (courses) => set({ courses }),
-  addCourse: (course) => set((s) => ({ courses: [...s.courses, course] })),
+  addCourse: (course) => set((s) => ({ courses: [...s.courses, course] }))
 }));
 ```
 
 ### 3. Server/Client Components
+
 ```tsx
 // Server Component (default in App Router)
 export async function CoursesPage() {
@@ -62,14 +67,16 @@ export async function CoursesPage() {
 }
 
 // Client Component
-'use client';
+('use client');
 export function CourseFilter({ onFilter }) {
   return <input onChange={(e) => onFilter(e.target.value)} />;
 }
 ```
 
 ### 4. Styling with Tailwind + CSS Modules
+
 Use Tailwind for utilities, CSS Modules for scoped styles:
+
 ```tsx
 // src/components/Button/Button.tsx
 import styles from './Button.module.css';
@@ -84,6 +91,7 @@ export function Button({ children, variant = 'primary' }) {
 ```
 
 ### 5. Code Splitting & Dynamic Imports
+
 ```tsx
 import dynamic from 'next/dynamic';
 
@@ -93,19 +101,24 @@ const AdminPanel = dynamic(() => import('@/components/Admin/Panel'), {
 ```
 
 ### 6. Performance Optimization
+
 Use memoization and useCallback:
+
 ```tsx
 'use client';
 import { useMemo, useCallback } from 'react';
 
 export function EnrollmentForm({ courses }) {
-  const active = useMemo(() => courses.filter(c => c.active), [courses]);
-  const enroll = useCallback((id) => { /* enroll */ }, []);
+  const active = useMemo(() => courses.filter((c) => c.active), [courses]);
+  const enroll = useCallback((id) => {
+    /* enroll */
+  }, []);
   return <form onSubmit={() => enroll()} />;
 }
 ```
 
 ## Quick Reference
+
 ```bash
 pnpm dev              # Start frontend
 pnpm build            # Production build
@@ -114,9 +127,10 @@ pnpm lint            # Code quality
 ```
 
 ## Common Issues
-| Issue | Solution |
-|-------|----------|
-| Hydration mismatch | Ensure 'use client' in client components. Use dynamic imports with `ssr: false`. |
-| Slow page load | Use dynamic imports for below-fold components. Optimize images with next/image. |
+
+| Issue                          | Solution                                                                         |
+| ------------------------------ | -------------------------------------------------------------------------------- |
+| Hydration mismatch             | Ensure 'use client' in client components. Use dynamic imports with `ssr: false`. |
+| Slow page load                 | Use dynamic imports for below-fold components. Optimize images with next/image.  |
 | State persisting across routes | Clear store on logout: `store.clear()`. Use session storage for temporary state. |
-| CSS conflicts | CSS Modules scope by default. Avoid global styles in components. Use BEM naming. |
+| CSS conflicts                  | CSS Modules scope by default. Avoid global styles in components. Use BEM naming. |

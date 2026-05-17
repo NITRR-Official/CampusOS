@@ -11,6 +11,7 @@
 [Summary of findings]
 
 **Key Sources:**
+
 - [Source 1] - [Brief summary]
 - [Source 2] - [Brief summary]
 
@@ -19,6 +20,7 @@
 [Summary of findings]
 
 **Key Sources:**
+
 - [Source 1] - [Brief summary]
 - [Source 2] - [Brief summary]
 
@@ -52,15 +54,15 @@
 
 [Summarize relevant academic papers:]
 
-- **Paper 1:** Author et al. (Year). *Title*. Key finding: [Summary]
-- **Paper 2:** Author et al. (Year). *Title*. Key finding: [Summary]
+- **Paper 1:** Author et al. (Year). _Title_. Key finding: [Summary]
+- **Paper 2:** Author et al. (Year). _Title_. Key finding: [Summary]
 
 ### Industry Research
 
 [Summarize relevant industry reports or case studies:]
 
-- **Report 1:** Organization. (Year). *Title*. Key insight: [Summary]
-- **Report 2:** Organization. (Year). *Title*. Key insight: [Summary]
+- **Report 1:** Organization. (Year). _Title_. Key insight: [Summary]
+- **Report 2:** Organization. (Year). _Title_. Key insight: [Summary]
 
 ## Key Insights
 

@@ -1,16 +1,19 @@
 # ADR 005: Removing Multi-Tenant Architecture
 
 ## Status
+
 Accepted
 
 ## Context
 
 Initially, CampusOS was designed as a multi-tenant platform with:
+
 - Single backend instance serving multiple institutes
 - Each institute as a separate tenant
 - Data isolation via `instituteId` in every entity
 
 Upon further analysis, multi-tenancy introduces complexity that:
+
 - Hinders scaling and query optimization
 - Adds data isolation risks (security concerns)
 - Increases operational overhead
@@ -21,6 +24,7 @@ Upon further analysis, multi-tenancy introduces complexity that:
 **Remove multi-tenant architecture entirely.**
 
 CampusOS will be:
+
 - Single-instance per deployment
 - Serve one organization/institute per deployment
 - Simpler operational model
@@ -37,6 +41,7 @@ CampusOS will be:
 ## Consequences
 
 ### Positive
+
 - Faster query performance (no tenant filtering)
 - Simpler codebase (less middleware logic)
 - Better security (no cross-tenant data risks)
@@ -44,6 +49,7 @@ CampusOS will be:
 - Horizontal scaling via new deployments
 
 ### Negative
+
 - Each institute needs separate deployment
 - Higher operational overhead per institute
 - No shared data between instances

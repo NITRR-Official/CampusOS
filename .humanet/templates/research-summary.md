@@ -44,8 +44,8 @@
 
 ## Data & Statistics
 
-| Metric | Value | Source |
-|--------|-------|--------|
+| Metric     | Value   | Source   |
+| ---------- | ------- | -------- |
 | [Metric 1] | [Value] | [Source] |
 | [Metric 2] | [Value] | [Source] |
 

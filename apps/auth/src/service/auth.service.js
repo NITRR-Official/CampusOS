@@ -6,11 +6,7 @@ const scryptAsync = promisify(crypto.scrypt);
 
 async function createPasswordHash(password) {
   const salt = crypto.randomBytes(16).toString('hex');
-  const derivedKey = await scryptAsync(
-    password,
-    salt,
-    64
-  );
+  const derivedKey = await scryptAsync(password, salt, 64);
   return `${salt}:${derivedKey.toString('hex')}`;
 }
 
@@ -21,16 +17,9 @@ async function verifyPassword(password, passwordHash) {
     return false;
   }
 
-  const incomingKey = await scryptAsync(
-    password,
-    salt,
-    64
-  );
+  const incomingKey = await scryptAsync(password, salt, 64);
 
-  return crypto.timingSafeEqual(
-    incomingKey,
-    Buffer.from(storedKey, 'hex')
-  );
+  return crypto.timingSafeEqual(incomingKey, Buffer.from(storedKey, 'hex'));
 }
 
 function toPublicUser(user) {

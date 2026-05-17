@@ -78,9 +78,11 @@ export class CheckInService {
    * @returns {object|null} Check-in record or null if not found
    */
   getUserCheckInStatus(eventId, userId) {
-    return Array.from(this.#storage.values()).find(
-      (checkIn) => checkIn.eventId === eventId && checkIn.userId === userId
-    ) || null;
+    return (
+      Array.from(this.#storage.values()).find(
+        (checkIn) => checkIn.eventId === eventId && checkIn.userId === userId
+      ) || null
+    );
   }
 
   /**
@@ -121,7 +123,10 @@ export class CheckInService {
       totalRegistered,
       checkedIn,
       pending,
-      checkInRate: totalRegistered > 0 ? ((checkedIn / totalRegistered) * 100).toFixed(2) : 0
+      checkInRate:
+        totalRegistered > 0
+          ? ((checkedIn / totalRegistered) * 100).toFixed(2)
+          : 0
     };
   }
 

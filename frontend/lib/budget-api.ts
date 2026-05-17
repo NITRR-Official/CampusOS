@@ -9,15 +9,21 @@ export const budgetAPI = {
   /**
    * Create budget for event
    */
-  async createBudget(eventId: string, budgetData: Record<string, unknown>): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/events/${eventId}/budget`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(budgetData)
-    });
+  async createBudget(
+    eventId: string,
+    budgetData: Record<string, unknown>
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/events/${eventId}/budget`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(budgetData)
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -31,11 +37,14 @@ export const budgetAPI = {
    * Get budget for event
    */
   async getEventBudget(eventId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/events/${eventId}/budget`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/events/${eventId}/budget`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Budget not found for this event');
@@ -50,7 +59,7 @@ export const budgetAPI = {
   async getBudgetById(budgetId: string): Promise<unknown> {
     const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     });
 
@@ -64,12 +73,15 @@ export const budgetAPI = {
   /**
    * Update budget
    */
-  async updateBudget(budgetId: string, updateData: Record<string, unknown>): Promise<unknown> {
+  async updateBudget(
+    budgetId: string,
+    updateData: Record<string, unknown>
+  ): Promise<unknown> {
     const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify(updateData)
     });
@@ -85,14 +97,17 @@ export const budgetAPI = {
    * Approve budget
    */
   async approveBudget(budgetId: string, userId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}/approve`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ userId })
-    });
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/${budgetId}/approve`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ userId })
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to approve budget');
@@ -105,12 +120,15 @@ export const budgetAPI = {
    * Reject budget
    */
   async rejectBudget(budgetId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}/reject`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/${budgetId}/reject`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to reject budget');
@@ -122,15 +140,21 @@ export const budgetAPI = {
   /**
    * Log an expense
    */
-  async logExpense(budgetId: string, expenseData: Record<string, unknown>): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}/expense`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(expenseData)
-    });
+  async logExpense(
+    budgetId: string,
+    expenseData: Record<string, unknown>
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/${budgetId}/expense`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(expenseData)
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -144,11 +168,14 @@ export const budgetAPI = {
    * Get budget expenses
    */
   async getBudgetExpenses(budgetId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}/expenses`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/${budgetId}/expenses`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch expenses');
@@ -161,11 +188,14 @@ export const budgetAPI = {
    * Get expense by ID
    */
   async getExpenseById(expenseId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/expense/${expenseId}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/expense/${expenseId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Expense not found');
@@ -177,15 +207,21 @@ export const budgetAPI = {
   /**
    * Update expense
    */
-  async updateExpense(expenseId: string, updateData: Record<string, unknown>): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/expense/${expenseId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updateData)
-    });
+  async updateExpense(
+    expenseId: string,
+    updateData: Record<string, unknown>
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/expense/${expenseId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update expense');
@@ -197,15 +233,21 @@ export const budgetAPI = {
   /**
    * Mark expense as paid
    */
-  async markExpenseAsPaid(expenseId: string, paymentMethod: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/expense/${expenseId}/mark-paid`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ paymentMethod })
-    });
+  async markExpenseAsPaid(
+    expenseId: string,
+    paymentMethod: string
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/expense/${expenseId}/mark-paid`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ paymentMethod })
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to mark expense as paid');
@@ -218,11 +260,14 @@ export const budgetAPI = {
    * Get budget summary
    */
   async getBudgetSummary(budgetId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}/summary`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/${budgetId}/summary`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch budget summary');
@@ -235,11 +280,14 @@ export const budgetAPI = {
    * Get budget vs actual comparison
    */
   async getBudgetVsActual(budgetId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}/vs-actual`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/budget/${budgetId}/vs-actual`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch budget comparison');

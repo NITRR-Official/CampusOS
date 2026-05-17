@@ -24,9 +24,14 @@ export class CalendarApiError extends Error {
   }
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-async function request(path: string, init?: RequestInit, accessToken?: string | null) {
+async function request(
+  path: string,
+  init?: RequestInit,
+  accessToken?: string | null
+) {
   const headers = new Headers(init?.headers || {});
 
   if (accessToken) {
@@ -45,14 +50,19 @@ async function request(path: string, init?: RequestInit, accessToken?: string | 
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new CalendarApiError(json?.message || 'Request failed', response.status);
+    throw new CalendarApiError(
+      json?.message || 'Request failed',
+      response.status
+    );
   }
 
   return json?.data;
 }
 
 export function fetchAllCalendarEvents(accessToken: string) {
-  return request('/api/v1/calendar', undefined, accessToken) as Promise<CalendarEvent[]>;
+  return request('/api/v1/calendar', undefined, accessToken) as Promise<
+    CalendarEvent[]
+  >;
 }
 
 export function fetchCalendarEventsByRange(

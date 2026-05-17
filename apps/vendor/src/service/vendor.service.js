@@ -11,8 +11,13 @@ function normalizeAssignment(assignment, vendorId) {
     return null;
   }
 
-  const assignmentId = assignment.assignmentId || assignment.id || assignment._id;
-  const assignedAt = assignment.assignedAt || assignment.assignedDate || assignment.createdAt || null;
+  const assignmentId =
+    assignment.assignmentId || assignment.id || assignment._id;
+  const assignedAt =
+    assignment.assignedAt ||
+    assignment.assignedDate ||
+    assignment.createdAt ||
+    null;
 
   return {
     id: assignmentId,
@@ -55,10 +60,22 @@ export class VendorService {
    * @returns {object} Created vendor record
    */
   async createVendor(vendorData) {
-    const { name, category, contactPerson, email, phone, address, bankDetails } = vendorData;
+    const {
+      name,
+      category,
+      contactPerson,
+      email,
+      phone,
+      address,
+      bankDetails
+    } = vendorData;
 
     if (!name || !category || !contactPerson || !email || !phone) {
-      return { success: false, error: 'Missing required fields: name, category, contactPerson, email, phone' };
+      return {
+        success: false,
+        error:
+          'Missing required fields: name, category, contactPerson, email, phone'
+      };
     }
 
     try {
@@ -104,7 +121,9 @@ export class VendorService {
    */
   async getVendorByName(name) {
     try {
-      const vendor = await Vendor.findOne({ nameLower: name.toLowerCase() }).lean();
+      const vendor = await Vendor.findOne({
+        nameLower: name.toLowerCase()
+      }).lean();
       return normalizeVendor(vendor);
     } catch (error) {
       console.error('Error fetching vendor by name:', error);
@@ -150,11 +169,10 @@ export class VendorService {
         updates.nameLower = updateData.name.toLowerCase();
       }
 
-      const vendor = await Vendor.findByIdAndUpdate(
-        vendorId,
-        updates,
-        { new: true, runValidators: true }
-      );
+      const vendor = await Vendor.findByIdAndUpdate(vendorId, updates, {
+        new: true,
+        runValidators: true
+      });
 
       if (!vendor) {
         return { success: false, error: 'Vendor not found' };
@@ -218,7 +236,10 @@ export class VendorService {
       vendor.assignments.push(assignment);
       await vendor.save();
 
-      return { success: true, assignment: normalizeAssignment(assignment, vendorId) };
+      return {
+        success: true,
+        assignment: normalizeAssignment(assignment, vendorId)
+      };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -231,7 +252,9 @@ export class VendorService {
    */
   async getEventVendors(eventId) {
     try {
-      const vendors = await Vendor.find({ 'assignments.eventId': eventId }).lean();
+      const vendors = await Vendor.find({
+        'assignments.eventId': eventId
+      }).lean();
 
       return vendors.flatMap((vendor) =>
         (vendor.assignments || [])
@@ -283,16 +306,23 @@ export class VendorService {
   async updateAssignmentStatus(assignmentId, newStatus) {
     const validStatuses = ['assigned', 'confirmed', 'completed', 'cancelled'];
     if (!validStatuses.includes(newStatus)) {
-      return { success: false, error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` };
+      return {
+        success: false,
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      };
     }
 
     try {
-      const vendor = await Vendor.findOne({ 'assignments.assignmentId': assignmentId });
+      const vendor = await Vendor.findOne({
+        'assignments.assignmentId': assignmentId
+      });
       if (!vendor) {
         return { success: false, error: 'Assignment not found' };
       }
 
-      const assignment = vendor.assignments.find((item) => item.assignmentId === assignmentId);
+      const assignment = vendor.assignments.find(
+        (item) => item.assignmentId === assignmentId
+      );
       if (!assignment) {
         return { success: false, error: 'Assignment not found' };
       }
@@ -307,7 +337,10 @@ export class VendorService {
 
       await vendor.save();
 
-      return { success: true, assignment: normalizeAssignment(assignment, vendor.id || vendor._id) };
+      return {
+        success: true,
+        assignment: normalizeAssignment(assignment, vendor.id || vendor._id)
+      };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -332,9 +365,11 @@ export class VendorService {
 
       vendor.ratings.push({ rating, ratedAt: new Date() });
       vendor.totalRatings = vendor.ratings.length;
-      vendor.averageRating = vendor.totalRatings > 0
-        ? vendor.ratings.reduce((sum, entry) => sum + entry.rating, 0) / vendor.totalRatings
-        : 0;
+      vendor.averageRating =
+        vendor.totalRatings > 0
+          ? vendor.ratings.reduce((sum, entry) => sum + entry.rating, 0) /
+            vendor.totalRatings
+          : 0;
       vendor.rating = vendor.averageRating;
       vendor.updatedAt = new Date();
 

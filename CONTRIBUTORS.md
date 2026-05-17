@@ -14,6 +14,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to get started co
 ## Recognition Process
 
 Contributors are recognized:
+
 1. After their first merged PR is added to this file
 2. In monthly community highlights
 3. In release notes for significant contributions

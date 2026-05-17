@@ -9,12 +9,14 @@ export const resourceAPI = {
   /**
    * Create a new resource
    */
-  async createResource(resourceData: Record<string, unknown>): Promise<unknown> {
+  async createResource(
+    resourceData: Record<string, unknown>
+  ): Promise<unknown> {
     const response = await fetch(`${API_BASE}/api/v1/resources`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify(resourceData)
     });
@@ -30,15 +32,18 @@ export const resourceAPI = {
   /**
    * Get all resources with optional filters
    */
-  async getAllResources(filters: Record<string, unknown> = {}): Promise<unknown> {
+  async getAllResources(
+    filters: Record<string, unknown> = {}
+  ): Promise<unknown> {
     const params = new URLSearchParams();
     if (filters.type) params.append('type', String(filters.type));
     if (filters.status) params.append('status', String(filters.status));
-    if (filters.condition) params.append('condition', String(filters.condition));
+    if (filters.condition)
+      params.append('condition', String(filters.condition));
 
     const response = await fetch(`${API_BASE}/api/v1/resources?${params}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     });
 
@@ -52,17 +57,23 @@ export const resourceAPI = {
   /**
    * Get available resources
    */
-  async getAvailableResources(filters: Record<string, unknown> = {}): Promise<unknown> {
+  async getAvailableResources(
+    filters: Record<string, unknown> = {}
+  ): Promise<unknown> {
     const params = new URLSearchParams();
     if (filters.type) params.append('type', String(filters.type));
     if (filters.status) params.append('status', String(filters.status));
-    if (filters.condition) params.append('condition', String(filters.condition));
+    if (filters.condition)
+      params.append('condition', String(filters.condition));
 
-    const response = await fetch(`${API_BASE}/api/v1/resources/available?${params}`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/resources/available?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch available resources');
@@ -77,7 +88,7 @@ export const resourceAPI = {
   async getResourceById(resourceId: string): Promise<unknown> {
     const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     });
 
@@ -91,12 +102,15 @@ export const resourceAPI = {
   /**
    * Update resource
    */
-  async updateResource(resourceId: string, updateData: Record<string, unknown>): Promise<unknown> {
+  async updateResource(
+    resourceId: string,
+    updateData: Record<string, unknown>
+  ): Promise<unknown> {
     const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify(updateData)
     });
@@ -115,7 +129,7 @@ export const resourceAPI = {
     const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     });
 
@@ -129,15 +143,22 @@ export const resourceAPI = {
   /**
    * Allocate resource to event
    */
-  async allocateResourceToEvent(eventId: string, resourceId: string, allocationData: Record<string, unknown>): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/events/${eventId}/resources/${resourceId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(allocationData)
-    });
+  async allocateResourceToEvent(
+    eventId: string,
+    resourceId: string,
+    allocationData: Record<string, unknown>
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/events/${eventId}/resources/${resourceId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(allocationData)
+      }
+    );
 
     if (!response.ok) {
       const error = await response.json();
@@ -151,11 +172,14 @@ export const resourceAPI = {
    * Get resources for event
    */
   async getEventResources(eventId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/events/${eventId}/resources`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/events/${eventId}/resources`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch event resources');
@@ -168,11 +192,14 @@ export const resourceAPI = {
    * Get resource allocations
    */
   async getResourceAllocations(resourceId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}/allocations`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${API_BASE}/api/v1/resources/${resourceId}/allocations`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch resource allocations');
@@ -184,15 +211,21 @@ export const resourceAPI = {
   /**
    * Update allocation status
    */
-  async updateAllocationStatus(allocationId: string, status: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/resources/allocations/${allocationId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ status })
-    });
+  async updateAllocationStatus(
+    allocationId: string,
+    status: string
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/resources/allocations/${allocationId}/status`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ status })
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update allocation status');
@@ -204,15 +237,21 @@ export const resourceAPI = {
   /**
    * Update resource maintenance
    */
-  async updateMaintenance(resourceId: string, maintenanceDate: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}/maintenance`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ maintenanceDate })
-    });
+  async updateMaintenance(
+    resourceId: string,
+    maintenanceDate: string
+  ): Promise<unknown> {
+    const response = await fetch(
+      `${API_BASE}/api/v1/resources/${resourceId}/maintenance`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ maintenanceDate })
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update maintenance date');

@@ -37,7 +37,9 @@ class CalendarService {
         const eventStart = Date.parse(event.startsAt);
         return eventStart >= start && eventStart <= end;
       })
-      .sort((left, right) => Date.parse(left.startsAt) - Date.parse(right.startsAt));
+      .sort(
+        (left, right) => Date.parse(left.startsAt) - Date.parse(right.startsAt)
+      );
   }
 
   getEvent(eventId) {

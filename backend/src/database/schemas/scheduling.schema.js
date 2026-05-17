@@ -70,7 +70,15 @@ const conflictSchema = new mongoose.Schema(
     },
     conflictType: {
       type: String,
-      enum: ['venue', 'resource', 'time', 'capacity', 'venue-overlap', 'resource-overlap', 'time-overlap'],
+      enum: [
+        'venue',
+        'resource',
+        'time',
+        'capacity',
+        'venue-overlap',
+        'resource-overlap',
+        'time-overlap'
+      ],
       required: true
     },
     severity: {

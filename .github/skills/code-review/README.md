@@ -47,6 +47,7 @@ Add these to your `package.json` for easier access:
 ```
 
 Then use:
+
 ```bash
 pnpm run review:all
 pnpm run review:security
@@ -75,18 +76,21 @@ pnpm run review:docs
 ## Review Dimensions
 
 ### 1. Security Review
+
 - Dependency vulnerability scanning
 - Secrets and credentials detection
 - Authentication pattern validation
 - Environment variable usage
 
 ### 2. Architecture Review
+
 - Module structure compliance
 - System layer adherence
 - Plugin system validation
 - Cross-module dependency analysis
 
 ### 3. Code Quality Review
+
 - ESLint configuration and rules
 - TypeScript type checking
 - Code formatting (Prettier)
@@ -94,6 +98,7 @@ pnpm run review:docs
 - File size and complexity analysis
 
 ### 4. Documentation Review
+
 - Humanet YAML validation
 - ADR alignment with code
 - README command accuracy
@@ -139,21 +144,25 @@ jobs:
 ## Troubleshooting
 
 ### Script permissions denied
+
 ```bash
 chmod +x .github/skills/code-review/scripts/*.sh
 ```
 
 ### ESLint/Prettier not found
+
 ```bash
 pnpm install --save-dev eslint prettier
 ```
 
 ### TypeScript errors
+
 ```bash
 pnpm install -D typescript
 ```
 
 ### Humanet validation fails
+
 ```bash
 pnpm install -g create-humanet
 humanet validate

@@ -7,6 +7,7 @@ argument-hint: 'metric-type, threshold'
 # Performance Monitoring
 
 ## When to Use
+
 - Tracking response times and throughput
 - Monitoring resource usage (CPU, memory)
 - Setting Service Level Objectives (SLOs)
@@ -15,11 +16,13 @@ argument-hint: 'metric-type, threshold'
 - Tracking frontend performance metrics
 
 ## What This Skill Does
+
 Implements performance monitoring for CampusOS using metrics collection, SLO tracking, and targeted alerting.
 
 ## Procedure
 
 ### Phase 1: Metrics Collection Setup
+
 1. Install metrics library: `pnpm add prom-client` (Prometheus format)
 2. Create `src/utils/metrics.ts`:
    ```typescript
@@ -37,6 +40,7 @@ Implements performance monitoring for CampusOS using metrics collection, SLO tra
 6. Use histogram buckets: [10ms, 50ms, 100ms, 500ms, 1s, 5s]
 
 ### Phase 2: Middleware & Auto-Instrumentation
+
 1. Add metrics middleware:
    ```typescript
    app.use((req, res, next) => {
@@ -61,6 +65,7 @@ Implements performance monitoring for CampusOS using metrics collection, SLO tra
 6. CPU usage: `os.cpus()` average load
 
 ### Phase 3: SLO/SLI Definition
+
 1. Define Service Level Objectives:
    - Availability: 99.9% uptime (max 43 minutes/month downtime)
    - Latency SLO: 95th percentile < 500ms
@@ -79,6 +84,7 @@ Implements performance monitoring for CampusOS using metrics collection, SLO tra
 6. Monthly review: Adjust SLO if consistently exceeded/missed
 
 ### Phase 4: Dashboard Configuration
+
 1. Create Grafana dashboard with panels:
    - **Latency**: p50, p95, p99 percentile lines
    - **Throughput**: QPS (requests per second)
@@ -92,6 +98,7 @@ Implements performance monitoring for CampusOS using metrics collection, SLO tra
 6. Share dashboard URL in #monitoring Slack channel
 
 ### Phase 5: Alerting Rules
+
 1. Create alert rules in DataDog/Prometheus:
    ```
    alert: HighErrorRate
@@ -111,6 +118,7 @@ Implements performance monitoring for CampusOS using metrics collection, SLO tra
 6. Route to on-call engineer via PagerDuty
 
 ### Phase 6: Performance Optimization Workflow
+
 1. Monitor metrics daily for anomalies
 2. Identify slow endpoints: `query latencies by route`
 3. Profile bottleneck: Database, API call, compute
@@ -119,6 +127,7 @@ Implements performance monitoring for CampusOS using metrics collection, SLO tra
 6. Re-baseline SLO if significant improvement
 
 ## Quick Reference
+
 ```bash
 # View metrics endpoint (Prometheus format)
 curl http://localhost:3000/metrics
@@ -142,11 +151,11 @@ prom2csv http://prometheus:9090 --output metrics.csv
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Metrics endpoint 404 | Verify middleware added before routes; ensure `GET /metrics` handler |
-| Prometheus can't scrape metrics | Check `--scrape_interval` alignment; verify firewall allows access |
-| Dashboard shows no data | Query time range may be too narrow; verify metrics are being emitted |
+| Issue                                    | Solution                                                               |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| Metrics endpoint 404                     | Verify middleware added before routes; ensure `GET /metrics` handler   |
+| Prometheus can't scrape metrics          | Check `--scrape_interval` alignment; verify firewall allows access     |
+| Dashboard shows no data                  | Query time range may be too narrow; verify metrics are being emitted   |
 | Alert firing constantly (false positive) | Increase `for:` threshold (e.g., `for: 10m`) or reduce alert threshold |
-| SLO budget exhausted | Prioritize stability; reduce deployments; increase alert threshold |
-| Memory metrics missing | Ensure `prom-client` default metrics enabled; check memory pressure |
+| SLO budget exhausted                     | Prioritize stability; reduce deployments; increase alert threshold     |
+| Memory metrics missing                   | Ensure `prom-client` default metrics enabled; check memory pressure    |

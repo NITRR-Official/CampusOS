@@ -39,7 +39,10 @@ export default function RegisterForm({ eventId }: RegisterFormProps) {
   return (
     <form className="space-y-3" onSubmit={handleSubmit}>
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600" htmlFor="attendeeName">
+        <label
+          className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600"
+          htmlFor="attendeeName"
+        >
           Name
         </label>
         <input
@@ -55,7 +58,10 @@ export default function RegisterForm({ eventId }: RegisterFormProps) {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600" htmlFor="attendeeEmail">
+        <label
+          className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600"
+          htmlFor="attendeeEmail"
+        >
           Email
         </label>
         <input

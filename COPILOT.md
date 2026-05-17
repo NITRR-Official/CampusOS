@@ -4,18 +4,18 @@
 
 CampusOS is a modular, plugin-based platform designed to manage:
 
-* Clubs
-* Events
-* Tasks & execution workflows
-* Operations (vendors, resources, budgeting)
-* Sponsorship & marketing
+- Clubs
+- Events
+- Tasks & execution workflows
+- Operations (vendors, resources, budgeting)
+- Sponsorship & marketing
 
 The system is built using:
 
-* Backend: Node.js + Express
-* Frontend: Next.js
-* Database: MongoDB
-* Architecture: Modular plugin-based system
+- Backend: Node.js + Express
+- Frontend: Next.js
+- Database: MongoDB
+- Architecture: Modular plugin-based system
 
 ---
 
@@ -24,25 +24,24 @@ The system is built using:
 1. Everything is a module
 2. Modules live inside `/apps/`
 3. Core system handles:
+   - Authentication
+   - Plugin loading
+   - Routing
 
-   * Authentication
-   * Plugin loading
-   * Routing
 4. Each module must be self-contained:
-
-   * routes
-   * controller
-   * service
-   * schema/model
+   - routes
+   - controller
+   - service
+   - schema/model
 
 ---
 
 ## 📁 Folder Structure Rules
 
-* `/apps/*` → feature modules
-* `/backend/` → core server
-* `/frontend/` → UI
-* `/shared/` → types, schemas
+- `/apps/*` → feature modules
+- `/backend/` → core server
+- `/frontend/` → UI
+- `/shared/` → types, schemas
 
 ---
 
@@ -50,12 +49,11 @@ The system is built using:
 
 Every module must:
 
-* Have `plugin.js` entry
-* Export:
-
-  * name
-  * routes
-  * init()
+- Have `plugin.js` entry
+- Export:
+  - name
+  - routes
+  - init()
 
 Modules must NOT directly depend on each other.
 Communication must happen via shared services or DB.
@@ -67,24 +65,22 @@ Communication must happen via shared services or DB.
 Before implementing ANY feature:
 
 1. Read:
-
-   * `.humanet/problem_statement.md`
-   * `.humanet/idea.md`
-   * `.humanet/scope.md`
+   - `.humanet/problem_statement.md`
+   - `.humanet/idea.md`
+   - `.humanet/scope.md`
 
 2. Ensure:
-
-   * Feature aligns with scope
-   * No unnecessary complexity
-   * Ask if you want any clarity related to any implementation or humanet docs
+   - Feature aligns with scope
+   - No unnecessary complexity
+   - Ask if you want any clarity related to any implementation or humanet docs
 
 ---
 
 ## 🚫 Constraints
 
-* Do NOT over-engineer
-* Do NOT introduce new architecture patterns without justification
-* Follow modular structure strictly
+- Do NOT over-engineer
+- Do NOT introduce new architecture patterns without justification
+- Follow modular structure strictly
 
 ---
 
@@ -92,28 +88,28 @@ Before implementing ANY feature:
 
 ### Backend
 
-* Use Express routers
-* Use middleware for validation
-* Keep controllers thin
-* Business logic in services
+- Use Express routers
+- Use middleware for validation
+- Keep controllers thin
+- Business logic in services
 
 ### Package Management
 
-* **Install packages via CLI only**:
-  * `pnpm install <package-name>`
-  * `pnpm install -D <package-name>` (dev dependencies)
-* **DO NOT directly edit package.json** for version management
-* Use `pnpm update` for version updates
-* Pin major versions, use `^` for minor/patch
-* All package decisions must be justified
+- **Install packages via CLI only**:
+  - `pnpm install <package-name>`
+  - `pnpm install -D <package-name>` (dev dependencies)
+- **DO NOT directly edit package.json** for version management
+- Use `pnpm update` for version updates
+- Pin major versions, use `^` for minor/patch
+- All package decisions must be justified
 
 ---
 
 ### Frontend
 
-* Use reusable components
-* Separate UI and logic
-* Fetch via service layer
+- Use reusable components
+- Separate UI and logic
+- Fetch via service layer
 
 ---
 
@@ -135,10 +131,10 @@ When implementing a feature:
 
 When generating code:
 
-* Follow project structure
-* Use clean naming
-* Add comments where needed
-* Avoid unnecessary dependencies
+- Follow project structure
+- Use clean naming
+- Add comments where needed
+- Avoid unnecessary dependencies
 
 ---
 

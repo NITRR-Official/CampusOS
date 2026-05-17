@@ -7,6 +7,7 @@ argument-hint: 'doc-type, output-format'
 # Documentation Generation
 
 ## When to Use
+
 - Auto-generating API documentation from code
 - Creating developer onboarding guides
 - Publishing API specifications (Swagger/OpenAPI)
@@ -15,11 +16,13 @@ argument-hint: 'doc-type, output-format'
 - Publishing tutorials and architecture guides
 
 ## What This Skill Does
+
 Automates API documentation generation and maintains developer-friendly guides for CampusOS.
 
 ## Procedure
 
 ### Phase 1: OpenAPI/Swagger Setup
+
 1. Install Swagger packages: `pnpm add express-jsdoc-swagger swagger-ui-express`
 2. Create `src/swagger.ts`:
    ```typescript
@@ -27,8 +30,8 @@ Automates API documentation generation and maintains developer-friendly guides f
    const specs = swaggerJsdoc({
      definition: {
        openapi: '3.0.0',
-       info: {title: 'CampusOS API', version: '1.0.0'},
-       servers: [{url: 'http://localhost:3000'}]
+       info: { title: 'CampusOS API', version: '1.0.0' },
+       servers: [{ url: 'http://localhost:3000' }]
      },
      apis: ['src/routes/**/*.ts']
    });
@@ -54,15 +57,16 @@ Automates API documentation generation and maintains developer-friendly guides f
 6. Export OpenAPI JSON: `GET /api-docs.json`
 
 ### Phase 2: Schema Documentation
+
 1. Define all request/response models:
    ```yaml
    schemas:
      Activity:
        type: object
        properties:
-         id: {type: string, format: uuid}
-         name: {type: string, minLength: 1}
-         status: {type: string, enum: [draft, published]}
+         id: { type: string, format: uuid }
+         name: { type: string, minLength: 1 }
+         status: { type: string, enum: [draft, published] }
        required: [id, name]
    ```
 2. Document parameters:
@@ -87,6 +91,7 @@ Automates API documentation generation and maintains developer-friendly guides f
 6. Link to guides for complex workflows
 
 ### Phase 3: Markdown Guides
+
 1. Create `docs/` directory structure:
    ```
    docs/
@@ -117,12 +122,13 @@ Automates API documentation generation and maintains developer-friendly guides f
 6. Keep "updated" date current
 
 ### Phase 4: Code Examples & SDKs
+
 1. Create `examples/` directory with runnable scripts:
    ```typescript
    // examples/create-activity.ts
-   import {CampusOS} from '@campusos/sdk';
-   const client = new CampusOS({token: process.env.API_TOKEN});
-   const activity = await client.activities.create({name: 'Exam'});
+   import { CampusOS } from '@campusos/sdk';
+   const client = new CampusOS({ token: process.env.API_TOKEN });
+   const activity = await client.activities.create({ name: 'Exam' });
    ```
 2. Generate SDK documentation from OpenAPI:
    ```bash
@@ -137,15 +143,22 @@ Automates API documentation generation and maintains developer-friendly guides f
 6. Provide filtering/sorting examples
 
 ### Phase 5: API Changelog & Versioning
+
 1. Document API changes in `CHANGELOG.md`:
+
    ```markdown
    ## [v1.1.0] - 2024-03-15
+
    ### Added
+
    - New endpoint: POST /activities/:id/duplicate
    - Filter parameter: ?category=exam
+
    ### Deprecated
+
    - Endpoint: GET /submissions (use /activities/:id/submissions)
    ```
+
 2. Maintain separate API version branches (v1, v2)
 3. Document migration guides when updating endpoints
 4. Include deprecation notices (3-month warning)
@@ -153,6 +166,7 @@ Automates API documentation generation and maintains developer-friendly guides f
 6. Update docs for each release
 
 ### Phase 6: Publishing & Hosting
+
 1. Generate static documentation: `pnpm run docs:build`
 2. Host on GitHub Pages or Vercel
 3. Enable search (Algolia DocSearch)
@@ -161,6 +175,7 @@ Automates API documentation generation and maintains developer-friendly guides f
 6. Monitor documentation feedback (GitHub issues)
 
 ## Quick Reference
+
 ```bash
 # Generate Swagger spec
 pnpm exec swagger-jsdoc src/routes/**/*.ts > api-spec.json
@@ -184,11 +199,11 @@ open http://localhost:3000/api-docs
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Swagger UI not loading | Verify `swagger-ui.serve` middleware registered; check `/api-docs.json` accessible |
-| OpenAPI schema validation fails | Use `swagger-cli validate`; check YAML syntax, required fields |
-| Missing endpoints in generated docs | Verify JSDoc comments above route handlers; check OpenAPI version match |
-| Generated SDK doesn't match API | Regenerate from latest spec: `openapi-generator-cli generate ...` |
-| Examples are outdated | Add CI/CD check to validate code examples run successfully |
-| Search not working in docs | Enable Algolia DocSearch; verify `docsearch` config in sidebar |
+| Issue                               | Solution                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------- |
+| Swagger UI not loading              | Verify `swagger-ui.serve` middleware registered; check `/api-docs.json` accessible |
+| OpenAPI schema validation fails     | Use `swagger-cli validate`; check YAML syntax, required fields                     |
+| Missing endpoints in generated docs | Verify JSDoc comments above route handlers; check OpenAPI version match            |
+| Generated SDK doesn't match API     | Regenerate from latest spec: `openapi-generator-cli generate ...`                  |
+| Examples are outdated               | Add CI/CD check to validate code examples run successfully                         |
+| Search not working in docs          | Enable Algolia DocSearch; verify `docsearch` config in sidebar                     |

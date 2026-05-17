@@ -36,14 +36,14 @@ PORT=4000
 
 ### Collections
 
-| Collection | Module | Purpose | Documents |
-|-----------|--------|---------|-----------|
-| vendors | Vendor | Store vendor information and assignments | VendorSchema |
-| resources | Resource | Track equipment and inventory | ResourceSchema |
-| timeslots | Scheduling | Store event time slots | TimeSlotSchema |
-| conflicts | Scheduling | Track scheduling conflicts | ConflictSchema |
-| budgets | Budget | Store event budgets | BudgetSchema |
-| expenses | Budget | Track expenses | ExpenseSchema |
+| Collection | Module     | Purpose                                  | Documents      |
+| ---------- | ---------- | ---------------------------------------- | -------------- |
+| vendors    | Vendor     | Store vendor information and assignments | VendorSchema   |
+| resources  | Resource   | Track equipment and inventory            | ResourceSchema |
+| timeslots  | Scheduling | Store event time slots                   | TimeSlotSchema |
+| conflicts  | Scheduling | Track scheduling conflicts               | ConflictSchema |
+| budgets    | Budget     | Store event budgets                      | BudgetSchema   |
+| expenses   | Budget     | Track expenses                           | ExpenseSchema  |
 
 ### Relationships
 
@@ -62,6 +62,7 @@ Event
 ## Schema Details
 
 ### Vendor Schema
+
 ```javascript
 {
   name: String,
@@ -80,6 +81,7 @@ Event
 ```
 
 ### Resource Schema
+
 ```javascript
 {
   name: String,
@@ -96,6 +98,7 @@ Event
 ```
 
 ### TimeSlot Schema
+
 ```javascript
 {
   eventId: String,
@@ -109,6 +112,7 @@ Event
 ```
 
 ### Conflict Schema
+
 ```javascript
 {
   slotId1: String,
@@ -123,6 +127,7 @@ Event
 ```
 
 ### Budget Schema
+
 ```javascript
 {
   eventId: String,
@@ -137,6 +142,7 @@ Event
 ```
 
 ### Expense Schema
+
 ```javascript
 {
   budgetId: String,
@@ -159,12 +165,14 @@ See the migration guide for the step-by-step implementation details, service cha
 ## Database Connection Options
 
 ### Local Development
+
 ```javascript
 // .env
 MONGODB_URI=mongodb://localhost:27017/campusos
 ```
 
 ### Docker
+
 ```bash
 docker run -d \
   -p 27017:27017 \
@@ -175,6 +183,7 @@ docker run -d \
 ```
 
 ### MongoDB Atlas (Cloud)
+
 ```javascript
 // .env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/campusos?retryWrites=true&w=majority
@@ -183,10 +192,11 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/campusos?retryWr
 ## Health Check Endpoint (Optional)
 
 Add to backend routes:
+
 ```javascript
 app.get('/health/db', async (req, res) => {
   const isConnected = await healthCheck();
-  res.json({ 
+  res.json({
     status: isConnected ? 'healthy' : 'unhealthy',
     database: 'mongodb'
   });
@@ -197,14 +207,14 @@ app.get('/health/db', async (req, res) => {
 
 Indexes created for optimal query performance:
 
-| Collection | Indexes |
-|-----------|---------|
-| vendors | category, email, assignments.eventId |
-| resources | type, allocations.eventId, condition |
-| timeslots | eventId, venue, startTime/endTime |
-| conflicts | slotId1/slotId2, resolved |
-| budgets | eventId (unique), approvalStatus |
-| expenses | budgetId, category, paymentStatus |
+| Collection | Indexes                              |
+| ---------- | ------------------------------------ |
+| vendors    | category, email, assignments.eventId |
+| resources  | type, allocations.eventId, condition |
+| timeslots  | eventId, venue, startTime/endTime    |
+| conflicts  | slotId1/slotId2, resolved            |
+| budgets    | eventId (unique), approvalStatus     |
+| expenses   | budgetId, category, paymentStatus    |
 
 ## Data Backup Strategy
 
@@ -219,17 +229,19 @@ mongorestore --uri="mongodb://localhost:27017/campusos" ./backups/campusos
 ## Troubleshooting
 
 ### Connection Issues
+
 ```javascript
 // Check connection
-import { isDBConnected } from '@backend/database/connection'
-console.log(isDBConnected()) // true/false
+import { isDBConnected } from '@backend/database/connection';
+console.log(isDBConnected()); // true/false
 ```
 
 ### Missing Indexes
+
 ```javascript
 // Rebuild indexes
-await Vendor.syncIndexes()
-await Resource.syncIndexes()
+await Vendor.syncIndexes();
+await Resource.syncIndexes();
 ```
 
 ## Performance Considerations

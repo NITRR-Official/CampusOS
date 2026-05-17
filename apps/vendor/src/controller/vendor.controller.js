@@ -14,7 +14,15 @@ export const vendorController = {
    */
   async createVendor(req, res, next) {
     try {
-      const { name, category, contactPerson, email, phone, address, bankDetails } = req.body;
+      const {
+        name,
+        category,
+        contactPerson,
+        email,
+        phone,
+        address,
+        bankDetails
+      } = req.body;
 
       const result = await vendorService.createVendor({
         name,
@@ -142,10 +150,16 @@ export const vendorController = {
       const { amount, notes } = req.body;
 
       if (!eventId || !vendorId) {
-        return res.status(400).json({ error: 'eventId and vendorId are required' });
+        return res
+          .status(400)
+          .json({ error: 'eventId and vendorId are required' });
       }
 
-      const result = await vendorService.assignVendorToEvent(eventId, vendorId, { amount, notes });
+      const result = await vendorService.assignVendorToEvent(
+        eventId,
+        vendorId,
+        { amount, notes }
+      );
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });
@@ -222,7 +236,10 @@ export const vendorController = {
         return res.status(400).json({ error: 'status is required' });
       }
 
-      const result = await vendorService.updateAssignmentStatus(assignmentId, status);
+      const result = await vendorService.updateAssignmentStatus(
+        assignmentId,
+        status
+      );
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });

@@ -6,11 +6,7 @@ export async function init(app, registry) {
   registerAuthRoutes(app, authController);
 
   registry.registerModule('auth', {
-    routes: [
-      '/api/v1/auth/signup',
-      '/api/v1/auth/login',
-      '/api/v1/auth/me'
-    ]
+    routes: ['/api/v1/auth/signup', '/api/v1/auth/login', '/api/v1/auth/me']
   });
 }
 

@@ -9,7 +9,7 @@
 
 ## 📖 About
 
-CampusOS is an open-source campus management platform designed to replace fragmented tools like WhatsApp groups, Google Sheets, and email for coordinating campus activities. 
+CampusOS is an open-source campus management platform designed to replace fragmented tools like WhatsApp groups, Google Sheets, and email for coordinating campus activities.
 
 Instead of building "just another event management tool," CampusOS provides the **complete infrastructure layer** for campus ecosystems, handling everything from organizational structure to operations to growth.
 
@@ -34,6 +34,7 @@ Instead of building "just another event management tool," CampusOS provides the 
 ## ✨ Features
 
 ### Phase 1: Foundation ✅
+
 - ✅ **Modular Architecture** — Pluggable modules for easy scaling
 - ✅ **Authentication** — JWT-based secure auth system
 - ✅ **User Management** — User profiles and role management
@@ -41,29 +42,34 @@ Instead of building "just another event management tool," CampusOS provides the 
 - ✅ **RBAC** — Role-based access control
 
 ### Phase 2: Events ✅
+
 - ✅ **Event Management** — Create, edit, and publish events
 - ✅ **RSVP System** — Registration and attendance tracking
 - ✅ **Event Listing** — Public event discovery pages
 - ✅ **Registration UI** — Streamlined RSVP interface
 
 ### Phase 3: Execution Engine ✅
+
 - ✅ **Task Management** — Create, assign, track tasks
 - ✅ **Task Dependencies** — Dependency chains with circular ref detection
 - ✅ **Status & Priority** — Workflow states and prioritization
 - ✅ **Calendar Events** — Deadline tracking and scheduling
 
 ### Phase 4: Live Event Support ✅
+
 - ✅ **QR Code Check-in** — Automated attendance tracking
 - ✅ **Check-in API** — Endpoint-based scanning
 - ✅ **Attendance Stats** — Real-time attendance analytics
 - ✅ **Participant Dashboard** — Event history and status tracking
 
 ### Phase 5: Operations Layer (Coming Soon)
+
 - 📋 **Vendor Management** — Vendor coordination and procurement
 - 📋 **Resource Allocation** — Resource scheduling and management
 - 📋 **Budget Tracking** — Expense and budget management
 
 ### Phase 5: Growth
+
 - 📋 **Sponsorship Management** — Sponsor tracking and engagement
 - 📋 **Marketing Tools** — Campaign management and assets
 - 📋 **System Analytics** — Comprehensive reporting
@@ -96,6 +102,7 @@ CampusOS uses **in-memory storage** for development. No database setup required 
 **Optional: Environment Variables**
 
 Create `.env` in project root to override defaults:
+
 ```env
 # Backend
 NODE_ENV=development
@@ -141,6 +148,7 @@ pnpm dev
 Look for these GitHub issue labels to find work that matches your interests and experience:
 
 **Difficulty Levels:**
+
 - 🟢 `good-first-issue` — Perfect for first-time contributors
 - 🟡 `help-wanted` — Needs expertise or community input
 - 🔴 `p0-critical` — High priority, urgent fixes
@@ -148,13 +156,15 @@ Look for these GitHub issue labels to find work that matches your interests and 
 besides these there are other difficulty level labels and priority labels.
 
 **By Category:**
+
 - `backend` — Node.js/Express changes
-- `frontend` — Next.js/React changes  
+- `frontend` — Next.js/React changes
 - `database` — Data schema or queries
 - `infrastructure` — DevOps, CI/CD, deployment
 - `documentation` — Docs, guides, comments
 
 **By Status:**
+
 - `in-progress` — Someone is actively working on it
 - `needs-review` — Waiting on code review
 - `blocked` — Depends on another issue
@@ -162,6 +172,7 @@ besides these there are other difficulty level labels and priority labels.
 ### Issue Templates
 
 When creating a new issue, choose the appropriate template:
+
 - 🐛 **[Bug Report](https://github.com/NITRR-Official/CampusOS/issues/new?template=bug_report.md)** — Found a problem?
 - ✨ **[Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?template=feature_request.md)** — Have an idea?
 - 📚 **[Documentation](https://github.com/NITRR-Official/CampusOS/issues/new?template=documentation.md)** — Docs need help?
@@ -195,17 +206,21 @@ All skills live in [`.github/skills/`](./.github/skills/) — reference them for
 ## 🏗️ Architecture Highlights
 
 ### Modular Design
+
 Every feature is a self-contained module in `/apps/`:
+
 - Routes, controllers, services, and schemas together
 - No direct module-to-module dependencies
 - Communication via shared services or database
 
 ### Plugin System
+
 - Dynamic module loading at startup
 - Enable/disable features per deployment
 - Extensible without core changes
 
 ### System Layers
+
 1. **Foundation** — Auth, Users, Clubs, RBAC
 2. **Event** — Events, RSVP, Check-in
 3. **Execution** — Tasks, Workflows, Calendar
@@ -220,12 +235,14 @@ Every feature is a self-contained module in `/apps/`:
 We welcome contributions from everyone! Whether you're fixing bugs, adding features, or improving documentation, your help makes CampusOS better.
 
 **New to CampusOS?** Start here:
+
 - 📖 [**CONTRIBUTING.md**](CONTRIBUTING.md) — Complete contributor guide with setup instructions
 - 🐛 [**Bug Report Template**](https://github.com/NITRR-Official/CampusOS/issues/new?template=bug_report.md)
 - ✨ [**Feature Request Template**](https://github.com/NITRR-Official/CampusOS/issues/new?template=feature_request.md)
 - 📚 [**Documentation Issues**](https://github.com/NITRR-Official/CampusOS/issues/new?template=documentation.md)
 
 **Community:**
+
 - 💬 [GitHub Discussions](https://github.com/NITRR-Official/CampusOS/discussions) — Ask questions
 - 📋 [Issue Tracker](https://github.com/NITRR-Official/CampusOS/issues) — Report bugs or suggest features
 - 🏆 [CONTRIBUTORS.md](CONTRIBUTORS.md) — See who's contributed
@@ -233,12 +250,14 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 ### How to Contribute
 
 1. **Fork & Clone**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/CampusOS.git
    cd CampusOS
    ```
 
 2. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -250,6 +269,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
    - Update documentation as needed
 
 4. **Commit with Clear Messages**
+
    ```bash
    git commit -m "feat: add check-in QR code generation"
    ```
@@ -261,6 +281,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
    ```
 
 ### Code Guidelines
+
 - **Architecture** — Follow modular structure in `/apps/` (schema → service → controller → routes)
 - **Quality** — Run `pnpm lint` and `pnpm build` before pushing
 - **Testing** — Write tests for new features (aim for 80%+ coverage)
@@ -268,6 +289,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 - **Commits** — Use [Conventional Commits](https://www.conventionalcommits.org/)
 
 ### Review Process
+
 - ✅ Automated checks: tests, lint, build
 - 👀 Manual review: code quality, architecture, documentation
 - 💬 Feedback: constructive suggestions on your PR
@@ -280,11 +302,13 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 ## � Community & Conduct
 
 **Our Community:** CampusOS is maintained by NIT Raipur and welcomes contributors worldwide.
+
 - 📖 **[Code of Conduct](./CODE_OF_CONDUCT.md)** — Guidelines for respectful community
 - 🤝 **[CONTRIBUTORS.md](./CONTRIBUTORS.md)** — Recognition for contributors
 - 💬 **[Discussions](https://github.com/NITRR-Official/CampusOS/discussions)** — Ask questions and share ideas
 
 **Need Help?**
+
 - 📋 Open an [Issue](https://github.com/NITRR-Official/CampusOS/issues) — Report bugs or request features
 - 💭 Start a [Discussion](https://github.com/NITRR-Official/CampusOS/discussions) — Ask questions
 - 📚 Read [CONTRIBUTING.md](./CONTRIBUTING.md) — Setup and guidelines
@@ -300,46 +324,54 @@ This project is maintained by:
 ## 🎯 Roadmap
 
 ### Phase 0: System Initialization ✅
+
 - [x] Project structure setup
 - [x] Humanet documentation
 - [x] Architecture decisions
 - [x] Copilot guidelines & skills
 
 ### Phase 1: Foundation System ✅
+
 - [x] Auth module (JWT)
 - [x] User management
 - [x] Club management
 - [x] RBAC system (admin/coordinator/volunteer)
 
 ### Phase 2: Event System ✅
+
 - [x] Event management (CRUD)
 - [x] RSVP system (registration)
 - [x] Public event pages
 - [x] Event discovery
 
 ### Phase 3: Execution Engine ✅
+
 - [x] Task management (create/assign/status)
 - [x] Task dependencies (circular detection)
 - [x] Workflow states (todo/in-progress/done)
 - [x] Calendar management
 
 ### Phase 4: Live Event Support ✅
+
 - [x] QR code generation
 - [x] Check-in API
 - [x] Attendance tracking
 - [x] Participant dashboard
 
 ### Phase 5: Operations Layer 🟡 (Next)
+
 - [ ] Vendor management
 - [ ] Resource allocation
 - [ ] Budget tracking
 
 ### Phase 6: Growth System
+
 - [ ] Sponsorship management
 - [ ] Marketing tools
 - [ ] Analytics
 
 **See [ROADMAP.md](./ROADMAP.md) for detailed phase breakdown.**
+
 - [ ] Production readiness
 
 See [Project Board](https://github.com/NITRR-Official/CampusOS/projects) for real-time progress.

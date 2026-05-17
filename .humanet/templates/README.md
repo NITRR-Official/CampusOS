@@ -27,6 +27,7 @@ If you create new templates that might be useful for others:
 ## Template Guidelines
 
 Good templates should:
+
 - Have a clear structure
 - Include instructions in [brackets]
 - Show examples of good content
@@ -35,4 +36,4 @@ Good templates should:
 
 ---
 
-*Templates help maintain consistency across documentation.*
+_Templates help maintain consistency across documentation._

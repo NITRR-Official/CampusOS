@@ -37,7 +37,13 @@ interface TaskCardProps {
   onTaskError: (message: string) => void;
 }
 
-function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: TaskCardProps) {
+function TaskCard({
+  task,
+  allTasks,
+  accessToken,
+  onTaskChange,
+  onTaskError
+}: TaskCardProps) {
   const [assigneeName, setAssigneeName] = useState(task.assigneeName || '');
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
@@ -66,7 +72,11 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
       const updatedTask = await assignTask(accessToken, task.id, assigneeName);
       onTaskChange(updatedTask);
     } catch (error) {
-      onTaskError(error instanceof TaskApiError ? error.message : 'Unable to reassign task right now.');
+      onTaskError(
+        error instanceof TaskApiError
+          ? error.message
+          : 'Unable to reassign task right now.'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -76,11 +86,19 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
     setStatus(nextStatus);
 
     try {
-      const updatedTask = await updateTaskStatus(accessToken, task.id, nextStatus);
+      const updatedTask = await updateTaskStatus(
+        accessToken,
+        task.id,
+        nextStatus
+      );
       onTaskChange(updatedTask);
     } catch (error) {
       setStatus(task.status);
-      onTaskError(error instanceof TaskApiError ? error.message : 'Unable to update status right now.');
+      onTaskError(
+        error instanceof TaskApiError
+          ? error.message
+          : 'Unable to update status right now.'
+      );
     }
   }
 
@@ -88,11 +106,19 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
     setPriority(nextPriority);
 
     try {
-      const updatedTask = await updateTaskPriority(accessToken, task.id, nextPriority);
+      const updatedTask = await updateTaskPriority(
+        accessToken,
+        task.id,
+        nextPriority
+      );
       onTaskChange(updatedTask);
     } catch (error) {
       setPriority(task.priority);
-      onTaskError(error instanceof TaskApiError ? error.message : 'Unable to update priority right now.');
+      onTaskError(
+        error instanceof TaskApiError
+          ? error.message
+          : 'Unable to update priority right now.'
+      );
     }
   }
 
@@ -103,11 +129,19 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
     setIsSaving(true);
 
     try {
-      const updatedTask = await addTaskDependency(accessToken, task.id, selectedDependency);
+      const updatedTask = await addTaskDependency(
+        accessToken,
+        task.id,
+        selectedDependency
+      );
       onTaskChange(updatedTask);
       setSelectedDependency('');
     } catch (error) {
-      onTaskError(error instanceof TaskApiError ? error.message : 'Unable to add dependency right now.');
+      onTaskError(
+        error instanceof TaskApiError
+          ? error.message
+          : 'Unable to add dependency right now.'
+      );
     } finally {
       setIsSaving(false);
     }
@@ -115,10 +149,18 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
 
   async function handleRemoveDependency(dependencyId: string) {
     try {
-      const updatedTask = await removeTaskDependency(accessToken, task.id, dependencyId);
+      const updatedTask = await removeTaskDependency(
+        accessToken,
+        task.id,
+        dependencyId
+      );
       onTaskChange(updatedTask);
     } catch (error) {
-      onTaskError(error instanceof TaskApiError ? error.message : 'Unable to remove dependency right now.');
+      onTaskError(
+        error instanceof TaskApiError
+          ? error.message
+          : 'Unable to remove dependency right now.'
+      );
     }
   }
 
@@ -126,21 +168,35 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
     <article className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60 transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Task</p>
-          <h3 className="mt-2 text-xl font-semibold text-slate-950">{task.title}</h3>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Task
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-slate-950">
+            {task.title}
+          </h3>
         </div>
         <div className="flex gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-          <span className="rounded-full bg-slate-100 px-3 py-1">{task.status}</span>
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-900">{task.priority}</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">
+            {task.status}
+          </span>
+          <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-900">
+            {task.priority}
+          </span>
         </div>
       </div>
 
-      {task.description ? <p className="mt-4 text-sm leading-6 text-slate-600">{task.description}</p> : null}
+      {task.description ? (
+        <p className="mt-4 text-sm leading-6 text-slate-600">
+          {task.description}
+        </p>
+      ) : null}
 
       <dl className="mt-5 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2">
         <div>
           <dt className="font-medium text-slate-500">Assignee</dt>
-          <dd className="mt-1 text-slate-900">{task.assigneeName || 'Unassigned'}</dd>
+          <dd className="mt-1 text-slate-900">
+            {task.assigneeName || 'Unassigned'}
+          </dd>
         </div>
         <div>
           <dt className="font-medium text-slate-500">Due</dt>
@@ -157,7 +213,10 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
       </dl>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <form className="rounded-2xl border border-slate-200 bg-slate-50 p-4" onSubmit={handleAssign}>
+        <form
+          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+          onSubmit={handleAssign}
+        >
           <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
             Reassign
           </label>
@@ -183,7 +242,9 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
             Status
             <select
               value={status}
-              onChange={(event) => handleStatusChange(event.target.value as TaskStatus)}
+              onChange={(event) =>
+                handleStatusChange(event.target.value as TaskStatus)
+              }
               className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
             >
               {STATUS_OPTIONS.map((option) => (
@@ -198,7 +259,9 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
             Priority
             <select
               value={priority}
-              onChange={(event) => handlePriorityChange(event.target.value as TaskPriority)}
+              onChange={(event) =>
+                handlePriorityChange(event.target.value as TaskPriority)
+              }
               className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
             >
               {PRIORITY_OPTIONS.map((option) => (
@@ -226,7 +289,9 @@ function TaskCard({ task, allTasks, accessToken, onTaskChange, onTaskError }: Ta
               >
                 <div>
                   <p className="font-medium text-slate-900">{depTask.title}</p>
-                  <p className="text-xs text-slate-500">Status: {depTask.status}</p>
+                  <p className="text-xs text-slate-500">
+                    Status: {depTask.status}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleRemoveDependency(depTask.id)}
@@ -299,7 +364,11 @@ export default function TasksPage() {
           return;
         }
 
-        setError(exception instanceof TaskApiError ? exception.message : 'Unable to load tasks right now.');
+        setError(
+          exception instanceof TaskApiError
+            ? exception.message
+            : 'Unable to load tasks right now.'
+        );
       } finally {
         setIsLoading(false);
       }
@@ -348,7 +417,11 @@ export default function TasksPage() {
       setDueDate('');
       setPriority('medium');
     } catch (exception) {
-      setError(exception instanceof TaskApiError ? exception.message : 'Unable to create task right now.');
+      setError(
+        exception instanceof TaskApiError
+          ? exception.message
+          : 'Unable to create task right now.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -356,7 +429,9 @@ export default function TasksPage() {
 
   function handleTaskChange(updatedTask: TaskItem) {
     setTasks((currentTasks) =>
-      currentTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+      currentTasks.map((task) =>
+        task.id === updatedTask.id ? updatedTask : task
+      )
     );
   }
 
@@ -376,10 +451,15 @@ export default function TasksPage() {
         >
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">Phase 3</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Task dashboard</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
+                Phase 3
+              </p>
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+                Task dashboard
+              </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-                Plan work, assign owners, and move tasks through the execution flow.
+                Plan work, assign owners, and move tasks through the execution
+                flow.
               </p>
             </div>
 
@@ -406,9 +486,16 @@ export default function TasksPage() {
               { label: 'In progress', value: taskCounts.active },
               { label: 'Done', value: taskCounts.done }
             ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</p>
-                <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
+              <div
+                key={item.label}
+                className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  {item.label}
+                </p>
+                <p className="mt-3 text-3xl font-semibold text-slate-950">
+                  {item.value}
+                </p>
               </div>
             ))}
           </div>
@@ -418,7 +505,8 @@ export default function TasksPage() {
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
             <h2 className="text-xl font-semibold">Sign in required</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-900/80">
-              Log in to create and manage tasks. Your session is stored locally after authentication.
+              Log in to create and manage tasks. Your session is stored locally
+              after authentication.
             </p>
             <Link
               href="/login"
@@ -430,17 +518,26 @@ export default function TasksPage() {
         ) : null}
 
         <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <form className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60" onSubmit={handleCreateTask}>
+          <form
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60"
+            onSubmit={handleCreateTask}
+          >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">New task</p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-950">Create work item</h2>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  New task
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                  Create work item
+                </h2>
               </div>
             </div>
 
             <div className="mt-6 space-y-4">
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Title</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Title
+                </span>
                 <input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
@@ -453,7 +550,9 @@ export default function TasksPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Description</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Description
+                </span>
                 <textarea
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
@@ -465,7 +564,9 @@ export default function TasksPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Assignee</span>
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Assignee
+                  </span>
                   <input
                     value={assigneeName}
                     onChange={(event) => setAssigneeName(event.target.value)}
@@ -477,7 +578,9 @@ export default function TasksPage() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Due date</span>
+                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Due date
+                  </span>
                   <input
                     type="datetime-local"
                     value={dueDate}
@@ -488,10 +591,14 @@ export default function TasksPage() {
               </div>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Priority</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Priority
+                </span>
                 <select
                   value={priority}
-                  onChange={(event) => setPriority(event.target.value as TaskPriority)}
+                  onChange={(event) =>
+                    setPriority(event.target.value as TaskPriority)
+                  }
                   className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                 >
                   {PRIORITY_OPTIONS.map((option) => (
@@ -522,10 +629,16 @@ export default function TasksPage() {
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Task queue</p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-950">Execution list</h2>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Task queue
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                    Execution list
+                  </h2>
                 </div>
-                {isLoading ? <span className="text-sm text-slate-500">Loading...</span> : null}
+                {isLoading ? (
+                  <span className="text-sm text-slate-500">Loading...</span>
+                ) : null}
               </div>
 
               <div className="mt-6 space-y-4">
@@ -542,7 +655,8 @@ export default function TasksPage() {
                   ))
                 ) : (
                   <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
-                    No tasks yet. Create the first execution item to get started.
+                    No tasks yet. Create the first execution item to get
+                    started.
                   </div>
                 )}
               </div>

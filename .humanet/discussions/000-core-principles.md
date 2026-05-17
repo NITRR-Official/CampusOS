@@ -1,6 +1,7 @@
 # Core Principles and Philosophy
 
 ## Status
+
 Foundational (applies to entire project)
 
 ## The 5 Core Principles

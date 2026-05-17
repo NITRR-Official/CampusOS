@@ -63,12 +63,16 @@ class EventService {
       return { type: 'EVENT_NOT_FOUND' };
     }
 
-    if (event.capacity !== null && event.registrations.length >= event.capacity) {
+    if (
+      event.capacity !== null &&
+      event.registrations.length >= event.capacity
+    ) {
       return { type: 'EVENT_CAPACITY_REACHED' };
     }
 
     const existing = event.registrations.find(
-      (registration) => registration.attendeeEmail === registrationPayload.attendeeEmail
+      (registration) =>
+        registration.attendeeEmail === registrationPayload.attendeeEmail
     );
 
     if (existing) {

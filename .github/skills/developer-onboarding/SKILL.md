@@ -6,6 +6,7 @@ description: 'Get started with CampusOS development. Use when: setting up local 
 # Developer Onboarding
 
 ## When to Use
+
 - First-time setup on new machine
 - Contributing to CampusOS for first time
 - Environment issues or dependency problems
@@ -15,6 +16,7 @@ description: 'Get started with CampusOS development. Use when: setting up local 
 ## Procedure
 
 ### 1. Environment Setup
+
 Clone and install:
 
 ```bash
@@ -38,6 +40,7 @@ cp .env.example .env.local
 ```
 
 ### 2. Local Development Setup
+
 Start servers:
 
 ```bash
@@ -55,6 +58,7 @@ pnpm db:seed
 ```
 
 ### 3. Project Structure Understanding
+
 Navigate key directories:
 
 ```
@@ -78,6 +82,7 @@ CampusOS/
 ```
 
 ### 4. First Contribution Workflow
+
 Make your first change:
 
 ```bash
@@ -102,6 +107,7 @@ gh pr create
 ```
 
 ### 5. Common Daily Commands
+
 Everyday workflows:
 
 ```bash
@@ -127,6 +133,7 @@ pnpm db:seed        # Load test data
 ```
 
 ### 6. Troubleshooting Common Issues
+
 Resolve setup problems:
 
 ```bash
@@ -152,6 +159,7 @@ node --version  # Match CI version
 ```
 
 ## Quick Reference
+
 ```bash
 # One-time setup
 git clone ... && cd CampusOS && pnpm install && cp .env.example .env.local
@@ -172,13 +180,14 @@ gh pr create --fill
 ```
 
 ## Common Issues
-| Issue | Solution |
-|-------|----------|
-| pnpm not found | Install: `npm install -g pnpm@8` |
-| Port in use | Kill: `lsof -ti:3000 \| xargs kill -9` |
-| .env.local not working | Copy: `cp .env.example .env.local`. Ask maintainer for secrets. |
-| DB migration fails | Check PostgreSQL running. Verify DATABASE_URL. |
-| TypeScript errors | Run `pnpm type-check`. Restart VS Code. |
-| Tests fail | Clear: `pnpm install`. Regen types: `pnpm generate:types`. |
-| Can't push branch | Fetch: `git fetch origin`. Try: `git push --set-upstream origin <branch>` |
-| pnpm install slow | Check internet. Run `pnpm store prune`. |
+
+| Issue                  | Solution                                                                  |
+| ---------------------- | ------------------------------------------------------------------------- |
+| pnpm not found         | Install: `npm install -g pnpm@8`                                          |
+| Port in use            | Kill: `lsof -ti:3000 \| xargs kill -9`                                    |
+| .env.local not working | Copy: `cp .env.example .env.local`. Ask maintainer for secrets.           |
+| DB migration fails     | Check PostgreSQL running. Verify DATABASE_URL.                            |
+| TypeScript errors      | Run `pnpm type-check`. Restart VS Code.                                   |
+| Tests fail             | Clear: `pnpm install`. Regen types: `pnpm generate:types`.                |
+| Can't push branch      | Fetch: `git fetch origin`. Try: `git push --set-upstream origin <branch>` |
+| pnpm install slow      | Check internet. Run `pnpm store prune`.                                   |

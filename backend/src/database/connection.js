@@ -12,7 +12,9 @@ let isConnected = false;
  * @param {string} uri - MongoDB connection URI
  * @returns {Promise<boolean>} Connection status
  */
-export async function connectDB(uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/campusos') {
+export async function connectDB(
+  uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/campusos'
+) {
   if (isConnected) {
     console.log('MongoDB already connected');
     return true;

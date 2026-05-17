@@ -1,5 +1,8 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDB, disconnectDB } from '../../../../backend/src/database/connection.js';
+import {
+  connectDB,
+  disconnectDB
+} from '../../../../backend/src/database/connection.js';
 import { Resource } from '../../../../backend/src/database/schemas/resource.schema.js';
 import { ResourceService } from './resource.service.js';
 
@@ -50,7 +53,7 @@ describe('ResourceService', () => {
 
     it('should fail when missing required fields', async () => {
       const resourceData = {
-        name: 'Incomplete Resource',
+        name: 'Incomplete Resource'
         // missing type and quantity
       };
 
@@ -168,17 +171,21 @@ describe('ResourceService', () => {
       });
 
       // Simulate full allocation
-      await service.allocateResourceToEvent('event-1', allocatedResource.resource.id, {
-        allocatedQuantity: 2,
-        startDate: new Date('2026-05-10'),
-        endDate: new Date('2026-05-11')
-      });
+      await service.allocateResourceToEvent(
+        'event-1',
+        allocatedResource.resource.id,
+        {
+          allocatedQuantity: 2,
+          startDate: new Date('2026-05-10'),
+          endDate: new Date('2026-05-11')
+        }
+      );
     });
 
     it('should return only resources with available quantity', async () => {
       const resources = await service.getAvailableResources();
 
-      expect(resources.every(r => r.availableQuantity > 0)).toBe(true);
+      expect(resources.every((r) => r.availableQuantity > 0)).toBe(true);
     });
   });
 
@@ -202,7 +209,11 @@ describe('ResourceService', () => {
         endDate: new Date('2026-05-11')
       };
 
-      const result = await service.allocateResourceToEvent(eventId, resourceId, allocationData);
+      const result = await service.allocateResourceToEvent(
+        eventId,
+        resourceId,
+        allocationData
+      );
 
       expect(result.success).toBe(true);
       expect(result.allocation).toBeDefined();
@@ -218,7 +229,11 @@ describe('ResourceService', () => {
         endDate: new Date('2026-05-11')
       };
 
-      const result = await service.allocateResourceToEvent(eventId, resourceId, allocationData);
+      const result = await service.allocateResourceToEvent(
+        eventId,
+        resourceId,
+        allocationData
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Insufficient availability');
@@ -231,7 +246,11 @@ describe('ResourceService', () => {
         endDate: new Date('2026-05-11')
       };
 
-      await service.allocateResourceToEvent(eventId, resourceId, allocationData);
+      await service.allocateResourceToEvent(
+        eventId,
+        resourceId,
+        allocationData
+      );
       const updatedResource = await service.getResourceById(resourceId);
 
       expect(updatedResource.availableQuantity).toBe(7); // 10 - 3
@@ -258,8 +277,9 @@ describe('ResourceService', () => {
     });
 
     it('should detect time-based conflicts', async () => {
-      const conflicts = await service.checkAllocationConflicts(resourceId, 
-        new Date('2026-05-10T14:00:00'), 
+      const conflicts = await service.checkAllocationConflicts(
+        resourceId,
+        new Date('2026-05-10T14:00:00'),
         new Date('2026-05-10T16:00:00')
       );
 
@@ -267,7 +287,8 @@ describe('ResourceService', () => {
     });
 
     it('should not report conflicts for non-overlapping times', async () => {
-      const conflicts = await service.checkAllocationConflicts(resourceId,
+      const conflicts = await service.checkAllocationConflicts(
+        resourceId,
         new Date('2026-05-11T10:00:00'),
         new Date('2026-05-11T15:00:00')
       );
@@ -284,13 +305,20 @@ describe('ResourceService', () => {
         quantity: 5
       });
 
-      const allocationResult = await service.allocateResourceToEvent('event-1', resourceResult.resource.id, {
-        allocatedQuantity: 3,
-        startDate: new Date('2026-05-10'),
-        endDate: new Date('2026-05-11')
-      });
+      const allocationResult = await service.allocateResourceToEvent(
+        'event-1',
+        resourceResult.resource.id,
+        {
+          allocatedQuantity: 3,
+          startDate: new Date('2026-05-10'),
+          endDate: new Date('2026-05-11')
+        }
+      );
 
-      const updateResult = await service.updateAllocationStatus(allocationResult.allocation.id, 'returned');
+      const updateResult = await service.updateAllocationStatus(
+        allocationResult.allocation.id,
+        'returned'
+      );
 
       expect(updateResult.success).toBe(true);
       expect(updateResult.allocation.status).toBe('returned');

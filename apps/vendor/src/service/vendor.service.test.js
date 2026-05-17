@@ -1,5 +1,8 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDB, disconnectDB } from '../../../../backend/src/database/connection.js';
+import {
+  connectDB,
+  disconnectDB
+} from '../../../../backend/src/database/connection.js';
 import { Vendor } from '../../../../backend/src/database/schemas/vendor.schema.js';
 import { VendorService } from './vendor.service.js';
 
@@ -98,8 +101,12 @@ describe('VendorService', () => {
 
       expect(result.vendor.createdAt).toBeInstanceOf(Date);
       expect(result.vendor.updatedAt).toBeInstanceOf(Date);
-      expect(result.vendor.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
-      expect(result.vendor.createdAt.getTime()).toBeLessThanOrEqual(afterCreate.getTime());
+      expect(result.vendor.createdAt.getTime()).toBeGreaterThanOrEqual(
+        beforeCreate.getTime()
+      );
+      expect(result.vendor.createdAt.getTime()).toBeLessThanOrEqual(
+        afterCreate.getTime()
+      );
     });
   });
 
@@ -191,7 +198,11 @@ describe('VendorService', () => {
         notes: 'Catering for event'
       };
 
-      const result = await service.assignVendorToEvent(eventId, vendorId, assignData);
+      const result = await service.assignVendorToEvent(
+        eventId,
+        vendorId,
+        assignData
+      );
 
       expect(result.success).toBe(true);
       expect(result.assignment).toBeDefined();
@@ -205,7 +216,11 @@ describe('VendorService', () => {
         notes: 'Catering for event'
       };
 
-      const result = await service.assignVendorToEvent(eventId, 'fake-vendor-id', assignData);
+      const result = await service.assignVendorToEvent(
+        eventId,
+        'fake-vendor-id',
+        assignData
+      );
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('not found');

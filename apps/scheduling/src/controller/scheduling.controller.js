@@ -15,7 +15,8 @@ export const schedulingController = {
   async createTimeSlot(req, res, next) {
     try {
       const { eventId } = req.params;
-      const { venue, startTime, endTime, capacity, allocatedResources, notes } = req.body;
+      const { venue, startTime, endTime, capacity, allocatedResources, notes } =
+        req.body;
 
       if (!eventId) {
         return res.status(400).json({ error: 'eventId is required' });
@@ -206,7 +207,10 @@ export const schedulingController = {
         return res.status(400).json({ error: 'resolution is required' });
       }
 
-      const result = await schedulingService.resolveConflict(conflictId, resolution);
+      const result = await schedulingService.resolveConflict(
+        conflictId,
+        resolution
+      );
 
       if (!result.success) {
         return res.status(404).json({ error: result.error });
@@ -228,10 +232,16 @@ export const schedulingController = {
       const { startTime, endTime } = req.query;
 
       if (!venue || !startTime || !endTime) {
-        return res.status(400).json({ error: 'venue, startTime, and endTime are required' });
+        return res
+          .status(400)
+          .json({ error: 'venue, startTime, and endTime are required' });
       }
 
-      const available = await schedulingService.isVenueAvailable(venue, startTime, endTime);
+      const available = await schedulingService.isVenueAvailable(
+        venue,
+        startTime,
+        endTime
+      );
 
       return res.status(200).json({
         venue,

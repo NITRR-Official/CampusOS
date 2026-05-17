@@ -15,6 +15,7 @@ Campus activity management is fragmented, chaotic, and lacks infrastructure. Clu
 ## Current Situation
 
 Campus activities are managed using:
+
 - **WhatsApp groups** with scattered messages (lost context, coordination chaos)
 - **Google Sheets** with inconsistent data entry and duplication
 - **Email chains** for vendor and sponsor communication
@@ -42,6 +43,7 @@ Campus activities are managed using:
 ## Why This Matters
 
 Campus activities are critical for:
+
 - Student engagement and community building
 - Skill development and networking
 - Cultural expression and diversity

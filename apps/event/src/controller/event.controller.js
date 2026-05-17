@@ -28,7 +28,14 @@ export function createEventController() {
     const { errors, value } = validateCreateEventPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -48,7 +55,14 @@ export function createEventController() {
     const { errors, value } = validateUpdateEventPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -75,7 +89,9 @@ export function createEventController() {
     }
 
     if (!validateStatus(event.status)) {
-      next(createHttpError(500, 'Invalid event status', 'INVALID_EVENT_STATUS'));
+      next(
+        createHttpError(500, 'Invalid event status', 'INVALID_EVENT_STATUS')
+      );
       return;
     }
 
@@ -127,7 +143,14 @@ export function createEventController() {
     const { errors, value } = validateRegistrationPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -139,12 +162,20 @@ export function createEventController() {
     }
 
     if (registrationResult.type === 'EVENT_CAPACITY_REACHED') {
-      next(createHttpError(409, 'Event capacity reached', 'EVENT_CAPACITY_REACHED'));
+      next(
+        createHttpError(409, 'Event capacity reached', 'EVENT_CAPACITY_REACHED')
+      );
       return;
     }
 
     if (registrationResult.type === 'ALREADY_REGISTERED') {
-      next(createHttpError(409, 'Already registered for this event', 'ALREADY_REGISTERED'));
+      next(
+        createHttpError(
+          409,
+          'Already registered for this event',
+          'ALREADY_REGISTERED'
+        )
+      );
       return;
     }
 

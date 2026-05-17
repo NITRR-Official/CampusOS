@@ -14,7 +14,8 @@ export const resourceController = {
    */
   async createResource(req, res, next) {
     try {
-      const { name, type, quantity, description, location, owner, cost } = req.body;
+      const { name, type, quantity, description, location, owner, cost } =
+        req.body;
 
       const result = await resourceService.createResource({
         name,
@@ -121,7 +122,10 @@ export const resourceController = {
         return res.status(400).json({ error: 'resourceId is required' });
       }
 
-      const result = await resourceService.updateResource(resourceId, updateData);
+      const result = await resourceService.updateResource(
+        resourceId,
+        updateData
+      );
 
       if (!result.success) {
         return res.status(404).json({ error: result.error });
@@ -167,18 +171,26 @@ export const resourceController = {
       const { allocatedQuantity, startDate, endDate, notes } = req.body;
 
       if (!eventId || !resourceId) {
-        return res.status(400).json({ error: 'eventId and resourceId are required' });
+        return res
+          .status(400)
+          .json({ error: 'eventId and resourceId are required' });
       }
 
-      const result = await resourceService.allocateResourceToEvent(eventId, resourceId, {
-        allocatedQuantity,
-        startDate,
-        endDate,
-        notes
-      });
+      const result = await resourceService.allocateResourceToEvent(
+        eventId,
+        resourceId,
+        {
+          allocatedQuantity,
+          startDate,
+          endDate,
+          notes
+        }
+      );
 
       if (!result.success) {
-        return res.status(400).json({ error: result.error, conflicts: result.conflicts });
+        return res
+          .status(400)
+          .json({ error: result.error, conflicts: result.conflicts });
       }
 
       return res.status(201).json(result.allocation);
@@ -223,7 +235,8 @@ export const resourceController = {
         return res.status(400).json({ error: 'resourceId is required' });
       }
 
-      const allocations = await resourceService.getResourceAllocations(resourceId);
+      const allocations =
+        await resourceService.getResourceAllocations(resourceId);
 
       return res.status(200).json({
         resourceId,
@@ -252,7 +265,10 @@ export const resourceController = {
         return res.status(400).json({ error: 'status is required' });
       }
 
-      const result = await resourceService.updateAllocationStatus(allocationId, status);
+      const result = await resourceService.updateAllocationStatus(
+        allocationId,
+        status
+      );
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });
@@ -281,7 +297,10 @@ export const resourceController = {
         return res.status(400).json({ error: 'maintenanceDate is required' });
       }
 
-      const result = await resourceService.updateMaintenance(resourceId, maintenanceDate);
+      const result = await resourceService.updateMaintenance(
+        resourceId,
+        maintenanceDate
+      );
 
       if (!result.success) {
         return res.status(404).json({ error: result.error });

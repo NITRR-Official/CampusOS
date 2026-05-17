@@ -32,7 +32,9 @@ export async function loadPlugins(app, registry) {
       path.join(modulePath, 'plugin.js'),
       path.join(modulePath, 'src', 'index.js')
     ];
-    const moduleEntryPath = entryCandidates.find((entry) => fs.existsSync(entry));
+    const moduleEntryPath = entryCandidates.find((entry) =>
+      fs.existsSync(entry)
+    );
 
     if (!moduleEntryPath) {
       console.warn(
@@ -57,10 +59,7 @@ export async function loadPlugins(app, registry) {
 
       console.log(`✓ Loaded plugin: ${moduleName}`);
     } catch (error) {
-      console.error(
-        `✗ Failed to load plugin ${moduleName}:`,
-        error.message
-      );
+      console.error(`✗ Failed to load plugin ${moduleName}:`, error.message);
       // Don't block other modules from loading
     }
   }

@@ -44,6 +44,7 @@ This `.humanet/` folder contains structured documentation for this idea, followi
    - How will you measure success?
 
 4. **Validate** - Run validation
+
    ```bash
    humanet validate
    ```
@@ -57,6 +58,7 @@ This `.humanet/` folder contains structured documentation for this idea, followi
 **Current Status:** Provisional
 
 Ideas start in "provisional" status for 30 days. During this time:
+
 - Complete all required documentation
 - Pass AI validation
 - Gather initial community feedback
@@ -82,4 +84,4 @@ This documentation is licensed under MIT.
 
 ---
 
-*Generated with [create-humanet](https://www.npmjs.com/package/create-humanet) • Managed with pnpm*
+_Generated with [create-humanet](https://www.npmjs.com/package/create-humanet) • Managed with pnpm_

@@ -4,21 +4,21 @@
 
 CampusOS is a modular, scalable platform designed to manage the complete lifecycle of campus activities including:
 
-* Clubs & organizational structure
-* Events & participation
-* Task & execution workflows
-* Operations (vendors, resources, logistics, budgeting)
-* Sponsorship & marketing
-* Planning (calendar, deadlines, yearly activities)
+- Clubs & organizational structure
+- Events & participation
+- Task & execution workflows
+- Operations (vendors, resources, logistics, budgeting)
+- Sponsorship & marketing
+- Planning (calendar, deadlines, yearly activities)
 
 ---
 
 ## 🧠 Development Principles
 
-* **Modular Architecture** → Everything is a module
-* **Vertical Development** → Backend + Frontend + DB together
-* **Humanet-driven** → Every decision documented
-* **Copilot-guided** → Context-aware development
+- **Modular Architecture** → Everything is a module
+- **Vertical Development** → Backend + Frontend + DB together
+- **Humanet-driven** → Every decision documented
+- **Copilot-guided** → Context-aware development
 
 ---
 
@@ -38,48 +38,47 @@ Set up development environment, architecture, and documentation.
 
 ### Humanet Setup
 
-* [x] Run `humanet init`
-* [x] Fill `problem_statement.md`
-* [x] Fill `idea.md`
-* [x] Fill `scope.md`
+- [x] Run `humanet init`
+- [x] Fill `problem_statement.md`
+- [x] Fill `idea.md`
+- [x] Fill `scope.md`
 
 ---
 
 ### Repository Setup
 
-* [x] Initialize Git repository
-* [x] Setup monorepo structure with pnpm workspaces
-* [x] Create folders:
-
-  * [x] `/backend`
-  * [x] `/frontend`
-  * [x] `/apps`
-  * [x] `/shared`
+- [x] Initialize Git repository
+- [x] Setup monorepo structure with pnpm workspaces
+- [x] Create folders:
+  - [x] `/backend`
+  - [x] `/frontend`
+  - [x] `/apps`
+  - [x] `/shared`
 
 ---
 
 ### Backend Core
 
-* [x] Setup Express server (`/backend/src/index.js`)
-* [x] Setup middleware structure (auth, logging, error handling)
-* [x] Implement plugin loader system (`plugin-loader.js`)
+- [x] Setup Express server (`/backend/src/index.js`)
+- [x] Setup middleware structure (auth, logging, error handling)
+- [x] Implement plugin loader system (`plugin-loader.js`)
 
 ---
 
 ### Frontend Setup
 
-* [x] Initialize Next.js app with Tailwind CSS
-* [x] Setup base layout (dashboard shell with Sidebar, Header, MainLayout)
-* [x] Create home page with stats and quick actions
+- [x] Initialize Next.js app with Tailwind CSS
+- [x] Setup base layout (dashboard shell with Sidebar, Header, MainLayout)
+- [x] Create home page with stats and quick actions
 
 ---
 
 ### Copilot Setup
 
-* [x] Create `COPILOT.md`
-* [x] Add project architecture rules
-* [x] Setup 20 development skills
-* [x] Setup 15 AI agent personas
+- [x] Create `COPILOT.md`
+- [x] Add project architecture rules
+- [x] Setup 20 development skills
+- [x] Setup 15 AI agent personas
 
 ---
 
@@ -99,49 +98,48 @@ Establish identity and organizational structure.
 
 ### Auth Module
 
-* [x] Signup API
-* [x] Login API
-* [x] JWT authentication
-* [x] Auth middleware
+- [x] Signup API
+- [x] Login API
+- [x] JWT authentication
+- [x] Auth middleware
 
 ---
 
 ### Institute Module
 
-* [x] Create institute
-
+- [x] Create institute
 
 ---
 
 ### Club Module
 
-* [x] Create club
-* [x] Add/remove members
-* [x] Assign roles
+- [x] Create club
+- [x] Add/remove members
+- [x] Assign roles
 
 ---
 
 ### RBAC (Roles & Permissions)
 
-* [x] Define roles:
+- [x] Define roles:
+  - Admin
+  - Coordinator
+  - Volunteer
 
-  * Admin
-  * Coordinator
-  * Volunteer
-* [x] Permission middleware
+- [x] Permission middleware
 
 ---
 
 ### Frontend
 
-* [x] Login/Signup pages
-* [x] Basic dashboard UI
+- [x] Login/Signup pages
+- [x] Basic dashboard UI
 
 ---
 
 ## 📦 Deliverable
 
-* Functional login system + club management
+- Functional login system + club management
 
 ---
 
@@ -161,39 +159,39 @@ Enable event creation and participation.
 
 ### Event Module
 
-* [x] Create event API
-* [x] Edit event
-* [x] Publish/unpublish event
-* [x] Event schema
+- [x] Create event API
+- [x] Edit event
+- [x] Publish/unpublish event
+- [x] Event schema
 
 ---
 
 ### RSVP Module
 
-* [x] Register for event
-* [x] Capacity handling
-* [x] Registration tracking
+- [x] Register for event
+- [x] Capacity handling
+- [x] Registration tracking
 
 ---
 
 ### Public Event Pages
 
-* [x] Event listing page
-* [x] Event detail page
-* [x] Registration UI
+- [x] Event listing page
+- [x] Event detail page
+- [x] Registration UI
 
 ---
 
 ### Frontend Integration
 
-* [x] Connect event APIs
-* [x] Display event data
+- [x] Connect event APIs
+- [x] Display event data
 
 ---
 
 ## 📦 Deliverable
 
-* Fully functional event system
+- Fully functional event system
 
 ---
 
@@ -213,41 +211,41 @@ Allow organizers to manage tasks and workflows.
 
 ### Task Module
 
-* [x] Create task
-* [x] Assign task
-* [x] Update status (todo/in-progress/done)
-* [x] Priority system
+- [x] Create task
+- [x] Assign task
+- [x] Update status (todo/in-progress/done)
+- [x] Priority system
 
 ---
 
 ### Calendar Module
 
-* [x] Add calendar events
-* [x] Deadline tracking
-* [x] Event linking
+- [x] Add calendar events
+- [x] Deadline tracking
+- [x] Event linking
 
 ---
 
 ### Task Dependencies
 
-* [x] Define dependencies between tasks
-* [x] Circular dependency detection
-* [x] Frontend UI for dependency management
+- [x] Define dependencies between tasks
+- [x] Circular dependency detection
+- [x] Frontend UI for dependency management
 
 ---
 
 ### Frontend
 
-* [x] Task dashboard
-* [x] Calendar view
-* [x] Dependency dropdown selector
-* [x] Dependency removal UI
+- [x] Task dashboard
+- [x] Calendar view
+- [x] Dependency dropdown selector
+- [x] Dependency removal UI
 
 ---
 
 ## 📦 Deliverable
 
-* Task and planning system fully operational with dependency management
+- Task and planning system fully operational with dependency management
 
 ---
 
@@ -263,23 +261,23 @@ Support real-world event execution.
 
 ### Check-in Module
 
-* [x] QR code generation
-* [x] Check-in API endpoints
-* [x] Attendance tracking and statistics
+- [x] QR code generation
+- [x] Check-in API endpoints
+- [x] Attendance tracking and statistics
 
 ---
 
 ### Participant Dashboard
 
-* [x] View registered events
-* [x] Attendance status display
-* [x] Event history
+- [x] View registered events
+- [x] Attendance status display
+- [x] Event history
 
 ---
 
 ## 📦 Deliverable
 
-* System ready for real event usage with QR-based attendance tracking
+- System ready for real event usage with QR-based attendance tracking
 
 ---
 
@@ -295,53 +293,53 @@ Handle event logistics and resources.
 
 ### Vendor Module
 
-* [x] Add vendors (full CRUD)
-* [x] Assign vendors to events
-* [x] Track vendor details
-* [x] Vendor rating system
-* [x] 10 REST endpoints
+- [x] Add vendors (full CRUD)
+- [x] Assign vendors to events
+- [x] Track vendor details
+- [x] Vendor rating system
+- [x] 10 REST endpoints
 
 ---
 
 ### Resource Module
 
-* [x] Track equipment/resources with inventory management
-* [x] Availability management with real-time tracking
-* [x] Resource allocation to time periods
-* [x] Maintenance date tracking
-* [x] 11 REST endpoints
+- [x] Track equipment/resources with inventory management
+- [x] Availability management with real-time tracking
+- [x] Resource allocation to time periods
+- [x] Maintenance date tracking
+- [x] 11 REST endpoints
 
 ---
 
 ### Scheduling Module
 
-* [x] Assign resources to time slots
-* [x] Conflict detection (venue, resource, time overlap)
-* [x] Automatic conflict resolution UI
-* [x] Venue availability checking
-* [x] 10 REST endpoints
+- [x] Assign resources to time slots
+- [x] Conflict detection (venue, resource, time overlap)
+- [x] Automatic conflict resolution UI
+- [x] Venue availability checking
+- [x] 10 REST endpoints
 
 ---
 
 ### Budget Module
 
-* [x] Allocate budget per event
-* [x] Track expenses with categorization
-* [x] Approval workflow (draft → approved/rejected)
-* [x] Payment tracking (pending, paid, refunded)
-* [x] Budget vs. actual comparison
-* [x] 13 REST endpoints
+- [x] Allocate budget per event
+- [x] Track expenses with categorization
+- [x] Approval workflow (draft → approved/rejected)
+- [x] Payment tracking (pending, paid, refunded)
+- [x] Budget vs. actual comparison
+- [x] 13 REST endpoints
 
 ---
 
 ## 📦 Deliverable
 
-* ✅ Complete logistics management system with 44 API endpoints
-* ✅ Frontend API clients for all 4 modules
-* ✅ Sample UI pages for operations dashboards
-* ✅ Full documentation and API reference
-  * See `docs/phase5/API_REFERENCE.md` for endpoint documentation
-  * See `docs/phase5/IMPLEMENTATION_SUMMARY.md` for architecture overview
+- ✅ Complete logistics management system with 44 API endpoints
+- ✅ Frontend API clients for all 4 modules
+- ✅ Sample UI pages for operations dashboards
+- ✅ Full documentation and API reference
+  - See `docs/phase5/API_REFERENCE.md` for endpoint documentation
+  - See `docs/phase5/IMPLEMENTATION_SUMMARY.md` for architecture overview
 
 ---
 
@@ -357,29 +355,29 @@ Enable sponsorship and marketing workflows.
 
 ### Sponsorship Module
 
-* [ ] Add sponsors
-* [ ] Track deliverables
-* [ ] Payment tracking
+- [ ] Add sponsors
+- [ ] Track deliverables
+- [ ] Payment tracking
 
 ---
 
 ### Marketing Module
 
-* [ ] Campaign management
-* [ ] Track creatives (posters, media)
+- [ ] Campaign management
+- [ ] Track creatives (posters, media)
 
 ---
 
 ### Frontend
 
-* [ ] Sponsor dashboard
-* [ ] Marketing dashboard
+- [ ] Sponsor dashboard
+- [ ] Marketing dashboard
 
 ---
 
 ## 📦 Deliverable
 
-* Sponsor + marketing system operational
+- Sponsor + marketing system operational
 
 ---
 
@@ -395,37 +393,37 @@ Make system scalable and production-ready.
 
 ### Notifications
 
-* [ ] In-app notifications
-* [ ] Event reminders
-* [ ] Task alerts
+- [ ] In-app notifications
+- [ ] Event reminders
+- [ ] Task alerts
 
 ---
 
 ### Audit Logs
 
-* [ ] Track user actions
-* [ ] Store logs
+- [ ] Track user actions
+- [ ] Store logs
 
 ---
 
 ### File Management
 
-* [ ] Upload assets (posters, documents)
-* [ ] Storage integration
+- [ ] Upload assets (posters, documents)
+- [ ] Storage integration
 
 ---
 
 ### Analytics
 
-* [ ] Event participation stats
-* [ ] Budget insights
-* [ ] Basic reporting
+- [ ] Event participation stats
+- [ ] Budget insights
+- [ ] Basic reporting
 
 ---
 
 ## 📦 Deliverable
 
-* Production-ready CampusOS
+- Production-ready CampusOS
 
 ---
 
@@ -433,52 +431,52 @@ Make system scalable and production-ready.
 
 ## 🏁 Milestone 1: Foundation Ready
 
-* Auth + Clubs working
+- Auth + Clubs working
 
 ---
 
 ## 🏁 Milestone 2: Event System Live
 
-* Events + RSVP functional
+- Events + RSVP functional
 
 ---
 
 ## 🏁 Milestone 3: Execution System Ready
 
-* Tasks + Calendar working
+- Tasks + Calendar working
 
 ---
 
 ## 🏁 Milestone 4: First Fest Ready 🎉
 
-* Events + RSVP + Check-in + Tasks
+- Events + RSVP + Check-in + Tasks
 
 ---
 
 ## 🏁 Milestone 5: Full Ops System
 
-* Vendors + Resources + Budget
+- Vendors + Resources + Budget
 
 ---
 
 ## 🏁 Milestone 6: Growth Enabled
 
-* Sponsorship + Marketing
+- Sponsorship + Marketing
 
 ---
 
 ## 🏁 Milestone 7: Production Ready
 
-* Notifications + Analytics + Stability
+- Notifications + Analytics + Stability
 
 ---
 
 # ⚠️ Guidelines
 
-* Do NOT skip phases
-* Complete deliverables before moving forward
-* Keep updating `.humanet/CHANGELOG.md`
-* Document decisions in `.humanet/discussions/`
+- Do NOT skip phases
+- Complete deliverables before moving forward
+- Keep updating `.humanet/CHANGELOG.md`
+- Document decisions in `.humanet/discussions/`
 
 ---
 
@@ -488,8 +486,8 @@ CampusOS is not just a project — it is a **long-term platform**.
 
 Focus on:
 
-* Consistency
-* Clarity
-* Modularity
+- Consistency
+- Clarity
+- Modularity
 
 Build step by step. Ship every phase.

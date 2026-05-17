@@ -9,10 +9,10 @@ Each component has a clearly defined responsibility, making the system easier to
 
 The backend primarily consists of the following files:
 
-* `index.js`
-* `server.js`
-* `app.js`
-* `registry.js`
+- `index.js`
+- `server.js`
+- `app.js`
+- `registry.js`
 
 ---
 
@@ -22,10 +22,10 @@ The `index.js` file acts as the main entry point of the backend application.
 
 ## Responsibilities
 
-* Establishes the database connection
-* Imports the assembled application instance from `app.js`
-* Starts the HTTP server using `server.js`
-* Uses port `4000` as the default server port (unless overridden)
+- Establishes the database connection
+- Imports the assembled application instance from `app.js`
+- Starts the HTTP server using `server.js`
+- Uses port `4000` as the default server port (unless overridden)
 
 ## Purpose
 
@@ -39,9 +39,9 @@ The `server.js` file contains the logic responsible for creating and managing th
 
 ## Responsibilities
 
-* Starts the HTTP server
-* Handles graceful shutdown procedures
-* Manages server lifecycle events
+- Starts the HTTP server
+- Handles graceful shutdown procedures
+- Manages server lifecycle events
 
 ## Purpose
 
@@ -57,12 +57,12 @@ It can be considered the central orchestration layer of the backend since most r
 
 ## Responsibilities
 
-* Creates the Express application instance
-* Configures CORS
-* Loads global middleware
-* Loads plugins and application extensions
-* Configures error handling mechanisms
-* Assembles application modules
+- Creates the Express application instance
+- Configures CORS
+- Loads global middleware
+- Loads plugins and application extensions
+- Configures error handling mechanisms
+- Assembles application modules
 
 ## Purpose
 
@@ -80,10 +80,10 @@ This registry acts as a centralized dependency management layer for dynamically 
 
 The registry allows registration and retrieval of:
 
-* Modules
-* Services
-* Authenticators
-* Resolvers
+- Modules
+- Services
+- Authenticators
+- Resolvers
 
 Internally, these components are stored using a `Map`-based structure and are later exposed through `app.locals`.
 
@@ -91,11 +91,11 @@ Internally, these components are stored using a `Map`-based structure and are la
 
 The registry system helps:
 
-* Reduce repetitive import statements
-* Centralize dependency access
-* Improve modularity
-* Simplify service discovery across the application
-* Enable cleaner plugin/module integration patterns
+- Reduce repetitive import statements
+- Centralize dependency access
+- Improve modularity
+- Simplify service discovery across the application
+- Enable cleaner plugin/module integration patterns
 
 ## Why It Matters
 
@@ -104,7 +104,7 @@ Instead of importing dependencies across multiple files repeatedly, components c
 Example conceptually:
 
 ```js
-const userService = app.locals.registry.getService("user");
+const userService = app.locals.registry.getService('user');
 ```
 
 This pattern keeps the codebase organized and reduces tight coupling between modules.
@@ -115,8 +115,8 @@ This pattern keeps the codebase organized and reduces tight coupling between mod
 
 The backend architecture is designed with the following principles in mind:
 
-* **Separation of Concerns** — Each file handles a dedicated responsibility
-* **Modularity** — Components can be extended independently
-* **Scalability** — Registry-driven architecture supports future expansion
-* **Maintainability** — Centralized configuration and dependency management reduce complexity
-* **Extensibility** — Plugins, services, and modules can be integrated cleanly
+- **Separation of Concerns** — Each file handles a dedicated responsibility
+- **Modularity** — Components can be extended independently
+- **Scalability** — Registry-driven architecture supports future expansion
+- **Maintainability** — Centralized configuration and dependency management reduce complexity
+- **Extensibility** — Plugins, services, and modules can be integrated cleanly

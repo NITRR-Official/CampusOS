@@ -158,7 +158,10 @@ export function validateUpdateEventPayload(payload = {}) {
   if (payload.capacity !== undefined) {
     updates.capacity = normalizeCapacity(payload.capacity);
 
-    if (Number.isNaN(updates.capacity) || (updates.capacity !== null && updates.capacity < 1)) {
+    if (
+      Number.isNaN(updates.capacity) ||
+      (updates.capacity !== null && updates.capacity < 1)
+    ) {
       errors.push({
         field: 'capacity',
         message: 'Capacity must be a positive integer when provided'
