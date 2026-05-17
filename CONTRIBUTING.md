@@ -42,7 +42,16 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
    pnpm install
    ```
 
-5. **Create a feature branch**
+5. **Start MongoDB Database (Required)**
+
+   The backend **must** have a running MongoDB instance before it can start, otherwise you will get an `ECONNREFUSED` error. The easiest way is using Docker:
+
+   ```bash
+   docker run -d -p 27017:27017 --name mongodb mongo:latest
+   ```
+   *If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](./docs/DATABASE_SETUP.md).*
+
+6. **Create a feature branch**
 
    ```bash
    git checkout -b feature/your-feature-name

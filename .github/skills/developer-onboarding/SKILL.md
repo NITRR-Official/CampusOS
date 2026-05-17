@@ -40,21 +40,19 @@ cp .env.example .env.local
 ```
 
 ### 2. Local Development Setup
-
-Start servers:
+  
+Start the database and servers:
 
 ```bash
-# Start all (frontend + backend concurrent)
+# 1. Start MongoDB (Required)
+# The backend will fail to start without a running MongoDB instance.
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+
+# 2. Start all (frontend + backend concurrent)
 pnpm dev
 
-# In separate terminal, run migrations
-pnpm db:migrate:dev
-
-# Seed test data (optional)
-pnpm db:seed
-
 # Verify: http://localhost:3000 (frontend)
-#         http://localhost:3001/api/health (backend)
+#         http://localhost:4000 (backend API)
 ```
 
 ### 3. Project Structure Understanding
@@ -128,8 +126,7 @@ pnpm type-check      # TypeScript
 pnpm format          # Code formatting
 
 # Database
-pnpm db:migrate:dev  # Apply migrations
-pnpm db:seed        # Load test data
+# Note: MongoDB handles schemas dynamically. No migration commands needed!
 ```
 
 ### 6. Troubleshooting Common Issues
@@ -142,8 +139,8 @@ PORT=3002 pnpm dev
 # Or kill: lsof -ti:3000 | xargs kill -9
 
 # Database connection fails
-# Check .env.local DATABASE_URL
-pnpm db:push  # Sync schema
+# Ensure MongoDB is running (e.g., docker start mongodb)
+# Check .env.local MONGODB_URI
 
 # Dependency conflicts
 pnpm install --force
@@ -186,7 +183,7 @@ gh pr create --fill
 | pnpm not found         | Install: `npm install -g pnpm@8`                                          |
 | Port in use            | Kill: `lsof -ti:3000 \| xargs kill -9`                                    |
 | .env.local not working | Copy: `cp .env.example .env.local`. Ask maintainer for secrets.           |
-| DB migration fails     | Check PostgreSQL running. Verify DATABASE_URL.                            |
+| DB connection fails    | Check MongoDB is running (`docker start mongodb`). Verify `MONGODB_URI`.  |
 | TypeScript errors      | Run `pnpm type-check`. Restart VS Code.                                   |
 | Tests fail             | Clear: `pnpm install`. Regen types: `pnpm generate:types`.                |
 | Can't push branch      | Fetch: `git fetch origin`. Try: `git push --set-upstream origin <branch>` |
