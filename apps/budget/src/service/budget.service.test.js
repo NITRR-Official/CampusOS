@@ -1,6 +1,12 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDB, disconnectDB } from '../../../../backend/src/database/connection.js';
-import { Budget, Expense } from '../../../../backend/src/database/schemas/budget.schema.js';
+import {
+  connectDB,
+  disconnectDB
+} from '../../../../backend/src/database/connection.js';
+import {
+  Budget,
+  Expense
+} from '../../../../backend/src/database/schemas/budget.schema.js';
 import { BudgetService } from './budget.service.js';
 
 describe('BudgetService', () => {
@@ -188,7 +194,10 @@ describe('BudgetService', () => {
     });
 
     it('should reject a budget and provide rejection reason', async () => {
-      const result = await service.rejectBudget(budgetId, 'Budget exceeds available funds');
+      const result = await service.rejectBudget(
+        budgetId,
+        'Budget exceeds available funds'
+      );
 
       expect(result.success).toBe(true);
       expect(result.budget.approvalStatus).toBe('rejected');
@@ -272,7 +281,10 @@ describe('BudgetService', () => {
     });
 
     it('should mark expense as paid', async () => {
-      const result = await service.markExpenseAsPaid(expenseId, 'bank_transfer');
+      const result = await service.markExpenseAsPaid(
+        expenseId,
+        'bank_transfer'
+      );
 
       expect(result.success).toBe(true);
       expect(result.expense.paymentStatus).toBe('paid');
@@ -285,8 +297,12 @@ describe('BudgetService', () => {
       const afterPayment = new Date();
 
       expect(result.expense.paidDate).toBeInstanceOf(Date);
-      expect(result.expense.paidDate.getTime()).toBeGreaterThanOrEqual(beforePayment.getTime());
-      expect(result.expense.paidDate.getTime()).toBeLessThanOrEqual(afterPayment.getTime());
+      expect(result.expense.paidDate.getTime()).toBeGreaterThanOrEqual(
+        beforePayment.getTime()
+      );
+      expect(result.expense.paidDate.getTime()).toBeLessThanOrEqual(
+        afterPayment.getTime()
+      );
     });
   });
 

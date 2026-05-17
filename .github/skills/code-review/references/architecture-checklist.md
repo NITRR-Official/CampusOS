@@ -55,7 +55,6 @@ Use this checklist when reviewing code for adherence to CampusOS architecture pa
 - [ ] No direct module-to-module imports
   - ❌ `import { userService } from '../auth/src'`
   - ✅ Communicate via database or shared services
-  
 - [ ] Database schema consistent with modules
 - [ ] Foreign keys properly defined
 - [ ] No circular dependencies via database
@@ -69,17 +68,18 @@ Use this checklist when reviewing code for adherence to CampusOS architecture pa
 
 ## Common Violations
 
-| Violation | Impact | Fix |
-|---|---|---|
-| Code outside `/apps/` | Plugin loader breaks | Move to module or create new app |
-| Direct imports between modules | Runtime coupling | Use event/database communication |
-| Missing `index.js` exports | Plugin registration fails | Create entry point with init() |
-| Circular dependencies | Bundle size, performance | Refactor shared code to Foundation |
-| Business logic in routes | Hard to test | Move to Execution services |
+| Violation                      | Impact                    | Fix                                |
+| ------------------------------ | ------------------------- | ---------------------------------- |
+| Code outside `/apps/`          | Plugin loader breaks      | Move to module or create new app   |
+| Direct imports between modules | Runtime coupling          | Use event/database communication   |
+| Missing `index.js` exports     | Plugin registration fails | Create entry point with init()     |
+| Circular dependencies          | Bundle size, performance  | Refactor shared code to Foundation |
+| Business logic in routes       | Hard to test              | Move to Execution services         |
 
 ## Review Checklist Questions
 
 Ask yourself:
+
 1. **Can this code live in `/apps/`?** If no, it shouldn't exist in this repo
 2. **Does another module depend on this?** If yes, is it via database/events only?
 3. **Could this be a plugin?** If yes, should it be in `plugin-loader.js`?

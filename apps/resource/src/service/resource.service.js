@@ -11,7 +11,8 @@ function normalizeAllocation(allocation, resourceId) {
     return null;
   }
 
-  const allocationId = allocation.allocationId || allocation.id || allocation._id;
+  const allocationId =
+    allocation.allocationId || allocation.id || allocation._id;
   const createdAt = allocation.createdAt || allocation.allocatedAt || null;
   const updatedAt = allocation.updatedAt || allocation.allocatedAt || null;
 
@@ -34,7 +35,9 @@ function normalizeResource(resourceDoc) {
     return null;
   }
 
-  const resource = resourceDoc.toObject ? resourceDoc.toObject() : { ...resourceDoc };
+  const resource = resourceDoc.toObject
+    ? resourceDoc.toObject()
+    : { ...resourceDoc };
   const resourceId = resource.id || resource._id;
 
   resource.id = resourceId;
@@ -56,10 +59,14 @@ export class ResourceService {
    * @returns {object} Created resource record
    */
   async createResource(resourceData) {
-    const { name, type, quantity, description, location, owner, cost } = resourceData;
+    const { name, type, quantity, description, location, owner, cost } =
+      resourceData;
 
     if (!name || !type || !quantity) {
-      return { success: false, error: 'Missing required fields: name, type, quantity' };
+      return {
+        success: false,
+        error: 'Missing required fields: name, type, quantity'
+      };
     }
 
     try {
@@ -214,7 +221,10 @@ export class ResourceService {
     const { allocatedQuantity, startDate, endDate, notes } = allocationData;
 
     if (!allocatedQuantity || !startDate || !endDate) {
-      return { success: false, error: 'Missing required fields: allocatedQuantity, startDate, endDate' };
+      return {
+        success: false,
+        error: 'Missing required fields: allocatedQuantity, startDate, endDate'
+      };
     }
 
     try {
@@ -230,9 +240,17 @@ export class ResourceService {
         };
       }
 
-      const conflicts = await this.checkAllocationConflicts(resource, startDate, endDate);
+      const conflicts = await this.checkAllocationConflicts(
+        resource,
+        startDate,
+        endDate
+      );
       if (conflicts.length > 0) {
-        return { success: false, error: 'Resource is already allocated during this period', conflicts };
+        return {
+          success: false,
+          error: 'Resource is already allocated during this period',
+          conflicts
+        };
       }
 
       const now = new Date();
@@ -255,7 +273,10 @@ export class ResourceService {
 
       await resource.save();
 
-      return { success: true, allocation: normalizeAllocation(allocation, resourceId) };
+      return {
+        success: true,
+        allocation: normalizeAllocation(allocation, resourceId)
+      };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -270,9 +291,10 @@ export class ResourceService {
    */
   async checkAllocationConflicts(resourceId, startDate, endDate) {
     try {
-      const resource = typeof resourceId === 'string'
-        ? await Resource.findById(resourceId).lean()
-        : resourceId;
+      const resource =
+        typeof resourceId === 'string'
+          ? await Resource.findById(resourceId).lean()
+          : resourceId;
 
       if (!resource) {
         return [];
@@ -283,13 +305,18 @@ export class ResourceService {
 
       return (resource.allocations || [])
         .filter((allocation) => {
-          if (allocation.status === 'returned' || allocation.status === 'damaged') {
+          if (
+            allocation.status === 'returned' ||
+            allocation.status === 'damaged'
+          ) {
             return false;
           }
 
           return !(end <= allocation.startDate || start >= allocation.endDate);
         })
-        .map((allocation) => normalizeAllocation(allocation, resource.id || resource._id))
+        .map((allocation) =>
+          normalizeAllocation(allocation, resource.id || resource._id)
+        )
         .filter(Boolean);
     } catch (error) {
       console.error('Error checking allocation conflicts:', error);
@@ -304,7 +331,9 @@ export class ResourceService {
    */
   async getEventResources(eventId) {
     try {
-      const resources = await Resource.find({ 'allocations.eventId': eventId }).lean();
+      const resources = await Resource.find({
+        'allocations.eventId': eventId
+      }).lean();
 
       return resources.flatMap((resource) =>
         (resource.allocations || [])
@@ -357,16 +386,23 @@ export class ResourceService {
   async updateAllocationStatus(allocationId, newStatus) {
     const validStatuses = ['allocated', 'in-use', 'returned', 'damaged'];
     if (!validStatuses.includes(newStatus)) {
-      return { success: false, error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` };
+      return {
+        success: false,
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      };
     }
 
     try {
-      const resource = await Resource.findOne({ 'allocations.allocationId': allocationId });
+      const resource = await Resource.findOne({
+        'allocations.allocationId': allocationId
+      });
       if (!resource) {
         return { success: false, error: 'Allocation not found' };
       }
 
-      const allocation = resource.allocations.find((item) => item.allocationId === allocationId);
+      const allocation = resource.allocations.find(
+        (item) => item.allocationId === allocationId
+      );
       if (!allocation) {
         return { success: false, error: 'Allocation not found' };
       }
@@ -381,7 +417,10 @@ export class ResourceService {
 
       await resource.save();
 
-      return { success: true, allocation: normalizeAllocation(allocation, resource.id || resource._id) };
+      return {
+        success: true,
+        allocation: normalizeAllocation(allocation, resource.id || resource._id)
+      };
     } catch (error) {
       return { success: false, error: error.message };
     }

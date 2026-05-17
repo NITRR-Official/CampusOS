@@ -12,9 +12,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
-import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validations/auth';
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordFormData
+} from '@/lib/validations/auth';
 
 export default function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -23,11 +26,11 @@ export default function ForgotPasswordPage() {
   const form = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
-      email: '',
-    },
+      email: ''
+    }
   });
 
-  async function onSubmit(data: ForgotPasswordFormData) {
+  async function onSubmit() {
     setIsLoading(true);
 
     // Mock API call delay
@@ -47,7 +50,9 @@ export default function ForgotPasswordPage() {
         alternateActionText="Login"
       >
         <div className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-200">
-          If an account exists for <span className="font-semibold">{form.getValues().email}</span>, you will receive reset instructions shortly.
+          If an account exists for{' '}
+          <span className="font-semibold">{form.getValues().email}</span>, you
+          will receive reset instructions shortly.
         </div>
       </AuthShell>
     );
@@ -96,4 +101,3 @@ export default function ForgotPasswordPage() {
     </AuthShell>
   );
 }
-

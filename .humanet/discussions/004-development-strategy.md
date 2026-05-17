@@ -1,6 +1,7 @@
 # Development Strategy
 
 ## Status
+
 Accepted
 
 ## Approach: Vertical Slicing
@@ -39,23 +40,27 @@ Build features vertically: backend + frontend + database together, not layer by 
 ## Core Development Rules
 
 ### Architecture Rules
+
 - **Modularity** — Everything is a module
 - **Independence** — No direct module-to-module dependencies
 - **Communication** — Via shared services or database
 - **Plugin System** — All modules loaded dynamically
 
 ### Code Rules
+
 - Backend: Express routers + middleware
 - Controllers: Thin, validation logic
 - Services: Business logic
 - Schemas: Data models and validation
 
 ### Package Management
+
 - **Install via CLI only** — Never directly edit package.json
 - Use `pnpm install <pkg>` for dependencies
 - Use `pnpm install -D <pkg>` for dev dependencies
 
 ### Documentation Rules
+
 - Update COPILOT.md for new constraints
 - Update .humanet/ for new decisions
 - Every architectural decision documented

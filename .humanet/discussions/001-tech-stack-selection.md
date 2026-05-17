@@ -1,11 +1,13 @@
 # ADR 001: Technology Stack Selection
 
 ## Status
+
 Accepted
 
 ## Context
 
 CampusOS needs to support:
+
 - Modular, plugin-based architecture
 - Scalable operations
 - Fast development cycle
@@ -18,16 +20,19 @@ Need to decide on: backend, frontend, database
 ## Decision
 
 ### Backend: Node.js + Express
+
 - **Why**: Fast development, JSON-native, large ecosystem
 - **Advantages**: JavaScript everywhere, npm packages, async handling
 - **Trade-off**: Not as performant as Go/Rust for pure computation
 
 ### Frontend: Next.js + React
+
 - **Why**: Full-stack JavaScript, SSR, static generation, great DX
 - **Advantages**: TypeScript support, API routes, deployment options
 - **Trade-off**: Larger bundle size than minimal alternatives
 
 ### Database: MongoDB
+
 - **Why**: Flexible schema, JSON documents
 - **Advantages**: Easy scaling, good for rapid development
 - **Trade-off**: Less strict schema enforcement than PostgreSQL
@@ -58,12 +63,14 @@ Need to decide on: backend, frontend, database
 ## Consequences
 
 ### Positive
+
 - Rapid feature development possible
 - Large talent pool for hiring
 - Rich package ecosystem
 - Good event-driven programming model
 
 ### Negative
+
 - Runtime errors caught later (mitigated with TypeScript)
 - More memory usage than compiled languages
 - Need for careful architecture (dynamic loading risk)

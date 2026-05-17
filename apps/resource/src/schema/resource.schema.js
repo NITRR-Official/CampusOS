@@ -16,7 +16,15 @@ export const ResourceSchema = {
   },
   type: {
     type: 'string',
-    enum: ['audio', 'visual', 'lighting', 'seating', 'stage', 'decoration', 'other'],
+    enum: [
+      'audio',
+      'visual',
+      'lighting',
+      'seating',
+      'stage',
+      'decoration',
+      'other'
+    ],
     required: true,
     description: 'Type of resource'
   },

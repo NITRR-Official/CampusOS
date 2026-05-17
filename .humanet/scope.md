@@ -9,151 +9,172 @@ CampusOS is built in phases, each expanding functionality.
 ## ✅ Phase 0: System Initialization (Week 1)
 
 ### In Scope
-* Foundation architecture setup
-* Express server with plugin loader
-* Next.js frontend shell
-* Humanet and Copilot setup
-* MongoDB connection
-* Development environment
+
+- Foundation architecture setup
+- Express server with plugin loader
+- Next.js frontend shell
+- Humanet and Copilot setup
+- MongoDB connection
+- Development environment
 
 ### Out of Scope
-* Feature implementation
-* User-facing functionality
-* Database schema finalization
+
+- Feature implementation
+- User-facing functionality
+- Database schema finalization
 
 ### Success Metrics
-* Express server running on port 3000
-* Plugin loading system functional
-* .humanet/ structure created and validated
-* Development environment ready
+
+- Express server running on port 3000
+- Plugin loading system functional
+- .humanet/ structure created and validated
+- Development environment ready
 
 ---
 
 ## ✅ Phase 1: Foundation System (Weeks 2-3)
 
 ### In Scope
-* **Auth Module** — JWT-based authentication
-* **Users Module** — User management and profiles
-* **Institutes Module** — Institute creation and management
-* **Clubs Module** — Club creation and management
-* **RBAC System** — Role-based access control
+
+- **Auth Module** — JWT-based authentication
+- **Users Module** — User management and profiles
+- **Institutes Module** — Institute creation and management
+- **Clubs Module** — Club creation and management
+- **RBAC System** — Role-based access control
 
 ### Out of Scope
-* Social features
-* Advanced analytics
-* Email notifications (basic auth only)
+
+- Social features
+- Advanced analytics
+- Email notifications (basic auth only)
 
 ### Success Metrics
-* User can create account
-* User can create institute
-* User can create club
-* RBAC permissions working
-* Proper data management and isolation verified
+
+- User can create account
+- User can create institute
+- User can create club
+- RBAC permissions working
+- Proper data management and isolation verified
 
 ---
 
 ## ✅ Phase 2: Event System (Weeks 4-5)
 
 ### In Scope
-* **Events Module** — Create and manage events
-* **RSVP System** — Registration and attendance
-* **Calendar Integration** — Event scheduling
-* **Event Analytics** — Basic metrics
+
+- **Events Module** — Create and manage events
+- **RSVP System** — Registration and attendance
+- **Calendar Integration** — Event scheduling
+- **Event Analytics** — Basic metrics
 
 ### Out of Scope
-* Advanced event templates
-* Recurring events
-* External calendar sync
+
+- Advanced event templates
+- Recurring events
+- External calendar sync
 
 ### Success Metrics
-* Create and publish event
-* RSVP functionality working
-* Event list view
-* Basic analytics available
+
+- Create and publish event
+- RSVP functionality working
+- Event list view
+- Basic analytics available
 
 ---
 
 ## ✅ Phase 3: Execution System (Weeks 6-7)
 
 ### In Scope
-* **Tasks Module** — Create and assign tasks
-* **Workflows** — Task execution workflows
-* **Assignments** — Assign to users/teams
-* **Check-in System** — Event check-in tracking
+
+- **Tasks Module** — Create and assign tasks
+- **Workflows** — Task execution workflows
+- **Assignments** — Assign to users/teams
+- **Check-in System** — Event check-in tracking
 
 ### Out of Scope
-* Advanced workflow automation
-* Integration with external tools
-* Mobile-first experience
+
+- Advanced workflow automation
+- Integration with external tools
+- Mobile-first experience
 
 ### Success Metrics
-* Create and assign tasks
-* Check-in working at events
-* Task completion tracking
-* Workflow state management visible
+
+- Create and assign tasks
+- Check-in working at events
+- Task completion tracking
+- Workflow state management visible
 
 ---
 
 ## ✅ Phase 4: Operations System (Weeks 8-10)
 
 ### In Scope
-* **Vendor Module** — Vendor management
-* **Resource Module** — Resource allocation
-* **Scheduling** — Resource scheduling
-* **Budget Module** — Basic budget tracking
+
+- **Vendor Module** — Vendor management
+- **Resource Module** — Resource allocation
+- **Scheduling** — Resource scheduling
+- **Budget Module** — Basic budget tracking
 
 ### Out of Scope
-* Advanced inventory management
-* Real-time supply chain
-* Vendor ratings advanced features
+
+- Advanced inventory management
+- Real-time supply chain
+- Vendor ratings advanced features
 
 ### Success Metrics
-* Vendor created and verified
-* Resources allocated
-* Budget tracked
-* Scheduling conflict detection
+
+- Vendor created and verified
+- Resources allocated
+- Budget tracked
+- Scheduling conflict detection
 
 ---
 
 ## ✅ Phase 5: Growth System (Weeks 11-12)
 
 ### In Scope
-* **Sponsorship Module** — Sponsor management
-* **Marketing Module** — Campaign management
-* **Analytics** — Comprehensive analytics
-* **Notifications** — Real-time notifications
+
+- **Sponsorship Module** — Sponsor management
+- **Marketing Module** — Campaign management
+- **Analytics** — Comprehensive analytics
+- **Notifications** — Real-time notifications
 
 ### Out of Scope
-* AI-powered recommendations
-* Advanced marketing automation
-* Social media integration
+
+- AI-powered recommendations
+- Advanced marketing automation
+- Social media integration
 
 ### Success Metrics
-* Create sponsorship deals
-* Track marketing campaigns
-* View comprehensive analytics
-* Notifications working
+
+- Create sponsorship deals
+- Track marketing campaigns
+- View comprehensive analytics
+- Notifications working
 
 ---
 
 ## ✅ Phase 6: System Maturity (Weeks 13+)
 
 ### In Scope
-* Performance optimization
-* Security hardening
-* Documentation completion
-* Community feedback integration
-* Bug fixes and refinements
+
+- Performance optimization
+- Security hardening
+- Documentation completion
+- Community feedback integration
+- Bug fixes and refinements
 
 ### Out of Scope
-* Major new features
-* Completely new modules
+
+- Major new features
+- Completely new modules
 
 ### Success Metrics
-* Production-ready system
-* Security audit passed
-* Performance under load
-* 100+ test coverage
+
+- Production-ready system
+- Security audit passed
+- Performance under load
+- 100+ test coverage
 
 ---
 
@@ -175,22 +196,25 @@ CampusOS is built in phases, each expanding functionality.
 ## 🎯 Success Metrics (Overall)
 
 ### Technical
-* System handles 1000+ clubs
-* Sub-100ms API response time
-* 99.9% uptime
-* Zero critical security issues
+
+- System handles 1000+ clubs
+- Sub-100ms API response time
+- 99.9% uptime
+- Zero critical security issues
 
 ### Business
-* Used by 5+ institutes
-* 500+ active clubs
-* 10,000+ events tracked
-* Community contributions
+
+- Used by 5+ institutes
+- 500+ active clubs
+- 10,000+ events tracked
+- Community contributions
 
 ### User Experience
-* NPS score > 7/10
-* User retention > 70%
-* Feature adoption > 60%
-* Support response < 2 hours
+
+- NPS score > 7/10
+- User retention > 70%
+- Feature adoption > 60%
+- Support response < 2 hours
 
 ---
 
@@ -223,6 +247,7 @@ CampusOS is built in phases, each expanding functionality.
 4. **First Fest Ready** 🎉 — Phase 4 complete (Real event with all systems)
 5. **Ops System Ready** — Phase 5 complete (Vendors, Resources, Budget tracking)
 6. **Growth System Ready** — Phase 6 complete (Sponsorship, Marketing, Analytics)
+
 ## 📏 Constraints
 
 1. **Technology** — Node.js, Express, Next.js, MongoDB
@@ -258,10 +283,10 @@ CampusOS is built in phases, each expanding functionality.
 
 [Identify potential risks to staying in scope or achieving metrics:]
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| [Risk 1] | [H/M/L] | [H/M/L] | [Strategy] |
-| [Risk 2] | [H/M/L] | [H/M/L] | [Strategy] |
+| Risk     | Likelihood | Impact  | Mitigation |
+| -------- | ---------- | ------- | ---------- |
+| [Risk 1] | [H/M/L]    | [H/M/L] | [Strategy] |
+| [Risk 2] | [H/M/L]    | [H/M/L] | [Strategy] |
 
 ## Dependencies
 
@@ -274,5 +299,6 @@ CampusOS is built in phases, each expanding functionality.
 ---
 
 **Related Documents:**
+
 - [idea.md](idea.md) - Solution description
 - [problem_statement.md](problem_statement.md) - Problem definition

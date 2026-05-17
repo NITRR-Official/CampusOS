@@ -28,7 +28,14 @@ export function createTaskController() {
     const { errors, value } = validateCreateTaskPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -70,7 +77,14 @@ export function createTaskController() {
     const { errors, value } = validateAssignTaskPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -92,7 +106,14 @@ export function createTaskController() {
     const { errors, value } = validateStatusPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -114,7 +135,14 @@ export function createTaskController() {
     const { errors, value } = validatePriorityPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -136,7 +164,9 @@ export function createTaskController() {
     const { dependencyId } = req.body;
 
     if (!dependencyId || typeof dependencyId !== 'string') {
-      next(createHttpError(400, 'dependencyId is required', 'VALIDATION_ERROR'));
+      next(
+        createHttpError(400, 'dependencyId is required', 'VALIDATION_ERROR')
+      );
       return;
     }
 
@@ -157,7 +187,8 @@ export function createTaskController() {
         DEPENDENCY_NOT_FOUND: 'Dependency task not found',
         SELF_REFERENCE: 'A task cannot depend on itself',
         DEPENDENCY_EXISTS: 'Dependency already exists',
-        CIRCULAR_DEPENDENCY: 'Adding this dependency would create a circular reference'
+        CIRCULAR_DEPENDENCY:
+          'Adding this dependency would create a circular reference'
       };
 
       next(createHttpError(status, messages[result.error], result.error));
@@ -175,7 +206,9 @@ export function createTaskController() {
     const { dependencyId } = req.body;
 
     if (!dependencyId || typeof dependencyId !== 'string') {
-      next(createHttpError(400, 'dependencyId is required', 'VALIDATION_ERROR'));
+      next(
+        createHttpError(400, 'dependencyId is required', 'VALIDATION_ERROR')
+      );
       return;
     }
 

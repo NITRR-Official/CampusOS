@@ -12,10 +12,22 @@ export class VendorService {
    * @returns {object} Created vendor record
    */
   async createVendor(vendorData) {
-    const { name, category, contactPerson, email, phone, address, bankDetails } = vendorData;
+    const {
+      name,
+      category,
+      contactPerson,
+      email,
+      phone,
+      address,
+      bankDetails
+    } = vendorData;
 
     if (!name || !category || !contactPerson || !email || !phone) {
-      return { success: false, error: 'Missing required fields: name, category, contactPerson, email, phone' };
+      return {
+        success: false,
+        error:
+          'Missing required fields: name, category, contactPerson, email, phone'
+      };
     }
 
     try {
@@ -190,10 +202,10 @@ export class VendorService {
         'assignments.eventId': eventId
       }).lean();
 
-      return vendors.flatMap(vendor =>
+      return vendors.flatMap((vendor) =>
         vendor.assignments
-          .filter(a => a.eventId === eventId)
-          .map(assignment => ({
+          .filter((a) => a.eventId === eventId)
+          .map((assignment) => ({
             ...assignment,
             vendorDetails: {
               id: vendor._id,
@@ -235,7 +247,10 @@ export class VendorService {
   async updateAssignmentStatus(vendorId, eventId, newStatus) {
     const validStatuses = ['assigned', 'confirmed', 'completed', 'cancelled'];
     if (!validStatuses.includes(newStatus)) {
-      return { success: false, error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` };
+      return {
+        success: false,
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      };
     }
 
     try {
@@ -294,9 +309,13 @@ export class VendorService {
       }
 
       // Recalculate average rating
-      const avgRating = vendor.ratings.length > 0
-        ? (vendor.ratings.reduce((sum, r) => sum + r.rating, 0) / vendor.ratings.length).toFixed(2)
-        : 0;
+      const avgRating =
+        vendor.ratings.length > 0
+          ? (
+              vendor.ratings.reduce((sum, r) => sum + r.rating, 0) /
+              vendor.ratings.length
+            ).toFixed(2)
+          : 0;
 
       vendor.averageRating = parseFloat(avgRating);
       vendor.totalRatings = vendor.ratings.length;

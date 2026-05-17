@@ -5,6 +5,7 @@ This document outlines the foundational design system for the CampusOS frontend.
 ## 1. Color Palette
 
 ### Primary Colors
+
 Used for primary actions, key UI elements, and main brand identity.
 
 ```
@@ -22,6 +23,7 @@ Primary (Sky Blue)
 ```
 
 **Usage:**
+
 - Primary buttons
 - Links and hover states
 - Active tabs
@@ -29,6 +31,7 @@ Primary (Sky Blue)
 - Primary brand elements
 
 ### Secondary Colors
+
 Used for secondary actions and supporting UI elements.
 
 ```
@@ -46,12 +49,14 @@ Secondary (Violet)
 ```
 
 **Usage:**
+
 - Secondary buttons
 - Supporting actions
 - Alternative highlights
 - Secondary branding elements
 
 ### Accent Colors
+
 Used for highlights, important information, and attention-grabbing elements.
 
 ```
@@ -69,6 +74,7 @@ Accent (Orange)
 ```
 
 **Usage:**
+
 - Badges and tags
 - Callout boxes
 - Highlight sections
@@ -78,30 +84,35 @@ Accent (Orange)
 ### Semantic Colors
 
 #### Success (Green)
+
 ```
 500: #22c55e ← Main Success Color
 Used for: Success messages, confirmed states, positive actions
 ```
 
 #### Warning (Amber)
+
 ```
 500: #f59e0b ← Main Warning Color
 Used for: Warning messages, cautionary alerts, pending states
 ```
 
 #### Error (Red)
+
 ```
 500: #ef4444 ← Main Error Color
 Used for: Error messages, validation errors, dangerous actions
 ```
 
 #### Info (Sky Blue)
+
 ```
 500: #0ea5e9 ← Main Info Color
 Used for: Informational messages, tips, helpful information
 ```
 
 ### Neutral Colors
+
 Used for text, borders, backgrounds, and general UI elements.
 
 ```
@@ -120,6 +131,7 @@ Neutral Gray Scale
 ```
 
 **Usage:**
+
 - Body text: 700 (light) / 200 (dark mode)
 - Secondary text: 600 (light) / 300 (dark mode)
 - Borders: 200 (light) / 700 (dark mode)
@@ -129,34 +141,34 @@ Neutral Gray Scale
 
 ### Heading Scale
 
-| Name | Size | Weight | Line Height | Use Case |
-|------|------|--------|-------------|----------|
-| Display Large | 3.5rem | 700 | 1.1 | Page hero/main title |
-| Display Medium | 3rem | 700 | 1.15 | Large page headers |
-| Display Small | 2.5rem | 700 | 1.2 | Section headers |
-| Heading Large | 2rem | 700 | 1.3 | Page titles (`<h1>`) |
-| Heading Medium | 1.5rem | 600 | 1.4 | Subsection titles (`<h2>`) |
-| Heading Small | 1.25rem | 600 | 1.5 | Small section titles (`<h3>`) |
-| Heading XS | 1.125rem | 600 | 1.6 | Subsection (`<h4>`) |
+| Name           | Size     | Weight | Line Height | Use Case                      |
+| -------------- | -------- | ------ | ----------- | ----------------------------- |
+| Display Large  | 3.5rem   | 700    | 1.1         | Page hero/main title          |
+| Display Medium | 3rem     | 700    | 1.15        | Large page headers            |
+| Display Small  | 2.5rem   | 700    | 1.2         | Section headers               |
+| Heading Large  | 2rem     | 700    | 1.3         | Page titles (`<h1>`)          |
+| Heading Medium | 1.5rem   | 600    | 1.4         | Subsection titles (`<h2>`)    |
+| Heading Small  | 1.25rem  | 600    | 1.5         | Small section titles (`<h3>`) |
+| Heading XS     | 1.125rem | 600    | 1.6         | Subsection (`<h4>`)           |
 
 ### Body Text Scale
 
-| Name | Size | Weight | Line Height | Use Case |
-|------|------|--------|-------------|----------|
-| Body Large | 1.125rem | 400 | 1.6 | Large body text |
-| Body Medium | 1rem | 400 | 1.6 | Standard body text (`<p>`) |
-| Body Small | 0.875rem | 400 | 1.5 | Small body text |
-| Body XS | 0.8125rem | 400 | 1.5 | Extra small text |
+| Name        | Size      | Weight | Line Height | Use Case                   |
+| ----------- | --------- | ------ | ----------- | -------------------------- |
+| Body Large  | 1.125rem  | 400    | 1.6         | Large body text            |
+| Body Medium | 1rem      | 400    | 1.6         | Standard body text (`<p>`) |
+| Body Small  | 0.875rem  | 400    | 1.5         | Small body text            |
+| Body XS     | 0.8125rem | 400    | 1.5         | Extra small text           |
 
 ### Label & Caption Scale
 
-| Name | Size | Weight | Line Height | Use Case |
-|------|------|--------|-------------|----------|
-| Label Large | 1rem | 600 | 1.5 | Form labels, buttons |
-| Label Medium | 0.875rem | 600 | 1.5 | Standard labels |
-| Label Small | 0.8125rem | 600 | 1.5 | Small labels |
-| Caption Medium | 0.875rem | 400 | 1.4 | Helper text, captions |
-| Caption Small | 0.8125rem | 400 | 1.4 | Extra small captions |
+| Name           | Size      | Weight | Line Height | Use Case              |
+| -------------- | --------- | ------ | ----------- | --------------------- |
+| Label Large    | 1rem      | 600    | 1.5         | Form labels, buttons  |
+| Label Medium   | 0.875rem  | 600    | 1.5         | Standard labels       |
+| Label Small    | 0.8125rem | 600    | 1.5         | Small labels          |
+| Caption Medium | 0.875rem  | 400    | 1.4         | Helper text, captions |
+| Caption Small  | 0.8125rem | 400    | 1.4         | Extra small captions  |
 
 ### Using Typography Classes
 
@@ -182,15 +194,15 @@ Neutral Gray Scale
 
 We use an 8px base unit system for consistent spacing:
 
-| Token | Value | Pixels | Use Case |
-|-------|-------|--------|----------|
-| xs | 0.5rem | 8px | Small gaps between elements |
-| sm | 1rem | 16px | Standard padding, small margins |
-| md | 1.5rem | 24px | Component padding, section spacing |
-| lg | 2rem | 32px | Large component padding, section gaps |
-| xl | 2.5rem | 40px | Large section spacing |
-| 2xl | 3rem | 48px | Major section breaks |
-| 3xl | 4rem | 64px | Large page sections |
+| Token | Value  | Pixels | Use Case                              |
+| ----- | ------ | ------ | ------------------------------------- |
+| xs    | 0.5rem | 8px    | Small gaps between elements           |
+| sm    | 1rem   | 16px   | Standard padding, small margins       |
+| md    | 1.5rem | 24px   | Component padding, section spacing    |
+| lg    | 2rem   | 32px   | Large component padding, section gaps |
+| xl    | 2.5rem | 40px   | Large section spacing                 |
+| 2xl   | 3rem   | 48px   | Major section breaks                  |
+| 3xl   | 4rem   | 64px   | Large page sections                   |
 
 ### Spacing Utility Classes
 
@@ -212,15 +224,15 @@ We use an 8px base unit system for consistent spacing:
 
 Consistent corner rounding for elements:
 
-| Token | Value | Use Case |
-|-------|-------|----------|
-| xs | 0.25rem (4px) | Small elements, icons |
-| sm | 0.5rem (8px) | Input fields, small components |
-| md | 0.75rem (12px) | Cards, buttons (default) |
-| lg | 1rem (16px) | Large cards, modals |
-| xl | 1.5rem (24px) | Large rounded elements |
-| 2xl | 2rem (32px) | Very rounded containers |
-| full | 9999px | Circular elements |
+| Token | Value          | Use Case                       |
+| ----- | -------------- | ------------------------------ |
+| xs    | 0.25rem (4px)  | Small elements, icons          |
+| sm    | 0.5rem (8px)   | Input fields, small components |
+| md    | 0.75rem (12px) | Cards, buttons (default)       |
+| lg    | 1rem (16px)    | Large cards, modals            |
+| xl    | 1.5rem (24px)  | Large rounded elements         |
+| 2xl   | 2rem (32px)    | Very rounded containers        |
+| full  | 9999px         | Circular elements              |
 
 ### Usage Examples
 
@@ -242,13 +254,13 @@ Consistent corner rounding for elements:
 
 Consistent depth through shadows:
 
-| Level | Usage |
-|-------|-------|
-| xs | Subtle elevation for minor interactions |
-| sm | Default shadow for cards and buttons |
-| md | Slightly elevated components |
-| lg | Elevated modals and dropdowns |
-| xl | Maximum elevation, floating panels |
+| Level | Usage                                   |
+| ----- | --------------------------------------- |
+| xs    | Subtle elevation for minor interactions |
+| sm    | Default shadow for cards and buttons    |
+| md    | Slightly elevated components            |
+| lg    | Elevated modals and dropdowns           |
+| xl    | Maximum elevation, floating panels      |
 
 ```tsx
 <div className="shadow-md">Card with medium shadow</div>
@@ -294,8 +306,8 @@ import { Button } from "@/components/ui/button";
 ### Form Inputs
 
 ```tsx
-<input 
-  type="text" 
+<input
+  type="text"
   placeholder="Enter text..."
   className="w-full rounded-sm border border-neutral-300 px-md py-sm text-body-md focus:outline-none focus:ring-2 focus:ring-primary-500"
 />
@@ -357,7 +369,9 @@ Dark mode is supported throughout the application. Use the `.dark` class or `dar
 ```tsx
 <div className="rounded-md bg-success-50 border-l-4 border-success-500 p-md">
   <h4 className="text-label-md font-semibold text-success-900">Success</h4>
-  <p className="text-body-sm text-success-800 mt-xs">Your action was successful</p>
+  <p className="text-body-sm text-success-800 mt-xs">
+    Your action was successful
+  </p>
 </div>
 ```
 

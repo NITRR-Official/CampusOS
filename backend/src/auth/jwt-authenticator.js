@@ -14,7 +14,9 @@ function getJwtSecret() {
   }
 
   if (process.env.NODE_ENV === 'production') {
-    throw new Error('JWT_SECRET environment variable is required in production');
+    throw new Error(
+      'JWT_SECRET environment variable is required in production'
+    );
   }
 
   console.warn('JWT_SECRET is not set. Using development fallback secret.');

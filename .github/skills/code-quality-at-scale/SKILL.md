@@ -7,6 +7,7 @@ argument-hint: 'pattern-type, architecture-rule'
 # Code Quality at Scale
 
 ## When to Use
+
 - Enforcing ESLint/TypeScript rules across codebase
 - Detecting code smell and architectural violations
 - Managing technical debt
@@ -15,20 +16,22 @@ argument-hint: 'pattern-type, architecture-rule'
 - Preventing regressions in code quality
 
 ## What This Skill Does
+
 Establishes code quality standards for CampusOS through linting, architecture rules, and automated enforcement.
 
 ## Procedure
 
 ### Phase 1: ESLint Configuration
+
 1. Install ESLint & plugins: `pnpm add --save-dev eslint eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-import`
 2. Create `.eslintrc.json`:
    ```json
    {
-     "env": {"node": true, "browser": true, "es2021": true},
+     "env": { "node": true, "browser": true, "es2021": true },
      "extends": ["eslint:recommended", "plugin:react/recommended"],
      "rules": {
-       "no-console": ["warn", {"allow": ["warn", "error"]}],
-       "no-unused-vars": ["error", {"argsIgnorePattern": "^_"}],
+       "no-console": ["warn", { "allow": ["warn", "error"] }],
+       "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
        "prefer-const": "error",
        "eqeqeq": ["error", "always"],
        "quotes": ["error", "single"]
@@ -43,12 +46,17 @@ Establishes code quality standards for CampusOS through linting, architecture ru
    - Consistent quotes (single)
 4. Override per file/directory:
    ```json
-   {"overrides": [{"files": ["**/*.test.ts"], "rules": {"no-console": "off"}}]}
+   {
+     "overrides": [
+       { "files": ["**/*.test.ts"], "rules": { "no-console": "off" } }
+     ]
+   }
    ```
 5. Run: `pnpm lint`
 6. Auto-fix: `pnpm lint --fix`
 
 ### Phase 2: TypeScript Strict Mode
+
 1. Enable strict TypeScript in `tsconfig.json`:
    ```json
    {
@@ -75,16 +83,20 @@ Establishes code quality standards for CampusOS through linting, architecture ru
 6. Set `skipLibCheck: false` in dev, true in production
 
 ### Phase 3: Architecture & Dependency Rules
+
 1. Use `eslint-plugin-import` for import rules:
    ```json
    {
      "rules": {
        "import/no-cycle": "error",
        "import/no-relative-packages": "error",
-       "import/order": ["error", {
-         "groups": ["builtin", "external", "parent", "sibling", "index"],
-         "alphabeticalOrder": true
-       }]
+       "import/order": [
+         "error",
+         {
+           "groups": ["builtin", "external", "parent", "sibling", "index"],
+           "alphabeticalOrder": true
+         }
+       ]
      }
    }
    ```
@@ -101,6 +113,7 @@ Establishes code quality standards for CampusOS through linting, architecture ru
 6. Monthly review: Are rules catching bugs? Adjust if needed.
 
 ### Phase 4: Testing & Coverage Requirements
+
 1. Enforce test co-location:
    - File: `src/utils/parser.ts`
    - Test: `src/utils/parser.test.ts`
@@ -122,6 +135,7 @@ Establishes code quality standards for CampusOS through linting, architecture ru
 6. Review coverage trends monthly
 
 ### Phase 5: Git Hooks & Pre-commit Checks
+
 1. Install `husky`: `pnpm add --save-dev husky`
 2. Setup hooks: `npx husky install`
 3. Create pre-commit hook (`.husky/pre-commit`):
@@ -142,6 +156,7 @@ Establishes code quality standards for CampusOS through linting, architecture ru
 6. Enforce no secrets: `pnpm exec git-secrets --install`
 
 ### Phase 6: Technical Debt Tracking
+
 1. Tag tech debt in code comments:
    ```typescript
    // TODO: https://github.com/...#123 - Refactor after API v2 released
@@ -157,6 +172,7 @@ Establishes code quality standards for CampusOS through linting, architecture ru
 6. Retire old code: Legacy endpoints after 3-month deprecation period
 
 ## Quick Reference
+
 ```bash
 # Lint all files
 pnpm lint
@@ -182,11 +198,11 @@ npx husky install && npx husky add .husky/pre-commit "pnpm lint-staged"
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
+| Issue                              | Solution                                                                                  |
+| ---------------------------------- | ----------------------------------------------------------------------------------------- |
 | ESLint too strict, many violations | Gradually enable rules; use `eslint --ignore-pattern`; migrate existing code over sprints |
-| Type errors from legacy code | Use `@ts-ignore` (with reason) temporarily; incrementally add types |
-| Pre-commit slow on large files | Optimize `lint-staged` to only check changed portions |
-| Coverage gap in new features | Add unit + integration tests; ensure >80% before merge |
-| Circular dependency detected | Use `madge --graph deps.svg` to visualize; refactor imports |
-| Too many TODO comments | Review and close; convert stale todos to issues |
+| Type errors from legacy code       | Use `@ts-ignore` (with reason) temporarily; incrementally add types                       |
+| Pre-commit slow on large files     | Optimize `lint-staged` to only check changed portions                                     |
+| Coverage gap in new features       | Add unit + integration tests; ensure >80% before merge                                    |
+| Circular dependency detected       | Use `madge --graph deps.svg` to visualize; refactor imports                               |
+| Too many TODO comments             | Review and close; convert stale todos to issues                                           |

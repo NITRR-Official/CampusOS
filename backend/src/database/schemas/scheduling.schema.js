@@ -70,7 +70,15 @@ const conflictSchema = new mongoose.Schema(
     },
     conflictType: {
       type: String,
-      enum: ['venue', 'resource', 'time', 'capacity', 'venue-overlap', 'resource-overlap', 'time-overlap'],
+      enum: [
+        'venue',
+        'resource',
+        'time',
+        'capacity',
+        'venue-overlap',
+        'resource-overlap',
+        'time-overlap'
+      ],
       required: true
     },
     severity: {
@@ -94,7 +102,6 @@ const conflictSchema = new mongoose.Schema(
 );
 
 // Indexes
-timeSlotSchema.index({ eventId: 1 });
 timeSlotSchema.index({ venue: 1 });
 timeSlotSchema.index({ startTime: 1, endTime: 1 });
 

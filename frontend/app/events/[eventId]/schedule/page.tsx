@@ -4,30 +4,55 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import schedulingAPI from '@/lib/scheduling-api';
 
+interface Conflict {
+  id: string;
+  description: string;
+  conflictType: string;
+  resolved: boolean;
+}
+
+interface Slot {
+  id: string;
+  venue: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface Schedule {
+  totalSlots: number;
+  totalConflicts: number;
+  resolvedConflicts: number;
+  unresolvedConflicts: number;
+  slots: Slot[];
+  conflicts: Conflict[];
+}
+
 export default function EventSchedulePage() {
   const params = useParams();
   const eventId = params.eventId as string;
-  const [schedule, setSchedule] = useState(null);
-  const [conflicts, setConflicts] = useState([]);
+  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function loadSchedule() {
+      try {
+        setLoading(true);
+        const data = (await schedulingAPI.getScheduleOverview(
+          eventId
+        )) as Schedule;
+        setSchedule(data);
+        setConflicts(data.conflicts || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadSchedule();
   }, [eventId]);
-
-  const loadSchedule = async () => {
-    try {
-      setLoading(true);
-      const data = await schedulingAPI.getScheduleOverview(eventId);
-      setSchedule(data);
-      setConflicts(data.conflicts || []);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) return <div className="p-4">Loading schedule...</div>;
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
@@ -59,13 +84,14 @@ export default function EventSchedulePage() {
 
       <div className="mb-6">
         <h2 className="text-xl font-bold mb-4">Time Slots</h2>
-        {schedule?.slots?.length > 0 ? (
+        {schedule?.slots && schedule.slots.length > 0 ? (
           <div className="space-y-2">
-            {schedule.slots.map(slot => (
+            {schedule.slots.map((slot) => (
               <div key={slot.id} className="border rounded p-3">
                 <p className="font-semibold">{slot.venue}</p>
                 <p className="text-sm text-gray-600">
-                  {new Date(slot.startTime).toLocaleString()} - {new Date(slot.endTime).toLocaleString()}
+                  {new Date(slot.startTime).toLocaleString()} -{' '}
+                  {new Date(slot.endTime).toLocaleString()}
                 </p>
               </div>
             ))}
@@ -77,13 +103,22 @@ export default function EventSchedulePage() {
 
       {conflicts.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold mb-4 text-red-600">Conflicts Detected</h2>
+          <h2 className="text-xl font-bold mb-4 text-red-600">
+            Conflicts Detected
+          </h2>
           <div className="space-y-2">
-            {conflicts.map(conflict => (
-              <div key={conflict.id} className="border border-red-300 bg-red-50 rounded p-3">
+            {conflicts.map((conflict) => (
+              <div
+                key={conflict.id}
+                className="border border-red-300 bg-red-50 rounded p-3"
+              >
                 <p className="font-semibold">{conflict.description}</p>
-                <p className="text-sm text-gray-600">Type: {conflict.conflictType}</p>
-                <p className="text-sm">Status: {conflict.resolved ? 'Resolved' : 'Unresolved'}</p>
+                <p className="text-sm text-gray-600">
+                  Type: {conflict.conflictType}
+                </p>
+                <p className="text-sm">
+                  Status: {conflict.resolved ? 'Resolved' : 'Unresolved'}
+                </p>
               </div>
             ))}
           </div>

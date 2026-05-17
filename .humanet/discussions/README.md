@@ -13,6 +13,7 @@ Document key decisions, discussions, and their rationale. This creates a histori
 Format: `NNN-title-with-dashes.md` (e.g., `001-tech-stack-selection.md`)
 
 Use ADRs for:
+
 - Technology choices
 - Architectural patterns
 - Major design decisions
@@ -24,6 +25,7 @@ See [001-tech-stack-selection.md](001-tech-stack-selection.md) for a template.
 Format: `meeting-YYYY-MM-DD.md`
 
 Document:
+
 - Attendees
 - Agenda
 - Discussion points

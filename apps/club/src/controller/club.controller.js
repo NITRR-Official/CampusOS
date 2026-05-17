@@ -28,7 +28,12 @@ export function createClubController() {
 
     if (errors.length > 0) {
       next(
-        createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors)
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
       );
       return;
     }
@@ -57,7 +62,12 @@ export function createClubController() {
 
     if (errors.length > 0) {
       next(
-        createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors)
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
       );
       return;
     }
@@ -113,12 +123,21 @@ export function createClubController() {
 
     if (errors.length > 0) {
       next(
-        createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors)
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
       );
       return;
     }
 
-    const updatedMember = clubService.assignRole(clubId, memberUserId, value.role);
+    const updatedMember = clubService.assignRole(
+      clubId,
+      memberUserId,
+      value.role
+    );
 
     if (updatedMember === null) {
       next(createHttpError(404, 'Club not found', 'CLUB_NOT_FOUND'));

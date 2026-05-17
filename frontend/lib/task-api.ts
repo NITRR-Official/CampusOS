@@ -26,9 +26,14 @@ export class TaskApiError extends Error {
   }
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-async function request(path: string, init?: RequestInit, accessToken?: string | null) {
+async function request(
+  path: string,
+  init?: RequestInit,
+  accessToken?: string | null
+) {
   const headers = new Headers(init?.headers || {});
 
   if (accessToken) {
@@ -54,7 +59,9 @@ async function request(path: string, init?: RequestInit, accessToken?: string | 
 }
 
 export function fetchTasks(accessToken: string) {
-  return request('/api/v1/tasks', undefined, accessToken) as Promise<TaskItem[]>;
+  return request('/api/v1/tasks', undefined, accessToken) as Promise<
+    TaskItem[]
+  >;
 }
 
 export function createTask(
@@ -77,7 +84,11 @@ export function createTask(
   ) as Promise<TaskItem>;
 }
 
-export function assignTask(accessToken: string, taskId: string, assigneeName: string) {
+export function assignTask(
+  accessToken: string,
+  taskId: string,
+  assigneeName: string
+) {
   return request(
     `/api/v1/tasks/${taskId}/assign`,
     {
@@ -88,7 +99,11 @@ export function assignTask(accessToken: string, taskId: string, assigneeName: st
   ) as Promise<TaskItem>;
 }
 
-export function updateTaskStatus(accessToken: string, taskId: string, status: TaskStatus) {
+export function updateTaskStatus(
+  accessToken: string,
+  taskId: string,
+  status: TaskStatus
+) {
   return request(
     `/api/v1/tasks/${taskId}/status`,
     {
@@ -99,7 +114,11 @@ export function updateTaskStatus(accessToken: string, taskId: string, status: Ta
   ) as Promise<TaskItem>;
 }
 
-export function updateTaskPriority(accessToken: string, taskId: string, priority: TaskPriority) {
+export function updateTaskPriority(
+  accessToken: string,
+  taskId: string,
+  priority: TaskPriority
+) {
   return request(
     `/api/v1/tasks/${taskId}/priority`,
     {
@@ -110,7 +129,11 @@ export function updateTaskPriority(accessToken: string, taskId: string, priority
   ) as Promise<TaskItem>;
 }
 
-export function addTaskDependency(accessToken: string, taskId: string, dependencyId: string) {
+export function addTaskDependency(
+  accessToken: string,
+  taskId: string,
+  dependencyId: string
+) {
   return request(
     `/api/v1/tasks/${taskId}/dependencies`,
     {
@@ -121,7 +144,11 @@ export function addTaskDependency(accessToken: string, taskId: string, dependenc
   ) as Promise<TaskItem>;
 }
 
-export function removeTaskDependency(accessToken: string, taskId: string, dependencyId: string) {
+export function removeTaskDependency(
+  accessToken: string,
+  taskId: string,
+  dependencyId: string
+) {
   return request(
     `/api/v1/tasks/${taskId}/dependencies`,
     {

@@ -1,5 +1,8 @@
 import crypto from 'crypto';
-import { Conflict, TimeSlot } from '../../../../backend/src/database/schemas/scheduling.schema.js';
+import {
+  Conflict,
+  TimeSlot
+} from '../../../../backend/src/database/schemas/scheduling.schema.js';
 
 /**
  * Scheduling Service
@@ -30,7 +33,9 @@ function normalizeConflict(conflictDoc) {
     return null;
   }
 
-  const conflict = conflictDoc.toObject ? conflictDoc.toObject() : { ...conflictDoc };
+  const conflict = conflictDoc.toObject
+    ? conflictDoc.toObject()
+    : { ...conflictDoc };
   conflict.id = conflict.id || conflict._id;
   delete conflict._id;
 
@@ -44,10 +49,22 @@ export class SchedulingService {
    * @returns {object} Created slot record
    */
   async createTimeSlot(slotData) {
-    const { eventId, venue, startTime, endTime, capacity, allocatedResources, notes } = slotData;
+    const {
+      eventId,
+      venue,
+      startTime,
+      endTime,
+      capacity,
+      allocatedResources,
+      notes
+    } = slotData;
 
     if (!eventId || !venue || !startTime || !endTime || !capacity) {
-      return { success: false, error: 'Missing required fields: eventId, venue, startTime, endTime, capacity' };
+      return {
+        success: false,
+        error:
+          'Missing required fields: eventId, venue, startTime, endTime, capacity'
+      };
     }
 
     const start = new Date(startTime);
@@ -121,17 +138,21 @@ export class SchedulingService {
         delete updates.allocatedResources;
       }
 
-      const slot = await TimeSlot.findByIdAndUpdate(
-        slotId,
-        updates,
-        { new: true, runValidators: true }
-      );
+      const slot = await TimeSlot.findByIdAndUpdate(slotId, updates, {
+        new: true,
+        runValidators: true
+      });
 
       if (!slot) {
         return { success: false, error: 'Time slot not found' };
       }
 
-      if (updateData.startTime || updateData.endTime || updateData.venue || updateData.allocatedResources) {
+      if (
+        updateData.startTime ||
+        updateData.endTime ||
+        updateData.venue ||
+        updateData.allocatedResources
+      ) {
         await this.detectConflictsForSlot(slotId);
       }
 
@@ -187,7 +208,10 @@ export class SchedulingService {
         }
 
         const commonResources = this.findCommonResources(slot, otherSlot);
-        if (commonResources.length > 0 && this.hasTimeOverlap(slot, otherSlot)) {
+        if (
+          commonResources.length > 0 &&
+          this.hasTimeOverlap(slot, otherSlot)
+        ) {
           conflicts.push({
             slotId: otherSlot._id,
             type: 'resource-overlap',
@@ -237,10 +261,14 @@ export class SchedulingService {
    * @returns {array} Common resource IDs
    */
   findCommonResources(slot1, slot2) {
-    const slot1Resources = slot1.resourcesAllocated || slot1.allocatedResources || [];
-    const slot2Resources = slot2.resourcesAllocated || slot2.allocatedResources || [];
+    const slot1Resources =
+      slot1.resourcesAllocated || slot1.allocatedResources || [];
+    const slot2Resources =
+      slot2.resourcesAllocated || slot2.allocatedResources || [];
 
-    const res1Ids = new Set(slot1Resources.map((resource) => resource.resourceId));
+    const res1Ids = new Set(
+      slot1Resources.map((resource) => resource.resourceId)
+    );
     const res2Ids = slot2Resources.map((resource) => resource.resourceId);
 
     return res2Ids.filter((id) => res1Ids.has(id));
@@ -350,14 +378,20 @@ export class SchedulingService {
     }).lean();
 
     const normalizedSlots = slots.map((slot) => normalizeSlot(slot));
-    const normalizedConflicts = conflicts.map((conflict) => normalizeConflict(conflict));
+    const normalizedConflicts = conflicts.map((conflict) =>
+      normalizeConflict(conflict)
+    );
 
     return {
       eventId,
       totalSlots: normalizedSlots.length,
       totalConflicts: normalizedConflicts.length,
-      resolvedConflicts: normalizedConflicts.filter((conflict) => conflict.resolved).length,
-      unresolvedConflicts: normalizedConflicts.filter((conflict) => !conflict.resolved).length,
+      resolvedConflicts: normalizedConflicts.filter(
+        (conflict) => conflict.resolved
+      ).length,
+      unresolvedConflicts: normalizedConflicts.filter(
+        (conflict) => !conflict.resolved
+      ).length,
       slots: normalizedSlots,
       conflicts: normalizedConflicts
     };

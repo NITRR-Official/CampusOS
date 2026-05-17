@@ -84,12 +84,14 @@ apps/module-name/
 ## Key Concepts
 
 ### Plugin System
+
 - Plugin loader scans `/apps/` directory
 - Each module exports: `name`, `routes`, `init()`
 - Modules are loaded dynamically at startup
 - No module-to-module direct imports
 
 ### Layers
+
 - Foundation (Auth, Users, Clubs, RBAC)
 - Event (Events, RSVP, Check-in)
 - Execution (Tasks, Calendar, Workflows)

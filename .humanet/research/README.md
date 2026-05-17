@@ -5,6 +5,7 @@ This directory contains supporting research materials, literature reviews, and b
 ## Purpose
 
 Use this space to:
+
 - Document existing solutions and alternatives
 - Compile relevant academic papers or articles
 - Summarize market research
@@ -34,13 +35,16 @@ See [literature-review.md](literature-review.md) for the standard format.
 When citing sources, use a consistent format:
 
 **Academic Papers:**
-> Author(s). (Year). Title. *Journal*, Volume(Issue), pages. DOI
+
+> Author(s). (Year). Title. _Journal_, Volume(Issue), pages. DOI
 
 **Web Articles:**
-> Author. (Year, Month Day). Title. *Website*. URL
+
+> Author. (Year, Month Day). Title. _Website_. URL
 
 **Books:**
-> Author. (Year). *Title*. Publisher.
+
+> Author. (Year). _Title_. Publisher.
 
 ## Organization Tips
 

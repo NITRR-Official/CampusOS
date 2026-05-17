@@ -7,6 +7,7 @@ argument-hint: 'trigger-event, branches, test-suite'
 # CI/CD Pipeline
 
 ## When to Use
+
 - Setting up automated testing on pull requests
 - Configuring deployment workflows
 - Implementing branch protection rules
@@ -15,11 +16,13 @@ argument-hint: 'trigger-event, branches, test-suite'
 - Managing workflow triggers and conditions
 
 ## What This Skill Does
+
 Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, testing, builds, and deployments on specific branches and PR events.
 
 ## Procedure
 
 ### Phase 1: Workflow Configuration
+
 1. Create `.github/workflows/` directory structure
 2. Define workflow file: `ci-test.yml`, `deploy.yml`, `lint.yml`
 3. Set triggers:
@@ -29,13 +32,14 @@ Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, tes
 4. Use `on:` syntax for multiple triggers:
    ```yaml
    on:
-     push: {branches: [main, develop]}
-     pull_request: {branches: [main]}
+     push: { branches: [main, develop] }
+     pull_request: { branches: [main] }
    ```
 5. Add environment variables at workflow level
 6. Specify job concurrency and runner: `runs-on: ubuntu-latest`
 
 ### Phase 2: Node.js & pnpm Setup
+
 1. Checkout code: `actions/checkout@v4`
 2. Install Node.js: `actions/setup-node@v4`
 3. Enable pnpm: `pnpm/action-setup@v2`
@@ -44,6 +48,7 @@ Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, tes
 6. Cache node_modules: `.pnpm-store`
 
 ### Phase 3: Testing Automation
+
 1. Run linter: `pnpm lint`
 2. Run unit tests: `pnpm test`
 3. Generate coverage: `pnpm test --coverage`
@@ -52,6 +57,7 @@ Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, tes
 6. Run integration tests: `pnpm test:integration`
 
 ### Phase 4: Build & Artifact Management
+
 1. Build backend: `pnpm build`
 2. Build frontend (Next.js): `pnpm build:web`
 3. Upload build artifacts for deploy jobs
@@ -60,6 +66,7 @@ Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, tes
 6. Tag build with commit SHA/timestamp
 
 ### Phase 5: Deployment Triggers
+
 1. Set deployment step to run only on `main` branch
 2. Add approval requirement: `environment: production`
 3. Deploy to staging on `develop` branch
@@ -68,6 +75,7 @@ Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, tes
 6. Require successful tests before deploy
 
 ### Phase 6: Notifications & Status
+
 1. Report status to PR commits
 2. Send Slack notifications on failure
 3. Add GitHub status checks (required on PR)
@@ -76,6 +84,7 @@ Establishes GitHub Actions CI/CD workflows for CampusOS, automating linting, tes
 6. Log workflow duration and costs
 
 ## Quick Reference
+
 ```bash
 # Create workflow skeleton
 touch .github/workflows/ci-test.yml
@@ -100,11 +109,11 @@ gh workflow run ci-test.yml --ref main
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| pnpm cache not working | Remove `pnpm/action-setup@v2` line; use built-in node caching |
-| Tests fail in CI, pass locally | Run `pnpm install --frozen-lockfile` locally; check env vars |
-| Deployment job skipped | Add `if: github.ref == 'refs/heads/main'` condition |
-| Workflow file not recognized | Ensure YAML syntax valid; check `.github/workflows/` path |
-| Concurrent jobs blocking | Use `concurrency: {group: '${{ github.ref }}', cancel-in-progress: true}` |
-| Node modules too large to cache | Use `--production` flag; exclude devDependencies from build |
+| Issue                           | Solution                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------- |
+| pnpm cache not working          | Remove `pnpm/action-setup@v2` line; use built-in node caching             |
+| Tests fail in CI, pass locally  | Run `pnpm install --frozen-lockfile` locally; check env vars              |
+| Deployment job skipped          | Add `if: github.ref == 'refs/heads/main'` condition                       |
+| Workflow file not recognized    | Ensure YAML syntax valid; check `.github/workflows/` path                 |
+| Concurrent jobs blocking        | Use `concurrency: {group: '${{ github.ref }}', cancel-in-progress: true}` |
+| Node modules too large to cache | Use `--production` flag; exclude devDependencies from build               |

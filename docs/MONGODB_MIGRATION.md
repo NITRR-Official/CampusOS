@@ -15,6 +15,7 @@ Migration complete; use this document as a reference for implementation details.
 ## Completed Setup
 
 ### Database Infrastructure
+
 - [x] MongoDB connection manager (`backend/src/database/connection.js`)
 - [x] Mongoose schemas for all 4 modules
 - [x] Database indexes for query optimization
@@ -23,12 +24,12 @@ Migration complete; use this document as a reference for implementation details.
 
 ### Database Schemas Created
 
-| Module | Schema Files | Collections |
-|--------|--------------|-------------|
-| Vendor | vendor.schema.js | vendors |
-| Resource | resource.schema.js | resources |
+| Module     | Schema Files         | Collections          |
+| ---------- | -------------------- | -------------------- |
+| Vendor     | vendor.schema.js     | vendors              |
+| Resource   | resource.schema.js   | resources            |
 | Scheduling | scheduling.schema.js | timeslots, conflicts |
-| Budget | budget.schema.js | budgets, expenses |
+| Budget     | budget.schema.js     | budgets, expenses    |
 
 ### Files Created
 
@@ -59,6 +60,7 @@ apps/vendor/src/service/
 **Current status**: Completed in `vendor.service.js` (reference retained in `vendor.service.mongodb.js`)
 
 **Changes required**:
+
 1. Import Vendor model: `import { Vendor } from '../../../backend/src/database/schemas/vendor.schema.js'`
 2. Remove Map-based storage initialization
 3. Make all methods async
@@ -82,6 +84,7 @@ async createVendor(vendorData) {
 ```
 
 **Methods to update**:
+
 - `createVendor()` → use `new Vendor().save()`
 - `getVendorById()` → use `Vendor.findById()`
 - `getAllVendors()` → use `Vendor.find()` with filters
@@ -91,6 +94,7 @@ async createVendor(vendorData) {
 - `rateVendor()` → use `$push` for ratings array, calculate average
 
 **Testing**:
+
 - Update vendor.service.test.js to use async/await
 - Use mongodb-memory-server for test database
 - Verify all 14 tests pass
@@ -100,18 +104,21 @@ async createVendor(vendorData) {
 **File to replace**: `apps/resource/src/service/resource.service.js`
 
 **Changes required**:
+
 1. Import Resource model
 2. Split Map storage (resource + allocations) into single Resource document
 3. Make all methods async
 4. Use MongoDB array operations for allocations
 
 **Key considerations**:
+
 - Allocations stored as array within Resource document
 - Use `$push` to add allocations
 - Use `$set` to update allocation status
 - Use `availableQuantity` calculation
 
 **Methods to update** (~10-15 methods):
+
 - All CRUD operations
 - Allocation management
 - Conflict detection queries
@@ -122,12 +129,14 @@ async createVendor(vendorData) {
 **File to replace**: `apps/scheduling/src/service/scheduling.service.js`
 
 **Changes required**:
+
 1. Import TimeSlot and Conflict models
 2. Split Map storage into two collections
 3. Make all methods async
 4. Update conflict detection to query across documents
 
 **Complex operations**:
+
 - Venue availability checking (query overlapping time slots)
 - Conflict detection (automatic creation of Conflict documents)
 - Multi-step workflow for creating slots with conflict checking
@@ -137,12 +146,14 @@ async createVendor(vendorData) {
 **File to replace**: `apps/budget/src/service/budget.service.js`
 
 **Changes required**:
+
 1. Import Budget and Expense models
 2. Split storage into two collections
 3. Make all methods async
 4. Update aggregations using MongoDB
 
 **Aggregation operations**:
+
 - Total expenses calculation
 - Category breakdown
 - Budget vs actual comparison
@@ -151,6 +162,7 @@ async createVendor(vendorData) {
 ## Implementation Checklist
 
 ### Phase 1: Vendor Service (Start Here)
+
 - [x] Copy `vendor.service.mongodb.js` approach to actual `vendor.service.js`
 - [x] Update all 14 methods to use Vendor model
 - [x] Add error handling for DB operations
@@ -163,6 +175,7 @@ async createVendor(vendorData) {
 - [x] Test with Postman/curl
 
 ### Phase 2: Resource Service
+
 - [x] Create resource.service.mongodb.js template
 - [x] Update all ~15 methods
 - [x] Handle allocation array operations
@@ -173,6 +186,7 @@ async createVendor(vendorData) {
 - [x] Update resource controller
 
 ### Phase 3: Scheduling Service
+
 - [x] Create scheduling.service.mongodb.js template
 - [x] Split into TimeSlot and Conflict models
 - [x] Implement conflict detection queries
@@ -183,6 +197,7 @@ async createVendor(vendorData) {
 - [x] Update scheduling controller
 
 ### Phase 4: Budget Service
+
 - [x] Create budget.service.mongodb.js template
 - [x] Split into Budget and Expense models
 - [x] Implement aggregation queries
@@ -341,7 +356,7 @@ services:
   mongodb:
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - '27017:27017'
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password

@@ -4,29 +4,43 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import budgetAPI from '@/lib/budget-api';
 
+interface BudgetSummary {
+  totalAllocation: number;
+  totalExpenses: number;
+  remaining: number;
+  utilisationPercent: number;
+  expensesByCategory: Record<string, number>;
+  paidExpenses: number;
+  pendingExpenses: number;
+}
+
 export default function BudgetPage() {
   const params = useParams();
   const eventId = params.eventId as string;
-  const [summary, setSummary] = useState(null);
+  const [summary, setSummary] = useState<BudgetSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    async function loadBudget() {
+      try {
+        setLoading(true);
+        const budget = (await budgetAPI.getEventBudget(eventId)) as {
+          id: string;
+        };
+        const budgetSummary = (await budgetAPI.getBudgetSummary(
+          budget.id
+        )) as BudgetSummary;
+        setSummary(budgetSummary);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    }
+
     loadBudget();
   }, [eventId]);
-
-  const loadBudget = async () => {
-    try {
-      setLoading(true);
-      const budget = await budgetAPI.getEventBudget(eventId);
-      const budgetSummary = await budgetAPI.getBudgetSummary(budget.id);
-      setSummary(budgetSummary);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) return <div className="p-4">Loading budget...</div>;
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
@@ -55,23 +69,32 @@ export default function BudgetPage() {
           <div className="mb-6">
             <p className="text-gray-600 mb-2">Budget Utilisation</p>
             <div className="w-full bg-gray-200 rounded-full h-4">
-              <div 
-                className="bg-blue-600 h-4 rounded-full" 
-                style={{ width: `${Math.min(summary.utilisationPercent, 100)}%` }}
+              <div
+                className="bg-blue-600 h-4 rounded-full"
+                style={{
+                  width: `${Math.min(summary.utilisationPercent, 100)}%`
+                }}
               />
             </div>
-            <p className="text-sm text-gray-600 mt-2">{summary.utilisationPercent}% utilised</p>
+            <p className="text-sm text-gray-600 mt-2">
+              {summary.utilisationPercent}% utilised
+            </p>
           </div>
 
           <div className="mb-6">
             <h2 className="text-xl font-bold mb-4">Expenses by Category</h2>
             <div className="space-y-2">
-              {Object.entries(summary.expensesByCategory).map(([category, amount]: any) => (
-                <div key={category} className="flex justify-between border p-2 rounded">
-                  <span className="capitalize">{category}</span>
-                  <span className="font-semibold">₹{amount}</span>
-                </div>
-              ))}
+              {Object.entries(summary.expensesByCategory).map(
+                ([category, amount]) => (
+                  <div
+                    key={category}
+                    className="flex justify-between border p-2 rounded"
+                  >
+                    <span className="capitalize">{category}</span>
+                    <span className="font-semibold">₹{amount}</span>
+                  </div>
+                )
+              )}
             </div>
           </div>
 

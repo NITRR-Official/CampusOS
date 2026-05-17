@@ -31,11 +31,13 @@ Evaluations are generated automatically by the Humanet platform's AI validation 
 ## Report Format
 
 Evaluation reports follow this naming convention:
+
 ```
 evaluation-YYYY-MM-DD-HHMMSS.md
 ```
 
 Each report contains:
+
 - Overall score (0-100)
 - Scores for each criterion
 - Detailed feedback and suggestions
@@ -44,6 +46,7 @@ Each report contains:
 ## Using Feedback
 
 Review evaluation feedback to:
+
 - Improve documentation quality
 - Address gaps or unclear sections
 - Strengthen your idea's presentation
@@ -64,4 +67,4 @@ Keep all evaluation reports to track improvement over time. The `config.yml` fil
 
 ---
 
-*Evaluation reports will appear here once your idea is registered on the Humanet platform.*
+_Evaluation reports will appear here once your idea is registered on the Humanet platform._

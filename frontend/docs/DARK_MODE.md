@@ -7,13 +7,17 @@ Dark mode is now fully integrated into the CampusOS frontend. The implementation
 ## How It Works
 
 ### Theme Provider
+
 The `ThemeProvider` component manages the application's theme state and handles:
+
 - **Persistence**: Theme preference is saved to localStorage
 - **System Preference Detection**: If no stored preference exists, the system's dark mode preference is detected and applied
 - **Hydration Safety**: Prevents hydration mismatches in Next.js by handling theme application after mount
 
 ### Theme Toggle Component
+
 The `ThemeToggle` component provides a user interface for switching between light and dark modes. It displays:
+
 - Sun icon (☀️) in dark mode
 - Moon icon (🌙) in light mode
 
@@ -83,17 +87,17 @@ Dark mode colors are defined using CSS variables in `globals.css`. These variabl
 ```css
 /* Light Mode */
 :root {
-  --background: oklch(1 0 0);           /* White background */
-  --foreground: oklch(0.145 0 0);       /* Dark text */
-  --primary: oklch(0.205 0 0);          /* Dark blue */
+  --background: oklch(1 0 0); /* White background */
+  --foreground: oklch(0.145 0 0); /* Dark text */
+  --primary: oklch(0.205 0 0); /* Dark blue */
   /* ... more variables ... */
 }
 
 /* Dark Mode */
 .dark {
-  --background: oklch(0.145 0 0);       /* Dark background */
-  --foreground: oklch(0.985 0 0);       /* Light text */
-  --primary: oklch(0.922 0 0);          /* Light blue */
+  --background: oklch(0.145 0 0); /* Dark background */
+  --foreground: oklch(0.985 0 0); /* Light text */
+  --primary: oklch(0.922 0 0); /* Light blue */
   /* ... more variables ... */
 }
 ```
@@ -118,6 +122,7 @@ const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 ## Best Practices
 
 ### 1. Always Use Tailwind Dark Mode Classes
+
 ```tsx
 // ✅ Good
 <div className="bg-white dark:bg-neutral-900" />
@@ -127,7 +132,9 @@ const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 ```
 
 ### 2. Use Design System Colors
+
 Refer to the design system documentation for consistent color usage:
+
 ```tsx
 // ✅ Use design system colors
 <div className="bg-primary-50 dark:bg-primary-950">
@@ -137,12 +144,15 @@ Refer to the design system documentation for consistent color usage:
 ```
 
 ### 3. Test Both Themes
+
 Always test your components in both light and dark modes to ensure:
+
 - Text contrast meets accessibility standards
 - All interactive elements are visible
 - Colors are semantically appropriate
 
 ### 4. Use Proper Text Colors
+
 ```tsx
 // ✅ Good contrast in both themes
 <p className="text-neutral-700 dark:text-neutral-300">
@@ -157,12 +167,15 @@ Always test your components in both light and dark modes to ensure:
 ## Accessibility Considerations
 
 ### Color Contrast
+
 - Light theme text: `text-neutral-700` (dark gray on white)
 - Dark theme text: `text-neutral-300` (light gray on dark background)
 - Both meet WCAG AA standards (4.5:1 ratio)
 
 ### Focus Indicators
+
 Dark mode includes proper focus states with high contrast rings:
+
 ```tsx
 <button className="focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400">
   Accessible button
@@ -172,18 +185,21 @@ Dark mode includes proper focus states with high contrast rings:
 ## Debugging
 
 ### Check Current Theme
+
 ```tsx
 const { theme } = useTheme();
 console.log('Current theme:', theme);
 ```
 
 ### Force a Theme
+
 ```tsx
 const { setTheme } = useTheme();
 setTheme('dark'); // Force dark mode
 ```
 
 ### Check localStorage
+
 ```javascript
 console.log('Stored theme:', localStorage.getItem('theme'));
 ```
@@ -191,6 +207,7 @@ console.log('Stored theme:', localStorage.getItem('theme'));
 ## Browser Support
 
 Dark mode is supported in all modern browsers:
+
 - Chrome 76+
 - Firefox 67+
 - Safari 12.1+

@@ -1,6 +1,7 @@
 # ADR 002: Multi-Tenant Architecture Design
 
 ## Status
+
 **DEPRECATED** (See ADR-005: Removing Multi-Tenant Architecture)
 
 ## Context (Historical)
@@ -38,11 +39,13 @@ CampusOS needs to serve multiple colleges/institutes from a single backend deplo
 ## Consequences
 
 ### Positive
+
 - Scalable to 100+ institutes
 - Low operational overhead
 - Easier to manage
 
 ### Negative
+
 - Must be careful with query filters (security risk)
 - Data leakage if not properly isolated
 - Backup/restore affects all tenants

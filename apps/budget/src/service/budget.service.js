@@ -1,5 +1,8 @@
 import crypto from 'crypto';
-import { Budget, Expense } from '../../../../backend/src/database/schemas/budget.schema.js';
+import {
+  Budget,
+  Expense
+} from '../../../../backend/src/database/schemas/budget.schema.js';
 
 /**
  * Budget Service
@@ -23,7 +26,9 @@ function normalizeExpense(expenseDoc) {
     return null;
   }
 
-  const expense = expenseDoc.toObject ? expenseDoc.toObject() : { ...expenseDoc };
+  const expense = expenseDoc.toObject
+    ? expenseDoc.toObject()
+    : { ...expenseDoc };
   expense.id = expense.id || expense._id;
   delete expense._id;
 
@@ -37,20 +42,30 @@ export class BudgetService {
    * @returns {object} Created budget record
    */
   async createBudget(budgetData) {
-    const { eventId, totalAllocation, budgetBreakdown, currency, notes } = budgetData;
+    const { eventId, totalAllocation, budgetBreakdown, currency, notes } =
+      budgetData;
 
     if (!eventId || !totalAllocation) {
-      return { success: false, error: 'Missing required fields: eventId, totalAllocation' };
+      return {
+        success: false,
+        error: 'Missing required fields: eventId, totalAllocation'
+      };
     }
 
     if (totalAllocation <= 0) {
-      return { success: false, error: 'Budget allocation must be greater than 0' };
+      return {
+        success: false,
+        error: 'Budget allocation must be greater than 0'
+      };
     }
 
     try {
       const existing = await Budget.findOne({ eventId }).lean();
       if (existing) {
-        return { success: false, error: 'Budget already exists for this event' };
+        return {
+          success: false,
+          error: 'Budget already exists for this event'
+        };
       }
 
       const budget = await Budget.create({
@@ -195,10 +210,21 @@ export class BudgetService {
       return { success: false, error: 'Budget not found' };
     }
 
-    const { category, description, amount, vendor, paymentMethod, receipt, notes } = expenseData;
+    const {
+      category,
+      description,
+      amount,
+      vendor,
+      paymentMethod,
+      receipt,
+      notes
+    } = expenseData;
 
     if (!category || !description || !amount) {
-      return { success: false, error: 'Missing required fields: category, description, amount' };
+      return {
+        success: false,
+        error: 'Missing required fields: category, description, amount'
+      };
     }
 
     if (amount <= 0) {
@@ -279,7 +305,10 @@ export class BudgetService {
       }
 
       if (expense.paymentStatus === 'paid' && updateData.amount) {
-        return { success: false, error: 'Cannot modify amount of a paid expense' };
+        return {
+          success: false,
+          error: 'Cannot modify amount of a paid expense'
+        };
       }
 
       Object.assign(expense, updateData, { updatedAt: new Date() });
@@ -408,7 +437,10 @@ export class BudgetService {
     });
 
     const variance = {};
-    const allCategories = new Set([...Object.keys(breakdown), ...Object.keys(actual)]);
+    const allCategories = new Set([
+      ...Object.keys(breakdown),
+      ...Object.keys(actual)
+    ]);
 
     allCategories.forEach((category) => {
       const planned = breakdown[category] || 0;
@@ -417,7 +449,8 @@ export class BudgetService {
         planned,
         actual: spent,
         difference: spent - planned,
-        variancePercent: planned > 0 ? ((spent - planned) / planned * 100).toFixed(2) : 'N/A'
+        variancePercent:
+          planned > 0 ? (((spent - planned) / planned) * 100).toFixed(2) : 'N/A'
       };
     });
 

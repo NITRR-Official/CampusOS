@@ -7,6 +7,7 @@ argument-hint: 'contributor-level, issue-type'
 # Contribution Guide
 
 ## When to Use
+
 - Preparing project for open-source contributions
 - Creating contributor onboarding documentation
 - Defining issue triage workflow
@@ -14,11 +15,13 @@ argument-hint: 'contributor-level, issue-type'
 - Setting up contributor rewards/recognition
 
 ## What This Skill Does
+
 Establishes CampusOS contribution workflow including issue triage, PR process, labeling, and contributor guidelines.
 
 ## Procedure
 
 ### Phase 1: Issue Triage & Labels
+
 1. Define label categories:
    - **Type**: bug, feature, enhancement, documentation
    - **Priority**: p0-critical, p1-high, p2-medium, p3-low
@@ -43,29 +46,36 @@ Establishes CampusOS contribution workflow including issue triage, PR process, l
 6. Review label usage monthly, consolidate if duplicates
 
 ### Phase 2: Pull Request Process
+
 1. Document PR requirements in `CONTRIBUTING.md`:
    - Fork repository
    - Create feature branch: `git checkout -b feature/description`
    - Make changes, commit with clear message
    - Push and open PR with template
 2. PR template (`.github/pull_request_template.md`):
+
    ```markdown
    ## Description
+
    Brief description of changes
 
    ## Fixes
+
    Closes #123
 
    ## Changes
+
    - [ ] Feature implemented
    - [ ] Tests added
    - [ ] Documentation updated
 
    ## Type of Change
+
    - [ ] Bug fix
    - [ ] New feature
    - [ ] Breaking change
    ```
+
 3. Require PR checks:
    - Tests pass (CI/CD)
    - No lint errors
@@ -79,6 +89,7 @@ Establishes CampusOS contribution workflow including issue triage, PR process, l
 6. Auto-delete head branch after merge
 
 ### Phase 3: Code Review Workflow
+
 1. Define review criteria:
    - Code quality (readable, maintainable)
    - Test coverage (>80%)
@@ -98,6 +109,7 @@ Establishes CampusOS contribution workflow including issue triage, PR process, l
 6. Request additional info if unclear
 
 ### Phase 4: Contributor Levels & Responsibilities
+
 1. **Contributors** (1st PR):
    - Fix documentation, typos
    - Complete small features
@@ -117,6 +129,7 @@ Establishes CampusOS contribution workflow including issue triage, PR process, l
    - Highlight in release notes
 
 ### Phase 5: Issue Tracking & Automation
+
 1. Use GitHub Projects for milestone tracking
 2. Link issues to PRs: "Fixes #123" auto-closes
 3. Automate with GitHub Actions:
@@ -134,6 +147,7 @@ Establishes CampusOS contribution workflow including issue triage, PR process, l
 6. Monthly contributor showcase: Tweet top contributors
 
 ### Phase 6: Contributor Communication
+
 1. Welcome message on first PR:
    - Congratulate on contribution
    - Link to contribution guide
@@ -151,6 +165,7 @@ Establishes CampusOS contribution workflow including issue triage, PR process, l
 6. Annual contributor survey for feedback
 
 ## Quick Reference
+
 ```bash
 # Create feature branch
 git checkout -b feature/description
@@ -173,11 +188,11 @@ echo "- [@username](https://github.com/username) - Feature description" >> CONTR
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| PR not receiving reviews | Ping maintainers in Slack; consider labeling `needs-review` |
+| Issue                                | Solution                                                            |
+| ------------------------------------ | ------------------------------------------------------------------- |
+| PR not receiving reviews             | Ping maintainers in Slack; consider labeling `needs-review`         |
 | Contributor frustrated with feedback | Use kind language; offer pair programming; link to code style guide |
-| Duplicate/related issues | Link with "Related #123"; consolidate discussion |
-| Merge conflict in PR | Rebase feature branch: `git rebase main feature/x` |
-| Contributor becomes inactive | Archive issue/PR; thank for effort; reopen if interest returns |
-| Too many stale issues | Set GitHub automation to close after 60 days; request updates |
+| Duplicate/related issues             | Link with "Related #123"; consolidate discussion                    |
+| Merge conflict in PR                 | Rebase feature branch: `git rebase main feature/x`                  |
+| Contributor becomes inactive         | Archive issue/PR; thank for effort; reopen if interest returns      |
+| Too many stale issues                | Set GitHub automation to close after 60 days; request updates       |

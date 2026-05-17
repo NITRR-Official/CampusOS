@@ -9,13 +9,13 @@
  * - Import Vendor model from database/schemas/vendor.schema.js
  * - Replace Map storage with MongoDB queries
  * - Update methods to use async/await
- * 
+ *
  * Before (Map):
  *   #vendorStorage = new Map()
  *   createVendor(data) { return { success, vendor } }
- * 
+ *
  * After (MongoDB):
- *   createVendor(data) { 
+ *   createVendor(data) {
  *     const vendor = new Vendor(data)
  *     await vendor.save()
  *     return { success: true, vendor: vendor.toObject() }
@@ -24,7 +24,7 @@
 
 /**
  * Template for converting a service
- * 
+ *
  * Changes needed:
  * 1. Import Mongoose model
  * 2. Replace Map initialization with model reference
@@ -38,7 +38,7 @@
 
 /**
  * Example Vendor Service Migration
- * 
+ *
  * Old (Map-based):
  * ```
  * createVendor(vendorData) {
@@ -48,7 +48,7 @@
  *   return { success: true, vendor };
  * }
  * ```
- * 
+ *
  * New (MongoDB):
  * ```
  * async createVendor(vendorData) {
@@ -61,7 +61,7 @@
 
 /**
  * Comparison of operations
- * 
+ *
  * Operation        | Map (Sync)           | MongoDB (Async)
  * ─────────────────┼──────────────────────┼──────────────────────
  * Create           | new Map, set()       | Model.create()
@@ -74,10 +74,14 @@
  */
 
 export const MIGRATION_GUIDE = {
-  vendor: 'Step 1: Import Vendor model from @backend/database/schemas/vendor.schema',
-  resource: 'Step 2: Import Resource model from @backend/database/schemas/resource.schema',
-  scheduling: 'Step 3: Import TimeSlot, Conflict models from @backend/database/schemas/scheduling.schema',
-  budget: 'Step 4: Import Budget, Expense models from @backend/database/schemas/budget.schema'
+  vendor:
+    'Step 1: Import Vendor model from @backend/database/schemas/vendor.schema',
+  resource:
+    'Step 2: Import Resource model from @backend/database/schemas/resource.schema',
+  scheduling:
+    'Step 3: Import TimeSlot, Conflict models from @backend/database/schemas/scheduling.schema',
+  budget:
+    'Step 4: Import Budget, Expense models from @backend/database/schemas/budget.schema'
 };
 
 export const ASYNC_CHANGES_REQUIRED = [

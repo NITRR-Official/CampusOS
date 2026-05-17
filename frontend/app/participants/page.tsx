@@ -5,7 +5,11 @@ import Link from 'next/link';
 import MainLayout from '../components/MainLayout';
 import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
 import { fetchEvents, EventItem, EventApiError } from '@/lib/event-api';
-import { getCheckInStatus, CheckInRecord, CheckInApiError } from '@/lib/checkin-api';
+import {
+  getCheckInStatus,
+  CheckInRecord,
+  CheckInApiError
+} from '@/lib/checkin-api';
 
 interface UserEventWithCheckIn extends EventItem {
   checkInStatus?: CheckInRecord;
@@ -35,7 +39,11 @@ export default function ParticipantDashboard() {
         const eventsWithCheckIn = await Promise.all(
           userEvents.map(async (event: EventItem) => {
             try {
-              const checkInStatus = await getCheckInStatus(currentToken, event.id, '');
+              const checkInStatus = await getCheckInStatus(
+                currentToken,
+                event.id,
+                ''
+              );
               return { ...event, checkInStatus };
             } catch (err) {
               // No check-in yet is not an error for participants
@@ -73,9 +81,13 @@ export default function ParticipantDashboard() {
     }
   }, [accessToken]);
 
-  const upcomingEvents = events.filter((e) => new Date(e.startsAt) > new Date());
+  const upcomingEvents = events.filter(
+    (e) => new Date(e.startsAt) > new Date()
+  );
   const pastEvents = events.filter((e) => new Date(e.startsAt) <= new Date());
-  const checkedInCount = events.filter((e) => e.checkInStatus?.status === 'checked-in').length;
+  const checkedInCount = events.filter(
+    (e) => e.checkInStatus?.status === 'checked-in'
+  ).length;
 
   return (
     <MainLayout>
@@ -90,8 +102,12 @@ export default function ParticipantDashboard() {
         >
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">Participant</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">My Events</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
+                Participant
+              </p>
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+                My Events
+              </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
                 View your registered events and check-in status.
               </p>
@@ -112,9 +128,16 @@ export default function ParticipantDashboard() {
               { label: 'Upcoming', value: upcomingEvents.length },
               { label: 'Checked In', value: checkedInCount }
             ].map((item) => (
-              <div key={item.label} className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</p>
-                <p className="mt-3 text-3xl font-semibold text-slate-950">{item.value}</p>
+              <div
+                key={item.label}
+                className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  {item.label}
+                </p>
+                <p className="mt-3 text-3xl font-semibold text-slate-950">
+                  {item.value}
+                </p>
               </div>
             ))}
           </div>
@@ -150,7 +173,9 @@ export default function ParticipantDashboard() {
             {/* Upcoming Events */}
             {upcomingEvents.length > 0 && (
               <section className="space-y-4">
-                <h2 className="text-2xl font-semibold text-slate-950">Upcoming Events</h2>
+                <h2 className="text-2xl font-semibold text-slate-950">
+                  Upcoming Events
+                </h2>
                 <div className="space-y-3">
                   {upcomingEvents.map((event) => (
                     <div
@@ -159,10 +184,15 @@ export default function ParticipantDashboard() {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h3 className="font-semibold text-slate-950">{event.title}</h3>
-                          <p className="mt-1 text-sm text-slate-600">{event.description}</p>
+                          <h3 className="font-semibold text-slate-950">
+                            {event.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-slate-600">
+                            {event.description}
+                          </p>
                           <p className="mt-2 text-xs text-slate-500">
-                            📅 {new Date(event.startsAt).toLocaleDateString()} at{' '}
+                            📅 {new Date(event.startsAt).toLocaleDateString()}{' '}
+                            at{' '}
                             {new Date(event.startsAt).toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit'
@@ -196,7 +226,9 @@ export default function ParticipantDashboard() {
             {/* Past Events */}
             {pastEvents.length > 0 && (
               <section className="space-y-4">
-                <h2 className="text-2xl font-semibold text-slate-950">Past Events</h2>
+                <h2 className="text-2xl font-semibold text-slate-950">
+                  Past Events
+                </h2>
                 <div className="space-y-3">
                   {pastEvents.map((event) => (
                     <div
@@ -205,8 +237,12 @@ export default function ParticipantDashboard() {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h3 className="font-semibold text-slate-950">{event.title}</h3>
-                          <p className="mt-1 text-sm text-slate-600">{event.description}</p>
+                          <h3 className="font-semibold text-slate-950">
+                            {event.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-slate-600">
+                            {event.description}
+                          </p>
                           <p className="mt-2 text-xs text-slate-500">
                             📅 {new Date(event.startsAt).toLocaleDateString()}
                           </p>

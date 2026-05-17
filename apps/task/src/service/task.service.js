@@ -101,7 +101,13 @@ class TaskService {
 
     // Check all dependencies of the dependency task
     for (const subDependencyId of dependencyTask.dependsOn) {
-      if (this.#detectCircularDependency(taskId, subDependencyId, new Set(visited))) {
+      if (
+        this.#detectCircularDependency(
+          taskId,
+          subDependencyId,
+          new Set(visited)
+        )
+      ) {
         return true;
       }
     }

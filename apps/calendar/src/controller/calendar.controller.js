@@ -27,7 +27,14 @@ export function createCalendarController() {
     const { errors, value } = validateCreateCalendarEventPayload(req.body);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
@@ -53,11 +60,21 @@ export function createCalendarController() {
     const { errors, value } = validateQueryCalendarEventsPayload(req.query);
 
     if (errors.length > 0) {
-      next(createHttpError(400, 'Request validation failed', 'VALIDATION_ERROR', errors));
+      next(
+        createHttpError(
+          400,
+          'Request validation failed',
+          'VALIDATION_ERROR',
+          errors
+        )
+      );
       return;
     }
 
-    const events = calendarService.getEventsBetween(value.startDate, value.endDate);
+    const events = calendarService.getEventsBetween(
+      value.startDate,
+      value.endDate
+    );
 
     res.status(200).json({
       success: true,
@@ -70,7 +87,13 @@ export function createCalendarController() {
     const event = calendarService.getEvent(eventId);
 
     if (!event) {
-      next(createHttpError(404, 'Calendar event not found', 'CALENDAR_EVENT_NOT_FOUND'));
+      next(
+        createHttpError(
+          404,
+          'Calendar event not found',
+          'CALENDAR_EVENT_NOT_FOUND'
+        )
+      );
       return;
     }
 
@@ -85,7 +108,13 @@ export function createCalendarController() {
     const removed = calendarService.deleteEvent(eventId);
 
     if (!removed) {
-      next(createHttpError(404, 'Calendar event not found', 'CALENDAR_EVENT_NOT_FOUND'));
+      next(
+        createHttpError(
+          404,
+          'Calendar event not found',
+          'CALENDAR_EVENT_NOT_FOUND'
+        )
+      );
       return;
     }
 

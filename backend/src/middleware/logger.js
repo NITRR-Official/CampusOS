@@ -12,7 +12,7 @@ export function loggerMiddleware(req, res, next) {
 
   // Hook into res.end to capture response details
   const originalEnd = res.end;
-  
+
   res.end = function (...args) {
     const duration = Date.now() - startTime;
     const status = res.statusCode;

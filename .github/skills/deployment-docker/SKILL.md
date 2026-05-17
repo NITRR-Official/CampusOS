@@ -7,6 +7,7 @@ argument-hint: 'service-type, registry'
 # Deployment Docker
 
 ## When to Use
+
 - Building Docker images for backend/frontend
 - Setting up multi-container local development with Docker Compose
 - Pushing images to container registry
@@ -15,12 +16,15 @@ argument-hint: 'service-type, registry'
 - Deploying containers to production
 
 ## What This Skill Does
+
 Creates production-ready Docker images and Compose configurations for CampusOS backend (Express), frontend (Next.js), and database (MongoDB).
 
 ## Procedure
 
 ### Phase 1: Backend Dockerfile (Express)
+
 1. Create `Dockerfile` in project root:
+
    ```dockerfile
    FROM node:20-alpine AS builder
    WORKDIR /app
@@ -38,6 +42,7 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
    EXPOSE 3000
    CMD ["node", "dist/index.js"]
    ```
+
 2. Use Alpine base image (smaller, ~150MB vs 900MB)
 3. Multi-stage build (builder stage discarded)
 4. Copy only production dependencies to final image
@@ -45,7 +50,9 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
 6. Expose port from env: `${PORT:-3000}`
 
 ### Phase 2: Frontend Dockerfile (Next.js)
+
 1. Create standalone `Dockerfile.nextjs`:
+
    ```dockerfile
    FROM node:20-alpine AS builder
    WORKDIR /app
@@ -61,9 +68,10 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
    EXPOSE 3001
    CMD ["node", "server.js"]
    ```
+
 2. Use Next.js standalone mode in `next.config.js`:
    ```js
-   module.exports = {output: 'standalone'}
+   module.exports = { output: 'standalone' };
    ```
 3. Build generates `.next/standalone` with minimal dependencies
 4. Public files must be copied separately
@@ -71,19 +79,20 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
 6. Health check endpoint: `curl http://localhost:3001`
 
 ### Phase 3: Docker Compose Configuration
+
 1. Create `docker-compose.yml`:
    ```yaml
    version: '3.9'
    services:
      backend:
-       build: {context: ., dockerfile: Dockerfile}
+       build: { context: ., dockerfile: Dockerfile }
        ports: ['3000:3000']
        environment:
          DB_URL: mongodb://mongo:27017/campusos
          JWT_SECRET: ${JWT_SECRET}
        depends_on: [mongo]
      frontend:
-       build: {context: ./apps/web, dockerfile: ../Dockerfile.nextjs}
+       build: { context: ./apps/web, dockerfile: ../Dockerfile.nextjs }
        ports: ['3001:3001']
        environment:
          NEXT_PUBLIC_API_URL: http://backend:3000
@@ -102,6 +111,7 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
 6. Use environment variable substitution: `${VAR_NAME}`
 
 ### Phase 4: Image Build & Optimization
+
 1. Build backend: `docker build -t campusos-backend:v1.0.0 .`
 2. Build frontend: `docker build -f Dockerfile.nextjs -t campusos-web:v1.0.0 ./apps/web`
 3. Optimize image size:
@@ -121,6 +131,7 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
    ```
 
 ### Phase 5: Registry & Deployment
+
 1. Login to registry: `docker login ghcr.io` (GitHub Container Registry)
 2. Tag image for registry: `docker tag campusos-backend:v1.0.0 ghcr.io/user/campusos-backend:v1.0.0`
 3. Push to registry: `docker push ghcr.io/user/campusos-backend:v1.0.0`
@@ -129,6 +140,7 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
 6. Set registry credentials in CI/CD secrets
 
 ### Phase 6: Local Development & Testing
+
 1. Start all services: `docker-compose up -d`
 2. View logs: `docker-compose logs -f backend`
 3. Run migrations: `docker-compose exec backend pnpm migrate`
@@ -137,6 +149,7 @@ Creates production-ready Docker images and Compose configurations for CampusOS b
 6. Clean up: `docker-compose down -v` (removes volumes)
 
 ## Quick Reference
+
 ```bash
 # Build and run via Compose
 docker-compose up --build
@@ -162,11 +175,11 @@ docker system prune -a
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Image build fails, "not found" | Verify Dockerfile path; check COPY source paths exist |
-| Container starts but crashes | Check logs: `docker-compose logs backend` |
-| Port already in use | Change port in docker-compose.yml or: `docker stop $(docker ps -q)` |
-| Database connection refused | Verify `depends_on: [mongo]` order; wait for mongo startup (~5s) |
-| .env variables not loaded | Ensure `.env.local` exists; use `--env-file` or `environment:` in compose |
-| Image size too large (>500MB) | Use Alpine base, multi-stage build, exclude unnecessary files in .dockerignore |
+| Issue                          | Solution                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| Image build fails, "not found" | Verify Dockerfile path; check COPY source paths exist                          |
+| Container starts but crashes   | Check logs: `docker-compose logs backend`                                      |
+| Port already in use            | Change port in docker-compose.yml or: `docker stop $(docker ps -q)`            |
+| Database connection refused    | Verify `depends_on: [mongo]` order; wait for mongo startup (~5s)               |
+| .env variables not loaded      | Ensure `.env.local` exists; use `--env-file` or `environment:` in compose      |
+| Image size too large (>500MB)  | Use Alpine base, multi-stage build, exclude unnecessary files in .dockerignore |

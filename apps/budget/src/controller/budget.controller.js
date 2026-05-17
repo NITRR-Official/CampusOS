@@ -54,7 +54,9 @@ export const budgetController = {
       const budget = await budgetService.getEventBudget(eventId);
 
       if (!budget) {
-        return res.status(404).json({ error: 'Budget not found for this event' });
+        return res
+          .status(404)
+          .json({ error: 'Budget not found for this event' });
       }
 
       return res.status(200).json(budget);
@@ -122,7 +124,9 @@ export const budgetController = {
       const { userId } = req.body;
 
       if (!budgetId || !userId) {
-        return res.status(400).json({ error: 'budgetId and userId are required' });
+        return res
+          .status(400)
+          .json({ error: 'budgetId and userId are required' });
       }
 
       const result = await budgetService.approveBudget(budgetId, userId);
@@ -168,7 +172,15 @@ export const budgetController = {
   async logExpense(req, res, next) {
     try {
       const { budgetId } = req.params;
-      const { category, description, amount, vendor, paymentMethod, receipt, notes } = req.body;
+      const {
+        category,
+        description,
+        amount,
+        vendor,
+        paymentMethod,
+        receipt,
+        notes
+      } = req.body;
 
       if (!budgetId) {
         return res.status(400).json({ error: 'budgetId is required' });
@@ -280,7 +292,10 @@ export const budgetController = {
         return res.status(400).json({ error: 'expenseId is required' });
       }
 
-      const result = await budgetService.markExpenseAsPaid(expenseId, paymentMethod);
+      const result = await budgetService.markExpenseAsPaid(
+        expenseId,
+        paymentMethod
+      );
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });

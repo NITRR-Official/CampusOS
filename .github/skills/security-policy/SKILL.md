@@ -7,6 +7,7 @@ argument-hint: 'policy-type, severity-level'
 # Security Policy
 
 ## When to Use
+
 - Setting up responsible vulnerability disclosure process
 - Creating SECURITY.md policy
 - Establishing security contact information
@@ -15,12 +16,15 @@ argument-hint: 'policy-type, severity-level'
 - Coordinating with security researchers
 
 ## What This Skill Does
+
 Establishes CampusOS security policy including responsible disclosure, vulnerability coordination, and incident response.
 
 ## Procedure
 
 ### Phase 1: Security Policy Documentation
+
 1. Create `SECURITY.md` in repository root:
+
    ```markdown
    # Security Policy
 
@@ -31,12 +35,14 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
    Email security team: [security@campusos.org](mailto:security@campusos.org)
 
    Include in your report:
+
    - Description of vulnerability
    - Steps to reproduce
    - Potential impact
    - Suggested fix (if available)
 
    **Response Timeline:**
+
    - Acknowledgement: Within 24 hours
    - Initial assessment: Within 7 days
    - Fix or mitigation: Within 30 days
@@ -44,16 +50,17 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
 
    ## Supported Versions
 
-   | Version | Supported          |
-   |---------|--------------------|
-   | 2.x     | ✅ Actively        |
+   | Version | Supported           |
+   | ------- | ------------------- |
+   | 2.x     | ✅ Actively         |
    | 1.x     | ⚠️ Until 2024-12-31 |
-   | 0.x     | ❌ No support      |
+   | 0.x     | ❌ No support       |
 
    ## PGP Public Key
 
    [Download key](./security-pgp.asc)
    ```
+
 2. Define response timeframes:
    - Critical: Fix within 72 hours
    - High: Fix within 7 days
@@ -65,6 +72,7 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
 6. Commit to version support timeline
 
 ### Phase 2: Vulnerability Coordination
+
 1. Set up security email: security@campusos.org
    - Monitored by 2+ team members
    - 24/7 response commitment
@@ -83,6 +91,7 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
 6. Publish CVE after fix released
 
 ### Phase 3: Incident Response Plan
+
 1. Define incident severity levels:
    - **Critical**: Data breach, RCE, authentication bypass
    - **High**: Denial of service, privilege escalation
@@ -110,6 +119,7 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
    - Post-incident review (7 days later)
 
 ### Phase 4: Compliance & Standards
+
 1. Document compliance requirements:
    - GDPR (if EU users)
    - HIPAA (if health data)
@@ -129,6 +139,7 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
 6. Security training for team (annual)
 
 ### Phase 5: Monitoring & Prevention
+
 1. Automated scanning:
    - Dependency vulnerabilities: `pnpm audit` weekly
    - Container scanning: Build-time image scan
@@ -151,12 +162,14 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
 6. Red team exercises: Quarterly simulated attacks
 
 ### Phase 6: Public Disclosure & Advisories
+
 1. Create GitHub Security Advisory:
    - Description: Technical details
    - Severity: CVSS score
    - GHSA ID: GitHub advisory ID (auto-generated)
    - CVE: CVE ID (if requested)
 2. Format advisory clearly:
+
    ```
    ## Vulnerability Description
    [Include: what it is, who's affected]
@@ -173,6 +186,7 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
    ## Credits
    [Researcher name/org with permission]
    ```
+
 3. Publish advisory:
    - Link in `SECURITY.md`
    - Twitter announcement
@@ -183,6 +197,7 @@ Establishes CampusOS security policy including responsible disclosure, vulnerabi
 6. Schedule follow-up security review
 
 ## Quick Reference
+
 ```bash
 # Check for known vulnerabilities
 pnpm audit
@@ -205,11 +220,11 @@ git log -p | grep -i "password\|token\|secret"
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Researcher report ignored | Ensure security@domain monitored; check spam folder; auto-responder set up |
-| CVE requested but no CVE coordinator | Contact MITRE; CNA (CVE Numbering Authority) assigns; coordinate with GitHub |
-| Patch doesn't fix vulnerability | Hold embargo; extend fix window; consider temporary workaround; get researcher approval for extended disclosure |
-| Media attention after disclosure | Prepare talking points; confirm facts; engage communications team; correct misinformation quickly |
-| No researchers reporting issues | Promote security.md; offer bug bounty; participate in security communities; hire red team for testing |
-| Compliance violation detected | Report to compliance officer; notify affected users; file incident report; plan remediation |
+| Issue                                | Solution                                                                                                        |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Researcher report ignored            | Ensure security@domain monitored; check spam folder; auto-responder set up                                      |
+| CVE requested but no CVE coordinator | Contact MITRE; CNA (CVE Numbering Authority) assigns; coordinate with GitHub                                    |
+| Patch doesn't fix vulnerability      | Hold embargo; extend fix window; consider temporary workaround; get researcher approval for extended disclosure |
+| Media attention after disclosure     | Prepare talking points; confirm facts; engage communications team; correct misinformation quickly               |
+| No researchers reporting issues      | Promote security.md; offer bug bounty; participate in security communities; hire red team for testing           |
+| Compliance violation detected        | Report to compliance officer; notify affected users; file incident report; plan remediation                     |

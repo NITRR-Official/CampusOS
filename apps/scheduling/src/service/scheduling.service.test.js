@@ -1,6 +1,12 @@
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDB, disconnectDB } from '../../../../backend/src/database/connection.js';
-import { Conflict, TimeSlot } from '../../../../backend/src/database/schemas/scheduling.schema.js';
+import {
+  connectDB,
+  disconnectDB
+} from '../../../../backend/src/database/connection.js';
+import {
+  Conflict,
+  TimeSlot
+} from '../../../../backend/src/database/schemas/scheduling.schema.js';
 import { SchedulingService } from './scheduling.service.js';
 
 describe('SchedulingService', () => {
@@ -160,7 +166,7 @@ describe('SchedulingService', () => {
       const slots = await service.getEventTimeSlots('event-1');
 
       expect(slots).toHaveLength(2);
-      expect(slots.every(s => s.eventId === 'event-1')).toBe(true);
+      expect(slots.every((s) => s.eventId === 'event-1')).toBe(true);
     });
 
     it('should return empty array for event with no slots', async () => {
@@ -182,7 +188,8 @@ describe('SchedulingService', () => {
     });
 
     it('should return true for non-overlapping time', async () => {
-      const available = await service.isVenueAvailable('Main Hall',
+      const available = await service.isVenueAvailable(
+        'Main Hall',
         new Date('2026-05-15T13:00:00'),
         new Date('2026-05-15T15:00:00')
       );
@@ -191,7 +198,8 @@ describe('SchedulingService', () => {
     });
 
     it('should return false for overlapping time', async () => {
-      const available = await service.isVenueAvailable('Main Hall',
+      const available = await service.isVenueAvailable(
+        'Main Hall',
         new Date('2026-05-15T11:00:00'),
         new Date('2026-05-15T13:00:00')
       );
@@ -221,7 +229,9 @@ describe('SchedulingService', () => {
       await service.createTimeSlot(slot2Data);
       const conflicts = await service.getAllConflicts();
 
-      expect(conflicts.some(c => c.conflictType === 'venue-overlap')).toBe(true);
+      expect(conflicts.some((c) => c.conflictType === 'venue-overlap')).toBe(
+        true
+      );
     });
   });
 
@@ -287,7 +297,10 @@ describe('SchedulingService', () => {
       const conflicts = await service.getAllConflicts();
       if (conflicts.length > 0) {
         const conflictId = conflicts[0].id;
-        const result = await service.resolveConflict(conflictId, 'Rescheduled event-2');
+        const result = await service.resolveConflict(
+          conflictId,
+          'Rescheduled event-2'
+        );
 
         expect(result.success).toBe(true);
         expect(result.conflict.resolved).toBe(true);

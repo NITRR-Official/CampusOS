@@ -13,7 +13,11 @@ import {
   type CalendarEventType
 } from '@/lib/calendar-api';
 
-const EVENT_TYPES: CalendarEventType[] = ['task-deadline', 'event', 'milestone'];
+const EVENT_TYPES: CalendarEventType[] = [
+  'task-deadline',
+  'event',
+  'milestone'
+];
 
 function getDaysInMonth(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -28,7 +32,10 @@ function formatDate(isoDate: string): string {
 }
 
 function formatTime(isoDate: string): string {
-  return new Date(isoDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return new Date(isoDate).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 interface EventListProps {
@@ -43,10 +50,15 @@ function EventList({ events, onDelete }: EventListProps) {
         <p className="text-sm text-slate-500">No events for this period.</p>
       ) : (
         events.map((event) => (
-          <div key={event.id} className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
+          <div
+            key={event.id}
+            className="rounded-lg border border-slate-200 bg-white p-3 text-sm"
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-900 truncate">{event.title}</p>
+                <p className="font-medium text-slate-900 truncate">
+                  {event.title}
+                </p>
                 <p className="text-xs text-slate-500 mt-1">
                   {formatDate(event.startsAt)} {formatTime(event.startsAt)}
                 </p>
@@ -86,7 +98,10 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
     days.push(day);
   }
 
-  const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+  const monthName = currentDate.toLocaleString('default', {
+    month: 'long',
+    year: 'numeric'
+  });
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
@@ -94,7 +109,10 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
       <h3 className="text-lg font-semibold text-slate-900 mb-4">{monthName}</h3>
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (
-          <div key={day} className="text-center text-xs font-medium text-slate-500 py-2">
+          <div
+            key={day}
+            className="text-center text-xs font-medium text-slate-500 py-2"
+          >
             {day}
           </div>
         ))}
@@ -131,7 +149,8 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [title, setTitle] = useState('');
-  const [eventType, setEventType] = useState<CalendarEventType>('task-deadline');
+  const [eventType, setEventType] =
+    useState<CalendarEventType>('task-deadline');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [description, setDescription] = useState('');
@@ -149,8 +168,16 @@ export default function CalendarPage() {
       setError('');
 
       try {
-        const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const monthStart = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        );
+        const monthEnd = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
+        );
 
         const items = await fetchCalendarEventsByRange(
           currentToken,
@@ -167,7 +194,9 @@ export default function CalendarPage() {
         }
 
         setError(
-          exception instanceof CalendarApiError ? exception.message : 'Unable to load calendar events right now.'
+          exception instanceof CalendarApiError
+            ? exception.message
+            : 'Unable to load calendar events right now.'
         );
       } finally {
         setIsLoading(false);
@@ -220,11 +249,19 @@ export default function CalendarPage() {
       setStartsAt('');
       setEndsAt('');
       setDescription('');
-      
+
       // Reload events for the month
       if (accessToken) {
-        const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        const monthStart = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          1
+        );
+        const monthEnd = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth() + 1,
+          0
+        );
         const items = await fetchCalendarEventsByRange(
           accessToken,
           monthStart.toISOString(),
@@ -234,7 +271,9 @@ export default function CalendarPage() {
       }
     } catch (exception) {
       setError(
-        exception instanceof CalendarApiError ? exception.message : 'Unable to create calendar event right now.'
+        exception instanceof CalendarApiError
+          ? exception.message
+          : 'Unable to create calendar event right now.'
       );
     } finally {
       setIsSubmitting(false);
@@ -249,17 +288,23 @@ export default function CalendarPage() {
       setEvents((current) => current.filter((e) => e.id !== eventId));
     } catch (exception) {
       setError(
-        exception instanceof CalendarApiError ? exception.message : 'Unable to delete event right now.'
+        exception instanceof CalendarApiError
+          ? exception.message
+          : 'Unable to delete event right now.'
       );
     }
   }
 
   function previousMonth() {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+    );
   }
 
   function nextMonth() {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+    );
   }
 
   return (
@@ -268,10 +313,15 @@ export default function CalendarPage() {
         <section className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-600">Phase 3</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">Calendar & Planning</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-600">
+                Phase 3
+              </p>
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+                Calendar & Planning
+              </h1>
               <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-                Track deadlines, events, and milestones across your execution timeline.
+                Track deadlines, events, and milestones across your execution
+                timeline.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -295,7 +345,8 @@ export default function CalendarPage() {
           <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
             <h2 className="text-xl font-semibold">Sign in required</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-900/80">
-              Log in to create and manage calendar events. Your session is stored locally.
+              Log in to create and manage calendar events. Your session is
+              stored locally.
             </p>
             <Link
               href="/login"
@@ -307,15 +358,24 @@ export default function CalendarPage() {
         ) : null}
 
         <section className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
-          <form className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60 h-fit" onSubmit={handleCreateEvent}>
+          <form
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60 h-fit"
+            onSubmit={handleCreateEvent}
+          >
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">New Event</p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-950">Add to Calendar</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                New Event
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                Add to Calendar
+              </h2>
             </div>
 
             <div className="mt-6 space-y-4">
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Title</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Title
+                </span>
                 <input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
@@ -328,10 +388,14 @@ export default function CalendarPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Type</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Type
+                </span>
                 <select
                   value={eventType}
-                  onChange={(event) => setEventType(event.target.value as CalendarEventType)}
+                  onChange={(event) =>
+                    setEventType(event.target.value as CalendarEventType)
+                  }
                   className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                 >
                   {EVENT_TYPES.map((type) => (
@@ -343,7 +407,9 @@ export default function CalendarPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Start</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Start
+                </span>
                 <input
                   type="datetime-local"
                   value={startsAt}
@@ -354,7 +420,9 @@ export default function CalendarPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">End (optional)</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  End (optional)
+                </span>
                 <input
                   type="datetime-local"
                   value={endsAt}
@@ -364,7 +432,9 @@ export default function CalendarPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">Description</span>
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Description
+                </span>
                 <textarea
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
@@ -410,12 +480,19 @@ export default function CalendarPage() {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <h3 className="font-semibold text-slate-900 mb-4">
-                Events for {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                Events for{' '}
+                {currentDate.toLocaleString('default', {
+                  month: 'long',
+                  year: 'numeric'
+                })}
               </h3>
               {isLoading ? (
                 <p className="text-sm text-slate-500">Loading events...</p>
               ) : (
-                <EventList events={eventsForMonth} onDelete={handleDeleteEvent} />
+                <EventList
+                  events={eventsForMonth}
+                  onDelete={handleDeleteEvent}
+                />
               )}
             </div>
           </div>

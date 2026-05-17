@@ -1,4 +1,7 @@
-import { validateSignupPayload, validateLoginPayload } from '../schema/auth.schema.js';
+import {
+  validateSignupPayload,
+  validateLoginPayload
+} from '../schema/auth.schema.js';
 import { getAuthService } from '../service/auth.service.js';
 
 function createHttpError(status, message, code, details) {

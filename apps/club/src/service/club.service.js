@@ -57,7 +57,9 @@ class ClubService {
     }
 
     const initialCount = club.members.length;
-    club.members = club.members.filter((member) => member.userId !== memberUserId);
+    club.members = club.members.filter(
+      (member) => member.userId !== memberUserId
+    );
 
     return club.members.length < initialCount;
   }

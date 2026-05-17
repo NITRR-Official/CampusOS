@@ -9,6 +9,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18.0.0 or higher
 - pnpm 10.0.0 or higher
 - Git
@@ -16,33 +17,48 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 ### Local Development Setup
 
 1. **Fork the repository**
+
    ```bash
    # Go to https://github.com/NITRR-Official/CampusOS
    # Click "Fork" in the top-right corner
    ```
 
 2. **Clone your fork**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/CampusOS.git
    cd CampusOS
    ```
 
 3. **Add upstream remote**
+
    ```bash
    git remote add upstream https://github.com/NITRR-Official/CampusOS.git
    ```
 
 4. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
-5. **Create a feature branch**
+5. **Start MongoDB Database (Required)**
+
+   The backend **must** have a running MongoDB instance before it can start, otherwise you will get an `ECONNREFUSED` error. The easiest way is using Docker:
+
+   ```bash
+   docker run -d -p 27017:27017 --name mongodb mongo:latest
+   ```
+   *If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](./docs/DATABASE_SETUP.md).*
+
+6. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 6. **Start development servers**
+
    ```bash
    # Terminal 1: Backend
    cd backend && pnpm dev
@@ -74,6 +90,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 ### 3. Making Changes
 
 #### Branching Strategy
+
 ```bash
 # Create feature branch from main
 git checkout main
@@ -82,7 +99,9 @@ git checkout -b feature/issue-number-description
 ```
 
 #### Commit Messages
+
 Use [Conventional Commits](https://www.conventionalcommits.org/):
+
 ```bash
 # Good examples:
 git commit -m "feat: add QR code generation for check-ins"
@@ -96,7 +115,9 @@ git commit -m "test: add test for task dependencies"
 ```
 
 #### Code Quality
+
 Before pushing, run:
+
 ```bash
 # Lint and format
 pnpm lint
@@ -112,6 +133,7 @@ cd frontend && pnpm tsc --noEmit
 ### 4. Testing
 
 **Write tests for:**
+
 - New features
 - Bug fixes
 - API endpoints
@@ -126,12 +148,14 @@ pnpm test
 ### 5. Documentation
 
 Update documentation if you:
+
 - Add a new API endpoint
 - Change existing functionality
 - Add a new feature
 - Modify database schema
 
 Update these files as needed:
+
 - `README.md` - Overview and setup
 - `ROADMAP.md` - Phase progress
 - Code comments for complex logic
@@ -147,6 +171,7 @@ git push origin feature/issue-number-description
 ```
 
 **In the PR description:**
+
 - Reference the issue: `Closes #123`
 - Explain what changed and why
 - Link related issues or discussions
@@ -181,18 +206,21 @@ git push origin feature/issue-number-description
 ## 🏗️ Architecture & Design Patterns
 
 ### Backend (Express.js)
+
 - Plugin-based architecture (see `/apps/` directory)
 - Each feature: schema → service → controller → routes
 - RBAC with roles: `admin`, `coordinator`, `volunteer`
 - See `/backend/src/` for middleware and utilities
 
 ### Frontend (Next.js)
+
 - React components with TypeScript
 - API clients in `/frontend/lib/` (e.g., `task-api.ts`)
 - Pages in `/frontend/app/` organized by feature
 - Tailwind CSS for styling
 
 ### Database (In-memory for now)
+
 - Schema validation on write
 - Services handle business logic
 - See `apps/*/src/service/` for patterns
@@ -216,6 +244,7 @@ campus-os/
 Use the [Bug Report](https://github.com/NITRR-Official/CampusOS/issues/new?template=bug_report.md) template.
 
 **Good bug reports include:**
+
 - Steps to reproduce
 - Expected vs. actual behavior
 - Environment (OS, Node version, etc.)
@@ -226,6 +255,7 @@ Use the [Bug Report](https://github.com/NITRR-Official/CampusOS/issues/new?templ
 Use the [Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?template=feature_request.md) template.
 
 **Good feature requests:**
+
 - Describe the problem it solves
 - Explain the use case
 - Propose a solution
@@ -240,6 +270,7 @@ Use the [Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?
 ## 🎖️ Recognition
 
 Contributors are recognized in:
+
 - `CONTRIBUTORS.md` (after first PR)
 - Release notes (for significant contributions)
 - Monthly community highlights

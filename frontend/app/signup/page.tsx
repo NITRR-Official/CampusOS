@@ -15,7 +15,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 
@@ -30,8 +30,8 @@ export default function SignupPage() {
       name: '',
       email: '',
       password: '',
-      confirmPassword: '',
-    },
+      confirmPassword: ''
+    }
   });
 
   async function onSubmit(data: SignupFormData) {
@@ -42,7 +42,7 @@ export default function SignupPage() {
       const authData = await signup({
         name: data.name,
         email: data.email,
-        password: data.password,
+        password: data.password
       });
       storeAuthSession(authData);
       router.push('/');

@@ -7,9 +7,11 @@
 ## Roles
 
 ### Core Team
+
 - TheFakeCreator — Architecture, Backend, Infrastructure
 
 ### Contributors
+
 - (None yet - open to community!)
 
 ## How to Contribute
@@ -46,6 +48,7 @@ CampusOS welcomes contributions! Here's how you can help:
 ## Credit
 
 All contributors will be credited in:
+
 - CONTRIBUTORS.md (this file)
 - Release notes
 - Project website
@@ -56,6 +59,7 @@ All contributors will be credited in:
 - Check [.humanet/discussions/](./discussions/) for architecture decisions
 - Read [.humanet/idea.md](./idea.md) for the vision
 - Review [.humanet/scope.md](./scope.md) for current scope
+
 3. **Submit Pull Request** with clear description
 4. **Participate in Review** and address feedback
 5. **Get Merged** and earn karma!
@@ -70,6 +74,7 @@ All contributors will be credited in:
 ## Karma System
 
 Contributors earn karma points based on:
+
 - Quality and impact of contributions
 - Community recognition (upvotes)
 - Consistency and engagement
@@ -95,4 +100,4 @@ Be kind, be constructive, be honest. We're here to collaborate on ideas that mak
 
 ---
 
-*Thank you for contributing to this idea!* 🚀
+_Thank you for contributing to this idea!_ 🚀

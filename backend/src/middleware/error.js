@@ -1,12 +1,15 @@
 /**
  * Error Handling Middleware
- * 
+ *
  * Catches all errors and formats them consistently
- * 
+ *
  * MUST be placed last in middleware chain
  */
 
 export function errorMiddleware(err, req, res, next) {
+  if (res.headersSent) {
+    return next(err);
+  }
   console.error('Error caught:', err);
 
   // Extract error details
