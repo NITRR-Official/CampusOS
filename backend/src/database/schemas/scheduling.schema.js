@@ -94,7 +94,6 @@ const conflictSchema = new mongoose.Schema(
 );
 
 // Indexes
-timeSlotSchema.index({ eventId: 1 });
 timeSlotSchema.index({ venue: 1 });
 timeSlotSchema.index({ startTime: 1, endTime: 1 });
 

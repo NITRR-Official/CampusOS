@@ -14,8 +14,7 @@ const budgetSchema = new mongoose.Schema(
     eventId: {
       type: String,
       required: true,
-      unique: true,
-      index: true
+      unique: true
     },
     totalAllocation: {
       type: Number,
@@ -94,10 +93,8 @@ const expenseSchema = new mongoose.Schema(
 );
 
 // Indexes
-budgetSchema.index({ eventId: 1 });
 budgetSchema.index({ approvalStatus: 1 });
 
-expenseSchema.index({ budgetId: 1 });
 expenseSchema.index({ category: 1 });
 expenseSchema.index({ paymentStatus: 1 });
 
