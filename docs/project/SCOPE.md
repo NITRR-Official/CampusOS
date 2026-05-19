@@ -36,7 +36,7 @@ CampusOS is built in phases, each expanding functionality.
 
 ## ✅ Phase 3: Execution System (Weeks 6–7)
 
-**In Scope**: Tasks Module, Workflows, Assignments.
+**In Scope**: Tasks Module, Calendar Module, Workflows, Assignments.
 
 **Out of Scope**: Advanced workflow automation, external tool integration, mobile-first experience.
 
@@ -149,10 +149,9 @@ CampusOS is built in phases, each expanding functionality.
 2. **Event System Live** — Phase 2 complete (Events, RSVP functional)
 3. **Execution System Ready** — Phase 3 complete (Tasks, Workflows, Calendar working)
 4. **Live Event Ready** — Phase 4 complete (Check-in, QR, Attendance tracking)
-5. **First Fest Ready** 🎉 — Phase 5 complete (Real event with all systems)
-6. **Ops System Ready** — Phase 5 complete (Vendors, Resources, Budget tracking)
-7. **Growth System Ready** — Phase 6 complete (Sponsorship, Marketing, Analytics)
-8. **Production Ready** — Phase 7 complete (Performance, security, stability)
+5. **Ops System Ready** — Phase 5 complete (Vendors, Resources, Budget tracking)
+6. **Growth System Ready** — Phase 6 complete (Sponsorship, Marketing, Analytics)
+7. **Production Ready** — Phase 7 complete (Performance, security, stability)
 
 ---
 
