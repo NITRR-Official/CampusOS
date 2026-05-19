@@ -96,15 +96,16 @@ CampusOS is organized into 6 functional layers, each handling a specific concern
 
 ## Phase-to-Layer Mapping
 
-| Phase   | Layers Involved |
-| ------- | --------------- |
-| Phase 0 | (Setup)         |
-| Phase 1 | Foundation      |
-| Phase 2 | Event           |
-| Phase 3 | Execution       |
-| Phase 4 | Operations      |
-| Phase 5 | Growth          |
-| Phase 6 | System Maturity |
+| Phase   | Layers Involved    |
+| ------- | ------------------ |
+| Phase 0 | (Setup)            |
+| Phase 1 | Foundation         |
+| Phase 2 | Event              |
+| Phase 3 | Execution          |
+| Phase 4 | Event (Check-in)   |
+| Phase 5 | Operations         |
+| Phase 6 | Growth             |
+| Phase 7 | System Maturity    |
 
 ---
 

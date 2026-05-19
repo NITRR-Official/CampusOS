@@ -28,7 +28,7 @@ CampusOS will be:
 - Single-instance per deployment
 - Serve one organization/institute per deployment
 - Simpler operational model
-- Easier to scale horizontally (multiple independ deployments)
+- Easier to scale horizontally (multiple independent deployments)
 
 ## Rationale
 

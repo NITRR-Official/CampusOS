@@ -394,7 +394,7 @@ See [Project Board](https://github.com/NITRR-Official/CampusOS/projects) for rea
 
 ## 📜 License
 
-This project is licensed under the MIT License — see the [LICENSE](https://opensource.org/licenses/MIT) details.
+This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
 
 ---
 

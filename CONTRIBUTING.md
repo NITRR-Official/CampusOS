@@ -268,7 +268,7 @@ Use the [Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?
 ## 🤔 Questions?
 
 - 💬 **Community Chat**: Check GitHub Discussions
-- 📖 **Developer Guide**: See [Developer Onboarding Skill](./.github/skills/developer-onboarding/SKILL.md)
+- 📖 **Developer Guide**: See [Developer Onboarding](./docs/getting-started/DEVELOPER_ONBOARDING.md)
 - 🛠️ **Setup Issues**: See Troubleshooting in README.md
 
 ## 🎖️ Recognition
