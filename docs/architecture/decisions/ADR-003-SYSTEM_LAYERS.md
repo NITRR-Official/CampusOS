@@ -105,7 +105,7 @@ CampusOS is organized into 6 functional layers, each handling a specific concern
 | Phase 4 | Event (Check-in)   |
 | Phase 5 | Operations         |
 | Phase 6 | Growth             |
-| Phase 7 | System Maturity    |
+| Phase 7 | System Layer       |
 
 ---
 
