@@ -59,9 +59,9 @@ High-level overview of Phase 5 implementation:
 
 ### Related Documentation
 
-- `ROADMAP.md` - Overall CampusOS roadmap
-- `frontend/docs/` - Frontend-specific documentation
-- `backend/src/` - Backend implementation code
+- [Roadmap](../../project/ROADMAP.md) - Overall CampusOS roadmap
+- [Frontend Documentation](../../frontend/) - Frontend-specific documentation
+- [Backend Architecture](../../architecture/BACKEND.md) - Backend architecture overview
 
 ## Phase 5 Modules
 

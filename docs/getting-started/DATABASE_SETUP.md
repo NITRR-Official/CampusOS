@@ -277,5 +277,5 @@ backend/src/
 
 ## Related Docs
 
-- See [docs/MONGODB_MIGRATION.md](docs/MONGODB_MIGRATION.md) for migration steps and service-level details.
-- See [docs/phase5/README.md](docs/phase5/README.md) for Phase 5 documentation index.
+- See [MONGODB_MIGRATION.md](./MONGODB_MIGRATION.md) for migration steps and service-level details.
+- See [Phase 5 Documentation](../phases/phase5/README.md) for Phase 5 documentation index.

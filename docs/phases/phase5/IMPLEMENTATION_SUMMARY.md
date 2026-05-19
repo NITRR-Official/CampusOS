@@ -191,8 +191,9 @@ CampusOS/
 │               └── page.tsx        (Budget dashboard)
 │
 └── docs/
-    └── phase5/
-        ├── API_REFERENCE.md         (Complete API docs)
+    ├── api/
+    │   └── PHASE_5_REFERENCE.md      (Complete API docs)
+    └── phases/phase5/
         └── IMPLEMENTATION_SUMMARY.md (This file)
 ```
 
