@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CampusOS Frontend
 
-## Getting Started
+This is the frontend application for [CampusOS](https://github.com/NITRR-Official/CampusOS), built using Next.js, React, and Tailwind CSS.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js v18.0.0+
+- pnpm v10.0.0+
+
+### Installation & Development
+
+The frontend is part of the CampusOS monorepo. Ensure you have installed dependencies from the root directory.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Navigate to the frontend directory
+cd frontend
+
+# Run the development server
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `app/` - Next.js App Router pages and layouts.
+- `components/` - Reusable UI components (buttons, cards, modals).
+- `lib/` - API clients, utility functions, and shared logic.
+- `../docs/frontend/` - Frontend-specific documentation (e.g., [Design System](../docs/frontend/DESIGN_SYSTEM.md), [Dark Mode](../docs/frontend/DARK_MODE.md)).
 
-## Learn More
+## 🎨 Design System
 
-To learn more about Next.js, take a look at the following resources:
+CampusOS uses a custom design system based on Tailwind CSS.
+For details on colors, typography, spacing, and component guidelines, please see the **[Design System Documentation](../docs/frontend/DESIGN_SYSTEM.md)**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌙 Dark Mode
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Dark mode is supported out of the box using Tailwind's `dark:` classes.
+See the **[Dark Mode Guide](../docs/frontend/DARK_MODE.md)** for implementation details.
 
-## Deploy on Vercel
+## 🛠️ Building for Production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm build
+pnpm start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🤝 Contributing
+
+Before contributing, please review the root [CONTRIBUTING.md](../CONTRIBUTING.md) guide and the [Code of Conduct](../CODE_OF_CONDUCT.md). Ensure that your UI components follow the established Design System.

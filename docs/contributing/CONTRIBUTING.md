@@ -50,7 +50,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
    docker run -d -p 27017:27017 --name mongodb mongo:latest
    ```
 
-   _If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](./docs/getting-started/DATABASE_SETUP.md)._
+   _If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](../getting-started/DATABASE_SETUP.md)._
 
 6. **Create a feature branch**
 
@@ -77,7 +77,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 
 - Look for issues labeled `good first issue` (perfect for first-time contributors)
 - Check out issues labeled `help wanted` for more complex tasks
-- See the [ROADMAP.md](./ROADMAP.md) for upcoming phases and features
+- See the [ROADMAP.md](../../ROADMAP.md) for upcoming phases and features
 
 ### 2. Before You Start
 
@@ -268,7 +268,7 @@ Use the [Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?
 ## 🤔 Questions?
 
 - 💬 **Community Chat**: Check GitHub Discussions
-- 📖 **Developer Guide**: See [Developer Onboarding Skill](./.github/skills/developer-onboarding/SKILL.md)
+- 📖 **Developer Guide**: See [Developer Onboarding](../getting-started/DEVELOPER_ONBOARDING.md)
 - 🛠️ **Setup Issues**: See Troubleshooting in README.md
 
 ## 🎖️ Recognition

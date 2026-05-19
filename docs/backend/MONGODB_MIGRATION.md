@@ -209,7 +209,7 @@ async createVendor(vendorData) {
 
 ## Environment Setup
 
-See [docs/DATABASE_SETUP.md](docs/DATABASE_SETUP.md) for environment configuration and local MongoDB setup.
+See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for environment configuration and local MongoDB setup.
 
 ## Testing Strategy
 
@@ -385,5 +385,5 @@ volumes:
 
 ## Related Docs
 
-- See [docs/DATABASE_SETUP.md](docs/DATABASE_SETUP.md) for setup and operations.
-- See [docs/phase5/README.md](docs/phase5/README.md) for Phase 5 documentation index.
+- See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for setup and operations.
+- See [Phase 5 Documentation](../phases/phase5/README.md) for Phase 5 documentation index.

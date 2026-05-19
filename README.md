@@ -62,13 +62,13 @@ Instead of building "just another event management tool," CampusOS provides the 
 - ✅ **Attendance Stats** — Real-time attendance analytics
 - ✅ **Participant Dashboard** — Event history and status tracking
 
-### Phase 5: Operations Layer (Coming Soon)
+### Phase 5: Operations Layer ✅
 
-- 📋 **Vendor Management** — Vendor coordination and procurement
-- 📋 **Resource Allocation** — Resource scheduling and management
-- 📋 **Budget Tracking** — Expense and budget management
+- ✅ **Vendor Management** — Vendor coordination and procurement
+- ✅ **Resource Allocation** — Resource scheduling and management
+- ✅ **Budget Tracking** — Expense and budget management
 
-### Phase 5: Growth
+### Phase 6: Growth Layer (Coming Soon)
 
 - 📋 **Sponsorship Management** — Sponsor tracking and engagement
 - 📋 **Marketing Tools** — Campaign management and assets
@@ -83,6 +83,7 @@ Instead of building "just another event management tool," CampusOS provides the 
 - **Node.js** v18.0.0 or higher
 - **pnpm** v10.0.0 or higher
 - **Git**
+- **MongoDB** — via [Docker](https://www.docker.com/) (recommended), native install, or [MongoDB Atlas](https://cloud.mongodb.com)
 
 ### Installation
 
@@ -95,9 +96,17 @@ cd CampusOS
 pnpm install
 ```
 
-### Configuration
+### Database Setup
 
-CampusOS uses **in-memory storage** for development. No database setup required to get started!
+The backend requires MongoDB to be running. Easiest way:
+
+```bash
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
+
+> For other methods (native install, Atlas), see the [Database Setup Guide](./docs/getting-started/DATABASE_SETUP.md).
+
+### Configuration
 
 **Optional: Environment Variables**
 
@@ -108,6 +117,7 @@ Create `.env` in project root to override defaults:
 NODE_ENV=development
 PORT=4000
 JWT_SECRET=dev-fallback-secret
+MONGODB_URI=mongodb://localhost:27017/campusos
 
 # Frontend
 NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
@@ -132,12 +142,13 @@ pnpm dev
 
 ## 📚 Documentation
 
-- **[Project Structure](./humanet/PROJECT_STRUCTURE.md)** — Detailed architecture and module layout
-- **[Problem Statement](./.humanet/problem_statement.md)** — The problem we're solving
-- **[Architecture Decisions](./.humanet/discussions/)** — ADRs and design decisions
-- **[Roadmap](./ROADMAP.md)** — Development phases and timeline
-- **[Copilot Guidelines](./COPILOT.md)** — AI development rules and patterns
-- **[Humanet Context](./.humanet/)** — Project documentation and governance
+- **[Documentation Hub](./docs/README.md)** — Central index for all project documentation
+- **[Quick Start](./docs/getting-started/QUICK_START.md)** — Get up and running fast
+- **[Architecture Overview](./docs/architecture/OVERVIEW.md)** — System design and principles
+- **[Project Structure](./docs/project/PROJECT_STRUCTURE.md)** — Directory layout and module organization
+- **[Roadmap](./docs/project/ROADMAP.md)** — Development phases and timeline
+- **[Architecture Decisions](./docs/architecture/decisions/)** — ADRs and design decisions
+- **[AI Development Guidelines](./docs/ai-development/COPILOT_GUIDELINES.md)** — Copilot rules and patterns
 
 ---
 
@@ -183,14 +194,15 @@ When creating a new issue, choose the appropriate template:
 
 Explore these guides to understand how CampusOS works:
 
-- 📖 **[Developer Onboarding](./.github/skills/developer-onboarding/SKILL.md)** — Setup and first contribution
-- 📦 **[Backend Patterns](./.github/skills/backend-setup/SKILL.md)** — Express server architecture
-- 🎆 **[Frontend Patterns](./.github/skills/frontend-patterns/SKILL.md)** — React/Next.js conventions
-- 📡 **[API Design](./.github/skills/api-design/SKILL.md)** — REST endpoint patterns
-- 🗄️ **[Database Design](./.github/skills/database-design/SKILL.md)** — Schema & migration patterns
-- 👥 **[Code Review](./.github/skills/code-review/SKILL.md)** — Review checklist
-
-All skills live in [`.github/skills/`](./.github/skills/) — reference them for domain-specific guidance.
+- 📖 **[Developer Onboarding](./docs/getting-started/DEVELOPER_ONBOARDING.md)** — Setup and first contribution
+- 📦 **[Backend Architecture](./docs/architecture/BACKEND.md)** — Express server and plugin system
+- 🎨 **[Frontend Overview](./docs/frontend/OVERVIEW.md)** — React/Next.js patterns and conventions
+- 📡 **[API Standards](./docs/guides/API_STANDARDS.md)** — REST endpoint design patterns
+- 🗄️ **[Database Setup](./docs/getting-started/DATABASE_SETUP.md)** — MongoDB setup and schema design
+- 🧪 **[Testing Guide](./docs/guides/TESTING.md)** — Test pyramid and coverage targets
+- 🔒 **[Security Guidelines](./docs/guides/SECURITY.md)** — OWASP, auth, and input validation
+- 👥 **[Code Review](./docs/guides/CODE_REVIEW.md)** — Review checklist and quality standards
+- 🚀 **[Deployment](./docs/guides/DEPLOYMENT.md)** — Docker, CI/CD, and production readiness
 
 ---
 
@@ -299,7 +311,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 
 ---
 
-## � Community & Conduct
+## 🤝 Community & Conduct
 
 **Our Community:** CampusOS is maintained by NIT Raipur and welcomes contributors worldwide.
 
@@ -358,20 +370,22 @@ This project is maintained by:
 - [x] Attendance tracking
 - [x] Participant dashboard
 
-### Phase 5: Operations Layer 🟡 (Next)
+### Phase 5: Operations Layer ✅
 
-- [ ] Vendor management
-- [ ] Resource allocation
-- [ ] Budget tracking
+- [x] Vendor management
+- [x] Resource allocation
+- [x] Budget tracking
 
-### Phase 6: Growth System
+### Phase 6: Growth Layer 🟡 (Next)
 
 - [ ] Sponsorship management
 - [ ] Marketing tools
+
+### Phase 7: System Maturity
+
+- [ ] Notifications
+- [ ] Audit Logs
 - [ ] Analytics
-
-**See [ROADMAP.md](./ROADMAP.md) for detailed phase breakdown.**
-
 - [ ] Production readiness
 
 See [Project Board](https://github.com/NITRR-Official/CampusOS/projects) for real-time progress.
@@ -380,7 +394,7 @@ See [Project Board](https://github.com/NITRR-Official/CampusOS/projects) for rea
 
 ## 📜 License
 
-This project is licensed under the [MIT License](LICENSE) — see the LICENSE file for details.
+This project is licensed under the MIT License — see the [LICENSE](https://opensource.org/licenses/MIT) details.
 
 ---
 
@@ -396,13 +410,5 @@ This project is licensed under the [MIT License](LICENSE) — see the LICENSE fi
 
 - **Issues:** [GitHub Issues](https://github.com/NITRR-Official/CampusOS/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/NITRR-Official/CampusOS/discussions)
-- **Documentation:** [.humanet/](./.humanet/)
-- **Architecture:** [Discussions](./.humanet/discussions/)
-
----
-
-<p align="center">
-  Made with ❤️ by Students-NIT Raipur</a>
-  <br>
-  <a href="https://github.com/NITRR-Official/CampusOS">CampusOS</a> — The Operating System for Campus Management
-</p>
+- **Documentation:** [docs/](./docs/README.md)
+- **Architecture:** [Architecture Decisions](./docs/architecture/decisions/)
