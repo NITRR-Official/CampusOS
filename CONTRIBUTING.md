@@ -49,7 +49,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
    ```bash
    docker run -d -p 27017:27017 --name mongodb mongo:latest
    ```
-   *If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](./docs/setup/DATABASE_SETUP.md).*
+   *If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](./docs/getting-started/DATABASE_SETUP.md).*
 
 6. **Create a feature branch**
 
@@ -219,8 +219,11 @@ git push origin feature/issue-number-description
 - Pages in `/frontend/app/` organized by feature
 - Tailwind CSS for styling
 
-### Database (In-memory for now)
+### Database (MongoDB)
 
+- MongoDB is required to run the server (`connectDB()` at startup)
+- Some modules use in-memory `Map()` storage (data lost on restart)
+- Operations modules (vendor, resource, scheduling, budget) use MongoDB with Mongoose
 - Schema validation on write
 - Services handle business logic
 - See `apps/*/src/service/` for patterns

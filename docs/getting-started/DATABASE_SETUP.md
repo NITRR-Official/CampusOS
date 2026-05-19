@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Provide a single, consistent setup guide for MongoDB used by the Phase 5 modules (Vendor, Resource, Scheduling, Budget).
+Provide a single, consistent setup guide for MongoDB, which is required to run the CampusOS backend.
 
 ## Audience
 
-Developers running CampusOS locally or in CI who need a working MongoDB connection and baseline operational guidance.
+Developers running CampusOS locally or in CI who need a working MongoDB connection.
 
 ## Status
 
@@ -232,8 +232,8 @@ mongorestore --uri="mongodb://localhost:27017/campusos" ./backups/campusos
 
 ```javascript
 // Check connection
-import { isDBConnected } from '@backend/database/connection';
-console.log(isDBConnected()); // true/false
+import mongoose from 'mongoose';
+console.log(mongoose.connection.readyState); // 1 = connected
 ```
 
 ### Missing Indexes
@@ -251,27 +251,6 @@ await Resource.syncIndexes();
 3. **Connection Pooling**: Configured with maxPoolSize: 10
 4. **Timeouts**: serverSelectionTimeout: 5s, socketTimeout: 45s
 
-## Next Steps
-
-1. Add `/health/db` endpoint for runtime checks
-2. Add CI/CD test execution and coverage reports
-
-## Files Modified/Created
-
-```
-backend/src/
-├── database/
-│   ├── connection.js (NEW)
-│   ├── migration-guide.js (NEW)
-│   └── schemas/
-│       ├── vendor.schema.js (NEW)
-│       ├── resource.schema.js (NEW)
-│       ├── scheduling.schema.js (NEW)
-│       ├── budget.schema.js (NEW)
-│       └── index.js (NEW)
-├── index.js (MODIFIED - added DB connection)
-└── ...
-```
 
 ---
 

@@ -83,6 +83,7 @@ Instead of building "just another event management tool," CampusOS provides the 
 - **Node.js** v18.0.0 or higher
 - **pnpm** v10.0.0 or higher
 - **Git**
+- **MongoDB** — via [Docker](https://www.docker.com/) (recommended), native install, or [MongoDB Atlas](https://cloud.mongodb.com)
 
 ### Installation
 
@@ -95,9 +96,17 @@ cd CampusOS
 pnpm install
 ```
 
-### Configuration
+### Database Setup
 
-CampusOS uses **in-memory storage** for development. No database setup required to get started!
+The backend requires MongoDB to be running. Easiest way:
+
+```bash
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
+
+> For other methods (native install, Atlas), see the [Database Setup Guide](./docs/getting-started/DATABASE_SETUP.md).
+
+### Configuration
 
 **Optional: Environment Variables**
 
@@ -108,6 +117,7 @@ Create `.env` in project root to override defaults:
 NODE_ENV=development
 PORT=4000
 JWT_SECRET=dev-fallback-secret
+MONGODB_URI=mongodb://localhost:27017/campusos
 
 # Frontend
 NEXT_PUBLIC_API_BASE_URL=http://localhost:4000

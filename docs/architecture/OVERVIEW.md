@@ -67,7 +67,7 @@ Modules are grouped into layers. Lower layers don't depend on higher ones.
 
 \* `auth` uses MongoDB (User schema), `club` and `institute` use in-memory storage.
 
-> **Important**: Foundation and Event layer modules currently store data in-memory (`Map` objects). Data is lost on server restart. Operations layer modules (Phase 5) use MongoDB with Mongoose. See [MongoDB Migration](../backend/MONGODB_MIGRATION.md) for the migration plan.
+> **Important**: MongoDB is required to run the server — `connectDB()` runs at startup and the process exits if it fails. However, some modules (Event, Task, Calendar, Club, Institute) store their data in-memory using `Map` objects instead of MongoDB collections. This means data in those modules is lost on server restart. Operations layer modules (Phase 5: Vendor, Resource, Scheduling, Budget) use MongoDB with Mongoose. See [MongoDB Migration](../backend/MONGODB_MIGRATION.md) for the plan to migrate all modules to MongoDB.
 
 ## Core Principles
 

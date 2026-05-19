@@ -162,9 +162,10 @@ apps/<module>/
 | Scheduling | `apps/scheduling/` | MongoDB | Time slot scheduling, conflicts |
 | Budget | `apps/budget/` | MongoDB | Budget allocation, expenses |
 
-> **Important**: Foundation and Event layer modules still use in-memory `Map()` storage.
-> Operations layer modules (Phase 5) use MongoDB with Mongoose schemas.
-> See [MongoDB Migration](../backend/MONGODB_MIGRATION.md) for the migration plan.
+> **Important**: MongoDB is required to start the server — `connectDB()` runs at boot and exits on failure.
+> Some modules (Club, Institute, Event, Check-in, Task, Calendar) store data in-memory using `Map()` objects, meaning their data is lost on restart.
+> Operations layer modules (Phase 5) use MongoDB with Mongoose.
+> See [MongoDB Migration](../backend/MONGODB_MIGRATION.md) for the plan to migrate all modules to MongoDB.
 
 ## Shared Package (`shared/`)
 
