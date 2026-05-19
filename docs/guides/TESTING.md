@@ -24,7 +24,10 @@ Every test file that touches the database follows this structure:
 
 ```javascript
 import { MongoMemoryServer } from 'mongodb-memory-server';
-import { connectDB, disconnectDB } from '../../../../backend/src/database/connection.js';
+import {
+  connectDB,
+  disconnectDB
+} from '../../../../backend/src/database/connection.js';
 import { Vendor } from '../../../../backend/src/database/schemas/vendor.schema.js';
 import { VendorService } from './vendor.service.js';
 
@@ -36,7 +39,7 @@ describe('VendorService', () => {
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     await connectDB(mongoServer.getUri());
-  }, 120000);  // 120s timeout for MongoDB download on first run
+  }, 120000); // 120s timeout for MongoDB download on first run
 
   // Stop MongoDB after all tests
   afterAll(async () => {
@@ -57,6 +60,7 @@ describe('VendorService', () => {
 ```
 
 Key things to notice:
+
 - `MongoMemoryServer.create()` downloads and starts a real MongoDB instance in memory
 - The `120000` timeout on `beforeAll`/`afterAll` handles the first-run binary download
 - `beforeEach` clears all documents for test isolation
@@ -83,7 +87,7 @@ it('should create a new vendor with all required fields', async () => {
   expect(result.success).toBe(true);
   expect(result.vendor).toBeDefined();
   expect(result.vendor.name).toBe('Tech Supplies Co');
-  expect(result.vendor.status).toBe('active');  // default value
+  expect(result.vendor.status).toBe('active'); // default value
 });
 ```
 
@@ -134,7 +138,9 @@ it('should set timestamps on vendor creation', async () => {
   const afterCreate = new Date();
 
   expect(result.vendor.createdAt).toBeInstanceOf(Date);
-  expect(result.vendor.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
+  expect(result.vendor.createdAt.getTime()).toBeGreaterThanOrEqual(
+    beforeCreate.getTime()
+  );
 });
 ```
 
@@ -156,13 +162,13 @@ pnpm -C apps/vendor test -- vendor.service.test.js
 
 ## Current Test Coverage
 
-| Module | Tests | Status |
-|--------|-------|--------|
-| Vendor | 14 tests (create, list, get, assign, rate) | ✅ Passing |
-| Resource | 16 tests | ✅ Passing |
-| Scheduling | 14 tests | ✅ Passing |
-| Budget | 21 tests | ✅ Passing |
-| **Total** | **65 tests** | ✅ All passing |
+| Module     | Tests                                      | Status         |
+| ---------- | ------------------------------------------ | -------------- |
+| Vendor     | 14 tests (create, list, get, assign, rate) | ✅ Passing     |
+| Resource   | 16 tests                                   | ✅ Passing     |
+| Scheduling | 14 tests                                   | ✅ Passing     |
+| Budget     | 21 tests                                   | ✅ Passing     |
+| **Total**  | **65 tests**                               | ✅ All passing |
 
 ## What to Test
 
@@ -180,12 +186,12 @@ pnpm -C apps/vendor test -- vendor.service.test.js
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| `MongoMemoryServer` download timeout | Increase `beforeAll` timeout to `120000` |
-| "Connection already established" | Check `beforeAll`/`afterAll` lifecycle |
-| Tests pass alone but fail together | `beforeEach` should clear all collections |
-| Flaky tests | Add `await` to all async operations |
+| Issue                                | Solution                                  |
+| ------------------------------------ | ----------------------------------------- |
+| `MongoMemoryServer` download timeout | Increase `beforeAll` timeout to `120000`  |
+| "Connection already established"     | Check `beforeAll`/`afterAll` lifecycle    |
+| Tests pass alone but fail together   | `beforeEach` should clear all collections |
+| Flaky tests                          | Add `await` to all async operations       |
 
 ---
 

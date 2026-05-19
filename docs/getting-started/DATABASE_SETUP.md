@@ -251,7 +251,6 @@ await Resource.syncIndexes();
 3. **Connection Pooling**: Configured with maxPoolSize: 10
 4. **Timeouts**: serverSelectionTimeout: 5s, socketTimeout: 45s
 
-
 ---
 
 ## Related Docs

@@ -80,10 +80,10 @@ Everything else requires a `Bearer` token in the `Authorization` header.
 The registry (`utils/registry.js`) is a singleton `ModuleRegistry` with 4 Map-based stores:
 
 ```javascript
-registry.modules         // Map — loaded plugin metadata
-registry.services         // Map — shared service instances
-registry.authenticators   // Map — auth strategies (e.g., 'jwt')
-registry.resolvers        // Map — data resolvers
+registry.modules; // Map — loaded plugin metadata
+registry.services; // Map — shared service instances
+registry.authenticators; // Map — auth strategies (e.g., 'jwt')
+registry.resolvers; // Map — data resolvers
 ```
 
 It's attached to the Express app via `app.locals.registry`, so any middleware or route handler can access it:
@@ -136,6 +136,7 @@ router.post('/', requireRoles('admin', 'coordinator'), controller.create);
 Valid roles: `admin`, `coordinator`, `volunteer`
 
 The `requireRoles` function is registered as a service so plugins can access it:
+
 ```javascript
 const requireRoles = registry.getService('requireRoles');
 ```
@@ -155,12 +156,12 @@ const requireRoles = registry.getService('requireRoles');
 
 `database/connection.js` manages Mongoose with these settings:
 
-| Setting | Value |
-|---------|-------|
-| `serverSelectionTimeoutMS` | 5000ms |
-| `socketTimeoutMS` | 45000ms |
-| `maxPoolSize` | 10 |
-| `minPoolSize` | 2 |
+| Setting                    | Value   |
+| -------------------------- | ------- |
+| `serverSelectionTimeoutMS` | 5000ms  |
+| `socketTimeoutMS`          | 45000ms |
+| `maxPoolSize`              | 10      |
+| `minPoolSize`              | 2       |
 
 Default URI: `mongodb://localhost:27017/campusos`
 

@@ -49,7 +49,8 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
    ```bash
    docker run -d -p 27017:27017 --name mongodb mongo:latest
    ```
-   *If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](../getting-started/DATABASE_SETUP.md).*
+
+   _If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](../getting-started/DATABASE_SETUP.md)._
 
 6. **Create a feature branch**
 
@@ -57,7 +58,7 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
    git checkout -b feature/your-feature-name
    ```
 
-6. **Start development servers**
+7. **Start development servers**
 
    ```bash
    # Terminal 1: Backend

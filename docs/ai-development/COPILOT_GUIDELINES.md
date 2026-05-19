@@ -44,17 +44,17 @@ apps/<module>/src/
 
 ## Technology Facts
 
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| Backend runtime | Node.js 18+ (ES Modules) | No TypeScript on backend |
-| Backend framework | Express.js | — |
-| Frontend | Next.js 16.2.2 (App Router, webpack) | NOT Turbopack by default |
-| Frontend UI | shadcn/ui + Radix UI + Tailwind CSS v4 | — |
-| Forms | react-hook-form + Zod | — |
-| Database | MongoDB + Mongoose | — |
-| Auth | JWT (HS256, 15m default expiry) | via `jwt-authenticator.js` |
-| Testing | Vitest + mongodb-memory-server | — |
-| Package manager | pnpm (workspaces) | — |
+| Component         | Technology                             | Notes                      |
+| ----------------- | -------------------------------------- | -------------------------- |
+| Backend runtime   | Node.js 18+ (ES Modules)               | No TypeScript on backend   |
+| Backend framework | Express.js                             | —                          |
+| Frontend          | Next.js 16.2.2 (App Router, webpack)   | NOT Turbopack by default   |
+| Frontend UI       | shadcn/ui + Radix UI + Tailwind CSS v4 | —                          |
+| Forms             | react-hook-form + Zod                  | —                          |
+| Database          | MongoDB + Mongoose                     | —                          |
+| Auth              | JWT (HS256, 15m default expiry)        | via `jwt-authenticator.js` |
+| Testing           | Vitest + mongodb-memory-server         | —                          |
+| Package manager   | pnpm (workspaces)                      | —                          |
 
 ## Common Pitfalls
 

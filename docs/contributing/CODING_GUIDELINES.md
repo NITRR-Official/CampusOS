@@ -112,6 +112,7 @@ async createVendor(req, res, next) {
 ```
 
 **Rules**:
+
 - Extract specific fields from `req.body` — don't spread the whole thing
 - Always wrap in `try/catch`
 - Always call `next(error)` in catch blocks
@@ -134,7 +135,8 @@ createVendor(data) {
 ```
 
 **Rules**:
-- Return `{ success: true, data }` or `{ success: false, error }` 
+
+- Return `{ success: true, data }` or `{ success: false, error }`
 - Don't throw for business errors — return error objects
 - Only throw for unexpected/system errors
 
@@ -144,23 +146,31 @@ Routes register directly on `app` and use `requireRoles` for RBAC:
 
 ```javascript
 export function registerVendorRoutes(app, requireRoles) {
-  app.post('/api/v1/vendors', requireRoles('admin', 'coordinator'), controller.create);
+  app.post(
+    '/api/v1/vendors',
+    requireRoles('admin', 'coordinator'),
+    controller.create
+  );
   app.get('/api/v1/vendors', controller.list);
-  app.delete('/api/v1/vendors/:vendorId', requireRoles('admin'), controller.delete);
+  app.delete(
+    '/api/v1/vendors/:vendorId',
+    requireRoles('admin'),
+    controller.delete
+  );
 }
 ```
 
 ## Naming Conventions
 
-| Element | Convention | Example |
-|---------|-----------|---------|
-| Files | `kebab-case.js` | `vendor.service.js` |
-| Variables | `camelCase` | `vendorService` |
-| Classes | `PascalCase` | `VendorService` |
-| Functions | `camelCase` | `createVendor` |
-| Constants | `UPPER_SNAKE_CASE` | `PUBLIC_ROUTES` |
-| React components | `PascalCase` | `ThemeToggle` |
-| API routes | `/api/v1/kebab-case` | `/api/v1/vendors` |
+| Element          | Convention           | Example             |
+| ---------------- | -------------------- | ------------------- |
+| Files            | `kebab-case.js`      | `vendor.service.js` |
+| Variables        | `camelCase`          | `vendorService`     |
+| Classes          | `PascalCase`         | `VendorService`     |
+| Functions        | `camelCase`          | `createVendor`      |
+| Constants        | `UPPER_SNAKE_CASE`   | `PUBLIC_ROUTES`     |
+| React components | `PascalCase`         | `ThemeToggle`       |
+| API routes       | `/api/v1/kebab-case` | `/api/v1/vendors`   |
 
 ## TypeScript (Frontend)
 

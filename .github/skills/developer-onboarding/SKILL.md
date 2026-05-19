@@ -40,7 +40,7 @@ cp .env.example .env.local
 ```
 
 ### 2. Local Development Setup
-  
+
 Start the database and servers:
 
 ```bash

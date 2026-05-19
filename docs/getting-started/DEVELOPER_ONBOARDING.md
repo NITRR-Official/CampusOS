@@ -38,6 +38,7 @@ cd frontend && pnpm dev
 ```
 
 You should see:
+
 ```
 🚀 CampusOS Backend running on http://localhost:4000
 📝 Environment: development
@@ -158,14 +159,14 @@ Backend (port 4000)
 
 ## 8. Common Issues
 
-| Problem | Solution |
-|---------|----------|
-| `ECONNREFUSED` on backend start | MongoDB isn't running → `docker start mongodb` |
-| Port 3000/4000 already in use | Kill the process or change `PORT` in `.env` |
-| `pnpm: command not found` | `npm install -g pnpm` |
+| Problem                            | Solution                                                       |
+| ---------------------------------- | -------------------------------------------------------------- |
+| `ECONNREFUSED` on backend start    | MongoDB isn't running → `docker start mongodb`                 |
+| Port 3000/4000 already in use      | Kill the process or change `PORT` in `.env`                    |
+| `pnpm: command not found`          | `npm install -g pnpm`                                          |
 | Backend starts but no plugins load | Check `apps/` directory exists and modules have `src/index.js` |
-| Frontend builds but API calls fail | Backend must be running, check `NEXT_PUBLIC_API_BASE_URL` |
-| MongoDB download timeout in tests | Increase `beforeAll` timeout to `120000` |
+| Frontend builds but API calls fail | Backend must be running, check `NEXT_PUBLIC_API_BASE_URL`      |
+| MongoDB download timeout in tests  | Increase `beforeAll` timeout to `120000`                       |
 
 ## 9. Where to Go Next
 

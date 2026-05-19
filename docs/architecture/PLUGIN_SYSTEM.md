@@ -17,6 +17,7 @@ At startup, `plugin-loader.js` does this:
 ```
 
 If a module fails to load:
+
 - **Development**: Error is logged, other modules continue loading
 - **Production**: The entire server crashes (fail-fast)
 
@@ -57,7 +58,7 @@ export async function init(app, registry) {
   registry.registerModule('vendor', {
     routes: [
       'POST /api/v1/vendors',
-      'GET /api/v1/vendors',
+      'GET /api/v1/vendors'
       // ... etc
     ]
   });
@@ -97,19 +98,19 @@ apps/<module>/
 
 These are the actual directories in `/apps/` right now:
 
-| Module | Directory | Layer |
-|--------|-----------|-------|
-| Auth | `apps/auth/` | Foundation |
-| Club | `apps/club/` | Foundation |
-| Institute | `apps/institute/` | Foundation |
-| Event | `apps/event/` | Event |
-| Check-in | `apps/checkin/` | Event |
-| Task | `apps/task/` | Execution |
-| Calendar | `apps/calendar/` | Execution |
-| Vendor | `apps/vendor/` | Operations |
-| Resource | `apps/resource/` | Operations |
+| Module     | Directory          | Layer      |
+| ---------- | ------------------ | ---------- |
+| Auth       | `apps/auth/`       | Foundation |
+| Club       | `apps/club/`       | Foundation |
+| Institute  | `apps/institute/`  | Foundation |
+| Event      | `apps/event/`      | Event      |
+| Check-in   | `apps/checkin/`    | Event      |
+| Task       | `apps/task/`       | Execution  |
+| Calendar   | `apps/calendar/`   | Execution  |
+| Vendor     | `apps/vendor/`     | Operations |
+| Resource   | `apps/resource/`   | Operations |
 | Scheduling | `apps/scheduling/` | Operations |
-| Budget | `apps/budget/` | Operations |
+| Budget     | `apps/budget/`     | Operations |
 
 ## Module Communication Rules
 
@@ -124,6 +125,7 @@ const requireRoles = registry.getService('requireRoles');
 ```
 
 Modules communicate through:
+
 1. **The service registry** — `registry.getService('name')` / `registry.registerService('name', impl)`
 2. **The database** — Modules can read any MongoDB collection, but each module owns its own collections
 
@@ -141,10 +143,13 @@ mkdir -p apps/my-module/src/{controller,routes,schema,service}
 // apps/my-module/src/schema/my-module.schema.js
 import mongoose from 'mongoose';
 
-const myModuleSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  status: { type: String, enum: ['active', 'inactive'], default: 'active' },
-}, { timestamps: true });
+const myModuleSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' }
+  },
+  { timestamps: true }
+);
 
 export const MyModel = mongoose.model('MyModel', myModuleSchema);
 ```

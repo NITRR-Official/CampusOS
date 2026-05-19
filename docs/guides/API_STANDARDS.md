@@ -22,13 +22,13 @@ All endpoints follow this pattern:
 
 ### HTTP Methods
 
-| Method | Purpose | Example | Success Code |
-|--------|---------|---------|-------------|
-| `GET` | List or retrieve | `GET /api/v1/vendors` | `200` |
-| `POST` | Create | `POST /api/v1/vendors` | `201` |
-| `PUT` | Full update | `PUT /api/v1/vendors/:vendorId` | `200` |
-| `PATCH` | Partial update | `PATCH /api/v1/events/:eventId` | `200` |
-| `DELETE` | Remove | `DELETE /api/v1/vendors/:vendorId` | `200` |
+| Method   | Purpose          | Example                            | Success Code |
+| -------- | ---------------- | ---------------------------------- | ------------ |
+| `GET`    | List or retrieve | `GET /api/v1/vendors`              | `200`        |
+| `POST`   | Create           | `POST /api/v1/vendors`             | `201`        |
+| `PUT`    | Full update      | `PUT /api/v1/vendors/:vendorId`    | `200`        |
+| `PATCH`  | Partial update   | `PATCH /api/v1/events/:eventId`    | `200`        |
+| `DELETE` | Remove           | `DELETE /api/v1/vendors/:vendorId` | `200`        |
 
 ## Response Patterns
 
@@ -50,11 +50,17 @@ Used by: `auth`, `club`, `institute`, `event`, `checkin`, `task`, `calendar`
 ```
 
 Auth responses include token info:
+
 ```json
 {
   "success": true,
   "data": {
-    "user": { "id": "abc", "name": "John", "email": "john@example.com", "role": "volunteer" },
+    "user": {
+      "id": "abc",
+      "name": "John",
+      "email": "john@example.com",
+      "role": "volunteer"
+    },
     "accessToken": "eyJhbG...",
     "tokenType": "Bearer"
   }
@@ -66,6 +72,7 @@ Auth responses include token info:
 Used by: `vendor`, `resource`, `scheduling`, `budget`
 
 Single resource:
+
 ```json
 {
   "_id": "abc123",
@@ -76,18 +83,18 @@ Single resource:
 ```
 
 List:
+
 ```json
 {
   "count": 5,
-  "vendors": [
-    { "_id": "abc123", "name": "Catering Co" }
-  ]
+  "vendors": [{ "_id": "abc123", "name": "Catering Co" }]
 }
 ```
 
 ### Errors
 
 Operations layer (bare error):
+
 ```json
 {
   "error": "Vendor not found"
@@ -95,6 +102,7 @@ Operations layer (bare error):
 ```
 
 Foundation/Event layer (structured error with code):
+
 ```json
 {
   "success": false,
@@ -107,6 +115,7 @@ Foundation/Event layer (structured error with code):
 ```
 
 Common error codes from auth/event controllers:
+
 - `VALIDATION_ERROR` — Invalid request body
 - `EMAIL_ALREADY_EXISTS` (409) — Duplicate email on signup
 - `INVALID_CREDENTIALS` (401) — Wrong email or password
@@ -118,16 +127,16 @@ Common error codes from auth/event controllers:
 
 ### Actual codes used in the codebase
 
-| Code | When |
-|------|------|
-| `200` | Successful GET, PUT, PATCH, DELETE |
-| `201` | Successful POST (resource created) |
-| `400` | Missing required fields, invalid data, business rule violation |
-| `401` | Missing token, invalid/expired token, wrong credentials |
-| `403` | Valid token but insufficient role |
-| `404` | Resource not found, route not found |
+| Code  | When                                                             |
+| ----- | ---------------------------------------------------------------- |
+| `200` | Successful GET, PUT, PATCH, DELETE                               |
+| `201` | Successful POST (resource created)                               |
+| `400` | Missing required fields, invalid data, business rule violation   |
+| `401` | Missing token, invalid/expired token, wrong credentials          |
+| `403` | Valid token but insufficient role                                |
+| `404` | Resource not found, route not found                              |
 | `409` | Conflict — duplicate email, already registered, capacity reached |
-| `500` | Unhandled server errors |
+| `500` | Unhandled server errors                                          |
 
 ## Filtering
 
@@ -167,10 +176,10 @@ After auth middleware, the request object contains:
 
 ```javascript
 req.user = {
-  id: "user_id",       // from JWT sub or id claim
-  email: "user@example.com",
-  role: "coordinator"  // admin | coordinator | volunteer
-}
+  id: 'user_id', // from JWT sub or id claim
+  email: 'user@example.com',
+  role: 'coordinator' // admin | coordinator | volunteer
+};
 ```
 
 ## RBAC
@@ -179,15 +188,19 @@ Role checks happen at the route level using `requireRoles()`:
 
 ```javascript
 // In route definitions:
-app.post('/api/v1/vendors', requireRoles('admin', 'coordinator'), controller.create);
+app.post(
+  '/api/v1/vendors',
+  requireRoles('admin', 'coordinator'),
+  controller.create
+);
 app.delete('/api/v1/vendors/:id', requireRoles('admin'), controller.delete);
 ```
 
-| Role | Typical access |
-|------|---------------|
-| `admin` | Full access — create, update, delete, approve |
-| `coordinator` | Create, update, assign resources |
-| `volunteer` | View, participate, submit |
+| Role          | Typical access                                |
+| ------------- | --------------------------------------------- |
+| `admin`       | Full access — create, update, delete, approve |
+| `coordinator` | Create, update, assign resources              |
+| `volunteer`   | View, participate, submit                     |
 
 ## Controller Pattern
 
@@ -210,6 +223,7 @@ async createVendor(req, res, next) {
 ```
 
 Key patterns:
+
 - **try/catch** wraps every handler
 - **`next(error)`** on unexpected errors — sends to error middleware
 - **Service returns `{ success, error }` or `{ success, data }`** — controller checks and responds

@@ -57,13 +57,13 @@ Modules are grouped into layers. Lower layers don't depend on higher ones.
 
 ### What's in each layer
 
-| Layer | Modules | What it handles | Storage |
-|-------|---------|----------------|---------|
-| **Foundation** | `auth`, `club`, `institute` | User accounts, JWT auth, RBAC, org structure | Mixed* |
-| **Event** | `event`, `checkin` | Event CRUD, RSVP/registration, QR check-in | In-memory |
-| **Execution** | `task`, `calendar` | Task assignment, dependencies, deadlines | In-memory |
-| **Operations** | `vendor`, `resource`, `scheduling`, `budget` | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB |
-| **Growth** | *(not yet built)* | Sponsorship, marketing, analytics | — |
+| Layer          | Modules                                      | What it handles                                                                | Storage   |
+| -------------- | -------------------------------------------- | ------------------------------------------------------------------------------ | --------- |
+| **Foundation** | `auth`, `club`, `institute`                  | User accounts, JWT auth, RBAC, org structure                                   | Mixed\*   |
+| **Event**      | `event`, `checkin`                           | Event CRUD, RSVP/registration, QR check-in                                     | In-memory |
+| **Execution**  | `task`, `calendar`                           | Task assignment, dependencies, deadlines                                       | In-memory |
+| **Operations** | `vendor`, `resource`, `scheduling`, `budget` | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB   |
+| **Growth**     | _(not yet built)_                            | Sponsorship, marketing, analytics                                              | —         |
 
 \* `auth` uses MongoDB (User schema), `club` and `institute` use in-memory storage.
 
@@ -74,6 +74,7 @@ Modules are grouped into layers. Lower layers don't depend on higher ones.
 ### 1. Every feature is a plugin
 
 All feature code lives in `/apps/<module>/`. The backend core (`backend/src/`) only handles:
+
 - Server lifecycle
 - Middleware pipeline
 - Plugin loading
@@ -82,6 +83,7 @@ All feature code lives in `/apps/<module>/`. The backend core (`backend/src/`) o
 ### 2. No module-to-module imports
 
 Modules talk to each other through:
+
 - **The service registry** — `registry.getService('requireRoles')`
 - **The database** — Modules can read any collection via Mongoose
 
@@ -90,21 +92,22 @@ This rule ensures you can add, remove, or disable modules without breaking other
 ### 3. Build vertically, not horizontally
 
 When adding a feature, build it top-to-bottom:
+
 1. Mongoose schema → 2. Service → 3. Controller → 4. Routes → 5. Frontend page
 
 Don't build "all services first, then all controllers." This catches integration issues early.
 
 ## Tech Stack
 
-| Component | Technology | Why |
-|-----------|-----------|-----|
-| **Backend** | Node.js 18+ with Express **v5** | ES module support, async middleware natively |
-| **Frontend** | Next.js 16 (App Router) + React 19 | SSR, file-based routing, TypeScript |
-| **Database** | MongoDB + Mongoose | Flexible schemas, fast prototyping, embedded documents |
-| **UI** | Tailwind CSS v4 + shadcn/ui | Utility-first styling with pre-built accessible components |
-| **Validation** | Zod (frontend) + Mongoose (backend) | Schema validation at both ends |
-| **Auth** | JWT (HS256) | Stateless auth, simple to implement |
-| **Package mgr** | pnpm (workspaces) | Fast, strict, supports monorepo |
+| Component       | Technology                          | Why                                                        |
+| --------------- | ----------------------------------- | ---------------------------------------------------------- |
+| **Backend**     | Node.js 18+ with Express **v5**     | ES module support, async middleware natively               |
+| **Frontend**    | Next.js 16 (App Router) + React 19  | SSR, file-based routing, TypeScript                        |
+| **Database**    | MongoDB + Mongoose                  | Flexible schemas, fast prototyping, embedded documents     |
+| **UI**          | Tailwind CSS v4 + shadcn/ui         | Utility-first styling with pre-built accessible components |
+| **Validation**  | Zod (frontend) + Mongoose (backend) | Schema validation at both ends                             |
+| **Auth**        | JWT (HS256)                         | Stateless auth, simple to implement                        |
+| **Package mgr** | pnpm (workspaces)                   | Fast, strict, supports monorepo                            |
 
 ## Non-Negotiable Rules
 

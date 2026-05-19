@@ -16,13 +16,13 @@ const requireRoles = registry.getService('requireRoles');
 
 ### Code in the right place
 
-| Code type | Goes in | Not in |
-|-----------|---------|--------|
-| Business logic | `service/*.service.js` | Controllers |
-| Request handling | `controller/*.controller.js` | Services |
-| Route definitions | `routes/*.routes.js` | Index or controllers |
-| Mongoose schemas | `schema/*.schema.js` | Services |
-| Plugin setup | `index.js` (exports `init`) | Anywhere else |
+| Code type         | Goes in                      | Not in               |
+| ----------------- | ---------------------------- | -------------------- |
+| Business logic    | `service/*.service.js`       | Controllers          |
+| Request handling  | `controller/*.controller.js` | Services             |
+| Route definitions | `routes/*.routes.js`         | Index or controllers |
+| Mongoose schemas  | `schema/*.schema.js`         | Services             |
+| Plugin setup      | `index.js` (exports `init`)  | Anywhere else        |
 
 ### Plugin entry point
 
@@ -117,9 +117,17 @@ Routes use `requireRoles()` for RBAC and register directly on `app`:
 
 ```javascript
 export function registerVendorRoutes(app, requireRoles) {
-  app.post('/api/v1/vendors', requireRoles('admin', 'coordinator'), controller.create);
+  app.post(
+    '/api/v1/vendors',
+    requireRoles('admin', 'coordinator'),
+    controller.create
+  );
   app.get('/api/v1/vendors', controller.list);
-  app.delete('/api/v1/vendors/:vendorId', requireRoles('admin'), controller.delete);
+  app.delete(
+    '/api/v1/vendors/:vendorId',
+    requireRoles('admin'),
+    controller.delete
+  );
 }
 ```
 
@@ -135,16 +143,16 @@ pnpm test              # If tests exist for your module
 
 ## Review Decision Guide
 
-| Finding | Severity | Action |
-|---------|----------|--------|
-| Direct import between modules | 🔴 Blocking | Must fix |
-| Business logic in controller | 🔴 Blocking | Move to service |
-| Missing `next(error)` in catch | 🔴 Blocking | Must fix |
-| Missing `requireRoles` on write endpoint | 🔴 Blocking | Add role check |
-| Hardcoded secret | 🔴 Blocking | Use env var |
-| Passing `req.body` directly to service | ⚠️ Warning | Extract specific fields |
-| No test coverage for service | ⚠️ Warning | Add tests |
-| Missing JSDoc on service methods | ℹ️ Info | Nice to have |
+| Finding                                  | Severity    | Action                  |
+| ---------------------------------------- | ----------- | ----------------------- |
+| Direct import between modules            | 🔴 Blocking | Must fix                |
+| Business logic in controller             | 🔴 Blocking | Move to service         |
+| Missing `next(error)` in catch           | 🔴 Blocking | Must fix                |
+| Missing `requireRoles` on write endpoint | 🔴 Blocking | Add role check          |
+| Hardcoded secret                         | 🔴 Blocking | Use env var             |
+| Passing `req.body` directly to service   | ⚠️ Warning  | Extract specific fields |
+| No test coverage for service             | ⚠️ Warning  | Add tests               |
+| Missing JSDoc on service methods         | ℹ️ Info     | Nice to have            |
 
 ---
 

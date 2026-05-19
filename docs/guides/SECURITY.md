@@ -7,21 +7,22 @@ Security practices for CampusOS, based on the actual implementation.
 ### How JWT Auth Works
 
 1. User logs in via `POST /api/v1/auth/login`
-2. Server returns `{ accessToken, tokenType: "Bearer", user }` 
+2. Server returns `{ accessToken, tokenType: "Bearer", user }`
 3. Frontend stores token in `localStorage` (key: `campusos.auth-session`)
 4. Every subsequent request includes `Authorization: Bearer <token>`
 5. `middleware/auth.js` verifies the token and sets `req.user`
 
 ### JWT Configuration
 
-| Setting | Value | Source |
-|---------|-------|--------|
-| Algorithm | HS256 | Hardcoded in `jwt-authenticator.js` |
-| Default expiry | 15 minutes | `JWT_EXPIRES_IN` env var |
-| Secret | Required in production | `JWT_SECRET` env var |
-| Dev fallback | `campus-os-dev-jwt-secret-change-me` | Only in non-production |
+| Setting        | Value                                | Source                              |
+| -------------- | ------------------------------------ | ----------------------------------- |
+| Algorithm      | HS256                                | Hardcoded in `jwt-authenticator.js` |
+| Default expiry | 15 minutes                           | `JWT_EXPIRES_IN` env var            |
+| Secret         | Required in production               | `JWT_SECRET` env var                |
+| Dev fallback   | `campus-os-dev-jwt-secret-change-me` | Only in non-production              |
 
 **Important**: If `JWT_SECRET` is not set in production, the server will crash on startup with:
+
 ```
 Error: JWT_SECRET environment variable is required in production
 ```
@@ -47,12 +48,12 @@ Everything else returns `401 Unauthorized` without a valid token.
 
 Four roles defined in `user.schema.js`:
 
-| Role | Access |
-|------|--------|
-| `admin` | Full access — CRUD on all resources, delete, approve |
+| Role          | Access                                                 |
+| ------------- | ------------------------------------------------------ |
+| `admin`       | Full access — CRUD on all resources, delete, approve   |
 | `coordinator` | Create, update, assign — event and resource management |
-| `volunteer` | View and participate (default role for new users) |
-| `user` | Basic access |
+| `volunteer`   | View and participate (default role for new users)      |
+| `user`        | Basic access                                           |
 
 > **Auto-admin**: The first user to sign up automatically gets the `admin` role (see `auth.service.js`). All subsequent users get `volunteer`.
 
@@ -82,8 +83,13 @@ export function requireRoles(...allowedRoles) {
 ```
 
 Used in routes like:
+
 ```javascript
-app.post('/api/v1/vendors', requireRoles('admin', 'coordinator'), controller.create);
+app.post(
+  '/api/v1/vendors',
+  requireRoles('admin', 'coordinator'),
+  controller.create
+);
 app.delete('/api/v1/vendors/:id', requireRoles('admin'), controller.delete);
 ```
 
@@ -98,10 +104,10 @@ app.delete('/api/v1/vendors/:id', requireRoles('admin'), controller.delete);
 
 ### Required secrets
 
-| Variable | Required In | Notes |
-|----------|------------|-------|
-| `JWT_SECRET` | Production | Server crashes without it |
-| `MONGODB_URI` | Always | Falls back to `mongodb://localhost:27017/campusos` |
+| Variable      | Required In | Notes                                              |
+| ------------- | ----------- | -------------------------------------------------- |
+| `JWT_SECRET`  | Production  | Server crashes without it                          |
+| `MONGODB_URI` | Always      | Falls back to `mongodb://localhost:27017/campusos` |
 
 ## Password Security
 
@@ -124,6 +130,7 @@ const hash = `${salt}:${derivedKey.toString('hex')}`;
 ### Request body size limits
 
 Set in `app.js`:
+
 ```javascript
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -155,8 +162,12 @@ Configured in `app.js`:
 
 ```javascript
 const allowedOrigins = (
-  process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:3000'
-).split(',').map(origin => origin.trim());
+  process.env.FRONTEND_URLS ||
+  process.env.FRONTEND_URL ||
+  'http://localhost:3000'
+)
+  .split(',')
+  .map((origin) => origin.trim());
 ```
 
 - Supports multiple origins via comma-separated `FRONTEND_URLS` env var

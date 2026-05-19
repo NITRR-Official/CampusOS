@@ -36,6 +36,7 @@ cd frontend && pnpm dev
 ```
 
 You should see:
+
 ```
 🚀 CampusOS Backend running on http://localhost:4000
 📝 Environment: development
@@ -62,12 +63,12 @@ See [Environment Variables](./ENVIRONMENT.md) for all options.
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
+| Problem                   | Fix                                            |
+| ------------------------- | ---------------------------------------------- |
 | `ECONNREFUSED` on backend | MongoDB isn't running → `docker start mongodb` |
-| Port 3000 or 4000 in use | Kill the process or change `PORT` in `.env` |
-| `pnpm: command not found` | `npm install -g pnpm` |
-| Dependencies out of date | `pnpm install` from root |
+| Port 3000 or 4000 in use  | Kill the process or change `PORT` in `.env`    |
+| `pnpm: command not found` | `npm install -g pnpm`                          |
+| Dependencies out of date  | `pnpm install` from root                       |
 
 ## Next Steps
 

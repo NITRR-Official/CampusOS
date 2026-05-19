@@ -4,14 +4,14 @@ This directory contains the key architectural decisions made for CampusOS. Each 
 
 ## Index
 
-| ADR | Title | Status | Date |
-|-----|-------|--------|------|
-| [ADR-000](./ADR-000-CORE_PRINCIPLES.md) | Core Principles | ✅ Accepted | 2026-03-15 |
-| [ADR-001](./ADR-001-TECH_STACK.md) | Tech Stack Selection | ✅ Accepted | 2026-03-15 |
-| [ADR-002](./ADR-002-MULTI_TENANT.md) | Multi-Tenant Architecture | ⚠️ Deprecated | 2026-03-15 |
-| [ADR-003](./ADR-003-SYSTEM_LAYERS.md) | System Layers | ✅ Accepted | 2026-03-15 |
-| [ADR-004](./ADR-004-DEV_STRATEGY.md) | Development Strategy | ✅ Accepted | 2026-03-15 |
-| [ADR-005](./ADR-005-REMOVE_MULTI_TENANT.md) | Remove Multi-Tenant | ✅ Accepted | 2026-04-01 |
+| ADR                                         | Title                     | Status        | Date       |
+| ------------------------------------------- | ------------------------- | ------------- | ---------- |
+| [ADR-000](./ADR-000-CORE_PRINCIPLES.md)     | Core Principles           | ✅ Accepted   | 2026-03-15 |
+| [ADR-001](./ADR-001-TECH_STACK.md)          | Tech Stack Selection      | ✅ Accepted   | 2026-03-15 |
+| [ADR-002](./ADR-002-MULTI_TENANT.md)        | Multi-Tenant Architecture | ⚠️ Deprecated | 2026-03-15 |
+| [ADR-003](./ADR-003-SYSTEM_LAYERS.md)       | System Layers             | ✅ Accepted   | 2026-03-15 |
+| [ADR-004](./ADR-004-DEV_STRATEGY.md)        | Development Strategy      | ✅ Accepted   | 2026-03-15 |
+| [ADR-005](./ADR-005-REMOVE_MULTI_TENANT.md) | Remove Multi-Tenant       | ✅ Accepted   | 2026-04-01 |
 
 ## What is an ADR?
 

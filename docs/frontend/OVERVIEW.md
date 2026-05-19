@@ -4,18 +4,18 @@ The CampusOS frontend is a Next.js 16 application using the App Router, React 19
 
 ## Tech Stack (actual `package.json`)
 
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| Next.js | 16.2.2 | Framework — App Router, SSR, file-based routing |
-| React | 19.2.4 | UI library |
-| TypeScript | 5.x | Type safety |
-| Tailwind CSS | 4.x | Utility-first styling |
-| shadcn/ui | 4.6.0 | Pre-built UI components (Button, Card, Dialog, Toast, etc.) |
-| Radix UI | — | Accessible primitives (under shadcn/ui) |
-| react-hook-form | 7.x | Form state management |
-| Zod | 3.x | Schema validation |
-| Axios | 1.x | HTTP client (available, but API clients use `fetch`) |
-| Lucide React | 1.x | Icon library |
+| Technology      | Version | Purpose                                                     |
+| --------------- | ------- | ----------------------------------------------------------- |
+| Next.js         | 16.2.2  | Framework — App Router, SSR, file-based routing             |
+| React           | 19.2.4  | UI library                                                  |
+| TypeScript      | 5.x     | Type safety                                                 |
+| Tailwind CSS    | 4.x     | Utility-first styling                                       |
+| shadcn/ui       | 4.6.0   | Pre-built UI components (Button, Card, Dialog, Toast, etc.) |
+| Radix UI        | —       | Accessible primitives (under shadcn/ui)                     |
+| react-hook-form | 7.x     | Form state management                                       |
+| Zod             | 3.x     | Schema validation                                           |
+| Axios           | 1.x     | HTTP client (available, but API clients use `fetch`)        |
+| Lucide React    | 1.x     | Icon library                                                |
 
 ## Directory Structure
 
@@ -69,7 +69,8 @@ Every backend domain has a corresponding API client in `lib/`. These use `fetch`
 
 ```typescript
 // lib/auth-api.ts — simplified
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
 async function requestAuth(path: string, body: Record<string, string>) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -116,12 +117,14 @@ export function clearAuthSession() {
 ## Fonts
 
 The app uses Google's **Geist** font family (loaded via `next/font/google`):
+
 - `Geist` (sans-serif) — mapped to `--font-geist-sans`
 - `Geist Mono` (monospace) — mapped to `--font-geist-mono`
 
 ## Theme System
 
 Dark mode is managed by a custom `ThemeProvider` in `lib/theme-provider.tsx`:
+
 - Wraps the entire app at the layout level
 - Toggle via `ThemeToggle.tsx` component
 - Uses CSS variables for color scheme switching
@@ -129,6 +132,7 @@ Dark mode is managed by a custom `ThemeProvider` in `lib/theme-provider.tsx`:
 ## Forms
 
 Forms use `react-hook-form` + `Zod` for validation:
+
 - Form state handled by `useForm()` from react-hook-form
 - Schema validation with `zodResolver(schema)`
 - shadcn/ui `<Form>` wrapper components for consistent field rendering
@@ -147,18 +151,18 @@ pnpm lint         # ESLint
 
 ## Available Pages
 
-| Route | Purpose |
-|-------|---------|
-| `/` | Dashboard / landing page |
-| `/login` | User login |
-| `/signup` | User registration |
-| `/forgot-password` | Password reset |
-| `/events` | Event listing and management |
-| `/tasks` | Task management |
-| `/calendar` | Calendar view |
-| `/vendors` | Vendor management |
-| `/resources` | Resource management |
-| `/participants` | Participant dashboard |
+| Route              | Purpose                      |
+| ------------------ | ---------------------------- |
+| `/`                | Dashboard / landing page     |
+| `/login`           | User login                   |
+| `/signup`          | User registration            |
+| `/forgot-password` | Password reset               |
+| `/events`          | Event listing and management |
+| `/tasks`           | Task management              |
+| `/calendar`        | Calendar view                |
+| `/vendors`         | Vendor management            |
+| `/resources`       | Resource management          |
+| `/participants`    | Participant dashboard        |
 
 ---
 

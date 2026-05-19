@@ -148,19 +148,19 @@ apps/<module>/
 
 ### Module Inventory
 
-| Module | Directory | Storage | Description |
-|--------|-----------|---------|-------------|
-| Auth | `apps/auth/` | MongoDB | User registration, login, JWT tokens |
-| Club | `apps/club/` | In-memory | Club management, membership |
-| Institute | `apps/institute/` | In-memory | Institute management |
-| Event | `apps/event/` | In-memory | Event CRUD, RSVP/registration |
-| Check-in | `apps/checkin/` | In-memory | QR code check-in, attendance |
-| Task | `apps/task/` | In-memory | Task assignment and tracking |
-| Calendar | `apps/calendar/` | In-memory | Calendar event management |
-| Vendor | `apps/vendor/` | MongoDB | Vendor management and rating |
-| Resource | `apps/resource/` | MongoDB | Equipment and resource tracking |
-| Scheduling | `apps/scheduling/` | MongoDB | Time slot scheduling, conflicts |
-| Budget | `apps/budget/` | MongoDB | Budget allocation, expenses |
+| Module     | Directory          | Storage   | Description                          |
+| ---------- | ------------------ | --------- | ------------------------------------ |
+| Auth       | `apps/auth/`       | MongoDB   | User registration, login, JWT tokens |
+| Club       | `apps/club/`       | In-memory | Club management, membership          |
+| Institute  | `apps/institute/`  | In-memory | Institute management                 |
+| Event      | `apps/event/`      | In-memory | Event CRUD, RSVP/registration        |
+| Check-in   | `apps/checkin/`    | In-memory | QR code check-in, attendance         |
+| Task       | `apps/task/`       | In-memory | Task assignment and tracking         |
+| Calendar   | `apps/calendar/`   | In-memory | Calendar event management            |
+| Vendor     | `apps/vendor/`     | MongoDB   | Vendor management and rating         |
+| Resource   | `apps/resource/`   | MongoDB   | Equipment and resource tracking      |
+| Scheduling | `apps/scheduling/` | MongoDB   | Time slot scheduling, conflicts      |
+| Budget     | `apps/budget/`     | MongoDB   | Budget allocation, expenses          |
 
 > **Important**: MongoDB is required to start the server — `connectDB()` runs at boot and exits on failure.
 > Some modules (Club, Institute, Event, Check-in, Task, Calendar) store data in-memory using `Map()` objects, meaning their data is lost on restart.
@@ -180,34 +180,34 @@ shared/
 
 ### Root (`package.json`)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `mongoose` | ^9.6.1 | MongoDB ODM (shared across modules) |
-| `mongodb-memory-server` | ^11.1.0 | In-memory MongoDB for tests |
-| `eslint` | ^10.3.0 | Linting |
-| `prettier` | ^3.8.3 | Formatting |
+| Package                 | Version | Purpose                             |
+| ----------------------- | ------- | ----------------------------------- |
+| `mongoose`              | ^9.6.1  | MongoDB ODM (shared across modules) |
+| `mongodb-memory-server` | ^11.1.0 | In-memory MongoDB for tests         |
+| `eslint`                | ^10.3.0 | Linting                             |
+| `prettier`              | ^3.8.3  | Formatting                          |
 
 ### Backend (`backend/package.json`)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `express` | ^5.2.1 | HTTP framework (v5!) |
-| `cors` | ^2.8.6 | Cross-origin requests |
-| `jsonwebtoken` | ^9.0.3 | JWT signing/verification |
-| `joi` | ^18.1.2 | Validation (available but not universally used) |
-| `dotenv` | ^17.4.0 | Environment variable loading |
+| Package        | Version | Purpose                                         |
+| -------------- | ------- | ----------------------------------------------- |
+| `express`      | ^5.2.1  | HTTP framework (v5!)                            |
+| `cors`         | ^2.8.6  | Cross-origin requests                           |
+| `jsonwebtoken` | ^9.0.3  | JWT signing/verification                        |
+| `joi`          | ^18.1.2 | Validation (available but not universally used) |
+| `dotenv`       | ^17.4.0 | Environment variable loading                    |
 
 ### Frontend (`frontend/package.json`)
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `next` | 16.2.2 | React framework |
-| `react` | 19.2.4 | UI library |
-| `tailwindcss` | ^4 | Utility-first CSS |
-| `shadcn` | ^4.6.0 | Component library |
-| `react-hook-form` | ^7.75.0 | Form state |
-| `zod` | ^3.23.8 | Schema validation |
-| `axios` | ^1.14.0 | HTTP client (available, but API clients use `fetch`) |
+| Package           | Version | Purpose                                              |
+| ----------------- | ------- | ---------------------------------------------------- |
+| `next`            | 16.2.2  | React framework                                      |
+| `react`           | 19.2.4  | UI library                                           |
+| `tailwindcss`     | ^4      | Utility-first CSS                                    |
+| `shadcn`          | ^4.6.0  | Component library                                    |
+| `react-hook-form` | ^7.75.0 | Form state                                           |
+| `zod`             | ^3.23.8 | Schema validation                                    |
+| `axios`           | ^1.14.0 | HTTP client (available, but API clients use `fetch`) |
 
 ---
 

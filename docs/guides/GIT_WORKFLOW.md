@@ -25,15 +25,15 @@ git checkout -b test/202-vendor-service-tests
 
 ### Branch Types
 
-| Type | Purpose |
-|------|---------|
-| `feature` | New functionality |
-| `fix` | Bug fixes |
-| `chore` | Maintenance, dependencies |
-| `docs` | Documentation changes |
-| `test` | Adding or fixing tests |
-| `perf` | Performance improvements |
-| `refactor` | Code restructuring |
+| Type       | Purpose                   |
+| ---------- | ------------------------- |
+| `feature`  | New functionality         |
+| `fix`      | Bug fixes                 |
+| `chore`    | Maintenance, dependencies |
+| `docs`     | Documentation changes     |
+| `test`     | Adding or fixing tests    |
+| `perf`     | Performance improvements  |
+| `refactor` | Code restructuring        |
 
 ## Commit Messages
 
@@ -65,7 +65,7 @@ git commit -m "WIP"
 - **Type**: `feat`, `fix`, `chore`, `docs`, `refactor`, `perf`, `test`
 - **Scope** (optional): Module name — `(vendor)`, `(auth)`, `(frontend)`
 - **Subject**: Lowercase, imperative, no period at the end
-- **Body**: Optional, explain *why* not *what*
+- **Body**: Optional, explain _why_ not _what_
 
 ## Keeping Your Branch Updated
 
@@ -137,13 +137,13 @@ git branch -d feature/123-enrollment-api
 
 ## Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| Merge conflict | Edit conflicted files, `git add .`, `git rebase --continue` |
-| Committed to main | `git revert <hash>` — never force-push main |
-| Large conflict | Squash commits first: `git rebase -i origin/main` |
-| Need to reset | `git reset --hard origin/main` (⚠️ loses local changes) |
-| Can't push | `git push --set-upstream origin <branch>` |
+| Issue             | Solution                                                    |
+| ----------------- | ----------------------------------------------------------- |
+| Merge conflict    | Edit conflicted files, `git add .`, `git rebase --continue` |
+| Committed to main | `git revert <hash>` — never force-push main                 |
+| Large conflict    | Squash commits first: `git rebase -i origin/main`           |
+| Need to reset     | `git reset --hard origin/main` (⚠️ loses local changes)     |
+| Can't push        | `git push --set-upstream origin <branch>`                   |
 
 ---
 
