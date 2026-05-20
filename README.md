@@ -1,7 +1,7 @@
 # CampusOS
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./docs/contributing/CONTRIBUTING.md)
 
 **The Operating System for Campus Management — A modular, scalable platform for managing the complete lifecycle of campus activities.**
 
@@ -248,7 +248,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 
 **New to CampusOS?** Start here:
 
-- 📖 [**CONTRIBUTING.md**](CONTRIBUTING.md) — Complete contributor guide with setup instructions
+- 📖 [**CONTRIBUTING.md**](./docs/contributing/CONTRIBUTING.md) — Complete contributor guide with setup instructions
 - 🐛 [**Bug Report Template**](https://github.com/NITRR-Official/CampusOS/issues/new?template=bug_report.md)
 - ✨ [**Feature Request Template**](https://github.com/NITRR-Official/CampusOS/issues/new?template=feature_request.md)
 - 📚 [**Documentation Issues**](https://github.com/NITRR-Official/CampusOS/issues/new?template=documentation.md)
@@ -257,7 +257,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 
 - 💬 [GitHub Discussions](https://github.com/NITRR-Official/CampusOS/discussions) — Ask questions
 - 📋 [Issue Tracker](https://github.com/NITRR-Official/CampusOS/issues) — Report bugs or suggest features
-- 🏆 [CONTRIBUTORS.md](CONTRIBUTORS.md) — See who's contributed
+- 🏆 [CONTRIBUTORS.md](./docs/contributing/CONTRIBUTORS.md) — See who's contributed
 
 ### How to Contribute
 
@@ -307,7 +307,7 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 - 💬 Feedback: constructive suggestions on your PR
 - ✨ Merge: Once approved and all checks pass
 
-**Questions?** Check [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup and troubleshooting.
+**Questions?** Check [CONTRIBUTING.md](./docs/contributing/CONTRIBUTING.md) for detailed setup and troubleshooting.
 
 ---
 
@@ -315,15 +315,15 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
 
 **Our Community:** CampusOS is maintained by NIT Raipur and welcomes contributors worldwide.
 
-- 📖 **[Code of Conduct](./CODE_OF_CONDUCT.md)** — Guidelines for respectful community
-- 🤝 **[CONTRIBUTORS.md](./CONTRIBUTORS.md)** — Recognition for contributors
+- 📖 **[Code of Conduct](./docs/contributing/CODE_OF_CONDUCT.md)** — Guidelines for respectful community
+- 🤝 **[CONTRIBUTORS.md](./docs/contributing/CONTRIBUTORS.md)** — Recognition for contributors
 - 💬 **[Discussions](https://github.com/NITRR-Official/CampusOS/discussions)** — Ask questions and share ideas
 
 **Need Help?**
 
 - 📋 Open an [Issue](https://github.com/NITRR-Official/CampusOS/issues) — Report bugs or request features
 - 💭 Start a [Discussion](https://github.com/NITRR-Official/CampusOS/discussions) — Ask questions
-- 📚 Read [CONTRIBUTING.md](./CONTRIBUTING.md) — Setup and guidelines
+- 📚 Read [CONTRIBUTING.md](./docs/contributing/CONTRIBUTING.md) — Setup and guidelines
 
 ## 👥 Maintainers
 
