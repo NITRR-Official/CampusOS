@@ -27,10 +27,14 @@ CampusOS/
 
 ### Workspace Configuration
 
-Workspaces are defined in root `package.json` (not a separate `pnpm-workspace.yaml`):
+Workspaces are defined in `pnpm-workspace.yaml` (the authoritative config for pnpm):
 
-```json
-"workspaces": ["apps/*", "backend", "frontend", "shared"]
+```yaml
+packages:
+  - backend
+  - frontend
+  - apps/*
+  - shared
 ```
 
 ## Backend (`backend/`)

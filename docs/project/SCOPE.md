@@ -36,15 +36,25 @@ CampusOS is built in phases, each expanding functionality.
 
 ## ✅ Phase 3: Execution System (Weeks 6–7)
 
-**In Scope**: Tasks Module, Workflows, Assignments, Check-in System.
+**In Scope**: Tasks Module, Calendar Module, Workflows, Assignments.
 
 **Out of Scope**: Advanced workflow automation, external tool integration, mobile-first experience.
 
-**Success Metrics**: Create and assign tasks, check-in working, workflow state management visible.
+**Success Metrics**: Create and assign tasks, workflow state management visible.
 
 ---
 
-## ✅ Phase 4: Operations System (Weeks 8–10)
+## ✅ Phase 4: Live Event Support (Week 8)
+
+**In Scope**: Check-in System, QR Code Generation, Attendance Tracking, Participant Dashboard.
+
+**Out of Scope**: NFC-based check-in, biometric attendance, third-party ticketing integration.
+
+**Success Metrics**: QR check-in working, attendance tracked, participant dashboard functional.
+
+---
+
+## ✅ Phase 5: Operations System (Weeks 9–11)
 
 **In Scope**: Vendor Module, Resource Module, Scheduling, Budget Module.
 
@@ -54,7 +64,7 @@ CampusOS is built in phases, each expanding functionality.
 
 ---
 
-## 🟡 Phase 5: Growth System (Weeks 11–12)
+## 🟡 Phase 6: Growth System (Weeks 12–14)
 
 **In Scope**: Sponsorship Module, Marketing Module, Analytics, Notifications.
 
@@ -64,7 +74,7 @@ CampusOS is built in phases, each expanding functionality.
 
 ---
 
-## Phase 6: System Maturity (Weeks 13+)
+## Phase 7: System Maturity (Weeks 15+)
 
 **In Scope**: Performance optimization, security hardening, documentation completion, community feedback integration, bug fixes.
 
@@ -129,18 +139,19 @@ CampusOS is built in phases, each expanding functionality.
 1. **Technology** — Node.js, Express, Next.js, MongoDB
 2. **Architecture** — Modular, plugin-based, no breaking changes
 3. **Data** — GDPR compliant, encrypted sensitive data
-4. **Timeline** — 12–16 weeks to Phase 5
+4. **Timeline** — 12–16 weeks to Phase 6
 
 ---
 
 ## Milestones
 
 1. **Foundation Ready** — Phase 1 complete (Auth, Users, Clubs, RBAC working)
-2. **Event System Live** — Phase 2 complete (Events, RSVP, Check-in functional)
+2. **Event System Live** — Phase 2 complete (Events, RSVP functional)
 3. **Execution System Ready** — Phase 3 complete (Tasks, Workflows, Calendar working)
-4. **First Fest Ready** 🎉 — Phase 4 complete (Real event with all systems)
+4. **First Fest Ready** 🎉 — Phase 4 complete (Events + RSVP + Check-in + Tasks)
 5. **Ops System Ready** — Phase 5 complete (Vendors, Resources, Budget tracking)
 6. **Growth System Ready** — Phase 6 complete (Sponsorship, Marketing, Analytics)
+7. **Production Ready** — Phase 7 complete (Performance, security, stability)
 
 ---
 
