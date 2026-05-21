@@ -52,46 +52,62 @@ All 5 checks run **in parallel** for fast feedback:
 
 ## CD — Deployments
 
-Both the **frontend** (Next.js) and **backend** (Express) are deployed to [Vercel](https://vercel.com).
+Both the **frontend** (Next.js) and **backend** (Express) are deployed to [Vercel](https://vercel.com) using a **hybrid approach**:
+
+1. **Vercel Git Integration** — Handles all standard deployments automatically (production, dev, PR previews)
+2. **GitHub Action** — Creates linked full-stack previews when a PR changes both frontend and backend
 
 ### How Deployments Are Triggered
 
-| Trigger              | Workflow                | Vercel Environment | Result                                 |
-| -------------------- | ----------------------- | ------------------ | -------------------------------------- |
-| PR opened/updated    | `vercel-preview.yml`    | Preview            | Unique URL per PR, commented on the PR |
-| Push/merge to `dev`  | `vercel-dev.yml`        | Preview            | Dev environment URL (latest on `dev`)  |
-| Push/merge to `main` | `vercel-production.yml` | Production         | Production domain                      |
+| Trigger | Method | Vercel Environment | Result |
+| --- | --- | --- | --- |
+| Push/merge to `main` | Vercel Git Integration | **Production** | Production domains updated |
+| Push/merge to `dev` | Vercel Git Integration | **Preview** | Dev environment updated |
+| PR opened/updated | Vercel Git Integration | **Preview** | Auto preview for each project |
+| PR with `full-preview` label | GitHub Action | **Preview** | Linked frontend↔backend preview |
 
-### Preview Deployments (PRs)
+### Standard Preview Deployments (Automatic)
 
-When a PR is opened to `dev` or `main`:
+When a PR is opened to `dev` or `main`, **Vercel automatically** deploys both the frontend and backend to unique preview URLs. The frontend preview uses the **fixed dev backend URL** from Vercel env vars.
 
-1. Both frontend and backend are deployed to unique preview URLs
-2. A bot comments the URLs directly on the PR
-3. Reviewers can test the changes live before approving
-4. The comment updates automatically on subsequent pushes
+This works perfectly for:
+- ✅ Frontend-only changes (most common)
+- ✅ Backend-only changes (test backend preview URL directly)
+- ✅ Fork PRs (no secrets needed, fully automatic)
+
+### Full-Stack Preview Deployments (Label-Gated)
+
+When a PR changes **both frontend and backend**, a maintainer can create a **linked preview** where the frontend is connected to the correct backend preview:
+
+1. Maintainer reviews the code and adds the **`full-preview`** label
+2. GitHub Action deploys backend first → captures its unique preview URL
+3. Frontend builds with `NEXT_PUBLIC_API_URL` set to the backend preview URL
+4. Frontend deploys → both URLs are commented on the PR
+
+```mermaid
+graph LR
+    A[Backend Build] --> B[Backend Deploy]
+    B --> C[Capture Backend URL]
+    C --> D[Frontend Build with Backend URL]
+    D --> E[Frontend Deploy]
+    E --> F[Comment URLs on PR]
+
+    style B fill:#059669,color:#fff
+    style E fill:#7c3aed,color:#fff
+    style F fill:#d97706,color:#fff
+```
+
+> [!IMPORTANT]
+> The `full-preview` label is required for security. GitHub does not pass secrets to workflows triggered by fork PRs. Using `pull_request_target` with a label gate ensures a maintainer has reviewed the code before it accesses deployment credentials.
 
 **Workflow file**: [`.github/workflows/vercel-preview.yml`](../../.github/workflows/vercel-preview.yml)
 
-### Dev Deployments
+### Production & Dev Deployments
 
-When code is merged into `dev`:
+These are handled entirely by **Vercel Git Integration** — no GitHub Action needed:
 
-1. Both frontend and backend are deployed to the dev environment
-2. This reflects the latest state of active development
-3. Used for integration testing before promoting to production
-
-**Workflow file**: [`.github/workflows/vercel-dev.yml`](../../.github/workflows/vercel-dev.yml)
-
-### Production Deployments
-
-When code is merged into `main`:
-
-1. Both frontend and backend are deployed to production
-2. The production domain (e.g., `campus-os-frontend.vercel.app`) is updated
-3. This should only happen after thorough testing on `dev`
-
-**Workflow file**: [`.github/workflows/vercel-production.yml`](../../.github/workflows/vercel-production.yml)
+- **Push to `main`** → Vercel deploys both projects to production
+- **Push to `dev`** → Vercel deploys both projects to preview (dev environment)
 
 ---
 
@@ -105,11 +121,16 @@ When code is merged into `main`:
 5. Run `pnpm format` to format your code
 6. Push to your fork
 7. Open a PR targeting the `dev` branch
-   → CI checks run automatically
-   → Preview deployment is created
-8. Address review feedback
-9. Maintainer merges your PR into `dev`
-   → Dev deployment is triggered
+   → CI checks run automatically (lint, type-check, format, test, build)
+   → Vercel auto-deploys a preview (frontend uses fixed backend URL)
+8. A maintainer reviews your code
+9. If your PR changes backend code:
+   → Maintainer adds the `full-preview` label
+   → A linked full-stack preview is deployed
+   → Both preview URLs are commented on your PR
+10. Address review feedback (previews auto-update on new pushes)
+11. Maintainer merges your PR into `dev`
+    → Dev deployment is triggered via Vercel
 ```
 
 > [!WARNING]
@@ -125,85 +146,79 @@ When code is merged into `main`:
 > [!IMPORTANT]
 > These steps must be completed **once** before the CI/CD workflows will work.
 
-### Step 1: Link Vercel Projects
+### Step 1: Connect Vercel to GitHub
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+1. Go to [vercel.com](https://vercel.com) → each project → **Settings → Git**
+2. Connect to the **NITRR-Official/CampusOS** GitHub repository
+3. Set **Production Branch** to `main`
 
-# Login
-vercel login
+This enables Vercel to auto-deploy on pushes and PRs.
 
-# Link frontend
-cd frontend
-vercel link
+### Step 2: Configure Vercel Projects
 
-# Link backend
-cd ../backend
-vercel link
-```
+For each Vercel project:
 
-This creates `.vercel/project.json` in both directories with `orgId` and `projectId`.
-
-### Step 2: Get a Vercel Token
-
-1. Go to [vercel.com/account/tokens](https://vercel.com/account/tokens)
-2. Create a token named `CampusOS GitHub Actions`
-3. Copy the token
-
-### Step 3: Add GitHub Repository Secrets
-
-Go to **Settings → Secrets and variables → Actions → New repository secret**:
-
-| Secret Name                  | Value                   | Source                          |
-| ---------------------------- | ----------------------- | ------------------------------- |
-| `VERCEL_TOKEN`               | Your Vercel API token   | Step 2                          |
-| `VERCEL_ORG_ID`              | Your Vercel org/user ID | `frontend/.vercel/project.json` |
-| `VERCEL_PROJECT_ID_FRONTEND` | Frontend project ID     | `frontend/.vercel/project.json` |
-| `VERCEL_PROJECT_ID_BACKEND`  | Backend project ID      | `backend/.vercel/project.json`  |
-
-### Step 4: Disable Vercel's Built-in Git Integration
-
-> [!WARNING]
-> Skip this and Vercel will deploy twice — once from its Git integration and once from the GitHub Action.
-
-1. Go to both projects on [vercel.com](https://vercel.com)
-2. **Settings → Git**
-3. Set **Ignored Build Step** to `exit 0`
-
-### Step 5: Add Environment Variables in Vercel
-
-Go to each project on [vercel.com](https://vercel.com) → **Settings → Environment Variables**.
-
-Add variables for **both Production and Preview** environments:
-
-#### Frontend
-
-| Variable              | Description            | Example                                |
-| --------------------- | ---------------------- | -------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | Backend deployment URL | `https://campus-os-backend.vercel.app` |
-
-#### Backend
-
-| Variable         | Required | Description                                        | Example                                     |
-| ---------------- | -------- | -------------------------------------------------- | ------------------------------------------- |
-| `MONGODB_URI`    | ✅       | MongoDB connection string                          | `mongodb+srv://...`                         |
-| `JWT_SECRET`     | ✅       | JWT signing key (crashes without it in production) | `your-secure-secret`                        |
-| `FRONTEND_URL`   | ✅       | Frontend URL for CORS                              | `https://campus-os-frontend.vercel.app`     |
-| `FRONTEND_URLS`  |          | Multiple CORS origins (comma-separated)            | `https://a.vercel.app,https://b.vercel.app` |
-| `JWT_EXPIRES_IN` |          | Token expiry, defaults to `15m`                    | `15m`                                       |
-
-### Step 6: Configure Monorepo Root Directories
-
-The backend depends on `apps/` and `shared/` — Vercel needs to know this is a pnpm monorepo.
-
-1. Frontend project → **Settings → General → Root Directory** → `frontend`
-2. Backend project → **Settings → General → Root Directory** → `backend`
+1. **Settings → General → Root Directory**:
+   - Frontend project → `frontend`
+   - Backend project → `backend`
 
 > [!TIP]
 > Vercel will detect `pnpm-workspace.yaml` in the parent folder and run `pnpm install` at the monorepo root, resolving workspace dependencies.
 
-### Step 7: Enable Branch Protection
+### Step 3: Add GitHub Repository Secrets
+
+These are only needed for the `full-preview` label-gated workflow.
+
+Go to the **main repo** → **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret Name                  | Value                   | Source                          |
+| ---------------------------- | ----------------------- | ------------------------------- |
+| `VERCEL_TOKEN`               | Your Vercel API token   | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
+| `VERCEL_ORG_ID`              | Your Vercel org/user ID | `frontend/.vercel/project.json` |
+| `VERCEL_PROJECT_ID_FRONTEND` | Frontend project ID     | `frontend/.vercel/project.json` |
+| `VERCEL_PROJECT_ID_BACKEND`  | Backend project ID      | `backend/.vercel/project.json`  |
+
+### Step 4: Add Environment Variables in Vercel
+
+Go to each project on [vercel.com](https://vercel.com) → **Settings → Environment Variables**.
+
+> [!IMPORTANT]
+> Use **separate MongoDB databases** for Production and Preview to keep data isolated.
+
+#### Frontend — Environment Variables
+
+| Variable              | Environment    | Value                                  | Notes                                                   |
+| --------------------- | -------------- | -------------------------------------- | ------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | **Production** | `https://campus-os-backend.vercel.app` | Stable backend production URL                           |
+| `NEXT_PUBLIC_API_URL` | **Preview**    | Backend's dev branch preview URL       | Used by Vercel auto-deploys (overridden by `full-preview` workflow) |
+
+#### Backend — Environment Variables
+
+| Variable             | Environment    | Value                                      | Notes                                          |
+| -------------------- | -------------- | ------------------------------------------ | ---------------------------------------------- |
+| `NODE_ENV`           | **Production** | `production`                               | Strict error handling, no fallback secrets      |
+| `NODE_ENV`           | **Preview**    | `development`                              | Verbose errors, dev fallbacks                   |
+| `MONGODB_URI`        | **Production** | `mongodb+srv://...campusos-prod`           | Production database (isolated)                  |
+| `MONGODB_URI`        | **Preview**    | `mongodb+srv://...campusos-dev`            | Dev database (separate from production)         |
+| `JWT_SECRET`         | **Production** | `<strong-random-secret>`                   | Unique to production                            |
+| `JWT_SECRET`         | **Preview**    | `<different-dev-secret>`                   | Unique to preview, different from production    |
+| `FRONTEND_URL`       | **Production** | `https://campus-os-frontend.vercel.app`    | CORS: exact match for production frontend       |
+| `FRONTEND_URL`       | **Preview**    | `https://campus-os-frontend-git-dev-<user>.vercel.app` | CORS: dev branch frontend URL          |
+| `ALLOW_PREVIEW_CORS` | **Preview**    | `true`                                     | Allows any `*.vercel.app` origin for PR previews |
+| `JWT_EXPIRES_IN`     | **Both**       | `15m`                                      | Optional, defaults to `15m`                     |
+
+> [!WARNING]
+> **Never use the same `MONGODB_URI` for Production and Preview.** Preview deployments could accidentally modify production data. Create two separate databases on [MongoDB Atlas](https://cloud.mongodb.com) (e.g., `campusos-prod` and `campusos-dev`).
+
+### Step 5: Create the `full-preview` Label
+
+Go to the **main repo** → **Issues → Labels → New label**:
+
+| Label | Color | Description |
+| --- | --- | --- |
+| `full-preview` | `#7c3aed` | Triggers linked full-stack preview deployment |
+
+### Step 6: Enable Branch Protection
 
 In GitHub → **Settings → Branches → Add rule**:
 
@@ -219,14 +234,27 @@ In GitHub → **Settings → Branches → Add rule**:
 
 ---
 
+## CORS for Preview Deployments
+
+PR preview URLs are unique per commit (e.g., `frontend-abc123.vercel.app`), so the backend can't know them in advance.
+
+The solution: when `ALLOW_PREVIEW_CORS=true` is set (Preview env only), the backend allows **any** `*.vercel.app` origin. This is safe because:
+
+- Preview environments use a **separate database** (`campusos-dev`)
+- The flag is **never set in Production** — production uses strict exact-match CORS
+- Only applies to `https://*.vercel.app` domains (not arbitrary origins)
+
+---
+
 ## Workflow Files Reference
 
-| File                                                                     | Trigger                    | Purpose                         |
-| ------------------------------------------------------------------------ | -------------------------- | ------------------------------- |
-| [`ci.yml`](../../.github/workflows/ci.yml)                               | PR or push to `main`/`dev` | 5 parallel quality checks       |
-| [`vercel-preview.yml`](../../.github/workflows/vercel-preview.yml)       | PR to `main`/`dev`         | Preview deployment + PR comment |
-| [`vercel-dev.yml`](../../.github/workflows/vercel-dev.yml)               | Push to `dev`              | Dev environment deployment      |
-| [`vercel-production.yml`](../../.github/workflows/vercel-production.yml) | Push to `main`             | Production deployment           |
+| File | Trigger | Purpose |
+| --- | --- | --- |
+| [`ci.yml`](../../.github/workflows/ci.yml) | PR or push to `main`/`dev` | 5 parallel quality checks |
+| [`vercel-preview.yml`](../../.github/workflows/vercel-preview.yml) | `full-preview` label on PR | Linked full-stack preview deployment |
+| Vercel Git Integration | Push to `main` | Production deployment (auto) |
+| Vercel Git Integration | Push to `dev` | Dev environment deployment (auto) |
+| Vercel Git Integration | PR opened | Standard preview deployment (auto) |
 
 ---
 

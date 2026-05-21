@@ -63,15 +63,21 @@ docker compose up -d --build
 
 ## CI/CD Pipeline
 
-CampusOS uses GitHub Actions for CI and Vercel for CD. The full pipeline documentation is in the dedicated **[CI/CD Guide](./CI_CD.md)**.
+CampusOS uses a **hybrid deployment approach**:
+
+- **Vercel Git Integration** handles all standard deployments automatically (production, dev, PR previews)
+- **GitHub Action** creates linked full-stack previews when a PR changes both frontend and backend (triggered by the `full-preview` label)
+
+The full pipeline documentation is in the dedicated **[CI/CD Guide](./CI_CD.md)**.
 
 ### Quick Summary
 
-| Event                 | What Happens                                                               |
-| --------------------- | -------------------------------------------------------------------------- |
-| PR to `dev` or `main` | CI checks run (lint, type-check, format, test, build) + preview deployment |
-| Merge to `dev`        | Dev environment deployment                                                 |
-| Merge to `main`       | Production deployment                                                      |
+| Event                 | What Happens                                                                    |
+| --------------------- | ------------------------------------------------------------------------------- |
+| PR to `dev` or `main` | CI checks run + Vercel auto-deploys previews                                    |
+| PR with `full-preview` label | CI checks + linked full-stack preview (frontend → correct backend)       |
+| Merge to `dev`        | Vercel auto-deploys to dev environment                                          |
+| Merge to `main`       | Vercel auto-deploys to production                                               |
 
 > [!NOTE]
 > Contributors open PRs to `dev`. Only admins merge `dev` → `main` for production releases. See [CI/CD Guide](./CI_CD.md) for full details.
@@ -90,13 +96,19 @@ Before deploying to any environment:
 
 ## Environment Configuration
 
-### Staging
+Vercel environment variables are set **per environment** (Production vs Preview) in the Vercel dashboard. See the [CI/CD Guide](./CI_CD.md#step-4-add-environment-variables-in-vercel) for the full table.
+
+> [!WARNING]
+> Always use **separate MongoDB databases** for Production and Preview. Production data must never be accessible from preview deployments.
+
+### Preview / Dev
 
 ```env
-NODE_ENV=staging
+NODE_ENV=development
 PORT=4000
-MONGODB_URI=mongodb+srv://staging-user:password@cluster.mongodb.net/campusos-staging
-JWT_SECRET=staging-secret-key
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/campusos-dev
+JWT_SECRET=dev-secret-key
+ALLOW_PREVIEW_CORS=true
 ```
 
 ### Production
@@ -104,7 +116,7 @@ JWT_SECRET=staging-secret-key
 ```env
 NODE_ENV=production
 PORT=4000
-MONGODB_URI=mongodb+srv://prod-user:password@cluster.mongodb.net/campusos
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/campusos-prod
 JWT_SECRET=<strong-production-secret>
 ```
 
