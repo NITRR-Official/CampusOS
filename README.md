@@ -417,3 +417,4 @@ This project is licensed under the MIT License — see the [LICENSE](./LICENSE) 
 - **Documentation:** [docs/](./docs/README.md)
 - **Architecture:** [Architecture Decisions](./docs/architecture/decisions/)
 
+
