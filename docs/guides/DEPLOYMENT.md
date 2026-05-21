@@ -37,7 +37,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://backend:4000
+      NEXT_PUBLIC_API_URL: http://backend:4000
     depends_on:
       - backend
 
@@ -63,52 +63,18 @@ docker compose up -d --build
 
 ## CI/CD Pipeline
 
-### Pipeline Stages
+CampusOS uses GitHub Actions for CI and Vercel for CD. The full pipeline documentation is in the dedicated **[CI/CD Guide](./CI_CD.md)**.
 
-```
-1. Trigger   → On PR or push to main
-2. Test      → Run test suite
-3. Build     → Compile/bundle
-4. Stage     → Deploy to staging
-5. Verify    → Smoke tests
-6. Produce   → Manual approval + deploy
-```
+### Quick Summary
 
-### GitHub Actions Workflow
+| Event                 | What Happens                                                               |
+| --------------------- | -------------------------------------------------------------------------- |
+| PR to `dev` or `main` | CI checks run (lint, type-check, format, test, build) + preview deployment |
+| Merge to `dev`        | Dev environment deployment                                                 |
+| Merge to `main`       | Production deployment                                                      |
 
-```yaml
-name: CI/CD
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm lint
-      - run: pnpm build
-      - run: pnpm test
-
-  deploy-staging:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # ... deployment steps
-```
+> [!NOTE]
+> Contributors open PRs to `dev`. Only admins merge `dev` → `main` for production releases. See [CI/CD Guide](./CI_CD.md) for full details.
 
 ## Pre-Deployment Checklist
 

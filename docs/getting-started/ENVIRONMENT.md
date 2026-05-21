@@ -34,12 +34,8 @@ FRONTEND_URLS=http://localhost:3000,https://campusos.example.com
 
 Variables read in `frontend/lib/`:
 
-| Variable                   | Default                 | Read In                                           | Description                           |
-| -------------------------- | ----------------------- | ------------------------------------------------- | ------------------------------------- |
-| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:4000` | `lib/auth-api.ts`                                 | Backend API URL for auth endpoints    |
-| `NEXT_PUBLIC_API_URL`      | `http://localhost:4000` | `lib/vendor-api.ts` and other Phase 5 API clients | Backend API URL for feature endpoints |
-
-> **Note**: There are two different env var names used across frontend API clients. `auth-api.ts` reads `NEXT_PUBLIC_API_BASE_URL` while the Phase 5 API clients (`vendor-api.ts`, `resource-api.ts`, etc.) read `NEXT_PUBLIC_API_URL`. Set both or standardize in the future.
+| Variable | Default | Read In | Description |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:4000` | `lib/auth-api.ts`, `lib/vendor-api.ts`, etc. | Backend API URL for feature endpoints |
 
 ## Example `.env` Files
 
@@ -57,7 +53,6 @@ FRONTEND_URLS=http://localhost:3000
 ### Frontend (`frontend/.env.local`)
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
 NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 

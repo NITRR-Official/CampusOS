@@ -52,10 +52,11 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 
    _If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](../getting-started/DATABASE_SETUP.md)._
 
-6. **Create a feature branch**
+6. **Create a feature branch from `dev`**
 
    ```bash
-   git checkout -b feature/your-feature-name
+   git fetch upstream
+   git checkout -b feature/your-feature-name upstream/dev
    ```
 
 7. **Start development servers**
@@ -93,11 +94,13 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 #### Branching Strategy
 
 ```bash
-# Create feature branch from main
-git checkout main
-git pull upstream main
-git checkout -b feature/issue-number-description
+# Create feature branch from dev
+git fetch upstream
+git checkout -b feature/issue-number-description upstream/dev
 ```
+
+> [!IMPORTANT]
+> Always branch from `dev`, not `main`. All contributor PRs must target the `dev` branch.
 
 #### Commit Messages
 
@@ -120,16 +123,21 @@ git commit -m "test: add test for task dependencies"
 Before pushing, run:
 
 ```bash
-# Lint and format
-pnpm lint
+# Format your code (required — CI will reject unformatted code)
 pnpm format
+
+# Lint
+pnpm lint
+
+# Type check (TypeScript)
+pnpm type-check
 
 # Build
 pnpm build
-
-# Type check (TypeScript)
-cd frontend && pnpm tsc --noEmit
 ```
+
+> [!WARNING]
+> **`pnpm format` is mandatory.** CI runs `pnpm format:check` which will **fail** if your code isn't formatted with Prettier. Always run `pnpm format` before pushing.
 
 ### 4. Testing
 
@@ -169,7 +177,11 @@ Update these files as needed:
 git push origin feature/issue-number-description
 
 # Go to GitHub and click "Compare & pull request"
+# IMPORTANT: Set the base branch to `dev` (not `main`)
 ```
+
+> [!CAUTION]
+> Always target the `dev` branch. PRs to `main` from contributors will be rejected — only admins merge `dev` → `main` for production releases.
 
 **In the PR description:**
 
@@ -202,7 +214,8 @@ git push origin feature/issue-number-description
 
 5. **Approval and merge**
    - Need at least 1 approval
-   - Maintainers will squash and merge for clean history
+   - Maintainers will squash and merge into `dev` for clean history
+   - Admins later promote `dev` → `main` for production releases
 
 ## 🏗️ Architecture & Design Patterns
 
