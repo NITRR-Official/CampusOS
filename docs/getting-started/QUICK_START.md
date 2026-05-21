@@ -56,7 +56,7 @@ The defaults work out of the box. To customize, create `.env` in the project roo
 PORT=4000                                  # Backend port
 JWT_SECRET=my-custom-secret                # JWT signing key (has dev fallback)
 MONGODB_URI=mongodb://localhost:27017/campusos  # MongoDB connection string
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000   # Frontend → Backend URL
+NEXT_PUBLIC_API_URL=http://localhost:4000   # Frontend → Backend URL
 ```
 
 See [Environment Variables](./ENVIRONMENT.md) for all options.

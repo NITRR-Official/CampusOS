@@ -58,7 +58,8 @@ Standards, patterns, and best practices for contributing code.
 | [Security Guidelines](./guides/SECURITY.md) | OWASP, JWT, RBAC, input validation                       |
 | [Git Workflow](./guides/GIT_WORKFLOW.md)    | Branching, commits, PRs, merging                         |
 | [Code Review](./guides/CODE_REVIEW.md)      | Review checklist — architecture, security, quality       |
-| [Deployment](./guides/DEPLOYMENT.md)        | Docker, CI/CD, production readiness                      |
+| [CI/CD Pipeline](./guides/CI_CD.md)         | CI checks, Vercel deployments, branch strategy           |
+| [Deployment](./guides/DEPLOYMENT.md)        | Docker, rollback, monitoring, production readiness       |
 
 ---
 

@@ -17,7 +17,8 @@
     "lint:fix": "pnpm -r run lint --fix",
     "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "type-check": "pnpm -r --filter frontend run type-check"
   },
   "keywords": [
     "campus-management",
