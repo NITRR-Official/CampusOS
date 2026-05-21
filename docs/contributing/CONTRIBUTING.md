@@ -194,13 +194,13 @@ git push origin feature/issue-number-description
 
 1. **Automated checks**
    - CI runs 5 quality checks: lint, type-check, format, test, build
-   - Vercel auto-deploys a preview of both frontend and backend
-   - The frontend preview uses a fixed backend URL (the dev backend)
-   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment — this is a one-time step
+   - Vercel auto-deploys a **frontend-only preview** (connected to the dev backend)
+   - Backend is NOT auto-deployed on PRs — saves resources
+   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment (one-time)
 
-2. **Preview deployments**
-   - **Frontend-only PRs**: Vercel’s automatic preview works immediately
-   - **PRs that change backend code**: A maintainer adds the `full-preview` label to create a linked preview where the frontend points to the correct backend preview. Both URLs are commented on the PR.
+2. **Full-stack preview deployments**
+   - **Frontend-only PRs**: Vercel's automatic frontend preview is sufficient
+   - **PRs that include backend changes**: A maintainer adds the `full-preview` label → both backend and frontend are deployed as a linked pair, with URLs commented on the PR. Further commits auto-redeploy while the label is present.
 
 3. **Manual review**
    - Code quality and readability

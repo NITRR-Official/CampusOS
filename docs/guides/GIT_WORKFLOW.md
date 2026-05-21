@@ -152,16 +152,17 @@ pnpm build           # Ensure frontend compiles
 ### 4. What Happens After You Open a PR
 
 1. **CI checks** run automatically (lint, type-check, format, test, build)
-2. **Vercel auto-deploys** a preview of both frontend and backend
-   - The frontend preview uses a fixed backend URL (the dev backend)
-   - This is good enough for most frontend-only PRs
-   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment — this is a one-time step
-3. A maintainer reviews your code
-4. **If your PR changes backend code**:
+2. **First-time contributors**: Vercel asks a maintainer to authorize your fork's deployment (one-time per contributor)
+3. **Vercel auto-deploys the frontend** to a unique preview URL
+   - The frontend preview is connected to the **dev branch backend** (stable URL)
+   - The **backend is NOT auto-deployed** on PRs — this saves resources
+4. A maintainer reviews your code
+5. **If your PR includes backend changes**:
    - Maintainer adds the **`full-preview`** label
-   - A **linked full-stack preview** is deployed (frontend → correct backend preview)
+   - Both backend and frontend are deployed as a **linked pair**
    - Both preview URLs are commented on your PR
-5. Address any feedback, push new commits — previews auto-update
+   - Further commits **auto-redeploy** while the label is present
+6. Address any feedback, push new commits — previews auto-update
 
 ### 5. Address Review Feedback
 

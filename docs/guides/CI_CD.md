@@ -18,7 +18,7 @@ graph LR
 
     B -->|push| D[Dev Deployment]
     C -->|push| E[Production Deployment]
-    A -->|PR opened| F[Preview Deployment]
+    A -->|PR opened| F[Frontend Preview]
 
     style C fill:#059669,color:#fff
     style B fill:#7c3aed,color:#fff
@@ -54,38 +54,46 @@ All 5 checks run **in parallel** for fast feedback:
 
 Both the **frontend** (Next.js) and **backend** (Express) are deployed to [Vercel](https://vercel.com) using a **hybrid approach**:
 
-1. **Vercel Git Integration** — Handles all standard deployments automatically (production, dev, PR previews)
-2. **GitHub Action** — Creates linked full-stack previews when a PR changes both frontend and backend
+1. **Vercel Git Integration** — Auto-deploys frontend on PRs, and both frontend + backend on `dev`/`main` pushes
+2. **GitHub Action** — Creates linked full-stack previews when a maintainer adds the `full-preview` label
 
 ### How Deployments Are Triggered
 
-| Trigger | Method | Vercel Environment | Result |
+| Trigger | Frontend | Backend | Method |
 | --- | --- | --- | --- |
-| Push/merge to `main` | Vercel Git Integration | **Production** | Production domains updated |
-| Push/merge to `dev` | Vercel Git Integration | **Preview** | Dev environment updated |
-| PR opened/updated | Vercel Git Integration | **Preview** | Auto preview for each project |
-| PR with `full-preview` label | GitHub Action | **Preview** | Linked frontend↔backend preview |
+| PR opened/updated | ✅ Auto-deploys (uses dev backend) | ⏭️ Skipped | Vercel Git Integration |
+| PR with `full-preview` label | ✅ Deployed (linked to backend) | ✅ Deployed | GitHub Action |
+| Push/merge to `dev` | ✅ Auto-deploys | ✅ Auto-deploys | Vercel Git Integration |
+| Push/merge to `main` | ✅ Auto-deploys | ✅ Auto-deploys | Vercel Git Integration |
 
-### Standard Preview Deployments (Automatic)
+---
 
-When a PR is opened to `dev` or `main`, **Vercel automatically** deploys both the frontend and backend to unique preview URLs. The frontend preview uses the **fixed dev backend URL** from Vercel env vars.
+### Preview Deployments (PRs)
 
-This works perfectly for:
-- ✅ Frontend-only changes (most common)
-- ✅ Backend-only changes (test backend preview URL directly)
-- ✅ Fork PRs (no secrets needed, fully automatic)
+All PRs must target the **`dev`** branch.
+
+When a PR is opened:
+
+1. **CI checks** run automatically (lint, type-check, format, test, build)
+2. If the contributor is **new**, a maintainer must authorize the fork's deployment on Vercel (one-time per contributor — Vercel comments on the PR asking for authorization)
+3. **Vercel auto-deploys the frontend only** to a unique preview URL
+4. The **backend is NOT auto-deployed** on PRs — the frontend preview uses the **stable dev branch backend URL**
+
+This is sufficient for the majority of PRs which only change frontend code.
 
 > [!NOTE]
-> **Fork PRs require a one-time authorization.** When a new contributor opens their first PR from a fork, Vercel will comment asking a team member to authorize the deployment. Once authorized, future PRs from that contributor deploy automatically. This is Vercel's built-in security for fork PRs.
+> Backend PR builds are intentionally skipped using Vercel's [Ignored Build Step](https://vercel.com/docs/deployments/configure-a-build#ignored-build-step). The command `test -n "$VERCEL_GIT_PULL_REQUEST_ID"` skips builds when a Pull Request ID is present, but allows builds on direct pushes to `main`/`dev`.
 
 ### Full-Stack Preview Deployments (Label-Gated)
 
-When a PR changes **both frontend and backend**, a maintainer can create a **linked preview** where the frontend is connected to the correct backend preview:
+If a PR includes **backend changes** and the maintainer wants a linked preview:
 
-1. Maintainer reviews the code and adds the **`full-preview`** label
+1. Maintainer adds the **`full-preview`** label to the PR
 2. GitHub Action deploys backend first → captures its unique preview URL
 3. Frontend builds with `NEXT_PUBLIC_API_URL` set to the backend preview URL
 4. Frontend deploys → both URLs are commented on the PR
+5. **Subsequent commits** to the PR automatically re-deploy while the label is present
+6. Maintainer can remove the label to stop full-preview deployments
 
 ```mermaid
 graph LR
@@ -105,12 +113,13 @@ graph LR
 
 **Workflow file**: [`.github/workflows/vercel-preview.yml`](../../.github/workflows/vercel-preview.yml)
 
-### Production & Dev Deployments
+### Dev Deployments
 
-These are handled entirely by **Vercel Git Integration** — no GitHub Action needed:
+When code is pushed or merged into the **`dev`** branch, Vercel Git Integration auto-deploys **both** frontend and backend. This reflects the latest state of active development.
 
-- **Push to `main`** → Vercel deploys both projects to production
-- **Push to `dev`** → Vercel deploys both projects to preview (dev environment)
+### Production Deployments
+
+When code is pushed or merged into the **`main`** branch (typically via a `dev` → `main` PR by admins), Vercel Git Integration auto-deploys **both** frontend and backend to production. This is considered the **stable, production-ready** release.
 
 ---
 
@@ -125,15 +134,18 @@ These are handled entirely by **Vercel Git Integration** — no GitHub Action ne
 6. Push to your fork
 7. Open a PR targeting the `dev` branch
    → CI checks run automatically (lint, type-check, format, test, build)
-   → Vercel auto-deploys a preview (frontend uses fixed backend URL)
+   → First-time contributors: Vercel asks a maintainer to authorize
+     your deployment (one-time)
+   → Vercel auto-deploys a frontend preview (connected to the dev backend)
 8. A maintainer reviews your code
-9. If your PR changes backend code:
+9. If your PR includes backend changes:
    → Maintainer adds the `full-preview` label
-   → A linked full-stack preview is deployed
-   → Both preview URLs are commented on your PR
-10. Address review feedback (previews auto-update on new pushes)
+   → Both backend and frontend are deployed as a linked pair
+   → Preview URLs are commented on your PR
+   → Further commits auto-redeploy while the label is present
+10. Address review feedback, push new commits — previews auto-update
 11. Maintainer merges your PR into `dev`
-    → Dev deployment is triggered via Vercel
+    → Both frontend and backend redeploy with the latest `dev` state
 ```
 
 > [!WARNING]
@@ -161,9 +173,20 @@ This enables Vercel to auto-deploy on pushes and PRs.
 
 For each Vercel project:
 
-1. **Settings → General → Root Directory**:
+1. **Settings → Build and Deployment → Root Directory**:
    - Frontend project → `frontend`
    - Backend project → `backend`
+
+2. **Backend project only — Settings → Build and Deployment → Ignored Build Step**:
+   - Set Behavior to **Custom**
+   - Set Command to: `test -n "$VERCEL_GIT_PULL_REQUEST_ID"`
+   - This skips backend builds on PRs but allows them on `main`/`dev` pushes
+
+3. **Both projects — Settings → Deployment Protection**:
+   - Disable **Vercel Authentication** for Preview deployments (so contributors can access preview URLs without a Vercel account)
+
+4. **Both projects — Environment Variables**:
+   - Add `ENABLE_EXPERIMENTAL_COREPACK` = `1` (Production + Preview) to use pnpm@10
 
 > [!TIP]
 > Vercel will detect `pnpm-workspace.yaml` in the parent folder and run `pnpm install` at the monorepo root, resolving workspace dependencies.
@@ -257,7 +280,7 @@ The solution: when `ALLOW_PREVIEW_CORS=true` is set (Preview env only), the back
 | [`vercel-preview.yml`](../../.github/workflows/vercel-preview.yml) | `full-preview` label on PR | Linked full-stack preview deployment |
 | Vercel Git Integration | Push to `main` | Production deployment (auto) |
 | Vercel Git Integration | Push to `dev` | Dev environment deployment (auto) |
-| Vercel Git Integration | PR opened | Standard preview deployment (auto) |
+| Vercel Git Integration | PR opened | Frontend-only preview deployment (auto) |
 
 ---
 

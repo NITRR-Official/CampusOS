@@ -4,6 +4,9 @@ Welcome to the CampusOS documentation. This is the central hub for all project d
 
 > **CampusOS** is a modular, scalable platform for managing the complete lifecycle of campus activities — clubs, events, tasks, operations, and growth.
 
+> [!TIP]
+> **New contributor?** Start with the [Quick Start](./getting-started/QUICK_START.md) to set up locally, then follow the [Developer Onboarding](./getting-started/DEVELOPER_ONBOARDING.md) to make your first contribution.
+
 ---
 
 ## 🚀 Getting Started
@@ -124,5 +127,5 @@ Standards, patterns, and best practices for contributing code.
 
 ---
 
-_Last Updated: May 19, 2026_
+_Last Updated: May 21, 2026_
 _Maintained By: CampusOS Team_
