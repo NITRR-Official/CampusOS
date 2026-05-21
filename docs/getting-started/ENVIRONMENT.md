@@ -98,7 +98,7 @@ Key differences between environments:
 | --------------------- | -------------------------------------- | -------------------------------------- |
 | `MONGODB_URI`         | `mongodb+srv://...campusos-prod`       | `mongodb+srv://...campusos-dev`        |
 | `NODE_ENV`            | `production`                           | `development`                          |
-| `NEXT_PUBLIC_API_URL` | Stable production backend URL          | Auto-injected by CI workflow           |
+| `NEXT_PUBLIC_API_URL` | Stable production backend URL          | Fixed dev backend URL (overridden by `full-preview` workflow) |
 | `ALLOW_PREVIEW_CORS`  | _(not set)_                            | `true`                                 |
 
 > [!WARNING]

@@ -193,26 +193,30 @@ git push origin feature/issue-number-description
 ## 🔍 Code Review Process
 
 1. **Automated checks**
-   - Tests pass
-   - Linting passes
-   - Build succeeds
+   - CI runs 5 quality checks: lint, type-check, format, test, build
+   - Vercel auto-deploys a preview of both frontend and backend
+   - The frontend preview uses a fixed backend URL (the dev backend)
 
-2. **Manual review**
+2. **Preview deployments**
+   - **Frontend-only PRs**: Vercel’s automatic preview works immediately
+   - **PRs that change backend code**: A maintainer adds the `full-preview` label to create a linked preview where the frontend points to the correct backend preview. Both URLs are commented on the PR.
+
+3. **Manual review**
    - Code quality and readability
    - Architecture and design patterns
    - Test coverage
    - Documentation completeness
 
-3. **Request changes vs. comment**
-   - "Request changes" = blocking, must address
-   - "Comment" = suggestion, not required
+4. **Request changes vs. comment**
+   - “Request changes” = blocking, must address
+   - “Comment” = suggestion, not required
 
-4. **Expected response time**
+5. **Expected response time**
    - Critical bugs: 4 hours
    - High priority: 1 day
    - Medium/Low priority: 3-7 days
 
-5. **Approval and merge**
+6. **Approval and merge**
    - Need at least 1 approval
    - Maintainers will squash and merge into `dev` for clean history
    - Admins later promote `dev` → `main` for production releases

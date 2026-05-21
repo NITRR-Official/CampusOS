@@ -1,11 +1,23 @@
-name: Vercel Preview Deployment
+name: Full-Stack Preview Deployment
+
+# This workflow creates a LINKED preview where the frontend points to the
+# correct backend preview URL. Use this when a PR changes both frontend
+# and backend code.
+#
+# For frontend-only PRs, Vercel's built-in Git integration handles
+# preview deployments automatically — no action needed.
+#
+# Trigger: Maintainer adds the 'full-preview' label after reviewing the PR.
+# Security: Uses pull_request_target so fork PRs can access secrets.
+#           The label gate ensures a maintainer has reviewed the code first.
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main, dev]
+    types: [labeled, synchronize]
 
 concurrency:
-  group: vercel-preview-${{ github.head_ref }}
+  group: full-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -21,14 +33,17 @@ jobs:
   deploy-backend:
     name: Deploy Backend Preview
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'full-preview')
     timeout-minutes: 15
     outputs:
       preview-url: ${{ steps.deploy.outputs.url }}
     env:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
     steps:
-      - name: Checkout
+      - name: Checkout PR code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -61,8 +76,10 @@ jobs:
     env:
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
     steps:
-      - name: Checkout
+      - name: Checkout PR code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -100,16 +117,20 @@ jobs:
           script: |
             const frontendUrl = '${{ needs.deploy-frontend.outputs.preview-url }}';
             const backendUrl = '${{ needs.deploy-backend.outputs.preview-url }}';
-            const body = `## 🚀 Preview Deployment
+            const body = `## 🔗 Full-Stack Preview Deployment
+
+            This is a **linked preview** where the frontend is connected to the backend preview.
 
             | Service | URL |
             |---|---|
             | **Frontend** | ${frontendUrl} |
             | **Backend** | ${backendUrl} |
+            | **Backend Health** | ${backendUrl}/health |
 
-            _Deployed from commit \`${context.sha.substring(0, 7)}\`_`;
+            > Vercel's automatic preview (with fixed backend) is also available in the deployment list.
 
-            // Find existing comment
+            _Deployed from commit \`${context.payload.pull_request.head.sha.substring(0, 7)}\`_`;
+
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -117,7 +138,7 @@ jobs:
             });
 
             const botComment = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('Preview Deployment')
+              c.user.type === 'Bot' && c.body.includes('Full-Stack Preview')
             );
 
             if (botComment) {
