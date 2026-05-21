@@ -65,19 +65,19 @@ docker compose up -d --build
 
 CampusOS uses a **hybrid deployment approach**:
 
-- **Vercel Git Integration** handles all standard deployments automatically (production, dev, PR previews)
-- **GitHub Action** creates linked full-stack previews when a PR changes both frontend and backend (triggered by the `full-preview` label)
+- **Vercel Git Integration** auto-deploys the frontend on PRs, and both frontend + backend on `dev`/`main` pushes
+- **GitHub Action** creates linked full-stack previews when a maintainer adds the `full-preview` label
 
 The full pipeline documentation is in the dedicated **[CI/CD Guide](./CI_CD.md)**.
 
 ### Quick Summary
 
-| Event                 | What Happens                                                                    |
-| --------------------- | ------------------------------------------------------------------------------- |
-| PR to `dev` or `main` | CI checks run + Vercel auto-deploys previews                                    |
-| PR with `full-preview` label | CI checks + linked full-stack preview (frontend → correct backend)       |
-| Merge to `dev`        | Vercel auto-deploys to dev environment                                          |
-| Merge to `main`       | Vercel auto-deploys to production                                               |
+| Event                        | Frontend              | Backend              |
+| ---------------------------- | --------------------- | -------------------- |
+| PR to `dev`                  | ✅ Auto-deploys       | ⏭️ Skipped           |
+| PR with `full-preview` label | ✅ Linked to backend  | ✅ Deployed          |
+| Merge to `dev`               | ✅ Auto-deploys       | ✅ Auto-deploys      |
+| Merge to `main`              | ✅ Auto-deploys       | ✅ Auto-deploys      |
 
 > [!NOTE]
 > Contributors open PRs to `dev`. Only admins merge `dev` → `main` for production releases. See [CI/CD Guide](./CI_CD.md) for full details.
