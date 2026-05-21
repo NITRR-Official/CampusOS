@@ -16,12 +16,13 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
-  deploy-frontend:
-    name: Deploy Frontend to Production
+  # Step 1: Deploy backend first (frontend needs its URL at build time)
+  deploy-backend:
+    name: Deploy Backend to Production
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,12 +44,14 @@ jobs:
       - name: Deploy to Production
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-  deploy-backend:
-    name: Deploy Backend to Production
+  # Step 2: Deploy frontend after backend is live
+  deploy-frontend:
+    name: Deploy Frontend to Production
     runs-on: ubuntu-latest
+    needs: deploy-backend
     timeout-minutes: 15
     env:
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
