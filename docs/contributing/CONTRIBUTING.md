@@ -52,10 +52,11 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 
    _If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](../getting-started/DATABASE_SETUP.md)._
 
-6. **Create a feature branch**
+6. **Create a feature branch from `dev`**
 
    ```bash
-   git checkout -b feature/your-feature-name
+   git fetch upstream
+   git checkout -b feature/your-feature-name upstream/dev
    ```
 
 7. **Start development servers**
@@ -93,11 +94,13 @@ We are committed to providing a welcoming and inspiring community for all. Pleas
 #### Branching Strategy
 
 ```bash
-# Create feature branch from main
-git checkout main
-git pull upstream main
-git checkout -b feature/issue-number-description
+# Create feature branch from dev
+git fetch upstream
+git checkout -b feature/issue-number-description upstream/dev
 ```
+
+> [!IMPORTANT]
+> Always branch from `dev`, not `main`. All contributor PRs must target the `dev` branch.
 
 #### Commit Messages
 
@@ -120,16 +123,21 @@ git commit -m "test: add test for task dependencies"
 Before pushing, run:
 
 ```bash
-# Lint and format
-pnpm lint
+# Format your code (required — CI will reject unformatted code)
 pnpm format
+
+# Lint
+pnpm lint
+
+# Type check (TypeScript)
+pnpm type-check
 
 # Build
 pnpm build
-
-# Type check (TypeScript)
-cd frontend && pnpm tsc --noEmit
 ```
+
+> [!WARNING]
+> **`pnpm format` is mandatory.** CI runs `pnpm format:check` which will **fail** if your code isn't formatted with Prettier. Always run `pnpm format` before pushing.
 
 ### 4. Testing
 
@@ -169,7 +177,11 @@ Update these files as needed:
 git push origin feature/issue-number-description
 
 # Go to GitHub and click "Compare & pull request"
+# IMPORTANT: Set the base branch to `dev` (not `main`)
 ```
+
+> [!CAUTION]
+> Always target the `dev` branch. PRs to `main` from contributors will be rejected — only admins merge `dev` → `main` for production releases.
 
 **In the PR description:**
 
@@ -181,28 +193,34 @@ git push origin feature/issue-number-description
 ## 🔍 Code Review Process
 
 1. **Automated checks**
-   - Tests pass
-   - Linting passes
-   - Build succeeds
+   - CI runs 5 quality checks: lint, type-check, format, test, build
+   - Vercel auto-deploys a preview of both frontend and backend
+   - The frontend preview uses a fixed backend URL (the dev backend)
+   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment — this is a one-time step
 
-2. **Manual review**
+2. **Preview deployments**
+   - **Frontend-only PRs**: Vercel’s automatic preview works immediately
+   - **PRs that change backend code**: A maintainer adds the `full-preview` label to create a linked preview where the frontend points to the correct backend preview. Both URLs are commented on the PR.
+
+3. **Manual review**
    - Code quality and readability
    - Architecture and design patterns
    - Test coverage
    - Documentation completeness
 
-3. **Request changes vs. comment**
-   - "Request changes" = blocking, must address
-   - "Comment" = suggestion, not required
+4. **Request changes vs. comment**
+   - “Request changes” = blocking, must address
+   - “Comment” = suggestion, not required
 
-4. **Expected response time**
+5. **Expected response time**
    - Critical bugs: 4 hours
    - High priority: 1 day
    - Medium/Low priority: 3-7 days
 
-5. **Approval and merge**
+6. **Approval and merge**
    - Need at least 1 approval
-   - Maintainers will squash and merge for clean history
+   - Maintainers will squash and merge into `dev` for clean history
+   - Admins later promote `dev` → `main` for production releases
 
 ## 🏗️ Architecture & Design Patterns
 

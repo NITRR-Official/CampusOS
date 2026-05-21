@@ -37,7 +37,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://backend:4000
+      NEXT_PUBLIC_API_URL: http://backend:4000
     depends_on:
       - backend
 
@@ -63,52 +63,24 @@ docker compose up -d --build
 
 ## CI/CD Pipeline
 
-### Pipeline Stages
+CampusOS uses a **hybrid deployment approach**:
 
-```
-1. Trigger   → On PR or push to main
-2. Test      → Run test suite
-3. Build     → Compile/bundle
-4. Stage     → Deploy to staging
-5. Verify    → Smoke tests
-6. Produce   → Manual approval + deploy
-```
+- **Vercel Git Integration** handles all standard deployments automatically (production, dev, PR previews)
+- **GitHub Action** creates linked full-stack previews when a PR changes both frontend and backend (triggered by the `full-preview` label)
 
-### GitHub Actions Workflow
+The full pipeline documentation is in the dedicated **[CI/CD Guide](./CI_CD.md)**.
 
-```yaml
-name: CI/CD
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+### Quick Summary
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm lint
-      - run: pnpm build
-      - run: pnpm test
+| Event                 | What Happens                                                                    |
+| --------------------- | ------------------------------------------------------------------------------- |
+| PR to `dev` or `main` | CI checks run + Vercel auto-deploys previews                                    |
+| PR with `full-preview` label | CI checks + linked full-stack preview (frontend → correct backend)       |
+| Merge to `dev`        | Vercel auto-deploys to dev environment                                          |
+| Merge to `main`       | Vercel auto-deploys to production                                               |
 
-  deploy-staging:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      # ... deployment steps
-```
+> [!NOTE]
+> Contributors open PRs to `dev`. Only admins merge `dev` → `main` for production releases. See [CI/CD Guide](./CI_CD.md) for full details.
 
 ## Pre-Deployment Checklist
 
@@ -124,13 +96,19 @@ Before deploying to any environment:
 
 ## Environment Configuration
 
-### Staging
+Vercel environment variables are set **per environment** (Production vs Preview) in the Vercel dashboard. See the [CI/CD Guide](./CI_CD.md#step-4-add-environment-variables-in-vercel) for the full table.
+
+> [!WARNING]
+> Always use **separate MongoDB databases** for Production and Preview. Production data must never be accessible from preview deployments.
+
+### Preview / Dev
 
 ```env
-NODE_ENV=staging
+NODE_ENV=development
 PORT=4000
-MONGODB_URI=mongodb+srv://staging-user:password@cluster.mongodb.net/campusos-staging
-JWT_SECRET=staging-secret-key
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/campusos-dev
+JWT_SECRET=dev-secret-key
+ALLOW_PREVIEW_CORS=true
 ```
 
 ### Production
@@ -138,7 +116,7 @@ JWT_SECRET=staging-secret-key
 ```env
 NODE_ENV=production
 PORT=4000
-MONGODB_URI=mongodb+srv://prod-user:password@cluster.mongodb.net/campusos
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/campusos-prod
 JWT_SECRET=<strong-production-secret>
 ```
 

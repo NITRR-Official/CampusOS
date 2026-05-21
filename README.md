@@ -120,7 +120,7 @@ JWT_SECRET=dev-fallback-secret
 MONGODB_URI=mongodb://localhost:27017/campusos
 
 # Frontend
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 
 ### Running the Project
@@ -266,12 +266,14 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
    ```bash
    git clone https://github.com/YOUR_USERNAME/CampusOS.git
    cd CampusOS
+   git remote add upstream https://github.com/NITRR-Official/CampusOS.git
    ```
 
-2. **Create a Feature Branch**
+2. **Create a Feature Branch from `dev`**
 
    ```bash
-   git checkout -b feature/your-feature-name
+   git fetch upstream
+   git checkout -b feature/your-feature-name upstream/dev
    ```
 
 3. **Make Your Changes**
@@ -286,16 +288,18 @@ We welcome contributions from everyone! Whether you're fixing bugs, adding featu
    git commit -m "feat: add check-in QR code generation"
    ```
 
-5. **Push & Create Pull Request**
+5. **Push & Create Pull Request to `dev`**
    ```bash
    git push origin feature/your-feature-name
-   # Then create PR via GitHub UI
+   # Then create PR via GitHub UI — target the `dev` branch
    ```
+
+> **Note**: All PRs should target the `dev` branch. Only admins merge `dev` → `main` for production releases.
 
 ### Code Guidelines
 
 - **Architecture** — Follow modular structure in `/apps/` (schema → service → controller → routes)
-- **Quality** — Run `pnpm lint` and `pnpm build` before pushing
+- **Quality** — Run `pnpm lint`, `pnpm type-check`, and `pnpm build` before pushing
 - **Testing** — Write tests for new features (aim for 80%+ coverage)
 - **Types** — Use TypeScript on frontend, JSDoc on backend
 - **Commits** — Use [Conventional Commits](https://www.conventionalcommits.org/)
@@ -412,3 +416,7 @@ This project is licensed under the MIT License — see the [LICENSE](./LICENSE) 
 - **Discussions:** [GitHub Discussions](https://github.com/NITRR-Official/CampusOS/discussions)
 - **Documentation:** [docs/](./docs/README.md)
 - **Architecture:** [Architecture Decisions](./docs/architecture/decisions/)
+
+
+
+

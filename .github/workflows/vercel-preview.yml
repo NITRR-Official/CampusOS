@@ -1,0 +1,158 @@
+name: Full-Stack Preview Deployment
+
+# This workflow creates a LINKED preview where the frontend points to the
+# correct backend preview URL. Use this when a PR changes both frontend
+# and backend code.
+#
+# For frontend-only PRs, Vercel's built-in Git integration handles
+# preview deployments automatically — no action needed.
+#
+# Trigger: Maintainer adds the 'full-preview' label after reviewing the PR.
+# Security: Uses pull_request_target so fork PRs can access secrets.
+#           The label gate ensures a maintainer has reviewed the code first.
+
+on:
+  pull_request_target:
+    branches: [main, dev]
+    types: [labeled, synchronize]
+
+concurrency:
+  group: full-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  # Step 1: Deploy backend first to get its preview URL
+  deploy-backend:
+    name: Deploy Backend Preview
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'full-preview')
+    timeout-minutes: 15
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_BACKEND }}
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --target=preview --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+  # Step 2: Deploy frontend with backend URL injected at build time
+  deploy-frontend:
+    name: Deploy Frontend Preview
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    timeout-minutes: 15
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FRONTEND }}
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel Environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build with Backend URL
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_API_URL: ${{ needs.deploy-backend.outputs.preview-url }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --target=preview --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+  # Step 3: Comment both URLs on the PR
+  comment-pr:
+    name: Comment Preview URLs
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, deploy-backend]
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const frontendUrl = '${{ needs.deploy-frontend.outputs.preview-url }}';
+            const backendUrl = '${{ needs.deploy-backend.outputs.preview-url }}';
+            const body = `## 🔗 Full-Stack Preview Deployment
+
+            This is a **linked preview** where the frontend is connected to the backend preview.
+
+            | Service | URL |
+            |---|---|
+            | **Frontend** | ${frontendUrl} |
+            | **Backend** | ${backendUrl} |
+            | **Backend Health** | ${backendUrl}/health |
+
+            > Vercel's automatic preview (with fixed backend) is also available in the deployment list.
+
+            _Deployed from commit \`${context.payload.pull_request.head.sha.substring(0, 7)}\`_`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Full-Stack Preview')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

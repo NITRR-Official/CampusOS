@@ -38,14 +38,30 @@ export async function createApp(registry) {
   app.use(
     cors({
       origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        // Allow requests with no origin (curl, server-to-server)
+        if (!origin) {
           callback(null, true);
           return;
         }
 
+        // Exact match against configured origins
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        // In non-production, allow Vercel preview URLs (*.vercel.app)
+        // This is safe because preview environments use separate databases
+        if (isDev || process.env.ALLOW_PREVIEW_CORS === 'true') {
+          if (/^https:\/\/[\w-]+\.vercel\.app$/.test(origin)) {
+            callback(null, true);
+            return;
+          }
+        }
+
         callback(new Error('CORS policy does not allow this origin'));
       },
-      credentials: true
+      credentials: true,
     })
   );
 

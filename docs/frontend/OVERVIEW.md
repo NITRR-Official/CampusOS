@@ -69,8 +69,7 @@ Every backend domain has a corresponding API client in `lib/`. These use `fetch`
 
 ```typescript
 // lib/auth-api.ts — simplified
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 async function requestAuth(path: string, body: Record<string, string>) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
