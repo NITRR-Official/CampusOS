@@ -196,6 +196,7 @@ git push origin feature/issue-number-description
    - CI runs 5 quality checks: lint, type-check, format, test, build
    - Vercel auto-deploys a preview of both frontend and backend
    - The frontend preview uses a fixed backend URL (the dev backend)
+   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment — this is a one-time step
 
 2. **Preview deployments**
    - **Frontend-only PRs**: Vercel’s automatic preview works immediately

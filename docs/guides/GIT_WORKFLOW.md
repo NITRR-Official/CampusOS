@@ -155,6 +155,7 @@ pnpm build           # Ensure frontend compiles
 2. **Vercel auto-deploys** a preview of both frontend and backend
    - The frontend preview uses a fixed backend URL (the dev backend)
    - This is good enough for most frontend-only PRs
+   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment — this is a one-time step
 3. A maintainer reviews your code
 4. **If your PR changes backend code**:
    - Maintainer adds the **`full-preview`** label

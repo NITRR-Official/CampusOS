@@ -75,6 +75,9 @@ This works perfectly for:
 - ✅ Backend-only changes (test backend preview URL directly)
 - ✅ Fork PRs (no secrets needed, fully automatic)
 
+> [!NOTE]
+> **Fork PRs require a one-time authorization.** When a new contributor opens their first PR from a fork, Vercel will comment asking a team member to authorize the deployment. Once authorized, future PRs from that contributor deploy automatically. This is Vercel's built-in security for fork PRs.
+
 ### Full-Stack Preview Deployments (Label-Gated)
 
 When a PR changes **both frontend and backend**, a maintainer can create a **linked preview** where the frontend is connected to the correct backend preview:
