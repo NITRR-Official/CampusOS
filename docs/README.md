@@ -29,7 +29,7 @@ How CampusOS is built under the hood.
 | [Architecture Overview](./architecture/OVERVIEW.md) | System layers, principles, and design philosophy                |
 | [Backend Architecture](./architecture/BACKEND.md)   | Express core — `index.js`, `app.js`, `server.js`, `registry.js` |
 | [Plugin System](./architecture/PLUGIN_SYSTEM.md)    | Module loading, plugin pattern, and how to create modules       |
-| [Architecture Decisions](./architecture/decisions/)  | ADRs — why we made the choices we did                           |
+| [Architecture Decisions](./architecture/decisions/) | ADRs — why we made the choices we did                           |
 
 ---
 
@@ -50,9 +50,9 @@ Standards, patterns, and best practices for contributing code.
 
 ## 📡 API Reference
 
-| Document                                  | Description                                           |
-| ----------------------------------------- | ----------------------------------------------------- |
-| [API Reference](./api/REFERENCE.md)       | All REST endpoints — Vendor, Resource, Scheduling, Budget |
+| Document                            | Description                                               |
+| ----------------------------------- | --------------------------------------------------------- |
+| [API Reference](./api/REFERENCE.md) | All REST endpoints — Vendor, Resource, Scheduling, Budget |
 
 ---
 

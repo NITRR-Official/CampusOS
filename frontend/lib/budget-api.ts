@@ -57,11 +57,14 @@ export const budgetAPI = {
    * Get budget by ID
    */
   async getBudgetById(budgetId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/budget/${budgetId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Budget not found');
@@ -77,14 +80,17 @@ export const budgetAPI = {
     budgetId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/budget/${budgetId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updateData)
-    });
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update budget');

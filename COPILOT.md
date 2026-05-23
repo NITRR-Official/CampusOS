@@ -4,15 +4,15 @@
 
 CampusOS is a modular, plugin-based platform for managing campus activities — clubs, events, tasks, operations (vendors, resources, budgeting), and growth (sponsorship, marketing).
 
-| Layer     | Technology                                    |
-| --------- | --------------------------------------------- |
-| Backend   | Node.js 18+ with Express v5 (ES Modules)      |
-| Frontend  | Next.js 16 (App Router), React 19, TypeScript |
-| Database  | MongoDB + Mongoose                            |
-| UI        | Tailwind CSS v4 + shadcn/ui                   |
-| Auth      | JWT (HS256, 15m expiry)                       |
-| Testing   | Vitest + mongodb-memory-server                |
-| Package   | pnpm (workspaces)                             |
+| Layer    | Technology                                    |
+| -------- | --------------------------------------------- |
+| Backend  | Node.js 18+ with Express v5 (ES Modules)      |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript |
+| Database | MongoDB + Mongoose                            |
+| UI       | Tailwind CSS v4 + shadcn/ui                   |
+| Auth     | JWT (HS256, 15m expiry)                       |
+| Testing  | Vitest + mongodb-memory-server                |
+| Package  | pnpm (workspaces)                             |
 
 ---
 

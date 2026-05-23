@@ -31,12 +31,12 @@ cd frontend && pnpm dev   # → http://localhost:3000
 
 ## 🛠️ Tech Stack
 
-| Layer        | Technology                                                       |
-| ------------ | ---------------------------------------------------------------- |
-| **Backend**  | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/) |
-| **Frontend** | [Next.js](https://nextjs.org/) + [React](https://react.dev/)    |
+| Layer        | Technology                                                                |
+| ------------ | ------------------------------------------------------------------------- |
+| **Backend**  | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)        |
+| **Frontend** | [Next.js](https://nextjs.org/) + [React](https://react.dev/)              |
 | **Database** | [MongoDB](https://www.mongodb.com/) + [Mongoose](https://mongoosejs.com/) |
-| **Arch**     | Modular plugin system with dynamic loading                       |
+| **Arch**     | Modular plugin system with dynamic loading                                |
 
 ---
 
@@ -44,15 +44,15 @@ cd frontend && pnpm dev   # → http://localhost:3000
 
 Everything you need is in the **[Documentation Hub →](./docs/README.md)**
 
-| Topic                  | Link                                                     |
-| ---------------------- | -------------------------------------------------------- |
-| Quick Start            | [Getting Started](./docs/getting-started/QUICK_START.md) |
-| Developer Onboarding   | [First Contribution](./docs/getting-started/DEVELOPER_ONBOARDING.md) |
-| Architecture           | [Overview](./docs/architecture/OVERVIEW.md)              |
-| Project Structure      | [Directory Layout](./docs/project/PROJECT_STRUCTURE.md)  |
-| API Standards          | [REST Patterns](./docs/guides/API_STANDARDS.md)          |
-| Testing                | [Test Guide](./docs/guides/TESTING.md)                   |
-| Roadmap                | [Phases & Progress](./docs/project/ROADMAP.md)           |
+| Topic                | Link                                                                 |
+| -------------------- | -------------------------------------------------------------------- |
+| Quick Start          | [Getting Started](./docs/getting-started/QUICK_START.md)             |
+| Developer Onboarding | [First Contribution](./docs/getting-started/DEVELOPER_ONBOARDING.md) |
+| Architecture         | [Overview](./docs/architecture/OVERVIEW.md)                          |
+| Project Structure    | [Directory Layout](./docs/project/PROJECT_STRUCTURE.md)              |
+| API Standards        | [REST Patterns](./docs/guides/API_STANDARDS.md)                      |
+| Testing              | [Test Guide](./docs/guides/TESTING.md)                               |
+| Roadmap              | [Phases & Progress](./docs/project/ROADMAP.md)                       |
 
 ---
 

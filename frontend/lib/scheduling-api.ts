@@ -57,11 +57,14 @@ export const schedulingAPI = {
    * Get time slot by ID
    */
   async getTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/schedule/${slotId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/schedule/${slotId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Time slot not found');
@@ -77,14 +80,17 @@ export const schedulingAPI = {
     slotId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/schedule/${slotId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updateData)
-    });
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/schedule/${slotId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update time slot');
@@ -97,12 +103,15 @@ export const schedulingAPI = {
    * Delete time slot
    */
   async deleteTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/schedule/${slotId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/schedule/${slotId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to delete time slot');

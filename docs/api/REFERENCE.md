@@ -268,10 +268,10 @@ CampusOS exposes **44 endpoints** across four modules for managing event operati
 
 ## RBAC Rules
 
-| Access Level             | Allowed Operations                                         |
-| ------------------------ | ---------------------------------------------------------- |
-| **Public**               | GET vendors, resources, schedule info, budget summaries     |
-| **Coordinator or Admin** | POST/PUT/DELETE vendors, resources, schedule; log expenses  |
+| Access Level             | Allowed Operations                                           |
+| ------------------------ | ------------------------------------------------------------ |
+| **Public**               | GET vendors, resources, schedule info, budget summaries      |
+| **Coordinator or Admin** | POST/PUT/DELETE vendors, resources, schedule; log expenses   |
 | **Admin only**           | DELETE resources; approve/reject budgets; update maintenance |
 
 ---

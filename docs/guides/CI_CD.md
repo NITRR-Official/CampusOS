@@ -39,12 +39,12 @@ CI runs automatically on every **pull request** and **push** to `main` or `dev`.
 All 5 checks run **in parallel** for fast feedback:
 
 | Check            | Command             | What It Validates                 |
-| ---------------- | -------------------- | --------------------------------- |
-| **Lint**         | `pnpm lint`          | ESLint across all workspaces      |
-| **Type Check**   | `pnpm type-check`    | TypeScript strictness (frontend)  |
-| **Format Check** | `pnpm format:check`  | Prettier compliance               |
-| **Test**         | `pnpm test`          | Test suites across all workspaces |
-| **Build**        | `pnpm build`         | Frontend compiles without errors  |
+| ---------------- | ------------------- | --------------------------------- |
+| **Lint**         | `pnpm lint`         | ESLint across all workspaces      |
+| **Type Check**   | `pnpm type-check`   | TypeScript strictness (frontend)  |
+| **Format Check** | `pnpm format:check` | Prettier compliance               |
+| **Test**         | `pnpm test`         | Test suites across all workspaces |
+| **Build**        | `pnpm build`        | Frontend compiles without errors  |
 
 **Workflow file**: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
 
@@ -54,29 +54,29 @@ All 5 checks run **in parallel** for fast feedback:
 
 CampusOS uses **two separate hosting platforms**:
 
-| Component    | Platform                                | Method              |
-| ------------ | --------------------------------------- | ------------------- |
-| **Frontend** | [Vercel](https://vercel.com)            | Git Integration     |
-| **Backend**  | [Render](https://render.com)            | Git Integration     |
+| Component    | Platform                     | Method          |
+| ------------ | ---------------------------- | --------------- |
+| **Frontend** | [Vercel](https://vercel.com) | Git Integration |
+| **Backend**  | [Render](https://render.com) | Git Integration |
 
 Both platforms auto-deploy when code is pushed — no GitHub Actions are used for deployment.
 
 ### Live URLs
 
-| Service           | URL                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------- |
-| Backend (dev)     | https://campus-os-backend.onrender.com                                                      |
-| Frontend (prod)   | https://campus-os-frontend.vercel.app                                                       |
-| Frontend (dev)    | https://campus-os-frontend-git-dev-techshreyashs-projects.vercel.app                        |
-| Frontend (PR)     | Auto-generated unique URL per PR (commented by Vercel bot)                                   |
+| Service         | URL                                                                  |
+| --------------- | -------------------------------------------------------------------- |
+| Backend (dev)   | https://campus-os-backend.onrender.com                               |
+| Frontend (prod) | https://campus-os-frontend.vercel.app                                |
+| Frontend (dev)  | https://campus-os-frontend-git-dev-techshreyashs-projects.vercel.app |
+| Frontend (PR)   | Auto-generated unique URL per PR (commented by Vercel bot)           |
 
 ### How Deployments Are Triggered
 
-| Trigger              | Frontend (Vercel)                       | Backend (Render)                    |
-| -------------------- | --------------------------------------- | ----------------------------------- |
-| PR opened/updated    | ✅ Auto-deploys preview                 | ✅ Auto-deploys preview            |
-| Push/merge to `dev`  | ✅ Auto-deploys dev                     | ✅ Auto-deploys dev                |
-| Push/merge to `main` | ✅ Auto-deploys production              | —  (Render deploys from `dev` only)|
+| Trigger              | Frontend (Vercel)          | Backend (Render)                   |
+| -------------------- | -------------------------- | ---------------------------------- |
+| PR opened/updated    | ✅ Auto-deploys preview    | ✅ Auto-deploys preview            |
+| Push/merge to `dev`  | ✅ Auto-deploys dev        | ✅ Auto-deploys dev                |
+| Push/merge to `main` | ✅ Auto-deploys production | — (Render deploys from `dev` only) |
 
 ---
 
@@ -85,6 +85,7 @@ Both platforms auto-deploy when code is pushed — no GitHub Actions are used fo
 When a Pull Request is opened or updated, both Vercel (Frontend) and Render (Backend) automatically spin up preview environments.
 
 To provide a seamless testing experience without complex routing:
+
 1. A GitHub Action ([`.github/workflows/preview-environments.yml`](../../.github/workflows/preview-environments.yml)) listens for these successful deployments.
 2. It automatically posts a comment on the PR linking the Frontend preview directly to the Backend preview using a `?backend=` query parameter.
 3. The frontend automatically detects this query parameter, securely saves it to `localStorage`, and redirects to strip it from the URL. All subsequent API requests naturally route to the preview backend.
@@ -153,22 +154,22 @@ Render's Git Integration auto-deploys the backend:
 2. Import the **NITRR-Official/CampusOS** GitHub repository
 3. Configure the project:
 
-| Setting | Value |
-| --- | --- |
-| **Project Name** | `campus-os-frontend` |
-| **Root Directory** | `frontend` |
-| **Production Branch** | `main` |
+| Setting               | Value                |
+| --------------------- | -------------------- |
+| **Project Name**      | `campus-os-frontend` |
+| **Root Directory**    | `frontend`           |
+| **Production Branch** | `main`               |
 
 4. **Settings → Deployment Protection**:
    - Disable **Vercel Authentication** for Preview deployments (so contributors can access preview URLs without a Vercel account)
 
 5. **Settings → Environment Variables**:
 
-| Variable              | Environment        | Value                                          |
-| --------------------- | ------------------ | ---------------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | **Production**     | `https://campus-os-backend.onrender.com`       |
-| `NEXT_PUBLIC_API_URL` | **Preview**        | `https://campus-os-backend.onrender.com`       |
-| `ENABLE_EXPERIMENTAL_COREPACK` | **Both** | `1`                                            |
+| Variable                       | Environment    | Value                                    |
+| ------------------------------ | -------------- | ---------------------------------------- |
+| `NEXT_PUBLIC_API_URL`          | **Production** | `https://campus-os-backend.onrender.com` |
+| `NEXT_PUBLIC_API_URL`          | **Preview**    | `https://campus-os-backend.onrender.com` |
+| `ENABLE_EXPERIMENTAL_COREPACK` | **Both**       | `1`                                      |
 
 ### Step 2: Configure Render (Backend)
 
@@ -176,25 +177,25 @@ Render's Git Integration auto-deploys the backend:
 2. Connect the **NITRR-Official/CampusOS** GitHub repository
 3. Configure the service:
 
-| Setting | Value |
-| --- | --- |
-| **Name** | `campus-os-backend` |
-| **Branch** | `dev` |
-| **Root Directory** | `backend` |
-| **Runtime** | Node |
-| **Build Command** | `pnpm install` |
-| **Start Command** | `node src/index.js` |
+| Setting            | Value               |
+| ------------------ | ------------------- |
+| **Name**           | `campus-os-backend` |
+| **Branch**         | `dev`               |
+| **Root Directory** | `backend`           |
+| **Runtime**        | Node                |
+| **Build Command**  | `pnpm install`      |
+| **Start Command**  | `node src/index.js` |
 
 4. **Environment Variables**:
 
-| Variable             | Value                                                          | Notes                                               |
-| -------------------- | -------------------------------------------------------------- | --------------------------------------------------- |
-| `NODE_ENV`           | `development`                                                  | Dev fallbacks, verbose errors                       |
-| `PORT`               | `10000`                                                        | Render's default port                               |
-| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`                                | MongoDB Atlas connection string                     |
-| `JWT_SECRET`         | `<your-dev-secret>`                                            | Secret for JWT signing                              |
-| `FRONTEND_URL`       | `https://campus-os-frontend.vercel.app`                        | CORS: exact match for production frontend           |
-| `ALLOW_PREVIEW_CORS` | `true`                                                         | Allows any `*.vercel.app` origin for PR previews    |
+| Variable             | Value                                   | Notes                                            |
+| -------------------- | --------------------------------------- | ------------------------------------------------ |
+| `NODE_ENV`           | `development`                           | Dev fallbacks, verbose errors                    |
+| `PORT`               | `10000`                                 | Render's default port                            |
+| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`         | MongoDB Atlas connection string                  |
+| `JWT_SECRET`         | `<your-dev-secret>`                     | Secret for JWT signing                           |
+| `FRONTEND_URL`       | `https://campus-os-frontend.vercel.app` | CORS: exact match for production frontend        |
+| `ALLOW_PREVIEW_CORS` | `true`                                  | Allows any `*.vercel.app` origin for PR previews |
 
 ### Step 3: Enable Branch Protection (GitHub)
 
@@ -226,15 +227,15 @@ The solution: when `ALLOW_PREVIEW_CORS=true` is set on the Render backend, it al
 
 ## Workflow Files Reference
 
-| File | Trigger | Purpose |
-| --- | --- | --- |
-| [`ci.yml`](../../.github/workflows/ci.yml) | PR or push to `main`/`dev` | 5 parallel quality checks |
-| [`preview-environments.yml`](../../.github/workflows/preview-environments.yml) | Deployment Status | Combines Frontend/Backend previews into a single URL and comments on PRs |
-| Vercel Git Integration | PR opened | Frontend preview deployment (auto) |
-| Vercel Git Integration | Push to `dev` | Frontend dev deployment (auto) |
-| Vercel Git Integration | Push to `main` | Frontend production deployment (auto) |
-| Render Git Integration | PR opened | Backend preview deployment (auto) |
-| Render Git Integration | Push to `dev` | Backend deployment (auto) |
+| File                                                                           | Trigger                    | Purpose                                                                  |
+| ------------------------------------------------------------------------------ | -------------------------- | ------------------------------------------------------------------------ |
+| [`ci.yml`](../../.github/workflows/ci.yml)                                     | PR or push to `main`/`dev` | 5 parallel quality checks                                                |
+| [`preview-environments.yml`](../../.github/workflows/preview-environments.yml) | Deployment Status          | Combines Frontend/Backend previews into a single URL and comments on PRs |
+| Vercel Git Integration                                                         | PR opened                  | Frontend preview deployment (auto)                                       |
+| Vercel Git Integration                                                         | Push to `dev`              | Frontend dev deployment (auto)                                           |
+| Vercel Git Integration                                                         | Push to `main`             | Frontend production deployment (auto)                                    |
+| Render Git Integration                                                         | PR opened                  | Backend preview deployment (auto)                                        |
+| Render Git Integration                                                         | Push to `dev`              | Backend deployment (auto)                                                |
 
 ---
 

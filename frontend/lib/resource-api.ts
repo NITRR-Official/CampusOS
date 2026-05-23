@@ -41,11 +41,14 @@ export const resourceAPI = {
     if (filters.condition)
       params.append('condition', String(filters.condition));
 
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/resources?${params}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/resources?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch resources');
@@ -86,11 +89,14 @@ export const resourceAPI = {
    * Get resource by ID
    */
   async getResourceById(resourceId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/resources/${resourceId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/resources/${resourceId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Resource not found');
@@ -106,14 +112,17 @@ export const resourceAPI = {
     resourceId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/resources/${resourceId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updateData)
-    });
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/resources/${resourceId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update resource');
@@ -126,12 +135,15 @@ export const resourceAPI = {
    * Delete resource
    */
   async deleteResource(resourceId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/resources/${resourceId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/resources/${resourceId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to delete resource');

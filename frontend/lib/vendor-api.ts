@@ -35,11 +35,14 @@ export const vendorAPI = {
     if (filters.category) params.append('category', String(filters.category));
     if (filters.status) params.append('status', String(filters.status));
 
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors?${params}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/vendors?${params}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to fetch vendors');
@@ -52,11 +55,14 @@ export const vendorAPI = {
    * Get vendor by ID
    */
   async getVendorById(vendorId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors/${vendorId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/vendors/${vendorId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Vendor not found');
@@ -72,14 +78,17 @@ export const vendorAPI = {
     vendorId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors/${vendorId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updateData)
-    });
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/vendors/${vendorId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(updateData)
+      }
+    );
 
     if (!response.ok) {
       throw new Error('Failed to update vendor');
@@ -92,12 +101,15 @@ export const vendorAPI = {
    * Delete vendor
    */
   async deleteVendor(vendorId: string): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors/${vendorId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `${getApiBaseUrl()}/api/v1/vendors/${vendorId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error('Failed to delete vendor');

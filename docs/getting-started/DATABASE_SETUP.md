@@ -113,15 +113,15 @@ See [Environment Variables](./ENVIRONMENT.md) for all options.
 
 ## Database Collections
 
-| Collection | Module     | Purpose                    |
-| ---------- | ---------- | -------------------------- |
-| users      | Auth       | User accounts              |
-| vendors    | Vendor     | Vendor information         |
-| resources  | Resource   | Equipment and inventory    |
-| timeslots  | Scheduling | Event time slots           |
-| conflicts  | Scheduling | Scheduling conflicts       |
-| budgets    | Budget     | Event budgets              |
-| expenses   | Budget     | Tracked expenses           |
+| Collection | Module     | Purpose                 |
+| ---------- | ---------- | ----------------------- |
+| users      | Auth       | User accounts           |
+| vendors    | Vendor     | Vendor information      |
+| resources  | Resource   | Equipment and inventory |
+| timeslots  | Scheduling | Event time slots        |
+| conflicts  | Scheduling | Scheduling conflicts    |
+| budgets    | Budget     | Event budgets           |
+| expenses   | Budget     | Tracked expenses        |
 
 > [!NOTE]
 > Some modules (Club, Institute, Event, Check-in, Task, Calendar) currently store data in-memory using `Map()` objects. Their data is lost on server restart. Operations modules (Vendor, Resource, Scheduling, Budget) and Auth use MongoDB.
@@ -138,12 +138,12 @@ mongorestore --uri="<connection-string>" ./backups/<date>/campusos
 
 ## Troubleshooting
 
-| Problem                    | Fix                                                   |
-| -------------------------- | ----------------------------------------------------- |
-| `ECONNREFUSED` on startup  | MongoDB isn't running → `docker start mongodb`        |
-| Connection timeout         | Check `MONGODB_URI` in `.env`                         |
-| Auth failure (Atlas)       | Verify username/password and IP allowlist              |
-| Slow first test run        | `mongodb-memory-server` downloads binaries on first use — wait ~60s |
+| Problem                   | Fix                                                                 |
+| ------------------------- | ------------------------------------------------------------------- |
+| `ECONNREFUSED` on startup | MongoDB isn't running → `docker start mongodb`                      |
+| Connection timeout        | Check `MONGODB_URI` in `.env`                                       |
+| Auth failure (Atlas)      | Verify username/password and IP allowlist                           |
+| Slow first test run       | `mongodb-memory-server` downloads binaries on first use — wait ~60s |
 
 ---
 
