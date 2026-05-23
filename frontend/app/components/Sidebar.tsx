@@ -10,7 +10,7 @@ interface SidebarLink {
 }
 
 const SIDEBAR_LINKS: SidebarLink[] = [
-  { href: '/', label: 'Dashboard', icon: '📊' },
+  { href: '/dashboard', label: 'Dashboard', icon: '📊' },
   { href: '/institutes', label: 'Institutes', icon: '🏫' },
   { href: '/clubs', label: 'Clubs', icon: '🎯' },
   { href: '/events', label: 'Events', icon: '📅' },

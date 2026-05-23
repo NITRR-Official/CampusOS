@@ -139,6 +139,12 @@ Neutral Gray Scale
 
 ## 2. Typography Scale
 
+### Font Families
+
+- Display/Headings: Sora
+- Body: Manrope
+- Mono: Geist Mono
+
 ### Heading Scale
 
 | Name           | Size     | Weight | Line Height | Use Case                      |
