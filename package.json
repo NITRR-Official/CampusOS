@@ -10,6 +10,7 @@
   },
   "packageManager": "pnpm@10.25.0",
   "scripts": {
+    "prepare": "husky install",
     "dev": "pnpm -r --filter backend --filter frontend run dev",
     "build": "pnpm -r --filter frontend run build",
     "test": "pnpm -r run test",
@@ -44,13 +45,25 @@
     "frontend",
     "shared"
   ],
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ],
+    "*.{ts,tsx,js,jsx,json,md}": [
+      "prettier --write"
+    ]
+  },
   "dependencies": {
     "mongoose": "^9.6.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.3.0",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "mongodb-memory-server": "^11.1.0",
     "prettier": "^3.8.3"
   }
