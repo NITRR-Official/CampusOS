@@ -8,8 +8,11 @@ How the CampusOS Express server actually works, traced through the source code.
 
 When you run `pnpm dev` in the backend (which runs `node --watch src/index.js`), this is what happens:
 
-```
-index.js  →  connectDB()  →  createApp(registry)  →  startServer(app, port)
+```mermaid
+flowchart LR
+    A["index.js"] --> B["connectDB()"]
+    B --> C["createApp(registry)"]
+    C --> D["startServer(app, port)"]
 ```
 
 1. `index.js` calls `connectDB()` to connect to MongoDB
@@ -49,17 +52,16 @@ backend/src/
 
 The order in `app.js` matters. Middleware runs top-to-bottom for every request:
 
-```
-Request arrives
-    │
-    ├── 1. Body parsing        express.json({ limit: '10mb' })
-    ├── 2. CORS                Allows origins from FRONTEND_URLS env var
-    ├── 3. Logger              Assigns req.id, logs method/path/status/duration
-    ├── 4. Health check        GET /health (returns early, no auth needed)
-    ├── 5. Auth                Skips PUBLIC_ROUTES, verifies JWT, sets req.user
-    ├── 6. Plugin routes       Loaded dynamically from /apps/
-    ├── 7. 404 handler         notFoundMiddleware — catches unmatched routes
-    └── 8. Error handler       errorMiddleware — catches all thrown errors
+```mermaid
+flowchart TD
+    Req["Request arrives"] --> M1["1. Body parsing<br/><small>express.json({ limit: '10mb' })</small>"]
+    M1 --> M2["2. CORS<br/><small>Allows origins from FRONTEND_URLS env var</small>"]
+    M2 --> M3["3. Logger<br/><small>Assigns req.id, logs method/path/status/duration</small>"]
+    M3 --> M4["4. Health check<br/><small>GET /health (returns early, no auth needed)</small>"]
+    M4 --> M5["5. Auth<br/><small>Skips PUBLIC_ROUTES, verifies JWT, sets req.user</small>"]
+    M5 --> M6["6. Plugin routes<br/><small>Loaded dynamically from /apps/</small>"]
+    M6 --> M7["7. 404 handler<br/><small>notFoundMiddleware — catches unmatched routes</small>"]
+    M7 --> M8["8. Error handler<br/><small>errorMiddleware — catches all thrown errors</small>"]
 ```
 
 ### Public Routes (no auth required)

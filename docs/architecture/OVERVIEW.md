@@ -4,55 +4,52 @@ CampusOS is organized around two key ideas: **everything is a plugin module**, a
 
 ## How It Works
 
-```
-                    ┌──────────────────────┐
-                    │      index.js        │  Entry point
-                    └──────────┬───────────┘
-                               │
-                    ┌──────────▼───────────┐
-                    │     connectDB()      │  MongoDB via Mongoose
-                    └──────────┬───────────┘
-                               │
-                    ┌──────────▼───────────┐
-                    │     createApp()      │  Express + middleware
-                    │                      │
-                    │  Body parsing        │
-                    │  CORS                │
-                    │  Logger              │
-                    │  Auth (JWT)          │
-                    │  ┌────────────────┐  │
-                    │  │ Plugin Loader  │──┼──► Scans /apps/
-                    │  └────────────────┘  │     and loads modules
-                    │  404 handler         │
-                    │  Error handler       │
-                    └──────────┬───────────┘
-                               │
-                    ┌──────────▼───────────┐
-                    │   startServer()      │  HTTP on port 4000
-                    └──────────────────────┘
+```mermaid
+flowchart TD
+    index["index.js<br/><small>Entry point</small>"] --> connectDB["connectDB()<br/><small>MongoDB via Mongoose</small>"]
+    connectDB --> createApp["createApp()<br/><small>Express + middleware</small>"]
+
+    createApp -.-> Middleware
+    subgraph Middleware
+        direction TB
+        p1[Body parsing]
+        p2[CORS]
+        p3[Logger]
+        p4["Auth (JWT)"]
+        p5[Plugin Loader] -.-> scan["Scans /apps/<br/>and loads modules"]
+        p6[404 handler]
+        p7[Error handler]
+    end
+
+    createApp --> startServer["startServer()<br/><small>HTTP on port 4000</small>"]
 ```
 
 ## System Layers
 
 Modules are grouped into layers. Lower layers don't depend on higher ones.
 
-```
-┌─────────────────────────────────────────────┐
-│              5. Growth Layer                │
-│         Sponsorship · Marketing             │   ← Not yet built
-├─────────────────────────────────────────────┤
-│           4. Operations Layer               │
-│     Vendor · Resource · Scheduling · Budget │   ← apps/vendor, resource, scheduling, budget
-├─────────────────────────────────────────────┤
-│           3. Execution Layer                │
-│           Task · Calendar                   │   ← apps/task, calendar
-├─────────────────────────────────────────────┤
-│             2. Event Layer                  │
-│           Event · Check-in                  │   ← apps/event, checkin
-├─────────────────────────────────────────────┤
-│          1. Foundation Layer                │
-│       Auth · Club · Institute              │   ← apps/auth, club, institute
-└─────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph L5 ["5. Growth Layer (Not yet built)"]
+        G["Sponsorship · Marketing"]
+    end
+    subgraph L4 ["4. Operations Layer"]
+        O["Vendor · Resource · Scheduling · Budget<br/>(apps/vendor, resource, scheduling, budget)"]
+    end
+    subgraph L3 ["3. Execution Layer"]
+        E["Task · Calendar<br/>(apps/task, calendar)"]
+    end
+    subgraph L2 ["2. Event Layer"]
+        Ev["Event · Check-in<br/>(apps/event, checkin)"]
+    end
+    subgraph L1 ["1. Foundation Layer"]
+        F["Auth · Club · Institute<br/>(apps/auth, club, institute)"]
+    end
+
+    L5 --> L4
+    L4 --> L3
+    L3 --> L2
+    L2 --> L1
 ```
 
 ### What's in each layer

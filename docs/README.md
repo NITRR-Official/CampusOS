@@ -22,7 +22,7 @@ Welcome to the CampusOS documentation. This hub links every guide, reference, an
 
 ## 🏗️ Architecture
 
-How CampusOS is built under the hood.
+How CampusOS is built under the hood. All system diagrams are rendered natively using [Mermaid](https://mermaid.js.org/).
 
 | Document                                            | Description                                                     |
 | --------------------------------------------------- | --------------------------------------------------------------- |

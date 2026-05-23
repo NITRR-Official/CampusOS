@@ -115,20 +115,21 @@ docker logs mongodb          # Check MongoDB logs
 
 ## 5. How Things Connect
 
-```
-Frontend (port 3000)
-    │
-    │  fetch('/api/v1/vendors')
-    │  Authorization: Bearer <token>
-    │
-    ▼
-Backend (port 4000)
-    │
-    ├── middleware/auth.js     → Verifies JWT
-    ├── middleware/permissions  → Checks role
-    ├── apps/vendor/routes     → Matches route
-    ├── apps/vendor/controller → Extracts params, calls service
-    └── apps/vendor/service    → Business logic → MongoDB
+```mermaid
+sequenceDiagram
+    participant F as Frontend (port 3000)
+    participant B as Backend (port 4000)
+    participant M as Middleware
+    participant R as Routes & Controller
+    participant S as Service & DB
+
+    F->>B: fetch('/api/v1/vendors')<br/>Authorization: Bearer <token>
+    B->>M: middleware/auth.js (Verifies JWT)
+    M->>M: middleware/permissions (Checks role)
+    M->>R: apps/vendor/routes (Matches route)
+    R->>R: apps/vendor/controller (Extracts params, calls service)
+    R->>S: apps/vendor/service (Business logic → MongoDB)
+    S-->>F: Returns response
 ```
 
 ## 6. Common Issues
