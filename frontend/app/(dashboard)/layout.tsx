@@ -14,9 +14,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <SidebarInset>
         <Header />
         <main className="flex-1 bg-background/50">
-          <div className="p-5 md:p-8 pb-20">
-            {children}
-          </div>
+          <div className="p-5 md:p-8 pb-20">{children}</div>
         </main>
       </SidebarInset>
     </SidebarProvider>

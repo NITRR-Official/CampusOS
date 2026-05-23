@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -21,7 +21,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
+  BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -30,20 +30,21 @@ export function Header() {
   const { isMobile } = useSidebar();
 
   const getBreadcrumbs = () => {
-    if (!pathname || pathname === '/') return [{ label: 'Dashboard', href: '/' }];
-    
+    if (!pathname || pathname === '/')
+      return [{ label: 'Dashboard', href: '/' }];
+
     const parts = pathname.split('/').filter(Boolean);
     const crumbs = [];
     let currentPath = '';
-    
+
     for (const part of parts) {
       currentPath += `/${part}`;
       crumbs.push({
         label: part.charAt(0).toUpperCase() + part.slice(1),
-        href: currentPath,
+        href: currentPath
       });
     }
-    
+
     return crumbs;
   };
 
@@ -64,7 +65,9 @@ export function Header() {
                       {isLast ? (
                         <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                        <BreadcrumbLink href={crumb.href}>
+                          {crumb.label}
+                        </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>
                     {!isLast && <BreadcrumbSeparator />}
@@ -75,14 +78,18 @@ export function Header() {
           </Breadcrumb>
         </div>
       </div>
-      
+
       <div className="ml-auto flex items-center gap-3">
         {/* Mobile Search Icon */}
-        <Button variant="ghost" size="icon" className="lg:hidden relative size-9 rounded-full">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden relative size-9 rounded-full"
+        >
           <Search className="size-5 text-muted-foreground" />
           <span className="sr-only">Search</span>
         </Button>
-        
+
         {/* Desktop Search Bar */}
         <div className="relative hidden w-64 lg:block">
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -92,21 +99,27 @@ export function Header() {
             className="w-full appearance-none bg-background pl-8 shadow-none h-9 rounded-md"
           />
         </div>
-        
+
         <ThemeToggle />
-        
-        <Button variant="ghost" size="icon" className="relative size-9 rounded-full">
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative size-9 rounded-full"
+        >
           <Bell className="size-5 text-muted-foreground" />
           <span className="absolute right-2 top-2 size-2 rounded-full bg-red-600 border border-background"></span>
           <span className="sr-only">Notifications</span>
         </Button>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative size-9 rounded-full">
               <Avatar className="size-9 border border-border">
                 <AvatarImage src="" alt="User" />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium">AD</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                  AD
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -114,14 +127,18 @@ export function Header() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">Admin User</p>
-                <p className="text-xs leading-none text-muted-foreground">admin@campusos.com</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  admin@campusos.com
+                </p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 focus:bg-red-50 dark:focus:bg-red-950">Log out</DropdownMenuItem>
+            <DropdownMenuItem className="text-red-500 focus:bg-red-50 dark:focus:bg-red-950">
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -11,7 +11,7 @@ import {
   Ticket,
   CheckSquare,
   Settings,
-  LogOut,
+  LogOut
 } from 'lucide-react';
 import {
   Sidebar,
@@ -23,7 +23,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarMenuItem
 } from '@/components/ui/sidebar';
 
 const navigation = [
@@ -33,7 +33,7 @@ const navigation = [
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Calendar', href: '/calendar', icon: Calendar },
   { name: 'Participants', href: '/participants', icon: Users },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Settings', href: '/settings', icon: Settings }
 ];
 
 export function AppSidebar() {
@@ -47,23 +47,27 @@ export function AppSidebar() {
             <span className="text-xl font-bold">C</span>
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold tracking-tight text-lg">CampusOS</span>
+            <span className="font-semibold tracking-tight text-lg">
+              CampusOS
+            </span>
           </div>
         </div>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/' && pathname?.startsWith(item.href));
+                const isActive =
+                  pathname === item.href ||
+                  (item.href !== '/' && pathname?.startsWith(item.href));
                 return (
                   <SidebarMenuItem key={item.name}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive} 
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
                       tooltip={item.name}
                       className="min-h-[44px] transition-all duration-200"
                     >
@@ -83,7 +87,10 @@ export function AppSidebar() {
       <SidebarFooter className="pb-10">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="min-h-[44px] text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors" asChild>
+            <SidebarMenuButton
+              className="min-h-[44px] text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+              asChild
+            >
               <button onClick={() => console.log('Logout')}>
                 <LogOut className="size-5" />
                 <span className="text-[15px]">Log out</span>

@@ -440,230 +440,227 @@ export default function TasksPage() {
   }
 
   return (
-
-      <div className="mx-auto max-w-7xl space-y-8">
-        <section
-          className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60"
-          style={{
-            background:
-              'radial-gradient(circle at top left, rgba(34, 211, 238, 0.18), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)'
-          }}
-        >
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
-                Phase 3
-              </p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
-                Task dashboard
-              </h1>
-              <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
-                Plan work, assign owners, and move tasks through the execution
-                flow.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/events"
-                className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-              >
-                View events
-              </Link>
-              <Link
-                href="/"
-                className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
-              >
-                Back to dashboard
-              </Link>
-            </div>
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-4">
-            {[
-              { label: 'Total tasks', value: taskCounts.total },
-              { label: 'Todo', value: taskCounts.todo },
-              { label: 'In progress', value: taskCounts.active },
-              { label: 'Done', value: taskCounts.done }
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  {item.label}
-                </p>
-                <p className="mt-3 text-3xl font-semibold text-slate-950">
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {!accessToken ? (
-          <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
-            <h2 className="text-xl font-semibold">Sign in required</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-900/80">
-              Log in to create and manage tasks. Your session is stored locally
-              after authentication.
+    <div className="mx-auto max-w-7xl space-y-8">
+      <section
+        className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60"
+        style={{
+          background:
+            'radial-gradient(circle at top left, rgba(34, 211, 238, 0.18), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)'
+        }}
+      >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
+              Phase 3
             </p>
-            <Link
-              href="/login"
-              className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-900"
-            >
-              Go to login
-            </Link>
-          </section>
-        ) : null}
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+              Task dashboard
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+              Plan work, assign owners, and move tasks through the execution
+              flow.
+            </p>
+          </div>
 
-        <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <form
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60"
-            onSubmit={handleCreateTask}
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/events"
+              className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+            >
+              View events
+            </Link>
+            <Link
+              href="/"
+              className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Back to dashboard
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-4">
+          {[
+            { label: 'Total tasks', value: taskCounts.total },
+            { label: 'Todo', value: taskCounts.todo },
+            { label: 'In progress', value: taskCounts.active },
+            { label: 'Done', value: taskCounts.done }
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {item.label}
+              </p>
+              <p className="mt-3 text-3xl font-semibold text-slate-950">
+                {item.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {!accessToken ? (
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-950">
+          <h2 className="text-xl font-semibold">Sign in required</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-amber-900/80">
+            Log in to create and manage tasks. Your session is stored locally
+            after authentication.
+          </p>
+          <Link
+            href="/login"
+            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-900"
           >
+            Go to login
+          </Link>
+        </section>
+      ) : null}
+
+      <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <form
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60"
+          onSubmit={handleCreateTask}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                New task
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                Create work item
+              </h2>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <label className="block">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Title
+              </span>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                placeholder="Prepare event checklist"
+                minLength={3}
+                maxLength={140}
+                required
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Description
+              </span>
+              <textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                className="min-h-28 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                placeholder="Add scope, context, or execution notes."
+                maxLength={1000}
+              />
+            </label>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Assignee
+                </span>
+                <input
+                  value={assigneeName}
+                  onChange={(event) => setAssigneeName(event.target.value)}
+                  className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                  placeholder="Team member name"
+                  minLength={2}
+                  maxLength={80}
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Due date
+                </span>
+                <input
+                  type="datetime-local"
+                  value={dueDate}
+                  onChange={(event) => setDueDate(event.target.value)}
+                  className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                />
+              </label>
+            </div>
+
+            <label className="block">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Priority
+              </span>
+              <select
+                value={priority}
+                onChange={(event) =>
+                  setPriority(event.target.value as TaskPriority)
+                }
+                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+              >
+                {PRIORITY_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {error ? (
+              <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {error}
+              </p>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={!accessToken || isSubmitting}
+              className="w-full rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? 'Creating task...' : 'Create task'}
+            </button>
+          </div>
+        </form>
+
+        <section className="space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  New task
+                  Task queue
                 </p>
                 <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-                  Create work item
+                  Execution list
                 </h2>
               </div>
+              {isLoading ? (
+                <span className="text-sm text-slate-500">Loading...</span>
+              ) : null}
             </div>
 
             <div className="mt-6 space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Title
-                </span>
-                <input
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                  placeholder="Prepare event checklist"
-                  minLength={3}
-                  maxLength={140}
-                  required
-                />
-              </label>
-
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Description
-                </span>
-                <textarea
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  className="min-h-28 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                  placeholder="Add scope, context, or execution notes."
-                  maxLength={1000}
-                />
-              </label>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Assignee
-                  </span>
-                  <input
-                    value={assigneeName}
-                    onChange={(event) => setAssigneeName(event.target.value)}
-                    className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                    placeholder="Team member name"
-                    minLength={2}
-                    maxLength={80}
+              {tasks.length > 0 ? (
+                tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    allTasks={tasks}
+                    accessToken={accessToken || ''}
+                    onTaskChange={handleTaskChange}
+                    onTaskError={handleTaskError}
                   />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Due date
-                  </span>
-                  <input
-                    type="datetime-local"
-                    value={dueDate}
-                    onChange={(event) => setDueDate(event.target.value)}
-                    className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                  />
-                </label>
-              </div>
-
-              <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Priority
-                </span>
-                <select
-                  value={priority}
-                  onChange={(event) =>
-                    setPriority(event.target.value as TaskPriority)
-                  }
-                  className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
-                >
-                  {PRIORITY_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              {error ? (
-                <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                  {error}
-                </p>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={!accessToken || isSubmitting}
-                className="w-full rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmitting ? 'Creating task...' : 'Create task'}
-              </button>
-            </div>
-          </form>
-
-          <section className="space-y-4">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Task queue
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-slate-950">
-                    Execution list
-                  </h2>
+                ))
+              ) : (
+                <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
+                  No tasks yet. Create the first execution item to get started.
                 </div>
-                {isLoading ? (
-                  <span className="text-sm text-slate-500">Loading...</span>
-                ) : null}
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {tasks.length > 0 ? (
-                  tasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      allTasks={tasks}
-                      accessToken={accessToken || ''}
-                      onTaskChange={handleTaskChange}
-                      onTaskError={handleTaskError}
-                    />
-                  ))
-                ) : (
-                  <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
-                    No tasks yet. Create the first execution item to get
-                    started.
-                  </div>
-                )}
-              </div>
+              )}
             </div>
-          </section>
+          </div>
         </section>
-      </div>
-
+      </section>
+    </div>
   );
 }
