@@ -1,493 +1,83 @@
-# 🚀 CampusOS Roadmap
+# CampusOS Roadmap
 
-## 🎯 Project Overview
-
-CampusOS is a modular, scalable platform designed to manage the complete lifecycle of campus activities including:
-
-- Clubs & organizational structure
-- Events & participation
-- Task & execution workflows
-- Operations (vendors, resources, logistics, budgeting)
-- Sponsorship & marketing
-- Planning (calendar, deadlines, yearly activities)
+CampusOS is built in phases, each expanding the platform's capabilities. Each phase completes backend modules, frontend integration, and documentation before the next begins.
 
 ---
 
-## 🧠 Development Principles
+## ✅ Phase 0: System Initialization — Complete
 
-- **Modular Architecture** → Everything is a module
-- **Vertical Development** → Backend + Frontend + DB together
-- **Humanet-driven** → Every decision documented
-- **Copilot-guided** → Context-aware development
+Set up monorepo structure, Express server with plugin loader, Next.js frontend shell, MongoDB connection, and development environment.
 
----
+## ✅ Phase 1: Foundation System — Complete
 
-## 🗺️ Phase-wise Roadmap
+**Modules**: Auth (JWT), Club, Institute, RBAC
 
----
+Functional login system, club management, and role-based permissions (`admin`, `coordinator`, `volunteer`).
 
-# 🟢 Phase 0: System Initialization (Week 1)
+## ✅ Phase 2: Event Engine — Complete
 
-## 🎯 Goal
+**Modules**: Event, RSVP
 
-Set up development environment, architecture, and documentation.
+Event CRUD, registration with capacity handling, public event listing and detail pages.
 
----
+## ✅ Phase 3: Execution Engine — Complete
 
-## 🧩 Tasks
+**Modules**: Task, Calendar
 
-### Humanet Setup
+Task assignment with priority and status tracking, calendar management, task dependency system with circular dependency detection.
 
-- [x] Run `humanet init`
-- [x] Fill `problem_statement.md`
-- [x] Fill `idea.md`
-- [x] Fill `scope.md`
+## ✅ Phase 4: Live Event Support — Complete
 
----
+**Modules**: Check-in
 
-### Repository Setup
+QR code generation, check-in API, attendance tracking, participant dashboard.
 
-- [x] Initialize Git repository
-- [x] Setup monorepo structure with pnpm workspaces
-- [x] Create folders:
-  - [x] `/backend`
-  - [x] `/frontend`
-  - [x] `/apps`
-  - [x] `/shared`
+## ✅ Phase 5: Operations Layer — Complete
 
----
+**Modules**: Vendor, Resource, Scheduling, Budget
 
-### Backend Core
+| Module     | Endpoints | Key Features                                       |
+| ---------- | --------- | -------------------------------------------------- |
+| Vendor     | 10        | CRUD, event assignments, rating system             |
+| Resource   | 11        | Inventory, allocation, conflict detection          |
+| Scheduling | 10        | Time slots, venue availability, conflict detection |
+| Budget     | 13        | Allocation, expenses, approval workflow, reporting |
 
-- [x] Setup Express server (`/backend/src/index.js`)
-- [x] Setup middleware structure (auth, logging, error handling)
-- [x] Implement plugin loader system (`plugin-loader.js`)
+**Total: 44 REST API endpoints.** See [API Reference](../api/REFERENCE.md) for details.
 
 ---
 
-### Frontend Setup
+## 🟢 Phase 6: Growth Layer — Next
 
-- [x] Initialize Next.js app with Tailwind CSS
-- [x] Setup base layout (dashboard shell with Sidebar, Header, MainLayout)
-- [x] Create home page with stats and quick actions
+**Goal**: Enable sponsorship and marketing workflows.
 
----
+- [ ] Sponsorship Module — Add sponsors, track deliverables, payment tracking
+- [ ] Marketing Module — Campaign management, creative tracking
+- [ ] Sponsor dashboard and marketing dashboard (frontend)
 
-### Copilot Setup
+## 🟢 Phase 7: System Maturity
 
-- [x] Create `COPILOT.md`
-- [x] Add project architecture rules
-- [x] Setup 20 development skills
-- [x] Setup 15 AI agent personas
+**Goal**: Production readiness and scalability.
 
----
-
-## ✅ Status: PHASE 0 COMPLETE
+- [ ] In-app notifications and event reminders
+- [ ] Audit logs — Track user actions
+- [ ] File management — Upload posters, documents
+- [ ] Analytics — Event participation stats, budget insights, basic reporting
 
 ---
 
-# ✅ Phase 1: Foundation System (Weeks 2–3) - COMPLETE
+## Milestones
 
-## 🎯 Goal
-
-Establish identity and organizational structure.
-
----
-
-## 🧩 Tasks
-
-### Auth Module
-
-- [x] Signup API
-- [x] Login API
-- [x] JWT authentication
-- [x] Auth middleware
+| #   | Milestone               | Status      |
+| --- | ----------------------- | ----------- |
+| 1   | Foundation Ready        | ✅ Complete |
+| 2   | Event System Live       | ✅ Complete |
+| 3   | Execution System Ready  | ✅ Complete |
+| 4   | First Fest Ready 🎉    | ✅ Complete |
+| 5   | Full Ops System         | ✅ Complete |
+| 6   | Growth Enabled          | 🟢 Next    |
+| 7   | Production Ready        | 🟢 Planned |
 
 ---
 
-### Institute Module
-
-- [x] Create institute
-
----
-
-### Club Module
-
-- [x] Create club
-- [x] Add/remove members
-- [x] Assign roles
-
----
-
-### RBAC (Roles & Permissions)
-
-- [x] Define roles:
-  - Admin
-  - Coordinator
-  - Volunteer
-
-- [x] Permission middleware
-
----
-
-### Frontend
-
-- [x] Login/Signup pages
-- [x] Basic dashboard UI
-
----
-
-## 📦 Deliverable
-
-- Functional login system + club management
-
----
-
-## ✅ Status: PHASE 1 COMPLETE
-
----
-
-# ✅ Phase 2: Event Engine (Weeks 4–5) - COMPLETE
-
-## 🎯 Goal
-
-Enable event creation and participation.
-
----
-
-## 🧩 Tasks
-
-### Event Module
-
-- [x] Create event API
-- [x] Edit event
-- [x] Publish/unpublish event
-- [x] Event schema
-
----
-
-### RSVP Module
-
-- [x] Register for event
-- [x] Capacity handling
-- [x] Registration tracking
-
----
-
-### Public Event Pages
-
-- [x] Event listing page
-- [x] Event detail page
-- [x] Registration UI
-
----
-
-### Frontend Integration
-
-- [x] Connect event APIs
-- [x] Display event data
-
----
-
-## 📦 Deliverable
-
-- Fully functional event system
-
----
-
-## ✅ Status: PHASE 2 COMPLETE
-
----
-
-# ✅ Phase 3: Execution Engine (Weeks 6–7) - COMPLETE
-
-## 🎯 Goal
-
-Allow organizers to manage tasks and workflows.
-
----
-
-## 🧩 Tasks
-
-### Task Module
-
-- [x] Create task
-- [x] Assign task
-- [x] Update status (todo/in-progress/done)
-- [x] Priority system
-
----
-
-### Calendar Module
-
-- [x] Add calendar events
-- [x] Deadline tracking
-- [x] Event linking
-
----
-
-### Task Dependencies
-
-- [x] Define dependencies between tasks
-- [x] Circular dependency detection
-- [x] Frontend UI for dependency management
-
----
-
-### Frontend
-
-- [x] Task dashboard
-- [x] Calendar view
-- [x] Dependency dropdown selector
-- [x] Dependency removal UI
-
----
-
-## 📦 Deliverable
-
-- Task and planning system fully operational with dependency management
-
----
-
-# ✅ Phase 4: Live Event Support (Week 8) - COMPLETE
-
-## 🎯 Goal
-
-Support real-world event execution.
-
----
-
-## 🧩 Tasks
-
-### Check-in Module
-
-- [x] QR code generation
-- [x] Check-in API endpoints
-- [x] Attendance tracking and statistics
-
----
-
-### Participant Dashboard
-
-- [x] View registered events
-- [x] Attendance status display
-- [x] Event history
-
----
-
-## 📦 Deliverable
-
-- System ready for real event usage with QR-based attendance tracking
-
----
-
-# ✅ Phase 5: Operations Layer (Weeks 9–11) - COMPLETE
-
-## 🎯 Goal
-
-Handle event logistics and resources.
-
----
-
-## 🧩 Tasks
-
-### Vendor Module
-
-- [x] Add vendors (full CRUD)
-- [x] Assign vendors to events
-- [x] Track vendor details
-- [x] Vendor rating system
-- [x] 10 REST endpoints
-
----
-
-### Resource Module
-
-- [x] Track equipment/resources with inventory management
-- [x] Availability management with real-time tracking
-- [x] Resource allocation to time periods
-- [x] Maintenance date tracking
-- [x] 11 REST endpoints
-
----
-
-### Scheduling Module
-
-- [x] Assign resources to time slots
-- [x] Conflict detection (venue, resource, time overlap)
-- [x] Automatic conflict resolution UI
-- [x] Venue availability checking
-- [x] 10 REST endpoints
-
----
-
-### Budget Module
-
-- [x] Allocate budget per event
-- [x] Track expenses with categorization
-- [x] Approval workflow (draft → approved/rejected)
-- [x] Payment tracking (pending, paid, refunded)
-- [x] Budget vs. actual comparison
-- [x] 13 REST endpoints
-
----
-
-## 📦 Deliverable
-
-- ✅ Complete logistics management system with 44 API endpoints
-- ✅ Frontend API clients for all 4 modules
-- ✅ Sample UI pages for operations dashboards
-- ✅ Full documentation and API reference
-  - See `docs/phases/phase5/API_REFERENCE.md` for endpoint documentation
-  - See `docs/phases/phase5/IMPLEMENTATION_SUMMARY.md` for architecture overview
-
----
-
-# 🟢 Phase 6: Growth Layer (Weeks 12–14)
-
-## 🎯 Goal
-
-Enable sponsorship and marketing workflows.
-
----
-
-## 🧩 Tasks
-
-### Sponsorship Module
-
-- [ ] Add sponsors
-- [ ] Track deliverables
-- [ ] Payment tracking
-
----
-
-### Marketing Module
-
-- [ ] Campaign management
-- [ ] Track creatives (posters, media)
-
----
-
-### Frontend
-
-- [ ] Sponsor dashboard
-- [ ] Marketing dashboard
-
----
-
-## 📦 Deliverable
-
-- Sponsor + marketing system operational
-
----
-
-# 🟢 Phase 7: System Maturity (Weeks 15+)
-
-## 🎯 Goal
-
-Make system scalable and production-ready.
-
----
-
-## 🧩 Tasks
-
-### Notifications
-
-- [ ] In-app notifications
-- [ ] Event reminders
-- [ ] Task alerts
-
----
-
-### Audit Logs
-
-- [ ] Track user actions
-- [ ] Store logs
-
----
-
-### File Management
-
-- [ ] Upload assets (posters, documents)
-- [ ] Storage integration
-
----
-
-### Analytics
-
-- [ ] Event participation stats
-- [ ] Budget insights
-- [ ] Basic reporting
-
----
-
-## 📦 Deliverable
-
-- Production-ready CampusOS
-
----
-
-# 🧠 Milestones
-
-## 🏁 Milestone 1: Foundation Ready
-
-- Auth + Clubs working
-
----
-
-## 🏁 Milestone 2: Event System Live
-
-- Events + RSVP functional
-
----
-
-## 🏁 Milestone 3: Execution System Ready
-
-- Tasks + Calendar working
-
----
-
-## 🏁 Milestone 4: First Fest Ready 🎉
-
-- Events + RSVP + Check-in + Tasks
-
----
-
-## 🏁 Milestone 5: Full Ops System
-
-- Vendors + Resources + Budget
-
----
-
-## 🏁 Milestone 6: Growth Enabled
-
-- Sponsorship + Marketing
-
----
-
-## 🏁 Milestone 7: Production Ready
-
-- Notifications + Analytics + Stability
-
----
-
-# ⚠️ Guidelines
-
-- Do NOT skip phases
-- Complete deliverables before moving forward
-- Keep updating `.humanet/CHANGELOG.md`
-- Document decisions in `.humanet/discussions/`
-
----
-
-# 🚀 Final Note
-
-CampusOS is not just a project — it is a **long-term platform**.
-
-Focus on:
-
-- Consistency
-- Clarity
-- Modularity
-
-Build step by step. Ship every phase.
+**See Also**: [Scope](./SCOPE.md) · [Problem Statement](./PROBLEM_STATEMENT.md) · [Project Structure](./PROJECT_STRUCTURE.md)

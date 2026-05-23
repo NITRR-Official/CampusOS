@@ -32,7 +32,7 @@ backend/src/
 │   └── jwt-authenticator.js  # JWT sign/verify, registered as authenticator
 │
 ├── middleware/
-│   ├── auth.js               # JWT verification, public route whitelist
+│   ├── auth.js               # JWT verification, public route allowlist
 │   ├── permissions.js        # requireRoles() — RBAC middleware factory
 │   ├── logger.js             # Request logging with trace IDs
 │   └── error.js              # Error handler + 404 handler

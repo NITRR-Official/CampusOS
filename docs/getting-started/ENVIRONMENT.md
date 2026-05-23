@@ -88,21 +88,34 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/campusos?retryWr
 
 ---
 
-## Vercel Deployment Variables
+## Deployment Variables
 
-When deploying to Vercel, environment variables are set **per environment** (Production vs Preview) in the Vercel dashboard. See the [CI/CD Guide](../guides/CI_CD.md#step-4-add-environment-variables-in-vercel) for the full table.
+CampusOS uses **Vercel** for the frontend and **Render** for the backend. Each platform has its own environment variables.
 
-Key differences between environments:
+### Frontend (Vercel)
 
-| Variable              | Production                             | Preview                                |
-| --------------------- | -------------------------------------- | -------------------------------------- |
-| `MONGODB_URI`         | `mongodb+srv://...campusos-prod`       | `mongodb+srv://...campusos-dev`        |
-| `NODE_ENV`            | `production`                           | `development`                          |
-| `NEXT_PUBLIC_API_URL` | Stable production backend URL          | Fixed dev backend URL (overridden by `full-preview` workflow) |
-| `ALLOW_PREVIEW_CORS`  | _(not set)_                            | `true`                                 |
+Set in the Vercel dashboard → **Settings → Environment Variables**:
 
-> [!WARNING]
-> Always use **separate databases** for Production and Preview. See the [CI/CD Guide](../guides/CI_CD.md) for setup instructions.
+| Variable              | Environment        | Value                                          |
+| --------------------- | ------------------ | ---------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | **Production**     | `https://campus-os-backend.onrender.com`       |
+| `NEXT_PUBLIC_API_URL` | **Preview**        | `https://campus-os-backend.onrender.com`       |
+
+### Backend (Render)
+
+Set in the Render dashboard → **Environment → Environment Variables**:
+
+| Variable             | Value                                          |
+| -------------------- | ---------------------------------------------- |
+| `NODE_ENV`           | `development`                                  |
+| `PORT`               | `10000`                                        |
+| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`                |
+| `JWT_SECRET`         | `<your-dev-secret>`                            |
+| `FRONTEND_URL`       | `https://campus-os-frontend.vercel.app`        |
+| `ALLOW_PREVIEW_CORS` | `true`                                         |
+
+> [!NOTE]
+> `ALLOW_PREVIEW_CORS=true` allows all `*.vercel.app` origins so that PR preview frontends can access the backend. See the [CI/CD Guide](../guides/CI_CD.md) for details.
 
 ---
 

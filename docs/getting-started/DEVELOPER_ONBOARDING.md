@@ -2,42 +2,11 @@
 
 Everything you need to go from zero to your first merged PR.
 
-## 1. Environment Setup
+## 1. Set Up Your Environment
 
-```bash
-# Clone the repository
-git clone https://github.com/NITRR-Official/CampusOS.git
-cd CampusOS
+Follow the [Quick Start](./QUICK_START.md) to clone the repo, install dependencies, start MongoDB, and run the backend + frontend.
 
-# Verify versions
-node --version    # Must be 18.0.0+
-pnpm --version    # Must be 10.0.0+
-
-# Install all dependencies (pnpm workspaces)
-pnpm install
-```
-
-## 2. Start MongoDB
-
-The backend requires MongoDB. Easiest way is Docker:
-
-```bash
-docker run -d -p 27017:27017 --name mongodb mongo:latest
-```
-
-See [Database Setup](./DATABASE_SETUP.md) for other methods.
-
-## 3. Start the Servers
-
-```bash
-# Terminal 1: Backend (Express on port 4000)
-cd backend && pnpm dev
-
-# Terminal 2: Frontend (Next.js on port 3000)
-cd frontend && pnpm dev
-```
-
-You should see:
+Once you see this in your terminal, you're ready:
 
 ```
 🚀 CampusOS Backend running on http://localhost:4000
@@ -45,9 +14,7 @@ You should see:
 ✅ MongoDB connected successfully
 ```
 
-## 4. Project Structure
-
-Here's what actually exists in the repo:
+## 2. Understand the Project Structure
 
 ```
 CampusOS/
@@ -83,7 +50,9 @@ CampusOS/
 └── .github/                # CI/CD, issue templates, agent configs
 ```
 
-## 5. Make Your First Contribution
+See [Project Structure](../project/PROJECT_STRUCTURE.md) for the full breakdown.
+
+## 3. Make Your First Contribution
 
 ### Find an issue
 
@@ -105,9 +74,13 @@ git checkout -b feature/<issue-number>-<short-description>
 ### Run quality checks
 
 ```bash
-pnpm lint          # ESLint
-pnpm build         # Build check
+pnpm format         # Auto-fix formatting (required — CI rejects unformatted code)
+pnpm lint           # ESLint
+pnpm build          # Build check
 ```
+
+> [!WARNING]
+> **`pnpm format` is mandatory.** CI runs `pnpm format:check` which will **fail** if your code isn't formatted with Prettier. Always run `pnpm format` before pushing.
 
 ### Commit and push
 
@@ -117,9 +90,9 @@ git commit -m "feat(vendor): add vendor search by category"
 git push origin feature/42-add-vendor-search
 ```
 
-Then create a Pull Request on GitHub.
+Then create a Pull Request on GitHub targeting the **`dev`** branch.
 
-## 6. Key Commands
+## 4. Key Commands
 
 ```bash
 # Development
@@ -127,6 +100,7 @@ cd backend && pnpm dev       # Backend (port 4000)
 cd frontend && pnpm dev      # Frontend (port 3000)
 
 # Quality
+pnpm format                  # Auto-format (run before every push)
 pnpm lint                    # Lint all packages
 pnpm build                   # Build all packages
 
@@ -134,12 +108,12 @@ pnpm build                   # Build all packages
 pnpm -C apps/vendor test     # Run vendor module tests
 pnpm -C apps/budget test     # Run budget module tests
 
-# Check MongoDB
+# MongoDB
 docker start mongodb         # Restart MongoDB
 docker logs mongodb          # Check MongoDB logs
 ```
 
-## 7. How Things Connect
+## 5. How Things Connect
 
 ```
 Frontend (port 3000)
@@ -157,7 +131,7 @@ Backend (port 4000)
     └── apps/vendor/service    → Business logic → MongoDB
 ```
 
-## 8. Common Issues
+## 6. Common Issues
 
 | Problem                            | Solution                                                       |
 | ---------------------------------- | -------------------------------------------------------------- |
@@ -168,7 +142,7 @@ Backend (port 4000)
 | Frontend builds but API calls fail | Backend must be running, check `NEXT_PUBLIC_API_URL`           |
 | MongoDB download timeout in tests  | Increase `beforeAll` timeout to `120000`                       |
 
-## 9. Where to Go Next
+## 7. Where to Go Next
 
 - [Architecture Overview](../architecture/OVERVIEW.md) — How the system is designed
 - [Plugin System](../architecture/PLUGIN_SYSTEM.md) — How to create a new module
