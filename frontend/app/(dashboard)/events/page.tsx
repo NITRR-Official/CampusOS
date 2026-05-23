@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import MainLayout from '../components/MainLayout';
+
 import { fetchEvents } from '@/lib/event-api';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export default async function EventsPage() {
   const events = await fetchEvents();
 
   return (
-    <MainLayout>
+
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl text-gray-900 mb-2">Events</h1>
@@ -82,6 +82,6 @@ export default async function EventsPage() {
           )}
         </div>
       </div>
-    </MainLayout>
+
   );
 }

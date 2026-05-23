@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
-import MainLayout from '../components/MainLayout';
+
 import { clearAuthSession, readAccessToken } from '@/lib/auth-session';
 import {
   CalendarApiError,
@@ -308,7 +308,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <MainLayout>
+
       <div className="mx-auto max-w-7xl space-y-8">
         <section className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100">
           <div className="flex items-center justify-between gap-3">
@@ -498,6 +498,6 @@ export default function CalendarPage() {
           </div>
         </section>
       </div>
-    </MainLayout>
+
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import MainLayout from '../components/MainLayout';
+
 import { clearAuthSession, readAccessToken } from '@/lib/auth-session';
 import {
   addTaskDependency,
@@ -440,7 +440,7 @@ export default function TasksPage() {
   }
 
   return (
-    <MainLayout>
+
       <div className="mx-auto max-w-7xl space-y-8">
         <section
           className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60"
@@ -664,6 +664,6 @@ export default function TasksPage() {
           </section>
         </section>
       </div>
-    </MainLayout>
+
   );
 }

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import MainLayout from '../../components/MainLayout';
+
 import RegisterForm from './RegisterForm';
 import { fetchEventById } from '@/lib/event-api';
 
@@ -20,7 +20,7 @@ export default async function EventDetailPage({
   const event = await fetchEventById(eventId);
 
   return (
-    <MainLayout>
+
       <div className="mx-auto max-w-4xl">
         <Link
           href="/events"
@@ -89,6 +89,6 @@ export default async function EventDetailPage({
           </div>
         </div>
       </div>
-    </MainLayout>
+
   );
 }

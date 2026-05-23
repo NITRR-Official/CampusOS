@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import MainLayout from '../components/MainLayout';
+
 import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
 import { fetchEvents, EventItem, EventApiError } from '@/lib/event-api';
 import {
@@ -90,7 +90,7 @@ export default function ParticipantDashboard() {
   ).length;
 
   return (
-    <MainLayout>
+
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Header Section */}
         <section
@@ -277,6 +277,6 @@ export default function ParticipantDashboard() {
           </>
         )}
       </div>
-    </MainLayout>
+
   );
 }
