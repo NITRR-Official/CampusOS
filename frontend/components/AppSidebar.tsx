@@ -42,16 +42,20 @@ export function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-3 px-2 py-3">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <span className="text-xl font-bold">C</span>
-          </div>
-          <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold tracking-tight text-lg">
-              CampusOS
-            </span>
-          </div>
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" className="hover:bg-transparent">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <span className="text-xl font-bold">C</span>
+              </div>
+              <div className="flex flex-col gap-0.5 leading-none">
+                <span className="font-semibold tracking-tight text-lg">
+                  CampusOS
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
