@@ -1,7 +1,8 @@
 ---
+trigger: model_decision
 description: "Commit and PR workflow rule: Triggered when user asks for commit details or PR titles."
-trigger: prompt
 ---
+
 # PR Workflow Rule
 
 Whenever the user asks for "commit details", "PR titles", or similar information after a code change, it indicates they are about to push their changes.
