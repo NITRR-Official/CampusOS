@@ -120,7 +120,6 @@ Open a PR on GitHub. **Set the base branch to `dev`** (not `main`).
 
 1. **Automated checks** — CI runs 5 quality checks: lint, type-check, format, test, build
 2. **Preview deployments** — Vercel auto-deploys a frontend preview connected to the dev backend
-   - 💡 **First-time contributors**: Vercel asks a maintainer to authorize your fork's deployment (one-time)
 3. **Manual review** — Code quality, architecture, test coverage, documentation
 4. **Response times** — Critical bugs: 4 hours · High priority: 1 day · Medium/Low: 3–7 days
 5. **Merge** — Need 1 approval. Maintainers squash-merge into `dev` for clean history.

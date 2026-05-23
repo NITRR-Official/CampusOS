@@ -98,9 +98,6 @@ Vercel's Git Integration handles frontend deployments automatically:
 - **Push to `dev`** → Vercel deploys to the dev frontend URL.
 - **Push to `main`** → Vercel deploys to production.
 
-> [!NOTE]
-> **First-time contributors from forks**: Vercel will comment on your PR asking a maintainer to authorize your deployment. This is a one-time step — once authorized, all your future PRs deploy automatically.
-
 ### Backend Deployments (Render)
 
 Render's Git Integration auto-deploys the backend:
@@ -124,8 +121,6 @@ Render's Git Integration auto-deploys the backend:
 6. Push to your fork
 7. Open a PR targeting the `dev` branch
    → CI checks run automatically (lint, type-check, format, test, build)
-   → First-time contributors: Vercel asks a maintainer to authorize
-     your deployment (one-time)
    → Vercel and Render auto-deploy preview environments.
    → GitHub Actions comments on the PR with the linked Preview URL.
 8. A maintainer reviews your code
@@ -163,7 +158,10 @@ Render's Git Integration auto-deploys the backend:
 4. **Settings → Deployment Protection**:
    - Disable **Vercel Authentication** for Preview deployments (so contributors can access preview URLs without a Vercel account)
 
-5. **Settings → Environment Variables**:
+5. **Settings → Git → Git Fork Protection**:
+   - Disable **Git Fork Protection** (so preview deployments from forked PRs deploy automatically without requiring maintainer approval)
+
+6. **Settings → Environment Variables**:
 
 | Variable                       | Environment    | Value                                    |
 | ------------------------------ | -------------- | ---------------------------------------- |

@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Agent/skill files (external, not project code)
+.agents
+skills-lock.json
+
+# Vercel config (auto-generated)
+**/.vercel
+
+# Lock files
+pnpm-lock.yaml
+
+# Generated types
+next-env.d.ts
