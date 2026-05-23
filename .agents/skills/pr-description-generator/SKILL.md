@@ -210,8 +210,11 @@ database write operation.
 
 ## Important Notes
 
-> [!IMPORTANT]
-> The PR must **always target the `dev` branch**, never `main`. Include this reminder in your output if the user seems unsure.
+> [!CAUTION]
+> **Do NOT inject meta-commentary, reminders, or callouts into the generated PR description.** The output must contain only the template sections — nothing extra like "This PR targets dev" or similar notes. Keep the output clean and copy-pasteable.
+
+> [!NOTE]
+> Internal awareness: PRs must always target the `dev` branch, never `main`. Only mention this if the user explicitly asks which branch to target — never embed it in the generated output.
 
 > [!TIP]
 > If the user provides commit titles without descriptions, generate the PR description by inferring the purpose from the commit titles and any available diff context.
