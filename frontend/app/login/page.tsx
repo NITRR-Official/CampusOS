@@ -40,7 +40,7 @@ export default function LoginPage() {
     try {
       const authData = await login(data);
       storeAuthSession(authData);
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

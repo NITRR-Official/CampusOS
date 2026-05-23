@@ -23,7 +23,8 @@ The CampusOS frontend is a Next.js 16 application using the App Router, React 19
 frontend/
 ├── app/                    # Next.js App Router (pages and layouts)
 │   ├── layout.tsx         # Root layout — Geist fonts, ThemeProvider
-│   ├── page.tsx           # Home/dashboard page
+│   ├── page.tsx           # Landing page
+│   ├── dashboard/         # Dashboard page
 │   ├── globals.css        # Global styles + Tailwind + CSS variables
 │   ├── login/             # Login page
 │   ├── signup/            # Registration page
@@ -115,9 +116,10 @@ export function clearAuthSession() {
 
 ## Fonts
 
-The app uses Google's **Geist** font family (loaded via `next/font/google`):
+The app uses a modern pairing loaded via `next/font/google`:
 
-- `Geist` (sans-serif) — mapped to `--font-geist-sans`
+- `Manrope` (sans-serif) — mapped to `--font-manrope`
+- `Sora` (display/headings) — mapped to `--font-sora`
 - `Geist Mono` (monospace) — mapped to `--font-geist-mono`
 
 ## Theme System
@@ -152,7 +154,8 @@ pnpm lint         # ESLint
 
 | Route              | Purpose                      |
 | ------------------ | ---------------------------- |
-| `/`                | Dashboard / landing page     |
+| `/`                | Landing page                |
+| `/dashboard`       | Dashboard                   |
 | `/login`           | User login                   |
 | `/signup`          | User registration            |
 | `/forgot-password` | Password reset               |

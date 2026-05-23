@@ -9,7 +9,8 @@ const config: Config = {
   theme: {
     fontFamily: {
       sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
-      mono: ['var(--font-mono)', 'monospace']
+      mono: ['var(--font-mono)', 'monospace'],
+      heading: ['var(--font-heading)', 'var(--font-sans)', 'system-ui', 'sans-serif']
     },
     fontSize: {
       // Heading Sizes
