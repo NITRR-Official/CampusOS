@@ -22,7 +22,7 @@ The CampusOS frontend is a Next.js 16 application using the App Router, React 19
 ```
 frontend/
 ├── app/                    # Next.js App Router (pages and layouts)
-│   ├── layout.tsx         # Root layout — Geist fonts, ThemeProvider
+│   ├── layout.tsx         # Root layout — Manrope + Sora + Geist Mono, ThemeProvider
 │   ├── page.tsx           # Landing page
 │   ├── dashboard/         # Dashboard page
 │   ├── globals.css        # Global styles + Tailwind + CSS variables
