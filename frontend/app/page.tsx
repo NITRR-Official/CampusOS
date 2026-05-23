@@ -20,7 +20,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 const HIGHLIGHTS = [
   {
     title: 'Unified operations',
-    description: 'Connect institutes, clubs, events, and resources in one view.',
+    description:
+      'Connect institutes, clubs, events, and resources in one view.',
     icon: Layers
   },
   {
@@ -107,23 +108,39 @@ export default function LandingPage() {
           </Link>
 
           <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground lg:flex">
-            <Link href="#features" className="transition-colors hover:text-foreground">
+            <Link
+              href="#features"
+              className="transition-colors hover:text-foreground"
+            >
               Platform
             </Link>
-            <Link href="#modules" className="transition-colors hover:text-foreground">
+            <Link
+              href="#modules"
+              className="transition-colors hover:text-foreground"
+            >
               Modules
             </Link>
-            <Link href="#workflow" className="transition-colors hover:text-foreground">
+            <Link
+              href="#workflow"
+              className="transition-colors hover:text-foreground"
+            >
               Workflow
             </Link>
-            <Link href="#launch" className="transition-colors hover:text-foreground">
+            <Link
+              href="#launch"
+              className="transition-colors hover:text-foreground"
+            >
               Launch
             </Link>
           </nav>
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <Button asChild variant="ghost" className="hidden h-10 lg:inline-flex">
+            <Button
+              asChild
+              variant="ghost"
+              className="hidden h-10 lg:inline-flex"
+            >
               <Link href="/login">Login</Link>
             </Button>
             <Button asChild className="h-10 px-5">
@@ -145,9 +162,9 @@ export default function LandingPage() {
                 Campus operations, finally in sync.
               </h1>
               <p className="mt-4 text-lg text-muted-foreground">
-                Align institutes, clubs, events, and vendors with a single source
-                of truth. CampusOS keeps schedules, approvals, and communication
-                moving together.
+                Align institutes, clubs, events, and vendors with a single
+                source of truth. CampusOS keeps schedules, approvals, and
+                communication moving together.
               </p>
             </div>
 
@@ -232,14 +249,16 @@ export default function LandingPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  {['Institutes', 'Clubs', 'Events', 'Resources'].map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-lg border border-border/70 bg-background/80 px-3 py-2"
-                    >
-                      {item}
-                    </div>
-                  ))}
+                  {['Institutes', 'Clubs', 'Events', 'Resources'].map(
+                    (item) => (
+                      <div
+                        key={item}
+                        className="rounded-lg border border-border/70 bg-background/80 px-3 py-2"
+                      >
+                        {item}
+                      </div>
+                    )
+                  )}
                 </CardContent>
               </Card>
 
@@ -348,18 +367,17 @@ export default function LandingPage() {
                 </p>
                 <h2 className="mt-3">From onboarding to outcomes.</h2>
               </div>
-              <Button
-                asChild
-                variant="outline"
-                className="h-11"
-              >
+              <Button asChild variant="outline" className="h-11">
                 <Link href="/dashboard">Explore the workspace</Link>
               </Button>
             </div>
 
             <div className="mt-10 grid gap-6 md:grid-cols-3">
               {STEPS.map((step) => (
-                <div key={step.step} className="space-y-3 rounded-2xl border border-border bg-background/80 p-5">
+                <div
+                  key={step.step}
+                  className="space-y-3 rounded-2xl border border-border bg-background/80 p-5"
+                >
                   <p className="text-xs font-semibold uppercase tracking-[0.4em] text-primary">
                     {step.step}
                   </p>

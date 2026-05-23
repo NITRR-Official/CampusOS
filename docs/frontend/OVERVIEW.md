@@ -154,8 +154,8 @@ pnpm lint         # ESLint
 
 | Route              | Purpose                      |
 | ------------------ | ---------------------------- |
-| `/`                | Landing page                |
-| `/dashboard`       | Dashboard                   |
+| `/`                | Landing page                 |
+| `/dashboard`       | Dashboard                    |
 | `/login`           | User login                   |
 | `/signup`          | User registration            |
 | `/forgot-password` | Password reset               |
