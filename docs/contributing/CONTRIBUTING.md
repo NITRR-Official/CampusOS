@@ -1,100 +1,60 @@
 # Contributing to CampusOS
 
-Thank you for your interest in contributing to CampusOS! We welcome contributions from everyone, regardless of experience level. This guide will help you get started.
+Thank you for your interest in contributing! We welcome contributions from everyone, regardless of experience level.
 
 ## 🎯 Code of Conduct
 
-We are committed to providing a welcoming and inspiring community for all. Please read and follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
+Please read and follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-- Node.js 18.0.0 or higher
-- pnpm 10.0.0 or higher
-- Git
-
-### Local Development Setup
-
-1. **Fork the repository**
-
-   ```bash
-   # Go to https://github.com/NITRR-Official/CampusOS
-   # Click "Fork" in the top-right corner
-   ```
-
-2. **Clone your fork**
+1. **Fork the repository** on [GitHub](https://github.com/NITRR-Official/CampusOS)
+2. **Clone your fork** and set up the development environment:
 
    ```bash
    git clone https://github.com/YOUR_USERNAME/CampusOS.git
    cd CampusOS
-   ```
-
-3. **Add upstream remote**
-
-   ```bash
    git remote add upstream https://github.com/NITRR-Official/CampusOS.git
-   ```
-
-4. **Install dependencies**
-
-   ```bash
    pnpm install
    ```
 
-5. **Start MongoDB Database (Required)**
-
-   The backend **must** have a running MongoDB instance before it can start, otherwise you will get an `ECONNREFUSED` error. The easiest way is using Docker:
+3. **Start MongoDB** (required before the backend can run):
 
    ```bash
    docker run -d -p 27017:27017 --name mongodb mongo:latest
    ```
 
-   _If you don't use Docker, you can install MongoDB natively by following the [official MongoDB installation guide](https://www.mongodb.com/docs/manual/installation/). For more details, see our [Database Setup Guide](../getting-started/DATABASE_SETUP.md)._
+   For other methods, see the [Database Setup Guide](../getting-started/DATABASE_SETUP.md).
 
-6. **Create a feature branch from `dev`**
-
-   ```bash
-   git fetch upstream
-   git checkout -b feature/your-feature-name upstream/dev
-   ```
-
-7. **Start development servers**
+4. **Start the servers**:
 
    ```bash
    # Terminal 1: Backend
-   cd backend && pnpm dev
+   cd backend && pnpm dev    # → http://localhost:4000
 
    # Terminal 2: Frontend
-   cd frontend && pnpm dev
+   cd frontend && pnpm dev   # → http://localhost:3000
    ```
 
-   Backend runs on `http://localhost:4000`
-   Frontend runs on `http://localhost:3000`
+For the full setup walkthrough, see [Quick Start](../getting-started/QUICK_START.md).
 
 ## 📋 How to Contribute
 
-### 1. Finding Issues to Work On
+### Finding Issues
 
-- Look for issues labeled `good first issue` (perfect for first-time contributors)
-- Check out issues labeled `help wanted` for more complex tasks
-- See the [ROADMAP.md](../../ROADMAP.md) for upcoming phases and features
+- [`good first issue`](https://github.com/NITRR-Official/CampusOS/issues?q=label%3Agood-first-issue) — Perfect for first-time contributors
+- [`help wanted`](https://github.com/NITRR-Official/CampusOS/issues?q=label%3Ahelp-wanted) — More complex tasks
+- [Roadmap](../project/ROADMAP.md) — Upcoming phases and features
 
-### 2. Before You Start
+### Before You Start
 
-- **Check existing issues** - Make sure your idea isn't already being worked on
-- **Discuss major changes** - For large features, please open a discussion or issue first
-- **Follow the development approach**:
-  - Backend-first: Implement APIs and business logic first
-  - Then add frontend UI
-  - Always prioritize code quality and testing
+- **Check existing issues** — Make sure your idea isn't already being worked on
+- **Discuss major changes** — For large features, open a discussion or issue first
 
-### 3. Making Changes
-
-#### Branching Strategy
+### Branching
 
 ```bash
-# Create feature branch from dev
+# Always branch from dev
 git fetch upstream
 git checkout -b feature/issue-number-description upstream/dev
 ```
@@ -102,83 +62,50 @@ git checkout -b feature/issue-number-description upstream/dev
 > [!IMPORTANT]
 > Always branch from `dev`, not `main`. All contributor PRs must target the `dev` branch.
 
-#### Commit Messages
+### Commit Messages
 
 Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```bash
-# Good examples:
 git commit -m "feat: add QR code generation for check-ins"
 git commit -m "fix: circular dependency detection in tasks"
 git commit -m "docs: update contributor guide"
-git commit -m "test: add test for task dependencies"
 
 # Format: type(scope): subject
 # Types: feat, fix, docs, test, chore, refactor, perf
-# Scope: optional, e.g., (api), (frontend), (database)
 ```
 
-#### Code Quality
+### Code Quality
 
 Before pushing, run:
 
 ```bash
-# Format your code (required — CI will reject unformatted code)
-pnpm format
-
-# Lint
-pnpm lint
-
-# Type check (TypeScript)
-pnpm type-check
-
-# Build
-pnpm build
+pnpm format       # Auto-fix formatting (required — CI rejects unformatted code)
+pnpm lint         # Lint
+pnpm type-check   # TypeScript (frontend)
+pnpm build        # Build check
 ```
 
 > [!WARNING]
 > **`pnpm format` is mandatory.** CI runs `pnpm format:check` which will **fail** if your code isn't formatted with Prettier. Always run `pnpm format` before pushing.
 
-### 4. Testing
+### Testing
 
-**Write tests for:**
-
-- New features
-- Bug fixes
-- API endpoints
-- Business logic
+Write tests for new features, bug fixes, and API endpoints.
 
 ```bash
 pnpm test
 ```
 
-**Test coverage target:** 80%+
+**Coverage target:** 80%+
 
-### 5. Documentation
-
-Update documentation if you:
-
-- Add a new API endpoint
-- Change existing functionality
-- Add a new feature
-- Modify database schema
-
-Update these files as needed:
-
-- `README.md` - Overview and setup
-- `ROADMAP.md` - Phase progress
-- Code comments for complex logic
-- `/docs` folder for API documentation
-
-### 6. Push and Create Pull Request
+### Push and Create Pull Request
 
 ```bash
-# Push to your fork
 git push origin feature/issue-number-description
-
-# Go to GitHub and click "Compare & pull request"
-# IMPORTANT: Set the base branch to `dev` (not `main`)
 ```
+
+Open a PR on GitHub. **Set the base branch to `dev`** (not `main`).
 
 > [!CAUTION]
 > Always target the `dev` branch. PRs to `main` from contributors will be rejected — only admins merge `dev` → `main` for production releases.
@@ -187,115 +114,32 @@ git push origin feature/issue-number-description
 
 - Reference the issue: `Closes #123`
 - Explain what changed and why
-- Link related issues or discussions
-- Follow the [PR template](.github/pull_request_template.md)
+- Follow the [PR template](../../.github/pull_request_template.md)
 
 ## 🔍 Code Review Process
 
-1. **Automated checks**
-   - CI runs 5 quality checks: lint, type-check, format, test, build
-   - Vercel auto-deploys a preview of both frontend and backend
-   - The frontend preview uses a fixed backend URL (the dev backend)
-   - 💡 **First-time contributors**: Vercel will ask a maintainer to authorize your fork's deployment — this is a one-time step
-
-2. **Preview deployments**
-   - **Frontend-only PRs**: Vercel’s automatic preview works immediately
-   - **PRs that change backend code**: A maintainer adds the `full-preview` label to create a linked preview where the frontend points to the correct backend preview. Both URLs are commented on the PR.
-
-3. **Manual review**
-   - Code quality and readability
-   - Architecture and design patterns
-   - Test coverage
-   - Documentation completeness
-
-4. **Request changes vs. comment**
-   - “Request changes” = blocking, must address
-   - “Comment” = suggestion, not required
-
-5. **Expected response time**
-   - Critical bugs: 4 hours
-   - High priority: 1 day
-   - Medium/Low priority: 3-7 days
-
-6. **Approval and merge**
-   - Need at least 1 approval
-   - Maintainers will squash and merge into `dev` for clean history
-   - Admins later promote `dev` → `main` for production releases
-
-## 🏗️ Architecture & Design Patterns
-
-### Backend (Express.js)
-
-- Plugin-based architecture (see `/apps/` directory)
-- Each feature: schema → service → controller → routes
-- RBAC with roles: `admin`, `coordinator`, `volunteer`
-- See `/backend/src/` for middleware and utilities
-
-### Frontend (Next.js)
-
-- React components with TypeScript
-- API clients in `/frontend/lib/` (e.g., `task-api.ts`)
-- Pages in `/frontend/app/` organized by feature
-- Tailwind CSS for styling
-
-### Database (MongoDB)
-
-- MongoDB is required to run the server (`connectDB()` at startup)
-- Some modules use in-memory `Map()` storage (data lost on restart)
-- Operations modules (vendor, resource, scheduling, budget) use MongoDB with Mongoose
-- Schema validation on write
-- Services handle business logic
-- See `apps/*/src/service/` for patterns
-
-## 📚 Project Structure
-
-```
-campus-os/
-├── apps/              # Feature modules (auth, task, event, etc.)
-├── backend/           # Express server core
-├── frontend/          # Next.js application
-├── shared/            # Shared utilities (future)
-├── .github/           # GitHub config (issues, workflows, etc.)
-├── ROADMAP.md         # Development roadmap
-├── CONTRIBUTING.md    # This file
-└── README.md          # Project overview
-```
+1. **Automated checks** — CI runs 5 quality checks: lint, type-check, format, test, build
+2. **Preview deployments** — Vercel auto-deploys a frontend preview connected to the dev backend (`https://campus-os-backend.onrender.com`)
+3. **Manual review** — Code quality, architecture, test coverage, documentation
+4. **Response times** — Critical bugs: 4 hours · High priority: 1 day · Medium/Low: 3–7 days
+5. **Merge** — Need 1 approval. Maintainers squash-merge into `dev` for clean history.
 
 ## 🐛 Reporting Bugs
 
-Use the [Bug Report](https://github.com/NITRR-Official/CampusOS/issues/new?template=bug_report.md) template.
-
-**Good bug reports include:**
-
-- Steps to reproduce
-- Expected vs. actual behavior
-- Environment (OS, Node version, etc.)
-- Screenshots/logs if applicable
+Use the [Bug Report](https://github.com/NITRR-Official/CampusOS/issues/new?template=bug_report.md) template. Include steps to reproduce, expected vs. actual behavior, and environment info.
 
 ## 💡 Suggesting Features
 
-Use the [Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?template=feature_request.md) template.
-
-**Good feature requests:**
-
-- Describe the problem it solves
-- Explain the use case
-- Propose a solution
-- Link to related discussions
+Use the [Feature Request](https://github.com/NITRR-Official/CampusOS/issues/new?template=feature_request.md) template. Describe the problem it solves and propose a solution.
 
 ## 🤔 Questions?
 
-- 💬 **Community Chat**: Check GitHub Discussions
-- 📖 **Developer Guide**: See [Developer Onboarding](../getting-started/DEVELOPER_ONBOARDING.md)
-- 🛠️ **Setup Issues**: See Troubleshooting in README.md
+- 💬 [GitHub Discussions](https://github.com/NITRR-Official/CampusOS/discussions)
+- 📖 [Developer Onboarding](../getting-started/DEVELOPER_ONBOARDING.md)
 
 ## 🎖️ Recognition
 
-Contributors are recognized in:
-
-- `CONTRIBUTORS.md` (after first PR)
-- Release notes (for significant contributions)
-- Monthly community highlights
+Contributors are recognized in [CONTRIBUTORS.md](./CONTRIBUTORS.md) after their first merged PR, in release notes, and in monthly community highlights.
 
 ## 📜 License
 
@@ -303,4 +147,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ---
 
-**Happy coding! We're excited to have you contribute to CampusOS.** 🚀
+**See Also**: [Developer Onboarding](../getting-started/DEVELOPER_ONBOARDING.md) · [Coding Guidelines](./CODING_GUIDELINES.md) · [Git Workflow](../guides/GIT_WORKFLOW.md) · [CI/CD Pipeline](../guides/CI_CD.md)

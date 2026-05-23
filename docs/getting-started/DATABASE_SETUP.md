@@ -1,177 +1,16 @@
 # Database Setup (MongoDB)
 
-## Purpose
+CampusOS uses MongoDB as its primary database. This guide covers three ways to get it running.
 
-Provide a single, consistent setup guide for MongoDB, which is required to run the CampusOS backend.
+## Option 1: Docker (Recommended)
 
-## Audience
-
-Developers running CampusOS locally or in CI who need a working MongoDB connection.
-
-## Status
-
-Migration complete; this document covers setup and operations. See the migration guide for step-by-step changes.
-
-## Prerequisites
+### Quick Start
 
 ```bash
-# MongoDB installed locally or running via Docker
 docker run -d -p 27017:27017 --name mongodb mongo:latest
-
-# Or use MongoDB Atlas (cloud)
-# Connection string: mongodb+srv://username:password@cluster.mongodb.net/campusos
 ```
 
-## Environment Setup
-
-Create `.env` in the backend folder:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/campusos
-NODE_ENV=development
-PORT=4000
-```
-
-## Database Architecture
-
-### Collections
-
-| Collection | Module     | Purpose                                  | Documents      |
-| ---------- | ---------- | ---------------------------------------- | -------------- |
-| vendors    | Vendor     | Store vendor information and assignments | VendorSchema   |
-| resources  | Resource   | Track equipment and inventory            | ResourceSchema |
-| timeslots  | Scheduling | Store event time slots                   | TimeSlotSchema |
-| conflicts  | Scheduling | Track scheduling conflicts               | ConflictSchema |
-| budgets    | Budget     | Store event budgets                      | BudgetSchema   |
-| expenses   | Budget     | Track expenses                           | ExpenseSchema  |
-
-### Relationships
-
-```
-Event
-├── Budget (1:1)
-│   └── Expense (1:N)
-├── TimeSlot (1:N)
-│   └── Conflict (through venue/time overlap)
-├── Resource Allocation (1:N)
-│   └── Resource (N:M)
-└── Vendor Assignment (1:N)
-    └── Vendor (N:M)
-```
-
-## Schema Details
-
-### Vendor Schema
-
-```javascript
-{
-  name: String,
-  category: String,
-  contactPerson: String,
-  email: String,
-  phone: String,
-  address: String,
-  pricing: Object,
-  ratings: [{rating, comment, ratedBy, ratedAt}],
-  averageRating: Number,
-  assignments: [{eventId, status, notes}],
-  isActive: Boolean,
-  timestamps
-}
-```
-
-### Resource Schema
-
-```javascript
-{
-  name: String,
-  type: String (equipment|furniture|technology|consumable|other),
-  quantity: Number,
-  availableQuantity: Number,
-  location: String,
-  condition: String,
-  lastMaintenanceDate: Date,
-  allocations: [{allocationId, eventId, quantity, dates, status}],
-  isActive: Boolean,
-  timestamps
-}
-```
-
-### TimeSlot Schema
-
-```javascript
-{
-  eventId: String,
-  venue: String,
-  startTime: Date,
-  endTime: Date,
-  capacity: Number,
-  resourcesAllocated: [{resourceId, quantity}],
-  timestamps
-}
-```
-
-### Conflict Schema
-
-```javascript
-{
-  slotId1: String,
-  slotId2: String,
-  conflictType: String (venue|resource|time|capacity),
-  severity: String,
-  description: String,
-  resolved: Boolean,
-  resolution: String,
-  timestamps
-}
-```
-
-### Budget Schema
-
-```javascript
-{
-  eventId: String,
-  totalAllocation: Number,
-  budgetBreakdown: [{category, amount}],
-  currency: String,
-  approvalStatus: String (draft|approved|rejected),
-  approvedBy: String,
-  approvedDate: Date,
-  timestamps
-}
-```
-
-### Expense Schema
-
-```javascript
-{
-  budgetId: String,
-  category: String,
-  description: String,
-  amount: Number,
-  vendor: String,
-  paymentMethod: String,
-  paymentStatus: String (pending|paid|refunded),
-  paidDate: Date,
-  receipt: String,
-  timestamps
-}
-```
-
-## Migration Steps
-
-See the migration guide for the step-by-step implementation details, service changes, and test updates.
-
-## Database Connection Options
-
-### Local Development
-
-```javascript
-// .env
-MONGODB_URI=mongodb://localhost:27017/campusos
-```
-
-### Docker
+### With Authentication
 
 ```bash
 docker run -d \
@@ -182,78 +21,130 @@ docker run -d \
   mongo:latest
 ```
 
-### MongoDB Atlas (Cloud)
+```env
+# backend/.env
+MONGODB_URI=mongodb://admin:password@localhost:27017/campusos?authSource=admin
+```
 
-```javascript
-// .env
+### Docker Compose (Full Stack)
+
+Create `docker-compose.yml` in the project root to run MongoDB, backend, and frontend together:
+
+```yaml
+version: '3'
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    ports:
+      - '4000:4000'
+    environment:
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/campusos?authSource=admin
+      NODE_ENV: development
+      PORT: 4000
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:4000
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+```
+
+```bash
+docker compose up -d        # Start all services
+docker compose logs -f      # View logs
+docker compose down         # Stop all services
+docker compose up -d --build  # Rebuild after code changes
+```
+
+## Option 2: Native Install
+
+Install MongoDB Community Edition from the [official guide](https://www.mongodb.com/docs/manual/installation/), then start it:
+
+```bash
+mongod --dbpath /data/db
+```
+
+```env
+# backend/.env
+MONGODB_URI=mongodb://localhost:27017/campusos
+```
+
+## Option 3: MongoDB Atlas (Cloud)
+
+1. Create a free cluster at [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Add your IP to the allowlist
+3. Create a database user
+4. Copy the connection string:
+
+```env
+# backend/.env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/campusos?retryWrites=true&w=majority
 ```
 
-## Health Check Endpoint (Optional)
+## Environment Configuration
 
-Add to backend routes:
+Create `.env` in the `backend/` folder:
 
-```javascript
-app.get('/health/db', async (req, res) => {
-  const isConnected = await healthCheck();
-  res.json({
-    status: isConnected ? 'healthy' : 'unhealthy',
-    database: 'mongodb'
-  });
-});
+```env
+MONGODB_URI=mongodb://localhost:27017/campusos
+NODE_ENV=development
+PORT=4000
 ```
 
-## Index Strategy
+See [Environment Variables](./ENVIRONMENT.md) for all options.
 
-Indexes created for optimal query performance:
+## Database Collections
 
-| Collection | Indexes                              |
-| ---------- | ------------------------------------ |
-| vendors    | category, email, assignments.eventId |
-| resources  | type, allocations.eventId, condition |
-| timeslots  | eventId, venue, startTime/endTime    |
-| conflicts  | slotId1/slotId2, resolved            |
-| budgets    | eventId (unique), approvalStatus     |
-| expenses   | budgetId, category, paymentStatus    |
+| Collection | Module     | Purpose                 |
+| ---------- | ---------- | ----------------------- |
+| users      | Auth       | User accounts           |
+| vendors    | Vendor     | Vendor information      |
+| resources  | Resource   | Equipment and inventory |
+| timeslots  | Scheduling | Event time slots        |
+| conflicts  | Scheduling | Scheduling conflicts    |
+| budgets    | Budget     | Event budgets           |
+| expenses   | Budget     | Tracked expenses        |
 
-## Data Backup Strategy
+> [!NOTE]
+> Some modules (Club, Institute, Event, Check-in, Task, Calendar) currently store data in-memory using `Map()` objects. Their data is lost on server restart. Operations modules (Vendor, Resource, Scheduling, Budget) and Auth use MongoDB.
+
+## Backups
 
 ```bash
-# Backup all collections
-mongodump --uri="mongodb://localhost:27017/campusos" --out=./backups
+# Backup
+mongodump --uri="<connection-string>" --out=./backups/$(date +%Y%m%d)
 
 # Restore
-mongorestore --uri="mongodb://localhost:27017/campusos" ./backups/campusos
+mongorestore --uri="<connection-string>" ./backups/<date>/campusos
 ```
 
 ## Troubleshooting
 
-### Connection Issues
-
-```javascript
-// Check connection
-import mongoose from 'mongoose';
-console.log(mongoose.connection.readyState); // 1 = connected
-```
-
-### Missing Indexes
-
-```javascript
-// Rebuild indexes
-await Vendor.syncIndexes();
-await Resource.syncIndexes();
-```
-
-## Performance Considerations
-
-1. **Batch Operations**: Use `Model.insertMany()` for bulk inserts
-2. **Lean Queries**: Use `.lean()` for read-only operations to reduce memory
-3. **Connection Pooling**: Configured with maxPoolSize: 10
-4. **Timeouts**: serverSelectionTimeout: 5s, socketTimeout: 45s
+| Problem                   | Fix                                                                 |
+| ------------------------- | ------------------------------------------------------------------- |
+| `ECONNREFUSED` on startup | MongoDB isn't running → `docker start mongodb`                      |
+| Connection timeout        | Check `MONGODB_URI` in `.env`                                       |
+| Auth failure (Atlas)      | Verify username/password and IP allowlist                           |
+| Slow first test run       | `mongodb-memory-server` downloads binaries on first use — wait ~60s |
 
 ---
 
-## Related Docs
-
-- See [MONGODB_MIGRATION.md](./MONGODB_MIGRATION.md) for migration steps and service-level details.
-- See [Phase 5 Documentation](../phases/phase5/README.md) for Phase 5 documentation index.
+**See Also**: [Quick Start](./QUICK_START.md) · [Environment Variables](./ENVIRONMENT.md)

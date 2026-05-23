@@ -6,16 +6,16 @@ All configuration options for CampusOS, verified against the actual source code.
 
 Variables read in `backend/src/`:
 
-| Variable            | Default                              | Read In                           | Description                                                           |
-| ------------------- | ------------------------------------ | --------------------------------- | --------------------------------------------------------------------- |
-| `PORT`              | `4000`                               | `index.js`                        | Backend server port                                                   |
-| `NODE_ENV`          | `development`                        | `app.js`, `server.js`, `error.js` | Environment mode. Affects error stack traces, plugin failure handling |
-| `JWT_SECRET`        | `campus-os-dev-jwt-secret-change-me` | `auth/jwt-authenticator.js`       | JWT signing key. **Crashes in production if not set**                 |
-| `JWT_EXPIRES_IN`    | `15m`                                | `auth/jwt-authenticator.js`       | Token expiry duration (e.g., `15m`, `1h`, `7d`)                       |
-| `MONGODB_URI`       | `mongodb://localhost:27017/campusos` | `database/connection.js`          | MongoDB connection string                                             |
-| `FRONTEND_URLS`     | `http://localhost:3000`              | `app.js`                          | Comma-separated allowed CORS origins                                  |
-| `FRONTEND_URL`      | `http://localhost:3000`              | `app.js`                          | Single allowed CORS origin (fallback if `FRONTEND_URLS` is not set)   |
-| `ALLOW_PREVIEW_CORS`| _(not set)_                          | `app.js`                          | Set to `true` to allow any `*.vercel.app` origin (Preview env only)   |
+| Variable             | Default                              | Read In                           | Description                                                           |
+| -------------------- | ------------------------------------ | --------------------------------- | --------------------------------------------------------------------- |
+| `PORT`               | `4000`                               | `index.js`                        | Backend server port                                                   |
+| `NODE_ENV`           | `development`                        | `app.js`, `server.js`, `error.js` | Environment mode. Affects error stack traces, plugin failure handling |
+| `JWT_SECRET`         | `campus-os-dev-jwt-secret-change-me` | `auth/jwt-authenticator.js`       | JWT signing key. **Crashes in production if not set**                 |
+| `JWT_EXPIRES_IN`     | `15m`                                | `auth/jwt-authenticator.js`       | Token expiry duration (e.g., `15m`, `1h`, `7d`)                       |
+| `MONGODB_URI`        | `mongodb://localhost:27017/campusos` | `database/connection.js`          | MongoDB connection string                                             |
+| `FRONTEND_URLS`      | `http://localhost:3000`              | `app.js`                          | Comma-separated allowed CORS origins                                  |
+| `FRONTEND_URL`       | `http://localhost:3000`              | `app.js`                          | Single allowed CORS origin (fallback if `FRONTEND_URLS` is not set)   |
+| `ALLOW_PREVIEW_CORS` | _(not set)_                          | `app.js`                          | Set to `true` to allow any `*.vercel.app` origin (Preview env only)   |
 
 ### CORS Origin Resolution
 
@@ -88,21 +88,50 @@ MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/campusos?retryWr
 
 ---
 
-## Vercel Deployment Variables
+## Deployment Variables
 
-When deploying to Vercel, environment variables are set **per environment** (Production vs Preview) in the Vercel dashboard. See the [CI/CD Guide](../guides/CI_CD.md#step-4-add-environment-variables-in-vercel) for the full table.
+CampusOS uses **Vercel** for the frontend and **Render** for the backend. Each platform has its own environment variables.
 
-Key differences between environments:
+### Frontend (Vercel)
 
-| Variable              | Production                             | Preview                                |
-| --------------------- | -------------------------------------- | -------------------------------------- |
-| `MONGODB_URI`         | `mongodb+srv://...campusos-prod`       | `mongodb+srv://...campusos-dev`        |
-| `NODE_ENV`            | `production`                           | `development`                          |
-| `NEXT_PUBLIC_API_URL` | Stable production backend URL          | Fixed dev backend URL (overridden by `full-preview` workflow) |
-| `ALLOW_PREVIEW_CORS`  | _(not set)_                            | `true`                                 |
+Set in the Vercel dashboard → **Settings → Environment Variables**:
 
-> [!WARNING]
-> Always use **separate databases** for Production and Preview. See the [CI/CD Guide](../guides/CI_CD.md) for setup instructions.
+| Variable              | Environment     | Value                                         |
+| --------------------- | --------------- | --------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | **Production**  | `https://campus-os-backend-main.onrender.com` |
+| `NEXT_PUBLIC_API_URL` | **Preview**     | `https://campus-os-backend.onrender.com`      |
+| `NEXT_PUBLIC_API_URL` | **Development** | `https://campus-os-backend.onrender.com`      |
+
+### Backend Dev (`campus-os-backend`)
+
+Render service watching the `dev` branch. Set in the Render dashboard → **Environment → Environment Variables**:
+
+| Variable             | Value                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `NODE_ENV`           | `development`                                                                                                |
+| `PORT`               | `10000`                                                                                                      |
+| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`                                                                              |
+| `JWT_SECRET`         | `<your-dev-secret>`                                                                                          |
+| `FRONTEND_URLS`      | `https://campus-os-frontend.vercel.app,https://campus-os-frontend-git-dev-techshreyashs-projects.vercel.app` |
+| `ALLOW_PREVIEW_CORS` | `true`                                                                                                       |
+
+> [!NOTE]
+> `ALLOW_PREVIEW_CORS=true` allows all `*.vercel.app` origins so that PR preview frontends can access the dev backend. See the [CI/CD Guide](../guides/CI_CD.md) for details.
+
+### Backend Main (`campus-os-backend-main`)
+
+Render service watching the `main` branch. Set in the Render dashboard → **Environment → Environment Variables**:
+
+| Variable       | Value                                   |
+| -------------- | --------------------------------------- |
+| `NODE_ENV`     | `production`                            |
+| `PORT`         | `10000`                                 |
+| `MONGODB_URI`  | `mongodb+srv://...campusos-prod`        |
+| `JWT_SECRET`   | `<your-production-secret>`              |
+| `FRONTEND_URL` | `https://campus-os-frontend.vercel.app` |
+
+> [!NOTE]
+> The production backend does **not** enable `ALLOW_PREVIEW_CORS`. It uses exact-match CORS via `FRONTEND_URL`.
 
 ---
 

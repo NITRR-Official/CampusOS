@@ -1,145 +1,65 @@
 # 🧠 Copilot System Context — CampusOS
 
-## 🎯 Project Overview
+## Project Overview
 
-CampusOS is a modular, plugin-based platform designed to manage:
+CampusOS is a modular, plugin-based platform for managing campus activities — clubs, events, tasks, operations (vendors, resources, budgeting), and growth (sponsorship, marketing).
 
-- Clubs
-- Events
-- Tasks & execution workflows
-- Operations (vendors, resources, budgeting)
-- Sponsorship & marketing
-
-The system is built using:
-
-- Backend: Node.js + Express
-- Frontend: Next.js
-- Database: MongoDB
-- Architecture: Modular plugin-based system
+| Layer    | Technology                                    |
+| -------- | --------------------------------------------- |
+| Backend  | Node.js 18+ with Express v5 (ES Modules)      |
+| Frontend | Next.js 16 (App Router), React 19, TypeScript |
+| Database | MongoDB + Mongoose                            |
+| UI       | Tailwind CSS v4 + shadcn/ui                   |
+| Auth     | JWT (HS256, 15m expiry)                       |
+| Testing  | Vitest + mongodb-memory-server                |
+| Package  | pnpm (workspaces)                             |
 
 ---
 
-## 🧩 Architecture Principles
+## Architecture Rules
 
-1. Everything is a module
-2. Modules live inside `/apps/`
-3. Core system handles:
-   - Authentication
-   - Plugin loading
-   - Routing
+1. **Everything is a plugin** — Feature code lives in `/apps/<module>/`
+2. **No cross-module imports** — Use `registry.getService()` for communication
+3. **Controllers are thin** — Extract params, call service, send response
+4. **Services return result objects** — `{ success: true, data }` or `{ success: false, error }`
+5. **ES modules only** — `import`/`export`, never `require()`
+6. **Write endpoints need RBAC** — Use `requireRoles()` from the registry
 
-4. Each module must be self-contained:
-   - routes
-   - controller
-   - service
-   - schema/model
+## Module Entry Point
 
----
+Every module in `/apps/` exports `init(app, registry)` from `src/index.js`:
 
-## 📁 Folder Structure Rules
+```javascript
+export async function init(app, registry) {
+  const requireRoles = registry.getService('requireRoles');
+  registerRoutes(app, requireRoles);
+  registry.registerModule('my-module', { routes: [...] });
+}
+```
 
-- `/apps/*` → feature modules
-- `/backend/` → core server
-- `/frontend/` → UI
-- `/shared/` → types, schemas
+## Module Structure
 
----
+```
+apps/<module>/src/
+├── index.js              # Exports init(app, registry)
+├── controller/           # HTTP handlers (thin)
+├── routes/               # Express route definitions
+├── schema/               # Mongoose models
+└── service/              # Business logic (tested)
+```
 
-## 🔌 Module Rules
+## Key Files
 
-Every module must:
+- `backend/src/app.js` — Middleware chain and plugin loading
+- `backend/src/utils/registry.js` — Service registry API
+- `backend/src/middleware/auth.js` — Public route allowlist
+- `backend/src/middleware/permissions.js` — `requireRoles()` implementation
 
-- Have `plugin.js` entry
-- Export:
-  - name
-  - routes
-  - init()
+## Documentation
 
-Modules must NOT directly depend on each other.
-Communication must happen via shared services or DB.
+See `docs/` for architecture docs, API reference, and guides. Key references:
 
----
-
-## 🧠 Humanet Integration
-
-Before implementing ANY feature:
-
-1. Read:
-   - `.humanet/problem_statement.md`
-   - `.humanet/idea.md`
-   - `.humanet/scope.md`
-
-2. Ensure:
-   - Feature aligns with scope
-   - No unnecessary complexity
-   - Ask if you want any clarity related to any implementation or humanet docs
-
----
-
-## 🚫 Constraints
-
-- Do NOT over-engineer
-- Do NOT introduce new architecture patterns without justification
-- Follow modular structure strictly
-
----
-
-## ✅ Coding Guidelines
-
-### Backend
-
-- Use Express routers
-- Use middleware for validation
-- Keep controllers thin
-- Business logic in services
-
-### Package Management
-
-- **Install packages via CLI only**:
-  - `pnpm install <package-name>`
-  - `pnpm install -D <package-name>` (dev dependencies)
-- **DO NOT directly edit package.json** for version management
-- Use `pnpm update` for version updates
-- Pin major versions, use `^` for minor/patch
-- All package decisions must be justified
-
----
-
-### Frontend
-
-- Use reusable components
-- Separate UI and logic
-- Fetch via service layer
-
----
-
-## 🔄 Development Workflow
-
-When implementing a feature:
-
-1. Understand requirement
-2. Check Humanet docs
-3. Design module
-4. Implement backend
-5. Implement frontend
-6. Connect both
-7. Update `.humanet/CHANGELOG.md`
-
----
-
-## 🧾 Output Expectations
-
-When generating code:
-
-- Follow project structure
-- Use clean naming
-- Add comments where needed
-- Avoid unnecessary dependencies
-
----
-
-## 🎯 Goal
-
-Build a scalable, modular, production-grade CampusOS system with clean architecture and maintainability.
-
----
+- `docs/architecture/OVERVIEW.md` — System layers and principles
+- `docs/architecture/PLUGIN_SYSTEM.md` — Plugin creation guide
+- `docs/contributing/CODING_GUIDELINES.md` — Code patterns and conventions
+- `docs/api/REFERENCE.md` — All REST endpoints

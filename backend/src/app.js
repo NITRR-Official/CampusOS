@@ -61,7 +61,7 @@ export async function createApp(registry) {
 
         callback(new Error('CORS policy does not allow this origin'));
       },
-      credentials: true,
+      credentials: true
     })
   );
 

@@ -1,14 +1,15 @@
 # CampusOS Documentation
 
-Welcome to the CampusOS documentation. This is the central hub for all project documentation — from getting started to architecture deep-dives.
+Welcome to the CampusOS documentation. This hub links every guide, reference, and decision record in the project.
 
-> **CampusOS** is a modular, scalable platform for managing the complete lifecycle of campus activities — clubs, events, tasks, operations, and growth.
+> **CampusOS** is a modular, open-source platform for managing campus activities — clubs, events, tasks, operations, and growth.
+
+> [!TIP]
+> **New here?** Start with the [Quick Start](./getting-started/QUICK_START.md), then follow the [Developer Onboarding](./getting-started/DEVELOPER_ONBOARDING.md) to land your first PR.
 
 ---
 
 ## 🚀 Getting Started
-
-New to CampusOS? Start here.
 
 | Document                                                          | Description                                  |
 | ----------------------------------------------------------------- | -------------------------------------------- |
@@ -19,24 +20,9 @@ New to CampusOS? Start here.
 
 ---
 
-## 📖 Project
-
-Understand what CampusOS is, why it exists, and where it's headed.
-
-| Document                                            | Description                              |
-| --------------------------------------------------- | ---------------------------------------- |
-| [Problem Statement](./project/PROBLEM_STATEMENT.md) | The problem CampusOS solves              |
-| [Idea](./project/IDEA.md)                           | The solution and core concept            |
-| [Scope](./project/SCOPE.md)                         | What's in and out of scope, by phase     |
-| [Roadmap](./project/ROADMAP.md)                     | Development phases and progress          |
-| [Project Structure](./project/PROJECT_STRUCTURE.md) | Directory layout and module organization |
-| [Changelog](./project/CHANGELOG.md)                 | History of major changes                 |
-
----
-
 ## 🏗️ Architecture
 
-How CampusOS is built under the hood.
+How CampusOS is built under the hood. All system diagrams are rendered natively using [Mermaid](https://mermaid.js.org/).
 
 | Document                                            | Description                                                     |
 | --------------------------------------------------- | --------------------------------------------------------------- |
@@ -59,7 +45,14 @@ Standards, patterns, and best practices for contributing code.
 | [Git Workflow](./guides/GIT_WORKFLOW.md)    | Branching, commits, PRs, merging                         |
 | [Code Review](./guides/CODE_REVIEW.md)      | Review checklist — architecture, security, quality       |
 | [CI/CD Pipeline](./guides/CI_CD.md)         | CI checks, Vercel deployments, branch strategy           |
-| [Deployment](./guides/DEPLOYMENT.md)        | Docker, rollback, monitoring, production readiness       |
+
+---
+
+## 📡 API Reference
+
+| Document                            | Description                                               |
+| ----------------------------------- | --------------------------------------------------------- |
+| [API Reference](./api/REFERENCE.md) | All REST endpoints — Vendor, Resource, Scheduling, Budget |
 
 ---
 
@@ -73,27 +66,18 @@ Standards, patterns, and best practices for contributing code.
 
 ---
 
-## ⚙️ Backend
+## 📖 Project
 
-| Document                                            | Description                                 |
-| --------------------------------------------------- | ------------------------------------------- |
-| [MongoDB Migration](./backend/MONGODB_MIGRATION.md) | Migration from in-memory storage to MongoDB |
+Understand what CampusOS is, why it exists, and where it's headed.
 
----
-
-## 📡 API Reference
-
-| Document                                            | Description                                           |
-| --------------------------------------------------- | ----------------------------------------------------- |
-| [Phase 5 API Reference](./api/PHASE_5_REFERENCE.md) | 44 endpoints for Vendor, Resource, Scheduling, Budget |
-
----
-
-## 📦 Phase Documentation
-
-| Document                                               | Description                                  |
-| ------------------------------------------------------ | -------------------------------------------- |
-| [Phase 5: Operations Layer](./phases/phase5/README.md) | Implementation summary, testing, and results |
+| Document                                            | Description                              |
+| --------------------------------------------------- | ---------------------------------------- |
+| [Problem Statement](./project/PROBLEM_STATEMENT.md) | The problem CampusOS solves              |
+| [Idea](./project/IDEA.md)                           | The solution and core concept            |
+| [Scope](./project/SCOPE.md)                         | What's in and out of scope, by phase     |
+| [Roadmap](./project/ROADMAP.md)                     | Development phases and progress          |
+| [Project Structure](./project/PROJECT_STRUCTURE.md) | Directory layout and module organization |
+| [Changelog](./project/CHANGELOG.md)                 | History of major changes                 |
 
 ---
 
@@ -103,16 +87,8 @@ Standards, patterns, and best practices for contributing code.
 | -------------------------------------------------------- | ----------------------------------------------- |
 | [Contributing Guide](./contributing/CONTRIBUTING.md)     | How to contribute — setup, workflow, PR process |
 | [Code of Conduct](./contributing/CODE_OF_CONDUCT.md)     | Community standards and enforcement             |
-| [Contributors](./contributing/CONTRIBUTORS.md)           | Recognition and contribution types              |
 | [Coding Guidelines](./contributing/CODING_GUIDELINES.md) | Code style, module rules, package management    |
-
----
-
-## 🤖 AI Development
-
-| Document                                                     | Description                               |
-| ------------------------------------------------------------ | ----------------------------------------- |
-| [Copilot Guidelines](./ai-development/COPILOT_GUIDELINES.md) | AI-assisted development rules and context |
+| [Contributors](./contributing/CONTRIBUTORS.md)           | Recognition and contribution types              |
 
 ---
 
@@ -121,8 +97,3 @@ Standards, patterns, and best practices for contributing code.
 - **Root README**: [../README.md](../README.md) — Project overview and quick start
 - **GitHub Issues**: [Report bugs or request features](https://github.com/NITRR-Official/CampusOS/issues)
 - **Discussions**: [Ask questions](https://github.com/NITRR-Official/CampusOS/discussions)
-
----
-
-_Last Updated: May 19, 2026_
-_Maintained By: CampusOS Team_
