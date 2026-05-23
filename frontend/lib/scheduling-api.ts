@@ -3,7 +3,7 @@
  * Frontend API integration for scheduling management
  */
 
-import { getApiBaseUrl } from './api-config';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export const schedulingAPI = {
   /**
@@ -14,7 +14,7 @@ export const schedulingAPI = {
     slotData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/events/${eventId}/schedule`,
+      `${API_BASE}/api/v1/events/${eventId}/schedule`,
       {
         method: 'POST',
         headers: {
@@ -38,7 +38,7 @@ export const schedulingAPI = {
    */
   async getEventSchedule(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/events/${eventId}/schedule`,
+      `${API_BASE}/api/v1/events/${eventId}/schedule`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -57,14 +57,11 @@ export const schedulingAPI = {
    * Get time slot by ID
    */
   async getTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/${slotId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error('Time slot not found');
@@ -80,17 +77,14 @@ export const schedulingAPI = {
     slotId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/${slotId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(updateData)
-      }
-    );
+    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(updateData)
+    });
 
     if (!response.ok) {
       throw new Error('Failed to update time slot');
@@ -103,15 +97,12 @@ export const schedulingAPI = {
    * Delete time slot
    */
   async deleteTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/${slotId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error('Failed to delete time slot');
@@ -132,7 +123,7 @@ export const schedulingAPI = {
     if (filters.severity) params.append('severity', String(filters.severity));
 
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/conflicts?${params}`,
+      `${API_BASE}/api/v1/schedule/conflicts?${params}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -152,7 +143,7 @@ export const schedulingAPI = {
    */
   async getSlotConflicts(slotId: string): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/${slotId}/conflicts`,
+      `${API_BASE}/api/v1/schedule/${slotId}/conflicts`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -175,7 +166,7 @@ export const schedulingAPI = {
     resolution: string
   ): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/conflicts/${conflictId}/resolve`,
+      `${API_BASE}/api/v1/schedule/conflicts/${conflictId}/resolve`,
       {
         method: 'PUT',
         headers: {
@@ -207,7 +198,7 @@ export const schedulingAPI = {
     });
 
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/schedule/venue/${venue}/available?${params}`,
+      `${API_BASE}/api/v1/schedule/venue/${venue}/available?${params}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -227,7 +218,7 @@ export const schedulingAPI = {
    */
   async getScheduleOverview(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/events/${eventId}/schedule/overview`,
+      `${API_BASE}/api/v1/events/${eventId}/schedule/overview`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`

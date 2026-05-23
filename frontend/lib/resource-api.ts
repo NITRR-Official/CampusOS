@@ -3,7 +3,7 @@
  * Frontend API integration for resource management
  */
 
-import { getApiBaseUrl } from './api-config';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export const resourceAPI = {
   /**
@@ -12,7 +12,7 @@ export const resourceAPI = {
   async createResource(
     resourceData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${getApiBaseUrl()}/api/v1/resources`, {
+    const response = await fetch(`${API_BASE}/api/v1/resources`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -41,14 +41,11 @@ export const resourceAPI = {
     if (filters.condition)
       params.append('condition', String(filters.condition));
 
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources?${params}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+    const response = await fetch(`${API_BASE}/api/v1/resources?${params}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error('Failed to fetch resources');
@@ -70,7 +67,7 @@ export const resourceAPI = {
       params.append('condition', String(filters.condition));
 
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/available?${params}`,
+      `${API_BASE}/api/v1/resources/available?${params}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -89,14 +86,11 @@ export const resourceAPI = {
    * Get resource by ID
    */
   async getResourceById(resourceId: string): Promise<unknown> {
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/${resourceId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+    const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error('Resource not found');
@@ -112,17 +106,14 @@ export const resourceAPI = {
     resourceId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/${resourceId}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(updateData)
-      }
-    );
+    const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(updateData)
+    });
 
     if (!response.ok) {
       throw new Error('Failed to update resource');
@@ -135,15 +126,12 @@ export const resourceAPI = {
    * Delete resource
    */
   async deleteResource(resourceId: string): Promise<unknown> {
-    const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/${resourceId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+    const response = await fetch(`${API_BASE}/api/v1/resources/${resourceId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error('Failed to delete resource');
@@ -161,7 +149,7 @@ export const resourceAPI = {
     allocationData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/events/${eventId}/resources/${resourceId}`,
+      `${API_BASE}/api/v1/events/${eventId}/resources/${resourceId}`,
       {
         method: 'POST',
         headers: {
@@ -185,7 +173,7 @@ export const resourceAPI = {
    */
   async getEventResources(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/events/${eventId}/resources`,
+      `${API_BASE}/api/v1/events/${eventId}/resources`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -205,7 +193,7 @@ export const resourceAPI = {
    */
   async getResourceAllocations(resourceId: string): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/${resourceId}/allocations`,
+      `${API_BASE}/api/v1/resources/${resourceId}/allocations`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -228,7 +216,7 @@ export const resourceAPI = {
     status: string
   ): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/allocations/${allocationId}/status`,
+      `${API_BASE}/api/v1/resources/allocations/${allocationId}/status`,
       {
         method: 'PUT',
         headers: {
@@ -254,7 +242,7 @@ export const resourceAPI = {
     maintenanceDate: string
   ): Promise<unknown> {
     const response = await fetch(
-      `${getApiBaseUrl()}/api/v1/resources/${resourceId}/maintenance`,
+      `${API_BASE}/api/v1/resources/${resourceId}/maintenance`,
       {
         method: 'PUT',
         headers: {

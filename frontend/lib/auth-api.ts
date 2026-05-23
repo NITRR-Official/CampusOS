@@ -31,10 +31,10 @@ export class ApiError extends Error {
   }
 }
 
-import { getApiBaseUrl } from './api-config';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 async function requestAuth(path: string, body: Record<string, string>) {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

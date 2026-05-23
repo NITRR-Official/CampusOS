@@ -96,26 +96,42 @@ CampusOS uses **Vercel** for the frontend and **Render** for the backend. Each p
 
 Set in the Vercel dashboard → **Settings → Environment Variables**:
 
-| Variable              | Environment    | Value                                    |
-| --------------------- | -------------- | ---------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | **Production** | `https://campus-os-backend.onrender.com` |
-| `NEXT_PUBLIC_API_URL` | **Preview**    | `https://campus-os-backend.onrender.com` |
+| Variable              | Environment     | Value                                         |
+| --------------------- | --------------- | --------------------------------------------- |
+| `NEXT_PUBLIC_API_URL` | **Production**  | `https://campus-os-backend-main.onrender.com` |
+| `NEXT_PUBLIC_API_URL` | **Preview**     | `https://campus-os-backend.onrender.com`      |
+| `NEXT_PUBLIC_API_URL` | **Development** | `https://campus-os-backend.onrender.com`      |
 
-### Backend (Render)
+### Backend Dev (`campus-os-backend`)
 
-Set in the Render dashboard → **Environment → Environment Variables**:
+Render service watching the `dev` branch. Set in the Render dashboard → **Environment → Environment Variables**:
 
-| Variable             | Value                                   |
-| -------------------- | --------------------------------------- |
-| `NODE_ENV`           | `development`                           |
-| `PORT`               | `10000`                                 |
-| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`         |
-| `JWT_SECRET`         | `<your-dev-secret>`                     |
-| `FRONTEND_URL`       | `https://campus-os-frontend.vercel.app` |
-| `ALLOW_PREVIEW_CORS` | `true`                                  |
+| Variable             | Value                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `NODE_ENV`           | `development`                                                                                                |
+| `PORT`               | `10000`                                                                                                      |
+| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`                                                                              |
+| `JWT_SECRET`         | `<your-dev-secret>`                                                                                          |
+| `FRONTEND_URLS`      | `https://campus-os-frontend.vercel.app,https://campus-os-frontend-git-dev-techshreyashs-projects.vercel.app` |
+| `ALLOW_PREVIEW_CORS` | `true`                                                                                                       |
 
 > [!NOTE]
-> `ALLOW_PREVIEW_CORS=true` allows all `*.vercel.app` origins so that PR preview frontends can access the backend. See the [CI/CD Guide](../guides/CI_CD.md) for details.
+> `ALLOW_PREVIEW_CORS=true` allows all `*.vercel.app` origins so that PR preview frontends can access the dev backend. See the [CI/CD Guide](../guides/CI_CD.md) for details.
+
+### Backend Main (`campus-os-backend-main`)
+
+Render service watching the `main` branch. Set in the Render dashboard → **Environment → Environment Variables**:
+
+| Variable       | Value                                   |
+| -------------- | --------------------------------------- |
+| `NODE_ENV`     | `production`                            |
+| `PORT`         | `10000`                                 |
+| `MONGODB_URI`  | `mongodb+srv://...campusos-prod`        |
+| `JWT_SECRET`   | `<your-production-secret>`              |
+| `FRONTEND_URL` | `https://campus-os-frontend.vercel.app` |
+
+> [!NOTE]
+> The production backend does **not** enable `ALLOW_PREVIEW_CORS`. It uses exact-match CORS via `FRONTEND_URL`.
 
 ---
 

@@ -3,7 +3,7 @@
  * Frontend TypeScript client for check-in operations
  */
 
-import { getApiBaseUrl } from './api-config';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export interface CheckInRecord {
   id: string;
@@ -41,7 +41,7 @@ export async function fetchCheckIns(
   eventId: string
 ): Promise<CheckInRecord[]> {
   const response = await fetch(
-    `${getApiBaseUrl()}/api/v1/events/${eventId}/checkins`,
+    `${API_BASE_URL}/api/v1/events/${eventId}/checkins`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -71,7 +71,7 @@ export async function createCheckIn(
   userId: string
 ): Promise<CheckInRecord> {
   const response = await fetch(
-    `${getApiBaseUrl()}/api/v1/events/${eventId}/checkins`,
+    `${API_BASE_URL}/api/v1/events/${eventId}/checkins`,
     {
       method: 'POST',
       headers: {
@@ -102,7 +102,7 @@ export async function getCheckInStatus(
   userId: string
 ): Promise<CheckInRecord> {
   const response = await fetch(
-    `${getApiBaseUrl()}/api/v1/events/${eventId}/checkins/status/${userId}`,
+    `${API_BASE_URL}/api/v1/events/${eventId}/checkins/status/${userId}`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -126,7 +126,7 @@ export async function getCheckInStatus(
  * Scan QR code to check in (public endpoint)
  */
 export async function scanQRCode(qrCode: string): Promise<CheckInRecord> {
-  const response = await fetch(`${getApiBaseUrl()}/api/v1/checkins/scan`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/checkins/scan`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -154,7 +154,7 @@ export async function fetchAttendanceStats(
   eventId: string
 ): Promise<AttendanceStats> {
   const response = await fetch(
-    `${getApiBaseUrl()}/api/v1/events/${eventId}/attendance-stats`,
+    `${API_BASE_URL}/api/v1/events/${eventId}/attendance-stats`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,

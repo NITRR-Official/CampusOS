@@ -157,7 +157,7 @@ pnpm build           # Ensure frontend compiles
    - There are no per-PR backend deployments
 3. A maintainer reviews your code
 4. Address any feedback, push new commits — frontend preview auto-updates
-5. Once merged to `dev`, both frontend (Vercel) and backend (Render) redeploy automatically
+5. Once merged to `dev`, the frontend (Vercel) and the dev backend (Render) redeploy automatically
 
 ### 5. Address Review Feedback
 
