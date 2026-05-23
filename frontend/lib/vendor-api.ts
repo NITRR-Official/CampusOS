@@ -3,14 +3,14 @@
  * Frontend API integration for vendor management
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { getApiBaseUrl } from './api-config';
 
 export const vendorAPI = {
   /**
    * Create a new vendor
    */
   async createVendor(vendorData: Record<string, unknown>): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/vendors`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const vendorAPI = {
     if (filters.category) params.append('category', String(filters.category));
     if (filters.status) params.append('status', String(filters.status));
 
-    const response = await fetch(`${API_BASE}/api/v1/vendors?${params}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors?${params}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -52,7 +52,7 @@ export const vendorAPI = {
    * Get vendor by ID
    */
   async getVendorById(vendorId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/vendors/${vendorId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors/${vendorId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -72,7 +72,7 @@ export const vendorAPI = {
     vendorId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/vendors/${vendorId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors/${vendorId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ export const vendorAPI = {
    * Delete vendor
    */
   async deleteVendor(vendorId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/vendors/${vendorId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/vendors/${vendorId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -115,7 +115,7 @@ export const vendorAPI = {
     assignmentData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/vendors/${vendorId}`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/vendors/${vendorId}`,
       {
         method: 'POST',
         headers: {
@@ -138,7 +138,7 @@ export const vendorAPI = {
    */
   async getEventVendors(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/vendors`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/vendors`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -158,7 +158,7 @@ export const vendorAPI = {
    */
   async getVendorAssignments(vendorId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/vendors/${vendorId}/assignments`,
+      `${getApiBaseUrl()}/api/v1/vendors/${vendorId}/assignments`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -181,7 +181,7 @@ export const vendorAPI = {
     status: string
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/vendors/assignments/${assignmentId}/status`,
+      `${getApiBaseUrl()}/api/v1/vendors/assignments/${assignmentId}/status`,
       {
         method: 'PUT',
         headers: {
@@ -204,7 +204,7 @@ export const vendorAPI = {
    */
   async rateVendor(vendorId: string, rating: number): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/vendors/${vendorId}/rate`,
+      `${getApiBaseUrl()}/api/v1/vendors/${vendorId}/rate`,
       {
         method: 'POST',
         headers: {

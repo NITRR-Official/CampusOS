@@ -30,10 +30,10 @@ export class EventApiError extends Error {
   }
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { getApiBaseUrl } from './api-config';
 
 async function request(path: string, init?: RequestInit) {
-  const response = await fetch(`${API_BASE_URL}${path}`, init);
+  const response = await fetch(`${getApiBaseUrl()}${path}`, init);
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {

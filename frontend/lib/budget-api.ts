@@ -3,7 +3,7 @@
  * Frontend API integration for budget management
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { getApiBaseUrl } from './api-config';
 
 export const budgetAPI = {
   /**
@@ -14,7 +14,7 @@ export const budgetAPI = {
     budgetData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/budget`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/budget`,
       {
         method: 'POST',
         headers: {
@@ -38,7 +38,7 @@ export const budgetAPI = {
    */
   async getEventBudget(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/budget`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/budget`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -57,7 +57,7 @@ export const budgetAPI = {
    * Get budget by ID
    */
   async getBudgetById(budgetId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/budget/${budgetId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -77,7 +77,7 @@ export const budgetAPI = {
     budgetId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/budget/${budgetId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/budget/${budgetId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export const budgetAPI = {
    */
   async approveBudget(budgetId: string, userId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/${budgetId}/approve`,
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}/approve`,
       {
         method: 'POST',
         headers: {
@@ -121,7 +121,7 @@ export const budgetAPI = {
    */
   async rejectBudget(budgetId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/${budgetId}/reject`,
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}/reject`,
       {
         method: 'POST',
         headers: {
@@ -145,7 +145,7 @@ export const budgetAPI = {
     expenseData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/${budgetId}/expense`,
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}/expense`,
       {
         method: 'POST',
         headers: {
@@ -169,7 +169,7 @@ export const budgetAPI = {
    */
   async getBudgetExpenses(budgetId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/${budgetId}/expenses`,
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}/expenses`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -189,7 +189,7 @@ export const budgetAPI = {
    */
   async getExpenseById(expenseId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/expense/${expenseId}`,
+      `${getApiBaseUrl()}/api/v1/budget/expense/${expenseId}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -212,7 +212,7 @@ export const budgetAPI = {
     updateData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/expense/${expenseId}`,
+      `${getApiBaseUrl()}/api/v1/budget/expense/${expenseId}`,
       {
         method: 'PUT',
         headers: {
@@ -238,7 +238,7 @@ export const budgetAPI = {
     paymentMethod: string
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/expense/${expenseId}/mark-paid`,
+      `${getApiBaseUrl()}/api/v1/budget/expense/${expenseId}/mark-paid`,
       {
         method: 'POST',
         headers: {
@@ -261,7 +261,7 @@ export const budgetAPI = {
    */
   async getBudgetSummary(budgetId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/${budgetId}/summary`,
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}/summary`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -281,7 +281,7 @@ export const budgetAPI = {
    */
   async getBudgetVsActual(budgetId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/budget/${budgetId}/vs-actual`,
+      `${getApiBaseUrl()}/api/v1/budget/${budgetId}/vs-actual`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`

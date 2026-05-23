@@ -3,7 +3,7 @@
  * Frontend API integration for scheduling management
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { getApiBaseUrl } from './api-config';
 
 export const schedulingAPI = {
   /**
@@ -14,7 +14,7 @@ export const schedulingAPI = {
     slotData: Record<string, unknown>
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/schedule`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/schedule`,
       {
         method: 'POST',
         headers: {
@@ -38,7 +38,7 @@ export const schedulingAPI = {
    */
   async getEventSchedule(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/schedule`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/schedule`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -57,7 +57,7 @@ export const schedulingAPI = {
    * Get time slot by ID
    */
   async getTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/schedule/${slotId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
@@ -77,7 +77,7 @@ export const schedulingAPI = {
     slotId: string,
     updateData: Record<string, unknown>
   ): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/schedule/${slotId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export const schedulingAPI = {
    * Delete time slot
    */
   async deleteTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/schedule/${slotId}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -123,7 +123,7 @@ export const schedulingAPI = {
     if (filters.severity) params.append('severity', String(filters.severity));
 
     const response = await fetch(
-      `${API_BASE}/api/v1/schedule/conflicts?${params}`,
+      `${getApiBaseUrl()}/api/v1/schedule/conflicts?${params}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -143,7 +143,7 @@ export const schedulingAPI = {
    */
   async getSlotConflicts(slotId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/schedule/${slotId}/conflicts`,
+      `${getApiBaseUrl()}/api/v1/schedule/${slotId}/conflicts`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -166,7 +166,7 @@ export const schedulingAPI = {
     resolution: string
   ): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/schedule/conflicts/${conflictId}/resolve`,
+      `${getApiBaseUrl()}/api/v1/schedule/conflicts/${conflictId}/resolve`,
       {
         method: 'PUT',
         headers: {
@@ -198,7 +198,7 @@ export const schedulingAPI = {
     });
 
     const response = await fetch(
-      `${API_BASE}/api/v1/schedule/venue/${venue}/available?${params}`,
+      `${getApiBaseUrl()}/api/v1/schedule/venue/${venue}/available?${params}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -218,7 +218,7 @@ export const schedulingAPI = {
    */
   async getScheduleOverview(eventId: string): Promise<unknown> {
     const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/schedule/overview`,
+      `${getApiBaseUrl()}/api/v1/events/${eventId}/schedule/overview`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
