@@ -6,14 +6,17 @@ Every feature in CampusOS is a plugin module in `/apps/`. Modules are loaded dyn
 
 At startup, `plugin-loader.js` does this:
 
-```
-1. Scan /apps/ for directories
-2. For each directory, look for:
-   → plugin.js       (checked first)
-   → src/index.js    (checked second)
-3. Dynamically import the entry file
-4. Call the exported init(app, registry) function
-5. Log success or failure per module
+```mermaid
+flowchart TD
+    Scan["1. Scan /apps/ for directories"] --> ForEach["2. For each directory, look for entry file"]
+    ForEach --> Check1{"Check: plugin.js exists?"}
+    Check1 -- Yes --> Import["3. Dynamically import the entry file"]
+    Check1 -- No --> Check2{"Check: src/index.js exists?"}
+    Check2 -- Yes --> Import
+    Check2 -- No --> Fail["Skip module"]
+
+    Import --> Init["4. Call the exported init(app, registry) function"]
+    Init --> Log["5. Log success or failure per module"]
 ```
 
 If a module fails to load:

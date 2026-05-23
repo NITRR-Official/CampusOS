@@ -1,6 +1,6 @@
 # CampusOS Project Structure
 
-How the repository is actually organized, verified against the filesystem.
+How the repository is organized, verified against the filesystem.
 
 ## Root Directory
 
@@ -10,24 +10,23 @@ CampusOS/
 ├── backend/                    # Express core server
 ├── frontend/                   # Next.js web application
 ├── shared/                     # Shared utilities package
-├── docs/                       # Documentation (you are here)
-├── .github/                    # CI workflows, issue templates, agent configs
-├── .humanet/                   # Project governance docs (problem, idea, scope, ADRs)
+├── docs/                       # Documentation
+├── .github/                    # CI workflows, issue templates
 │
 ├── package.json                # Root — pnpm workspaces, shared deps
+├── pnpm-workspace.yaml         # Workspace config (authoritative)
 ├── pnpm-lock.yaml              # Lock file
 ├── README.md                   # Project gateway
-├── ROADMAP.md                  # Development roadmap
 ├── COPILOT.md                  # AI development rules
-├── CONTRIBUTING.md             # Contributor guide
-├── CODE_OF_CONDUCT.md          # Community standards
-├── CONTRIBUTORS.md             # Contributor list
+├── LICENSE                     # MIT License
+├── eslint.config.js            # Shared ESLint config
+├── .prettierrc                 # Prettier config
 └── .gitignore
 ```
 
 ### Workspace Configuration
 
-Workspaces are defined in `pnpm-workspace.yaml` (the authoritative config for pnpm):
+Workspaces are defined in `pnpm-workspace.yaml`:
 
 ```yaml
 packages:
@@ -52,7 +51,7 @@ backend/
     │   └── jwt-authenticator.js  # JWT sign/verify — registered as authenticator
     │
     ├── middleware/
-    │   ├── auth.js             # JWT verification, public route whitelist
+    │   ├── auth.js             # JWT verification, public route allowlist
     │   ├── permissions.js      # requireRoles() — RBAC middleware factory
     │   ├── logger.js           # Request logging with trace IDs
     │   └── error.js            # Error handler + 404 handler
@@ -166,10 +165,10 @@ apps/<module>/
 | Scheduling | `apps/scheduling/` | MongoDB   | Time slot scheduling, conflicts      |
 | Budget     | `apps/budget/`     | MongoDB   | Budget allocation, expenses          |
 
-> **Important**: MongoDB is required to start the server — `connectDB()` runs at boot and exits on failure.
+> [!NOTE]
+> MongoDB is required to start the server — `connectDB()` runs at boot and exits on failure.
 > Some modules (Club, Institute, Event, Check-in, Task, Calendar) store data in-memory using `Map()` objects, meaning their data is lost on restart.
-> Operations layer modules (Phase 5) use MongoDB with Mongoose.
-> See [MongoDB Migration](../backend/MONGODB_MIGRATION.md) for the plan to migrate all modules to MongoDB.
+> Operations layer modules use MongoDB with Mongoose.
 
 ## Shared Package (`shared/`)
 

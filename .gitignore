@@ -57,9 +57,6 @@ Thumbs.db
 .env.local
 config.local.js
 
-# Prettier
-.prettierignore
-
 # ESLint
 .eslintcache
 

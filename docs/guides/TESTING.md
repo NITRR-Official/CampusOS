@@ -195,4 +195,4 @@ pnpm -C apps/vendor test -- vendor.service.test.js
 
 ---
 
-**See Also**: [Phase 5 Test Results](../phases/phase5/TEST_RESULTS.md) · [Code Review](./CODE_REVIEW.md) · [API Standards](./API_STANDARDS.md)
+**See Also**: [Code Review](./CODE_REVIEW.md) · [API Standards](./API_STANDARDS.md)
