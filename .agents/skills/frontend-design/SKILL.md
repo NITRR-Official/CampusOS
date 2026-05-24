@@ -1,42 +1,127 @@
 ---
-name: frontend-design
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.
-license: Complete terms in LICENSE.txt
+name: frontend
+description: >-
+  Comprehensive frontend development hub — UI/UX design, React/Next.js patterns,
+  Tailwind CSS v4, shadcn/ui components, Three.js 3D graphics, creative web
+  experiences, data visualization, diagramming, Figma integration, accessibility,
+  game development, scroll animations, and design systems. Use for ANY frontend
+  task: building components, designing interfaces, styling, theming, animations,
+  charts, responsive layouts, mobile design, or implementing design patterns.
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+# Frontend Development Hub
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+This skill is an **index of specialized frontend sub-skills**. Do NOT read every sub-skill. Instead:
 
-## Design Thinking
+1. Scan the categories below to find what's relevant to the current task
+2. Read only the specific `SKILL.md` file(s) needed via their relative path
+3. Follow the instructions in that sub-skill
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
-- **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-- **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+> Multiple sub-skills can be combined for a single task (e.g. `shadcn` + `frontend-patterns` for building CampusOS UI).
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+---
 
-Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
-- Production-grade and functional
-- Visually striking and memorable
-- Cohesive with a clear aesthetic point-of-view
-- Meticulously refined in every detail
+## Core — CampusOS Patterns
 
-## Frontend Aesthetics Guidelines
+Project-specific frontend conventions and framework best practices.
 
-Focus on:
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **Frontend Patterns** | `./core/frontend-patterns/SKILL.md` | Building React components with CampusOS conventions, App Router, Tailwind CSS v4, react-hook-form + Zod |
+| **React Best Practices** | `./core/vercel-react-best-practices/SKILL.md` | Optimizing React/Next.js performance, data fetching, bundle size, code splitting |
 
-NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
+---
 
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+## Components — Frameworks & Libraries
 
-**IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+Pre-built component libraries and design system tooling.
 
-Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **shadcn/ui** | `./components/shadcn/SKILL.md` | Adding, searching, fixing, debugging, or styling shadcn/ui components; working with registries, presets, or `components.json` |
+| **Tailwind Design System** | `./components/tailwind-design-system/SKILL.md` | Building scalable design systems with Tailwind CSS v4 — design tokens, component libraries, responsive patterns |
+
+---
+
+## Design — Visual & UX
+
+Design principles, UI/UX patterns, accessibility, and theming.
+
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **Frontend Design** | `./design/frontend-design/SKILL.md` | Creating distinctive, production-grade interfaces; avoiding generic AI aesthetics |
+| **UI/UX Pro Max** | `./design/ui-ux-pro-max/SKILL.md` | Comprehensive UI/UX design intelligence — 50+ styles, 161 palettes, 57 font pairings, 25 chart types across 10 stacks |
+| **Web Design Guidelines** | `./design/web-design-guidelines/SKILL.md` | Reviewing UI for Web Interface Guidelines compliance, accessibility audits, UX review |
+| **Premium Web Design** | `./design/premium-web-design/SKILL.md` | Building premium, polished web experiences |
+| **UI Design System** | `./design/ui-design-system/SKILL.md` | Design token generation, component documentation, responsive calculations, developer handoff |
+| **UX Research & Design** | `./design/ux-researcher-designer/SKILL.md` | User research, persona creation, journey mapping, usability testing, design validation |
+| **Mobile Design** | `./design/mobile-design/SKILL.md` | Mobile-first design, touch interactions, platform conventions for React Native, Flutter, or native |
+| **Theme Factory** | `./design/theme-factory/SKILL.md` | Styling artifacts with themes — slides, docs, HTML pages; 10 preset themes with colors/fonts |
+| **Tailwind Patterns** | `./design/tailwind-patterns/SKILL.md` | Advanced Tailwind CSS v4 patterns — CSS-first config, container queries, design tokens |
+| **Accessibility Auditor** | `./design/accessibility-auditor/SKILL.md` | WCAG compliance, accessibility testing, screen reader optimization |
+
+---
+
+## Creative — Interactive Experiences
+
+Specialized tools for creative, interactive, and generative web projects.
+
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **3D Web Experience** | `./creative/3d-web-experience/SKILL.md` | Building immersive 3D web experiences |
+| **Scroll Experience** | `./creative/scroll-experience/SKILL.md` | Scroll-driven animations, parallax storytelling, cinematic web experiences (like Apple/NYT) |
+| **D3.js Data Viz** | `./creative/claude-d3js-skill/SKILL.md` | Data visualization with D3.js |
+| **Canvas Design** | `./creative/canvas-design/SKILL.md` | HTML5 Canvas, 2D graphics, custom visualizations |
+| **Algorithmic Art** | `./creative/algorithmic-art/SKILL.md` | Generative art, procedural graphics, creative coding |
+| **Remotion Video** | `./creative/remotion-best-practices/SKILL.md` | Programmatic video creation with React (Remotion) |
+| **Web Game Dev** | `./creative/develop-web-game/SKILL.md` | Browser-based game development |
+| **Game Development** | `./creative/game-development/SKILL.md` | Game design patterns, physics, game loops |
+| **Interactive Portfolio** | `./creative/interactive-portfolio/SKILL.md` | Building interactive portfolio sites |
+| **Image Generation** | `./creative/imagegen/SKILL.md` | AI image generation integration |
+| **Luma Image Gen** | `./creative/luma-imagegen/SKILL.md` | Luma AI image generation |
+| **Meme Factory** | `./creative/meme-factory/SKILL.md` | Meme creation and image manipulation |
+| **Slack GIF Creator** | `./creative/slack-gif-creator/SKILL.md` | Animated GIFs optimized for Slack |
+| **Marp Slides** | `./creative/marp-slide/SKILL.md` | Markdown-based presentation slides with Marp |
+| **Marketing Campaigns** | `./creative/executing-marketing-campaigns/SKILL.md` | Marketing page design and campaign assets |
+
+---
+
+## Diagrams — Visualization & Documentation
+
+Diagramming, charting, and architecture visualization tools.
+
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **Diagrammer** | `./diagrams/diagrammer/SKILL.md` | General-purpose diagramming |
+| **Draw.io** | `./diagrams/draw-io/SKILL.md` | Draw.io / diagrams.net diagrams |
+| **Excalidraw** | `./diagrams/excalidraw/SKILL.md` | Hand-drawn style diagrams with Excalidraw |
+| **Mermaid Diagrams** | `./diagrams/mermaid-diagrams/SKILL.md` | Mermaid.js syntax and patterns |
+| **C4 Architecture** | `./diagrams/c4-architecture/SKILL.md` | C4 model architecture diagrams |
+
+---
+
+## Figma — Design Tool Integration
+
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **Figma** | `./figma/figma/SKILL.md` | Working with Figma files, design tokens, assets |
+| **Figma to Code** | `./figma/figma-implement-design/SKILL.md` | Implementing Figma designs in code |
+
+---
+
+## Three.js — 3D Graphics
+
+Complete Three.js reference for 3D web applications. Start with **Fundamentals**, then load topic-specific skills as needed.
+
+| Sub-Skill | Read | Use When |
+|-----------|------|----------|
+| **Fundamentals** | `./threejs/threejs-fundamentals/SKILL.md` | Scene setup, cameras, renderer, Object3D hierarchy, coordinate systems |
+| **Geometry** | `./threejs/threejs-geometry/SKILL.md` | Built-in shapes, BufferGeometry, custom geometry, instancing |
+| **Materials** | `./threejs/threejs-materials/SKILL.md` | PBR, shader materials, material properties |
+| **Lighting** | `./threejs/threejs-lighting/SKILL.md` | Light types, shadows, environment lighting, IBL |
+| **Textures** | `./threejs/threejs-textures/SKILL.md` | Texture types, UV mapping, environment maps, optimization |
+| **Animation** | `./threejs/threejs-animation/SKILL.md` | Keyframe animation, skeletal animation, morph targets, mixing |
+| **Interaction** | `./threejs/threejs-interaction/SKILL.md` | Raycasting, controls, mouse/touch input, object selection |
+| **Shaders** | `./threejs/threejs-shaders/SKILL.md` | GLSL, ShaderMaterial, uniforms, custom effects |
+| **Post-Processing** | `./threejs/threejs-postprocessing/SKILL.md` | EffectComposer, bloom, DOF, screen effects |
+| **Loaders** | `./threejs/threejs-loaders/SKILL.md` | GLTF loading, textures, HDR environments, async patterns |
