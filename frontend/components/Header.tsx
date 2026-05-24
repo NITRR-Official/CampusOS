@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import { usePathname } from 'next/navigation';
-import { Search, Bell, User } from 'lucide-react';
-import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import Link from 'next/link';
+import { Search, Bell } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +28,6 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 
 export function Header() {
   const pathname = usePathname();
-  const { isMobile } = useSidebar();
 
   const getBreadcrumbs = () => {
     if (!pathname || pathname === '/')
@@ -65,8 +65,8 @@ export function Header() {
                       {isLast ? (
                         <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                       ) : (
-                        <BreadcrumbLink href={crumb.href}>
-                          {crumb.label}
+                        <BreadcrumbLink asChild>
+                          <Link href={crumb.href}>{crumb.label}</Link>
                         </BreadcrumbLink>
                       )}
                     </BreadcrumbItem>
