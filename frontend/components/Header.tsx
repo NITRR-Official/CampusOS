@@ -116,7 +116,8 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative size-9 rounded-full">
               <Avatar className="size-9 border border-border">
-                <AvatarImage src="" alt="User" />
+                {/* Render AvatarImage conditionally or use a valid fallback approach. Since we don't have a URL, we will omit the src prop entirely or omit AvatarImage */}
+                {/* <AvatarImage src="" alt="User" /> */}
                 <AvatarFallback className="bg-primary/10 text-primary font-medium">
                   AD
                 </AvatarFallback>
