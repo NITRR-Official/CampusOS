@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist_Mono, Manrope, Sora } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/lib/theme-provider';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const manrope = Manrope({
   variable: '--font-manrope',
@@ -38,7 +39,14 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
