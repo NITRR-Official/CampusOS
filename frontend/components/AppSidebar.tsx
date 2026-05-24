@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { clearAuthSession } from '@/lib/auth-session';
 import {
   Calendar,
   Home,
@@ -38,6 +39,7 @@ const navigation = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -95,7 +97,12 @@ export function AppSidebar() {
               className="min-h-[44px] text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
               asChild
             >
-              <button onClick={() => console.log('Logout')}>
+              <button
+                onClick={async () => {
+                  await clearAuthSession();
+                  router.push('/login');
+                }}
+              >
                 <LogOut className="size-5" />
                 <span className="text-[15px]">Log out</span>
               </button>
