@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/sidebar';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Institutes', href: '/institutes', icon: Building2 },
   { name: 'Events', href: '/events', icon: Ticket },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
@@ -42,12 +42,16 @@ export function AppSidebar() {
   const router = useRouter();
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar
+      variant="sidebar"
+      collapsible="icon"
+      className="border-r border-border/60 bg-card/50 backdrop-blur-xl"
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="hover:bg-transparent">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <SidebarMenuButton size="lg" className="hover:bg-transparent mb-2">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-md">
                 <span className="text-xl font-bold">C</span>
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
@@ -75,7 +79,7 @@ export function AppSidebar() {
                       asChild
                       isActive={isActive}
                       tooltip={item.name}
-                      className="min-h-[44px] transition-all duration-200"
+                      className={`min-h-[44px] transition-all duration-200 ${isActive ? 'bg-primary/10 text-primary font-medium shadow-sm' : 'hover:bg-muted/50 hover:text-foreground text-muted-foreground'}`}
                     >
                       <Link href={item.href}>
                         <item.icon className="size-5" />
@@ -94,7 +98,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="min-h-[44px] text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+              className="min-h-[44px] text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
               asChild
             >
               <button
