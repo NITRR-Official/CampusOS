@@ -45,7 +45,7 @@ export default function SignupPage() {
         password: data.password
       });
       storeAuthSession(authData);
-      router.push('/');
+      router.push('/dashboard');
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

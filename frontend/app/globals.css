@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-sora);
   
   /* Typography Scale */
   --text-display-lg: 3.5rem / 1.1;
@@ -154,6 +154,7 @@
   
   /* Display Headings */
   .display-lg {
+    font-family: var(--font-heading);
     font-size: 3.5rem;
     line-height: 1.1;
     font-weight: 700;
@@ -164,6 +165,7 @@
   }
   
   .display-md {
+    font-family: var(--font-heading);
     font-size: 3rem;
     line-height: 1.15;
     font-weight: 700;
@@ -174,6 +176,7 @@
   }
   
   .display-sm {
+    font-family: var(--font-heading);
     font-size: 2.5rem;
     line-height: 1.2;
     font-weight: 700;
@@ -185,6 +188,7 @@
   
   /* Heading Styles */
   h1 {
+    font-family: var(--font-heading);
     font-size: 2rem;
     line-height: 1.3;
     font-weight: 700;
@@ -195,6 +199,7 @@
   }
   
   h2 {
+    font-family: var(--font-heading);
     font-size: 1.5rem;
     line-height: 1.4;
     font-weight: 600;
@@ -205,6 +210,7 @@
   }
   
   h3 {
+    font-family: var(--font-heading);
     font-size: 1.25rem;
     line-height: 1.5;
     font-weight: 600;
@@ -215,6 +221,7 @@
   }
   
   h4 {
+    font-family: var(--font-heading);
     font-size: 1.125rem;
     line-height: 1.6;
     font-weight: 600;
@@ -225,6 +232,7 @@
   }
   
   h5, h6 {
+    font-family: var(--font-heading);
     font-size: 0.875rem;
     line-height: 1.5;
     font-weight: 600;
