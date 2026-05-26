@@ -60,7 +60,7 @@ Everything you need is in the **[Documentation Hub →](./docs/README.md)**
 
 We welcome contributions from everyone! Look for issues labelled **`good-first-issue`** to get started.
 
-1. Read the **[Contributing Guide](./docs/contributing/CONTRIBUTING.md)**
+1. Read the **[Contributing Guide](./docs/contributing/CONTRIBUTING.md)** and the **[Issue Labels Guide](./docs/contributing/LABELS.md)**
 2. Fork → branch from `dev` → make changes → open PR to `dev`
 3. Follow [Coding Guidelines](./docs/contributing/CODING_GUIDELINES.md) and [Conventional Commits](https://www.conventionalcommits.org/)
 

@@ -86,6 +86,7 @@ Understand what CampusOS is, why it exists, and where it's headed.
 | Document                                                 | Description                                     |
 | -------------------------------------------------------- | ----------------------------------------------- |
 | [Contributing Guide](./contributing/CONTRIBUTING.md)     | How to contribute — setup, workflow, PR process |
+| [Issue Labels Guide](./contributing/LABELS.md)           | Explaining all different labels and their use   |
 | [Code of Conduct](./contributing/CODE_OF_CONDUCT.md)     | Community standards and enforcement             |
 | [Coding Guidelines](./contributing/CODING_GUIDELINES.md) | Code style, module rules, package management    |
 | [Contributors](./contributing/CONTRIBUTORS.md)           | Recognition and contribution types              |

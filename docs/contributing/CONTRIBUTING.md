@@ -42,6 +42,7 @@ For the full setup walkthrough, see [Quick Start](../getting-started/QUICK_START
 
 ### Finding Issues
 
+- [**Issue Labels Guide**](./LABELS.md) — Explains all the different labels and their use (highly recommended!)
 - [`good first issue`](https://github.com/NITRR-Official/CampusOS/issues?q=label%3Agood-first-issue) — Perfect for first-time contributors
 - [`help wanted`](https://github.com/NITRR-Official/CampusOS/issues?q=label%3Ahelp-wanted) — More complex tasks
 - [Roadmap](../project/ROADMAP.md) — Upcoming phases and features
