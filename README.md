@@ -58,7 +58,7 @@ Everything you need is in the **[Documentation Hub →](./docs/README.md)**
 
 ## 🤝 Contributing
 
-We welcome contributions from everyone! Look for issues labelled **`good-first-issue`** to get started.
+We welcome contributions from everyone! Look for issues labelled **`good-first-issue`** to get started, and check out our **[Issue Labels Guide](./docs/contributing/LABELS.md)** to understand our workflow.
 
 1. Read the **[Contributing Guide](./docs/contributing/CONTRIBUTING.md)** and the **[Issue Labels Guide](./docs/contributing/LABELS.md)**
 2. Fork → branch from `dev` → make changes → open PR to `dev`

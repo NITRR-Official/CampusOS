@@ -148,4 +148,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 
 ---
 
-**See Also**: [Developer Onboarding](../getting-started/DEVELOPER_ONBOARDING.md) · [Coding Guidelines](./CODING_GUIDELINES.md) · [Git Workflow](../guides/GIT_WORKFLOW.md) · [CI/CD Pipeline](../guides/CI_CD.md)
+**See Also**: [Developer Onboarding](../getting-started/DEVELOPER_ONBOARDING.md) · [Issue Labels Guide](./LABELS.md) · [Coding Guidelines](./CODING_GUIDELINES.md) · [Git Workflow](../guides/GIT_WORKFLOW.md) · [CI/CD Pipeline](../guides/CI_CD.md)
