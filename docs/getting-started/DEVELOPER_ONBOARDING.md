@@ -57,6 +57,7 @@ See [Project Structure](../project/PROJECT_STRUCTURE.md) for the full breakdown.
 ### Find an issue
 
 Look for [`good-first-issue`](https://github.com/NITRR-Official/CampusOS/issues?q=label%3Agood-first-issue) on GitHub.
+Check our **[Issue Labels Guide](../contributing/LABELS.md)** to understand difficulty levels and find tasks matching your skills!
 
 ### Create a branch
 
@@ -149,6 +150,7 @@ sequenceDiagram
 - [Plugin System](../architecture/PLUGIN_SYSTEM.md) — How to create a new module
 - [API Standards](../guides/API_STANDARDS.md) — REST conventions used here
 - [Git Workflow](../guides/GIT_WORKFLOW.md) — Branching and PR process
+- [Issue Labels Guide](../contributing/LABELS.md) — How to find your next task
 - [Testing Guide](../guides/TESTING.md) — How to write tests
 
 ---
