@@ -165,18 +165,18 @@ function TaskCard({
   }
 
   return (
-    <article className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/60 transition hover:-translate-y-0.5 hover:shadow-lg">
+    <article className="rounded-3xl border border-border/80 bg-card p-5 shadow-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Task
           </p>
-          <h3 className="mt-2 text-xl font-semibold text-slate-950">
+          <h3 className="mt-2 text-xl font-semibold text-foreground">
             {task.title}
           </h3>
         </div>
-        <div className="flex gap-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-          <span className="rounded-full bg-slate-100 px-3 py-1">
+        <div className="flex gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <span className="rounded-full bg-muted/80 px-3 py-1">
             {task.status}
           </span>
           <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-900">
@@ -186,66 +186,66 @@ function TaskCard({
       </div>
 
       {task.description ? (
-        <p className="mt-4 text-sm leading-6 text-slate-600">
+        <p className="mt-4 text-sm leading-6 text-muted-foreground">
           {task.description}
         </p>
       ) : null}
 
-      <dl className="mt-5 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2">
+      <dl className="mt-5 grid grid-cols-1 gap-3 text-sm text-muted-foreground sm:grid-cols-2">
         <div>
-          <dt className="font-medium text-slate-500">Assignee</dt>
-          <dd className="mt-1 text-slate-900">
+          <dt className="font-medium text-muted-foreground">Assignee</dt>
+          <dd className="mt-1 text-foreground">
             {task.assigneeName || 'Unassigned'}
           </dd>
         </div>
         <div>
-          <dt className="font-medium text-slate-500">Due</dt>
-          <dd className="mt-1 text-slate-900">{formatDate(task.dueDate)}</dd>
+          <dt className="font-medium text-muted-foreground">Due</dt>
+          <dd className="mt-1 text-foreground">{formatDate(task.dueDate)}</dd>
         </div>
         <div>
-          <dt className="font-medium text-slate-500">Created</dt>
-          <dd className="mt-1 text-slate-900">{formatDate(task.createdAt)}</dd>
+          <dt className="font-medium text-muted-foreground">Created</dt>
+          <dd className="mt-1 text-foreground">{formatDate(task.createdAt)}</dd>
         </div>
         <div>
-          <dt className="font-medium text-slate-500">Updated</dt>
-          <dd className="mt-1 text-slate-900">{formatDate(task.updatedAt)}</dd>
+          <dt className="font-medium text-muted-foreground">Updated</dt>
+          <dd className="mt-1 text-foreground">{formatDate(task.updatedAt)}</dd>
         </div>
       </dl>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <form
-          className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+          className="rounded-2xl border border-border bg-muted p-4"
           onSubmit={handleAssign}
         >
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Reassign
           </label>
           <div className="flex gap-2">
             <input
               value={assigneeName}
               onChange={(event) => setAssigneeName(event.target.value)}
-              className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+              className="min-w-0 flex-1 rounded-xl border border-border/80 bg-card px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               placeholder="Team member name"
             />
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Save
             </button>
           </div>
         </form>
 
-        <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="grid gap-3 rounded-2xl border border-border bg-muted p-4">
+          <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Status
             <select
               value={status}
               onChange={(event) =>
                 handleStatusChange(event.target.value as TaskStatus)
               }
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+              className="mt-2 w-full rounded-xl border border-border/80 bg-card px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
               {STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -255,14 +255,14 @@ function TaskCard({
             </select>
           </label>
 
-          <label className="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Priority
             <select
               value={priority}
               onChange={(event) =>
                 handlePriorityChange(event.target.value as TaskPriority)
               }
-              className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+              className="mt-2 w-full rounded-xl border border-border/80 bg-card px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             >
               {PRIORITY_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -275,8 +275,8 @@ function TaskCard({
       </div>
 
       {/* Dependencies Section */}
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <label className="mb-3 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <div className="mt-5 rounded-2xl border border-border bg-muted p-4">
+        <label className="mb-3 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Dependencies
         </label>
 
@@ -285,11 +285,11 @@ function TaskCard({
             {dependencyTasks.map((depTask) => (
               <div
                 key={depTask.id}
-                className="flex items-center justify-between rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+                className="flex items-center justify-between rounded-lg border border-border/80 bg-card px-3 py-2 text-sm"
               >
                 <div>
-                  <p className="font-medium text-slate-900">{depTask.title}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="font-medium text-foreground">{depTask.title}</p>
+                  <p className="text-xs text-muted-foreground">
                     Status: {depTask.status}
                   </p>
                 </div>
@@ -303,14 +303,16 @@ function TaskCard({
             ))}
           </div>
         ) : (
-          <p className="mb-4 text-sm text-slate-500">No dependencies set</p>
+          <p className="mb-4 text-sm text-muted-foreground">
+            No dependencies set
+          </p>
         )}
 
         <form onSubmit={handleAddDependency} className="flex gap-2">
           <select
             value={selectedDependency}
             onChange={(event) => setSelectedDependency(event.target.value)}
-            className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+            className="min-w-0 flex-1 rounded-xl border border-border/80 bg-card px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
           >
             <option value="">Add dependency...</option>
             {availableDependencies.map((t) => (
@@ -322,7 +324,7 @@ function TaskCard({
           <button
             type="submit"
             disabled={!selectedDependency || isSaving}
-            className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Add
           </button>
@@ -441,22 +443,16 @@ export default function TasksPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-      <section
-        className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60"
-        style={{
-          background:
-            'radial-gradient(circle at top left, rgba(34, 211, 238, 0.18), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)'
-        }}
-      >
+      <section className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
               Phase 3
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
               Task dashboard
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
               Plan work, assign owners, and move tasks through the execution
               flow.
             </p>
@@ -465,13 +461,13 @@ export default function TasksPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/events"
-              className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              className="rounded-full border border-border/80 bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground transition hover:border-border hover:bg-muted"
             >
               View events
             </Link>
             <Link
               href="/"
-              className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               Back to dashboard
             </Link>
@@ -487,12 +483,12 @@ export default function TasksPage() {
           ].map((item) => (
             <div
               key={item.label}
-              className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur"
+              className="rounded-2xl border border-white/60 bg-card/75 p-4 backdrop-blur"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 {item.label}
               </p>
-              <p className="mt-3 text-3xl font-semibold text-slate-950">
+              <p className="mt-3 text-3xl font-semibold text-foreground">
                 {item.value}
               </p>
             </div>
@@ -509,7 +505,7 @@ export default function TasksPage() {
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-900"
+            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-amber-900"
           >
             Go to login
           </Link>
@@ -518,15 +514,15 @@ export default function TasksPage() {
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <form
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60"
+          className="rounded-3xl border border-border bg-card p-6 shadow-sm shadow-sm"
           onSubmit={handleCreateTask}
         >
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 New task
               </p>
-              <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+              <h2 className="mt-2 text-2xl font-semibold text-foreground">
                 Create work item
               </h2>
             </div>
@@ -534,13 +530,13 @@ export default function TasksPage() {
 
           <div className="mt-6 space-y-4">
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Title
               </span>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 placeholder="Prepare event checklist"
                 minLength={3}
                 maxLength={140}
@@ -549,13 +545,13 @@ export default function TasksPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Description
               </span>
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                className="min-h-28 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="min-h-28 w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 placeholder="Add scope, context, or execution notes."
                 maxLength={1000}
               />
@@ -563,13 +559,13 @@ export default function TasksPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Assignee
                 </span>
                 <input
                   value={assigneeName}
                   onChange={(event) => setAssigneeName(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   placeholder="Team member name"
                   minLength={2}
                   maxLength={80}
@@ -577,20 +573,20 @@ export default function TasksPage() {
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Due date
                 </span>
                 <input
                   type="datetime-local"
                   value={dueDate}
                   onChange={(event) => setDueDate(event.target.value)}
-                  className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                  className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
               </label>
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Priority
               </span>
               <select
@@ -598,7 +594,7 @@ export default function TasksPage() {
                 onChange={(event) =>
                   setPriority(event.target.value as TaskPriority)
                 }
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               >
                 {PRIORITY_OPTIONS.map((option) => (
                   <option key={option} value={option}>
@@ -617,7 +613,7 @@ export default function TasksPage() {
             <button
               type="submit"
               disabled={!accessToken || isSubmitting}
-              className="w-full rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? 'Creating task...' : 'Create task'}
             </button>
@@ -625,18 +621,20 @@ export default function TasksPage() {
         </form>
 
         <section className="space-y-4">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm shadow-sm">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                   Task queue
                 </p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                <h2 className="mt-2 text-2xl font-semibold text-foreground">
                   Execution list
                 </h2>
               </div>
               {isLoading ? (
-                <span className="text-sm text-slate-500">Loading...</span>
+                <span className="text-sm text-muted-foreground">
+                  Loading...
+                </span>
               ) : null}
             </div>
 
@@ -653,7 +651,7 @@ export default function TasksPage() {
                   />
                 ))
               ) : (
-                <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
+                <div className="rounded-3xl border border-dashed border-border/80 bg-muted p-10 text-center text-muted-foreground">
                   No tasks yet. Create the first execution item to get started.
                 </div>
               )}

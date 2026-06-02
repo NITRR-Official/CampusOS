@@ -1,13 +1,10 @@
 import { ReactNode } from 'react';
+import { RequireGuest } from '@/app/components/auth/AuthGuard';
 
 interface AuthLayoutProps {
   children: ReactNode;
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
-      {children}
-    </div>
-  );
+  return <RequireGuest>{children}</RequireGuest>;
 }

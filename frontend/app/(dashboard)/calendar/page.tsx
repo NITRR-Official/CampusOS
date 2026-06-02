@@ -47,22 +47,24 @@ function EventList({ events, onDelete }: EventListProps) {
   return (
     <div className="space-y-2">
       {events.length === 0 ? (
-        <p className="text-sm text-slate-500">No events for this period.</p>
+        <p className="text-sm text-muted-foreground">
+          No events for this period.
+        </p>
       ) : (
         events.map((event) => (
           <div
             key={event.id}
-            className="rounded-lg border border-slate-200 bg-white p-3 text-sm"
+            className="rounded-lg border border-border bg-card p-3 text-sm"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-900 truncate">
+                <p className="font-medium text-foreground truncate">
                   {event.title}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {formatDate(event.startsAt)} {formatTime(event.startsAt)}
                 </p>
-                <span className="mt-2 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+                <span className="mt-2 inline-block rounded-full bg-muted/80 px-2 py-0.5 text-xs font-medium text-muted-foreground">
                   {event.eventType}
                 </span>
               </div>
@@ -105,13 +107,15 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-slate-900 mb-4">{monthName}</h3>
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-foreground mb-4">
+        {monthName}
+      </h3>
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (
           <div
             key={day}
-            className="text-center text-xs font-medium text-slate-500 py-2"
+            className="text-center text-xs font-medium text-muted-foreground py-2"
           >
             {day}
           </div>
@@ -123,16 +127,16 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
             key={idx}
             className={`aspect-square rounded-lg border ${
               day === null
-                ? 'bg-slate-50 border-slate-100'
-                : 'border-slate-200 bg-white hover:bg-slate-50'
+                ? 'bg-muted border-slate-100'
+                : 'border-border bg-card hover:bg-muted'
             } p-1`}
           >
             {day !== null && (
               <div className="flex flex-col h-full">
-                <p className="text-xs font-medium text-slate-900">{day}</p>
+                <p className="text-xs font-medium text-foreground">{day}</p>
                 {eventsMap.has(day) && (
                   <div className="mt-1 flex-1 overflow-hidden">
-                    <div className="w-2 h-2 rounded-full bg-cyan-500"></div>
+                    <div className="w-2 h-2 rounded-full bg-primary"></div>
                   </div>
                 )}
               </div>
@@ -309,16 +313,16 @@ export default function CalendarPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-      <section className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60 bg-gradient-to-br from-slate-50 to-slate-100">
+      <section className="rounded-4xl border border-border p-8 shadow-sm shadow-sm bg-card text-card-foreground">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
               Phase 3
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
               Calendar & Planning
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
               Track deadlines, events, and milestones across your execution
               timeline.
             </p>
@@ -326,13 +330,13 @@ export default function CalendarPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/tasks"
-              className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+              className="rounded-full border border-border/80 bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground transition hover:border-border hover:bg-muted"
             >
               View tasks
             </Link>
             <Link
               href="/"
-              className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
             >
               Back to dashboard
             </Link>
@@ -349,7 +353,7 @@ export default function CalendarPage() {
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-900"
+            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-amber-900"
           >
             Go to login
           </Link>
@@ -358,27 +362,27 @@ export default function CalendarPage() {
 
       <section className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
         <form
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60 h-fit"
+          className="rounded-3xl border border-border bg-card p-6 shadow-sm shadow-sm h-fit"
           onSubmit={handleCreateEvent}
         >
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               New Event
             </p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+            <h2 className="mt-2 text-2xl font-semibold text-foreground">
               Add to Calendar
             </h2>
           </div>
 
           <div className="mt-6 space-y-4">
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Title
               </span>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 placeholder="Event title"
                 minLength={3}
                 maxLength={140}
@@ -387,7 +391,7 @@ export default function CalendarPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Type
               </span>
               <select
@@ -395,7 +399,7 @@ export default function CalendarPage() {
                 onChange={(event) =>
                   setEventType(event.target.value as CalendarEventType)
                 }
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               >
                 {EVENT_TYPES.map((type) => (
                   <option key={type} value={type}>
@@ -406,38 +410,38 @@ export default function CalendarPage() {
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Start
               </span>
               <input
                 type="datetime-local"
                 value={startsAt}
                 onChange={(event) => setStartsAt(event.target.value)}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 required
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 End (optional)
               </span>
               <input
                 type="datetime-local"
                 value={endsAt}
                 onChange={(event) => setEndsAt(event.target.value)}
-                className="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Description
               </span>
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                className="min-h-24 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+                className="min-h-24 w-full rounded-2xl border border-border/80 bg-muted px-4 py-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                 placeholder="Add details"
                 maxLength={1000}
               />
@@ -452,7 +456,7 @@ export default function CalendarPage() {
             <button
               type="submit"
               disabled={!accessToken || isSubmitting}
-              className="w-full rounded-2xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? 'Adding to calendar...' : 'Add to calendar'}
             </button>
@@ -463,13 +467,13 @@ export default function CalendarPage() {
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={previousMonth}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-border/80 bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               ← Previous
             </button>
             <button
               onClick={nextMonth}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-border/80 bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted"
             >
               Next →
             </button>
@@ -477,8 +481,8 @@ export default function CalendarPage() {
 
           <CalendarGrid currentDate={currentDate} eventsMap={eventsMap} />
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="font-semibold text-slate-900 mb-4">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h3 className="font-semibold text-foreground mb-4">
               Events for{' '}
               {currentDate.toLocaleString('default', {
                 month: 'long',
@@ -486,7 +490,7 @@ export default function CalendarPage() {
               })}
             </h3>
             {isLoading ? (
-              <p className="text-sm text-slate-500">Loading events...</p>
+              <p className="text-sm text-muted-foreground">Loading events...</p>
             ) : (
               <EventList events={eventsForMonth} onDelete={handleDeleteEvent} />
             )}

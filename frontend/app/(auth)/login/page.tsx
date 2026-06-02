@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,10 +20,25 @@ import {
 } from '@/components/ui/form';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 
+function getRedirectPath(value: string | null) {
+  if (!value) {
+    return '/dashboard';
+  }
+
+  if (!value.startsWith('/') || value.startsWith('//')) {
+    return '/dashboard';
+  }
+
+  return value;
+}
+
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const nextParam = searchParams?.get('next') || null;
+  const redirectTo = useMemo(() => getRedirectPath(nextParam), [nextParam]);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -40,7 +55,7 @@ export default function LoginPage() {
     try {
       const authData = await login(data);
       storeAuthSession(authData);
-      router.push('/dashboard');
+      router.replace(redirectTo);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

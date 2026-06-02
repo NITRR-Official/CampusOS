@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Bell } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,9 +25,18 @@ import {
   BreadcrumbSeparator
 } from '@/components/ui/breadcrumb';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useAuth } from '@/lib/auth-provider';
+
+function getInitials(value: string) {
+  const parts = value.split(' ').filter(Boolean);
+  const letters = parts.length > 1 ? parts[0][0] + parts[1][0] : value[0];
+  return (letters || 'U').toUpperCase();
+}
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, role, logout } = useAuth();
 
   const getBreadcrumbs = () => {
     if (!pathname || pathname === '/')
@@ -49,6 +58,15 @@ export function Header() {
   };
 
   const breadcrumbs = getBreadcrumbs();
+  const displayName = user?.name || 'Campus User';
+  const displayEmail = user?.email || 'No email on file';
+  const displayRole = role ? `${role[0].toUpperCase()}${role.slice(1)}` : '';
+  const avatarFallback = getInitials(user?.name || user?.email || 'User');
+
+  function handleLogout() {
+    logout();
+    router.push('/login');
+  }
 
   return (
     <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-4 border-b bg-background/60 backdrop-blur-xl px-4 md:px-6 transition-[width,height] ease-linear">
@@ -119,7 +137,7 @@ export function Header() {
                 {/* Render AvatarImage conditionally or use a valid fallback approach. Since we don't have a URL, we will omit the src prop entirely or omit AvatarImage */}
                 {/* <AvatarImage src="" alt="User" /> */}
                 <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                  AD
+                  {avatarFallback}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -127,17 +145,27 @@ export function Header() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Admin User</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  admin@campusos.com
+                <p className="text-sm font-medium leading-none">
+                  {displayName}
                 </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {displayEmail}
+                </p>
+                {displayRole ? (
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+                    {displayRole}
+                  </p>
+                ) : null}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500 focus:bg-red-50 dark:focus:bg-red-950">
+            <DropdownMenuItem
+              onSelect={handleLogout}
+              className="text-red-500 focus:bg-red-50 dark:focus:bg-red-950"
+            >
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
