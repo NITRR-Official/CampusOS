@@ -93,28 +93,24 @@ export default function ParticipantDashboard() {
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Header Section */}
       <section
-        className="rounded-4xl border border-slate-200 p-8 shadow-sm shadow-slate-200/60"
-        style={{
-          background:
-            'radial-gradient(circle at top left, rgba(34, 211, 238, 0.18), transparent 34%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)'
-        }}
+        className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm"
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
               Participant
             </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
               My Events
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
               View your registered events and check-in status.
             </p>
           </div>
 
           <Link
             href="/"
-            className="rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Back to dashboard
           </Link>
@@ -129,12 +125,12 @@ export default function ParticipantDashboard() {
           ].map((item) => (
             <div
               key={item.label}
-              className="rounded-2xl border border-white/60 bg-white/75 p-4 backdrop-blur"
+              className="rounded-2xl border border-white/60 bg-card/75 p-4 backdrop-blur"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                 {item.label}
               </p>
-              <p className="mt-3 text-3xl font-semibold text-slate-950">
+              <p className="mt-3 text-3xl font-semibold text-foreground">
                 {item.value}
               </p>
             </div>
@@ -150,7 +146,7 @@ export default function ParticipantDashboard() {
           </p>
           <Link
             href="/login"
-            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-900"
+            className="mt-4 inline-flex rounded-full bg-amber-950 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-amber-900"
           >
             Go to login
           </Link>
@@ -164,32 +160,32 @@ export default function ParticipantDashboard() {
       ) : null}
 
       {isLoading ? (
-        <section className="rounded-3xl border border-slate-200 bg-white p-8 text-center">
-          <p className="text-slate-600">Loading your events...</p>
+        <section className="rounded-3xl border border-border bg-card p-8 text-center">
+          <p className="text-muted-foreground">Loading your events...</p>
         </section>
       ) : (
         <>
           {/* Upcoming Events */}
           {upcomingEvents.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-950">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Upcoming Events
               </h2>
               <div className="space-y-3">
                 {upcomingEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-2xl border border-border bg-card p-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="font-semibold text-slate-950">
+                        <h3 className="font-semibold text-foreground">
                           {event.title}
                         </h3>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {event.description}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-muted-foreground">
                           📅 {new Date(event.startsAt).toLocaleDateString()} at{' '}
                           {new Date(event.startsAt).toLocaleTimeString([], {
                             hour: '2-digit',
@@ -200,7 +196,7 @@ export default function ParticipantDashboard() {
                       <div className="flex flex-col gap-2">
                         <Link
                           href={`/events/${event.id}`}
-                          className="rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-cyan-400"
+                          className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-primary/90"
                         >
                           View Event
                         </Link>
@@ -224,24 +220,24 @@ export default function ParticipantDashboard() {
           {/* Past Events */}
           {pastEvents.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-slate-950">
+              <h2 className="text-2xl font-semibold text-foreground">
                 Past Events
               </h2>
               <div className="space-y-3">
                 {pastEvents.map((event) => (
                   <div
                     key={event.id}
-                    className="rounded-2xl border border-slate-200 bg-white/50 p-4 shadow-sm"
+                    className="rounded-2xl border border-border bg-card/50 p-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="font-semibold text-slate-950">
+                        <h3 className="font-semibold text-foreground">
                           {event.title}
                         </h3>
-                        <p className="mt-1 text-sm text-slate-600">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {event.description}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="mt-2 text-xs text-muted-foreground">
                           📅 {new Date(event.startsAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -250,7 +246,7 @@ export default function ParticipantDashboard() {
                           ✓ Attended
                         </span>
                       ) : (
-                        <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                        <span className="rounded-lg bg-muted/80 px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                           ⊘ Absent
                         </span>
                       )}
@@ -262,11 +258,11 @@ export default function ParticipantDashboard() {
           )}
 
           {events.length === 0 && (
-            <section className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-              <p className="text-slate-600">No registered events yet.</p>
+            <section className="rounded-3xl border border-dashed border-border/80 bg-muted p-10 text-center">
+              <p className="text-muted-foreground">No registered events yet.</p>
               <Link
                 href="/events"
-                className="mt-4 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="mt-4 inline-flex rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
               >
                 Browse Events
               </Link>

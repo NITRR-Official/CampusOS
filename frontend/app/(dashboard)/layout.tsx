@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { cookies } from 'next/headers';
+import { RequireAuth } from '@/app/components/auth/AuthGuard';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
@@ -16,13 +17,15 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        <main className="flex-1 bg-background/50">
-          <div className="p-5 md:p-8 pb-20">{children}</div>
-        </main>
-      </SidebarInset>
+      <RequireAuth>
+        <AppSidebar />
+        <SidebarInset>
+          <Header />
+          <main className="relative flex-1 bg-background/50 overflow-hidden">
+            <div className="relative z-10 p-5 md:p-8 pb-20">{children}</div>
+          </main>
+        </SidebarInset>
+      </RequireAuth>
     </SidebarProvider>
   );
 }

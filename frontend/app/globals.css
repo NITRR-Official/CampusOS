@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Manrope:wght@200..800&family=Sora:wght@100..800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -69,6 +70,10 @@
 }
 
 :root {
+  --font-manrope: 'Manrope', sans-serif;
+  --font-sora: 'Sora', sans-serif;
+  --font-geist-mono: 'Geist Mono', monospace;
+
   --background: oklch(0.98 0.01 260);
   --foreground: oklch(0.2 0.02 260);
   --card: oklch(1 0 0);

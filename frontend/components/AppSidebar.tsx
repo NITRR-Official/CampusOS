@@ -3,12 +3,11 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { clearAuthSession } from '@/lib/auth-session';
+import { useAuth } from '@/lib/auth-provider';
 import {
   Calendar,
   Home,
   Users,
-  Building2,
   Ticket,
   CheckSquare,
   Settings,
@@ -29,7 +28,6 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Institutes', href: '/institutes', icon: Building2 },
   { name: 'Events', href: '/events', icon: Ticket },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Calendar', href: '/calendar', icon: Calendar },
@@ -40,6 +38,7 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { logout } = useAuth();
 
   return (
     <Sidebar
@@ -103,7 +102,7 @@ export function AppSidebar() {
             >
               <button
                 onClick={async () => {
-                  await clearAuthSession();
+                  logout();
                   router.push('/login');
                 }}
               >
