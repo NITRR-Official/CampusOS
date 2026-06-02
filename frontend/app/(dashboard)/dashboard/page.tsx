@@ -112,7 +112,8 @@ export default function Dashboard() {
           </p>
           <div className="bg-card/80 backdrop-blur rounded-xl border border-border/60 p-8 md:p-12 text-center shadow-sm">
             <p className="text-muted-foreground text-sm md:text-base m-0">
-              No recent activity. Create a club or schedule an event to get started!
+              No recent activity. Create a club or schedule an event to get
+              started!
             </p>
             <div className="mt-6 flex justify-center">
               <Link

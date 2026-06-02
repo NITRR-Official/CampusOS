@@ -38,10 +38,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const nextParam = searchParams?.get('next') || null;
-  const redirectTo = useMemo(
-    () => getRedirectPath(nextParam),
-    [nextParam]
-  );
+  const redirectTo = useMemo(() => getRedirectPath(nextParam), [nextParam]);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),

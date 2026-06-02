@@ -32,10 +32,7 @@ function isValidRole(role: string | null | undefined): role is UserRole {
 function decodeBase64(value: string) {
   try {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(
-      Math.ceil(normalized.length / 4) * 4,
-      '='
-    );
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
     return globalThis.atob(padded);
   } catch {
     return null;
@@ -85,7 +82,9 @@ function normalizeSession(session: AuthResponseData | null) {
   return session;
 }
 
-const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = React.createContext<AuthContextValue | undefined>(
+  undefined
+);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = React.useState<AuthStatus>('loading');

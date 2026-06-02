@@ -47,7 +47,9 @@ function EventList({ events, onDelete }: EventListProps) {
   return (
     <div className="space-y-2">
       {events.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No events for this period.</p>
+        <p className="text-sm text-muted-foreground">
+          No events for this period.
+        </p>
       ) : (
         events.map((event) => (
           <div
@@ -106,7 +108,9 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-foreground mb-4">{monthName}</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-4">
+        {monthName}
+      </h3>
       <div className="grid grid-cols-7 gap-1 mb-2">
         {weekDays.map((day) => (
           <div

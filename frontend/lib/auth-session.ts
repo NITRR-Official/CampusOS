@@ -54,7 +54,8 @@ export function clearAuthSession() {
   }
 
   window.localStorage.removeItem(AUTH_STORAGE_KEY);
-  document.cookie = 'campusos_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+  document.cookie =
+    'campusos_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
   emitAuthSessionChange();
 }
 
@@ -62,7 +63,7 @@ export function subscribeAuthSession(
   callback: (session: AuthResponseData | null) => void
 ) {
   if (typeof window === 'undefined') {
-    return () => { };
+    return () => {};
   }
 
   const handleStorage = (event: StorageEvent) => {

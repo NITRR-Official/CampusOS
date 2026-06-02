@@ -92,9 +92,7 @@ export default function ParticipantDashboard() {
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       {/* Header Section */}
-      <section
-        className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm"
-      >
+      <section className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">

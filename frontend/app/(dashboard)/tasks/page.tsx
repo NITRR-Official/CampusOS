@@ -303,7 +303,9 @@ function TaskCard({
             ))}
           </div>
         ) : (
-          <p className="mb-4 text-sm text-muted-foreground">No dependencies set</p>
+          <p className="mb-4 text-sm text-muted-foreground">
+            No dependencies set
+          </p>
         )}
 
         <form onSubmit={handleAddDependency} className="flex gap-2">
@@ -441,9 +443,7 @@ export default function TasksPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-      <section
-        className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm"
-      >
+      <section className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
@@ -632,7 +632,9 @@ export default function TasksPage() {
                 </h2>
               </div>
               {isLoading ? (
-                <span className="text-sm text-muted-foreground">Loading...</span>
+                <span className="text-sm text-muted-foreground">
+                  Loading...
+                </span>
               ) : null}
             </div>
 

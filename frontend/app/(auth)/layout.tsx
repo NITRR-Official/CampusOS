@@ -6,9 +6,5 @@ interface AuthLayoutProps {
 }
 
 export default function AuthLayout({ children }: AuthLayoutProps) {
-  return (
-    <RequireGuest>
-      {children}
-    </RequireGuest>
-  );
+  return <RequireGuest>{children}</RequireGuest>;
 }
