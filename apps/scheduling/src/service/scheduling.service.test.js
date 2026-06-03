@@ -6,7 +6,7 @@ import {
 import {
   Conflict,
   TimeSlot
-} from '../../../../backend/src/database/schemas/scheduling.schema.js';
+} from '../schema/scheduling.schema.js';
 import { SchedulingService } from './scheduling.service.js';
 
 describe('SchedulingService', () => {

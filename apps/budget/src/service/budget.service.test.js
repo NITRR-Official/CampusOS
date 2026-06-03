@@ -6,7 +6,7 @@ import {
 import {
   Budget,
   Expense
-} from '../../../../backend/src/database/schemas/budget.schema.js';
+} from '../schema/budget.schema.js';
 import { BudgetService } from './budget.service.js';
 
 describe('BudgetService', () => {
