@@ -135,15 +135,15 @@ sequenceDiagram
 
 ## 6. Common Issues
 
-| Problem                            | Solution                                                       |
-| ---------------------------------- | -------------------------------------------------------------- |
-| `ECONNREFUSED` on backend start    | MongoDB isn't running → `docker start mongodb`                 |
-| Port 3000/4000 already in use      | Kill the process or change `PORT` in `.env`                    |
-| `pnpm: command not found`          | `npm install -g pnpm`                                          |
-| Backend starts but no plugins load | Check `apps/` directory exists and modules have `src/index.js` |
-| New plugin skipped / disabled      | Toggle it to enabled using the Plugin Manager API (updates MongoDB)    |
-| Frontend builds but API calls fail | Backend must be running, check `NEXT_PUBLIC_API_URL`           |
-| MongoDB download timeout in tests  | Increase `beforeAll` timeout to `120000`                       |
+| Problem                            | Solution                                                            |
+| ---------------------------------- | ------------------------------------------------------------------- |
+| `ECONNREFUSED` on backend start    | MongoDB isn't running → `docker start mongodb`                      |
+| Port 3000/4000 already in use      | Kill the process or change `PORT` in `.env`                         |
+| `pnpm: command not found`          | `npm install -g pnpm`                                               |
+| Backend starts but no plugins load | Check `apps/` directory exists and modules have `src/index.js`      |
+| New plugin skipped / disabled      | Toggle it to enabled using the Plugin Manager API (updates MongoDB) |
+| Frontend builds but API calls fail | Backend must be running, check `NEXT_PUBLIC_API_URL`                |
+| MongoDB download timeout in tests  | Increase `beforeAll` timeout to `120000`                            |
 
 ## 7. Where to Go Next
 

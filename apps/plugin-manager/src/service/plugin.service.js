@@ -6,10 +6,16 @@ export class PluginService {
    */
   async getPlugins() {
     try {
-      const plugins = await Plugin.find({}, { name: 1, enabled: 1, version: 1, _id: 0 }).lean();
+      const plugins = await Plugin.find(
+        {},
+        { name: 1, enabled: 1, version: 1, _id: 0 }
+      ).lean();
       return { success: true, plugins };
     } catch (error) {
-      return { success: false, error: 'Failed to fetch plugins from DB: ' + error.message };
+      return {
+        success: false,
+        error: 'Failed to fetch plugins from DB: ' + error.message
+      };
     }
   }
 
@@ -25,12 +31,21 @@ export class PluginService {
       );
 
       if (!result) {
-        return { success: false, error: `Plugin '${pluginName}' not found in database` };
+        return {
+          success: false,
+          error: `Plugin '${pluginName}' not found in database`
+        };
       }
 
-      return { success: true, message: `Plugin '${pluginName}' has been ${enabled ? 'enabled' : 'disabled'} in the database` };
+      return {
+        success: true,
+        message: `Plugin '${pluginName}' has been ${enabled ? 'enabled' : 'disabled'} in the database`
+      };
     } catch (error) {
-      return { success: false, error: 'Failed to update plugin state: ' + error.message };
+      return {
+        success: false,
+        error: 'Failed to update plugin state: ' + error.message
+      };
     }
   }
 
@@ -39,7 +54,7 @@ export class PluginService {
    */
   restartServer() {
     console.log('🔄 Super Admin requested server restart via Plugin Manager');
-    
+
     // Give response time to flush before killing
     setTimeout(() => {
       // Send SIGTERM to our own process to trigger graceful shutdown

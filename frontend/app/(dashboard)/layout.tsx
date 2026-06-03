@@ -19,17 +19,24 @@ export default async function DashboardLayout({
   // Next.js caches this fetch automatically, saving API hits on every page load.
   let activePlugins: string[] = [];
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
     // Using no-store so plugin toggles reflect immediately without waiting 5 minutes.
-    const res = await fetch(`${apiUrl}/system/modules`, { 
+    const res = await fetch(`${apiUrl}/system/modules`, {
       cache: 'no-store'
     });
     if (res.ok) {
       const data = await res.json();
       activePlugins = data.modules || [];
     }
-  } catch (err: any) {
-    if (err.digest === 'DYNAMIC_SERVER_USAGE') throw err;
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'digest' in err &&
+      err.digest === 'DYNAMIC_SERVER_USAGE'
+    )
+      throw err;
     console.error('Failed to fetch active plugins for sidebar:', err);
   }
 

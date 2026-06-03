@@ -4,14 +4,21 @@ import { ExtensionPoint } from '@/components/ExtensionPoint';
 export default async function Dashboard() {
   let activePlugins: string[] = [];
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
     const res = await fetch(`${apiUrl}/system/modules`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       activePlugins = data.modules || [];
     }
-  } catch (err: any) {
-    if (err.digest === 'DYNAMIC_SERVER_USAGE') throw err;
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'digest' in err &&
+      err.digest === 'DYNAMIC_SERVER_USAGE'
+    )
+      throw err;
     console.error('Failed to fetch active plugins for dashboard:', err);
   }
 
@@ -39,13 +46,17 @@ export default async function Dashboard() {
         </div>
 
         {/* Plugin Extension Point: dashboard-top */}
-        <ExtensionPoint id="dashboard-top" activePlugins={activePlugins} context={{ dashboard: true }} />
+        <ExtensionPoint
+          id="dashboard-top"
+          activePlugins={activePlugins}
+          context={{ dashboard: true }}
+        />
 
         {/* Quick Stats */}
-        <ExtensionPoint 
-          id="dashboard-stats" 
-          activePlugins={activePlugins} 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10" 
+        <ExtensionPoint
+          id="dashboard-stats"
+          activePlugins={activePlugins}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
         />
 
         {/* Quick Actions */}
@@ -53,10 +64,10 @@ export default async function Dashboard() {
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
             Quick Actions
           </p>
-          <ExtensionPoint 
-            id="dashboard-actions" 
-            activePlugins={activePlugins} 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" 
+          <ExtensionPoint
+            id="dashboard-actions"
+            activePlugins={activePlugins}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
           />
         </div>
 

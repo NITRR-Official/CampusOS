@@ -6,13 +6,15 @@ import { initFrontend as initClub } from '../../plugins/club/init';
 
 /**
  * This file acts as the Build-Time plugin loader.
- * In the final version, this file will be automatically generated 
+ * In the final version, this file will be automatically generated
  * by the CLI installer script whenever a plugin is added/removed.
  */
 export function initializePlugins() {
   if (typeof window !== 'undefined') {
     // Prevent double initialization in React strict mode / fast refresh
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).__pluginsInitialized) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__pluginsInitialized = true;
   }
 

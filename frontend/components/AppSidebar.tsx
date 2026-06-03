@@ -37,13 +37,17 @@ import { initializePlugins } from '@/lib/plugins/init';
 // Call it once when module is loaded on client
 initializePlugins();
 
-export function AppSidebar({ activePlugins = [] }: { activePlugins?: string[] }) {
+export function AppSidebar({
+  activePlugins = []
+}: {
+  activePlugins?: string[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
-  
+
   // Map string icons back to Lucide components
-  const iconMap: Record<string, any> = {
+  const iconMap: Record<string, React.ElementType> = {
     Ticket,
     CheckSquare,
     Calendar,
@@ -53,14 +57,15 @@ export function AppSidebar({ activePlugins = [] }: { activePlugins?: string[] })
   };
 
   // Combine core navigation with plugin navigation
-  const pluginLinks = registry.getSidebarLinks()
-    .filter(link => activePlugins.includes(link.pluginId))
-    .map(link => ({
+  const pluginLinks = registry
+    .getSidebarLinks()
+    .filter((link) => activePlugins.includes(link.pluginId))
+    .map((link) => ({
       name: link.title,
       href: link.url,
       icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : Settings
     }));
-  
+
   const allNavigation = [...navigation, ...pluginLinks];
 
   return (

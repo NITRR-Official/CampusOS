@@ -9,7 +9,7 @@ export interface SidebarLink {
 
 export interface WidgetRegistration {
   pluginId: string;
-  component: React.ComponentType<any>;
+  component: React.ComponentType<{ context?: unknown }>;
 }
 
 class PluginRegistry {
@@ -33,7 +33,11 @@ class PluginRegistry {
   /**
    * Register a widget to be injected at a specific extension point
    */
-  registerWidget(extensionPointId: string, pluginId: string, component: React.ComponentType<any>) {
+  registerWidget(
+    extensionPointId: string,
+    pluginId: string,
+    component: React.ComponentType<{ context?: unknown }>
+  ) {
     if (!this.widgets.has(extensionPointId)) {
       this.widgets.set(extensionPointId, []);
     }

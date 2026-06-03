@@ -18,7 +18,7 @@ export async function togglePlugin(req, res, next) {
   try {
     const { name } = req.params;
     const { enabled } = req.body;
-    
+
     if (typeof enabled !== 'boolean') {
       return res.status(400).json({ error: 'enabled must be a boolean' });
     }

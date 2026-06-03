@@ -6,11 +6,12 @@ Accepted
 
 ## Context
 
-CampusOS is built on a highly modular plugin system where features (Auth, Vendor, Task, etc.) are separated into isolated directories under `/apps/`. 
+CampusOS is built on a highly modular plugin system where features (Auth, Vendor, Task, etc.) are separated into isolated directories under `/apps/`.
 
-As the platform evolves, there is a desire to introduce a "Super Admin Dashboard" capable of installing, enabling, and disabling plugins dynamically. Initial discussions explored mimicking VS Code's "Extension Host" architecture (using Worker Threads for true runtime hot-swapping). 
+As the platform evolves, there is a desire to introduce a "Super Admin Dashboard" capable of installing, enabling, and disabling plugins dynamically. Initial discussions explored mimicking VS Code's "Extension Host" architecture (using Worker Threads for true runtime hot-swapping).
 
 However, true runtime plugin hot-swapping in a Node.js/Express environment introduces severe complexity:
+
 - **Express Routers**: Express lacks a native way to unbind/remove routes from the middleware stack.
 - **Mongoose Models**: Deleting cached schemas at runtime causes memory leaks and registry conflicts.
 - **ES Modules**: Cache busting for ES modules is highly unreliable.
@@ -21,6 +22,7 @@ However, true runtime plugin hot-swapping in a Node.js/Express environment intro
 **Adopt the "Config & Restart" pattern for the Super Admin Plugin Manager.**
 
 Instead of attempting complex in-memory hot-swapping, the platform will:
+
 1. Allow the Super Admin Dashboard to manage plugin states by writing to a persistent configuration source (e.g., a `plugins.json` file or a database registry).
 2. Trigger a graceful Node.js process restart (via PM2 or a container orchestrator like Docker) after a plugin is enabled, disabled, or installed.
 3. Upon restart, the `plugin-loader.js` will read the configuration and cleanly mount only the active plugins.

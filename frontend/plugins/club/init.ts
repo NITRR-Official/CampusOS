@@ -1,5 +1,10 @@
 import { registry } from '../../lib/plugins/registry';
-import { ClubStatsWidget, ClubMemberStatsWidget, ClubQuickActionWidget, ClubMemberQuickActionWidget } from './dashboard';
+import {
+  ClubStatsWidget,
+  ClubMemberStatsWidget,
+  ClubQuickActionWidget,
+  ClubMemberQuickActionWidget
+} from './dashboard';
 
 export function initFrontend() {
   registry.registerSidebarLink({
@@ -13,5 +18,9 @@ export function initFrontend() {
   registry.registerWidget('dashboard-stats', 'club', ClubStatsWidget);
   registry.registerWidget('dashboard-stats', 'club', ClubMemberStatsWidget);
   registry.registerWidget('dashboard-actions', 'club', ClubQuickActionWidget);
-  registry.registerWidget('dashboard-actions', 'club', ClubMemberQuickActionWidget);
+  registry.registerWidget(
+    'dashboard-actions',
+    'club',
+    ClubMemberQuickActionWidget
+  );
 }

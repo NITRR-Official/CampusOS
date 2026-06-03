@@ -10,9 +10,7 @@ export function ClubStatsWidget() {
         <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
           Clubs
         </p>
-        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
-          0
-        </p>
+        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">0</p>
       </div>
     </div>
   );
@@ -28,9 +26,7 @@ export function ClubMemberStatsWidget() {
         <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
           Members
         </p>
-        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
-          0
-        </p>
+        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">0</p>
       </div>
     </div>
   );

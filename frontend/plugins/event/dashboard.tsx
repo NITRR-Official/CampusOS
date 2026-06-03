@@ -10,9 +10,7 @@ export function EventStatsWidget() {
         <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
           Events
         </p>
-        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
-          0
-        </p>
+        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">0</p>
       </div>
     </div>
   );

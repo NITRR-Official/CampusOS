@@ -5,7 +5,7 @@ import { registry } from '../lib/plugins/registry';
 
 interface ExtensionPointProps {
   id: string;
-  context?: any;
+  context?: unknown;
   className?: string;
   activePlugins?: string[];
 }
@@ -14,11 +14,16 @@ interface ExtensionPointProps {
  * An ExtensionPoint allows plugins to dynamically inject their own React components
  * into core CampusOS pages without modifying the core codebase.
  */
-export function ExtensionPoint({ id, context, className = "contents", activePlugins }: ExtensionPointProps) {
+export function ExtensionPoint({
+  id,
+  context,
+  className = 'contents',
+  activePlugins
+}: ExtensionPointProps) {
   let Widgets = registry.getWidgets(id);
-  
+
   if (activePlugins) {
-    Widgets = Widgets.filter(w => activePlugins.includes(w.pluginId));
+    Widgets = Widgets.filter((w) => activePlugins.includes(w.pluginId));
   }
 
   if (Widgets.length === 0) {

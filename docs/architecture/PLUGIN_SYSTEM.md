@@ -34,7 +34,6 @@ Plugins are managed via the built-in `plugin-manager` module. This provides a `s
 
 When a plugin introduces UI components, CampusOS uses **Build-Time Integration**. The frontend components are injected into the frontend directory, and the system runs `pnpm build`. This avoids complex micro-frontend configurations while maintaining perfect type safety and native performance.
 
-
 ## Real Plugin Entry Points
 
 Here's what actual modules look like in the codebase:
