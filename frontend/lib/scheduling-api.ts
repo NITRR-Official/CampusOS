@@ -1,236 +1,60 @@
-/**
- * Scheduling API Client
- * Frontend API integration for scheduling management
- */
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+import { apiClient } from './api/client';
 
 export const schedulingAPI = {
-  /**
-   * Create a new time slot
-   */
-  async createTimeSlot(
-    eventId: string,
-    slotData: Record<string, unknown>
-  ): Promise<unknown> {
-    const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/schedule`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(slotData)
-      }
-    );
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create time slot');
-    }
-
-    return response.json();
+  createTimeSlot(eventId: string, slotData: Record<string, unknown>) {
+    return apiClient.post(`/api/v1/events/${eventId}/schedule`, slotData);
   },
 
-  /**
-   * Get event schedule (all time slots)
-   */
-  async getEventSchedule(eventId: string): Promise<unknown> {
-    const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/schedule`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch schedule');
-    }
-
-    return response.json();
+  getEventSchedule(eventId: string) {
+    return apiClient.get(`/api/v1/events/${eventId}/schedule`);
   },
 
-  /**
-   * Get time slot by ID
-   */
-  async getTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Time slot not found');
-    }
-
-    return response.json();
+  getTimeSlot(slotId: string) {
+    return apiClient.get(`/api/v1/schedule/${slotId}`);
   },
 
-  /**
-   * Update time slot
-   */
-  async updateTimeSlot(
-    slotId: string,
-    updateData: Record<string, unknown>
-  ): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(updateData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to update time slot');
-    }
-
-    return response.json();
+  updateTimeSlot(slotId: string, updateData: Record<string, unknown>) {
+    return apiClient.put(`/api/v1/schedule/${slotId}`, updateData);
   },
 
-  /**
-   * Delete time slot
-   */
-  async deleteTimeSlot(slotId: string): Promise<unknown> {
-    const response = await fetch(`${API_BASE}/api/v1/schedule/${slotId}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to delete time slot');
-    }
-
-    return response.json();
+  deleteTimeSlot(slotId: string) {
+    return apiClient.delete(`/api/v1/schedule/${slotId}`);
   },
 
-  /**
-   * Get all conflicts
-   */
-  async getAllConflicts(
-    filters: Record<string, unknown> = {}
-  ): Promise<unknown> {
+  getAllConflicts(filters: Record<string, unknown> = {}) {
     const params = new URLSearchParams();
     if (filters.resolved !== undefined)
       params.append('resolved', String(filters.resolved));
     if (filters.severity) params.append('severity', String(filters.severity));
 
-    const response = await fetch(
-      `${API_BASE}/api/v1/schedule/conflicts?${params}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch conflicts');
-    }
-
-    return response.json();
+    return apiClient.get(`/api/v1/schedule/conflicts?${params}`);
   },
 
-  /**
-   * Get conflicts for slot
-   */
-  async getSlotConflicts(slotId: string): Promise<unknown> {
-    const response = await fetch(
-      `${API_BASE}/api/v1/schedule/${slotId}/conflicts`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch slot conflicts');
-    }
-
-    return response.json();
+  getSlotConflicts(slotId: string) {
+    return apiClient.get(`/api/v1/schedule/${slotId}/conflicts`);
   },
 
-  /**
-   * Resolve conflict
-   */
-  async resolveConflict(
-    conflictId: string,
-    resolution: string
-  ): Promise<unknown> {
-    const response = await fetch(
-      `${API_BASE}/api/v1/schedule/conflicts/${conflictId}/resolve`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ resolution })
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to resolve conflict');
-    }
-
-    return response.json();
+  resolveConflict(conflictId: string, resolution: string) {
+    return apiClient.put(`/api/v1/schedule/conflicts/${conflictId}/resolve`, {
+      resolution
+    });
   },
 
-  /**
-   * Check venue availability
-   */
-  async checkVenueAvailability(
+  checkVenueAvailability(
     venue: string,
     startTime: string | Date,
     endTime: string | Date
-  ): Promise<unknown> {
+  ) {
     const params = new URLSearchParams({
       startTime: new Date(startTime).toISOString(),
       endTime: new Date(endTime).toISOString()
     });
 
-    const response = await fetch(
-      `${API_BASE}/api/v1/schedule/venue/${venue}/available?${params}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to check venue availability');
-    }
-
-    return response.json();
+    return apiClient.get(`/api/v1/schedule/venue/${venue}/available?${params}`);
   },
 
-  /**
-   * Get schedule overview
-   */
-  async getScheduleOverview(eventId: string): Promise<unknown> {
-    const response = await fetch(
-      `${API_BASE}/api/v1/events/${eventId}/schedule/overview`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch schedule overview');
-    }
-
-    return response.json();
+  getScheduleOverview(eventId: string) {
+    return apiClient.get(`/api/v1/events/${eventId}/schedule/overview`);
   }
 };
 

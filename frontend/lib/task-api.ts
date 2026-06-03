@@ -1,3 +1,6 @@
+import { apiClient } from './api/client';
+export { ApiError as TaskApiError } from './api/errors';
+
 export type TaskStatus = 'todo' | 'in-progress' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
 
@@ -9,62 +12,19 @@ export interface TaskItem {
   dueDate: string | null;
   priority: TaskPriority;
   status: TaskStatus;
-  dependsOn: string[]; // Array of task IDs this task depends on
+  dependsOn: string[];
   createdBy: string;
   assignedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-export class TaskApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'TaskApiError';
-    this.status = status;
-  }
-}
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
-async function request(
-  path: string,
-  init?: RequestInit,
-  accessToken?: string | null
-) {
-  const headers = new Headers(init?.headers || {});
-
-  if (accessToken) {
-    headers.set('Authorization', `Bearer ${accessToken}`);
-  }
-
-  if (init?.body && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers
-  });
-
-  const json = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new TaskApiError(json?.message || 'Request failed', response.status);
-  }
-
-  return json?.data;
-}
-
-export function fetchTasks(accessToken: string) {
-  return request('/api/v1/tasks', undefined, accessToken) as Promise<
-    TaskItem[]
-  >;
+export function fetchTasks(accessToken?: string) {
+  return apiClient.get<TaskItem[]>('/api/v1/tasks', { accessToken });
 }
 
 export function createTask(
-  accessToken: string,
+  accessToken: string | undefined,
   payload: {
     title: string;
     description: string;
@@ -73,87 +33,65 @@ export function createTask(
     priority: TaskPriority;
   }
 ) {
-  return request(
-    '/api/v1/tasks',
-    {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    },
-    accessToken
-  ) as Promise<TaskItem>;
+  return apiClient.post<TaskItem>('/api/v1/tasks', payload, { accessToken });
 }
 
 export function assignTask(
-  accessToken: string,
+  accessToken: string | undefined,
   taskId: string,
   assigneeName: string
 ) {
-  return request(
+  return apiClient.patch<TaskItem>(
     `/api/v1/tasks/${taskId}/assign`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ assigneeName })
-    },
-    accessToken
-  ) as Promise<TaskItem>;
+    { assigneeName },
+    { accessToken }
+  );
 }
 
 export function updateTaskStatus(
-  accessToken: string,
+  accessToken: string | undefined,
   taskId: string,
   status: TaskStatus
 ) {
-  return request(
+  return apiClient.patch<TaskItem>(
     `/api/v1/tasks/${taskId}/status`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ status })
-    },
-    accessToken
-  ) as Promise<TaskItem>;
+    { status },
+    { accessToken }
+  );
 }
 
 export function updateTaskPriority(
-  accessToken: string,
+  accessToken: string | undefined,
   taskId: string,
   priority: TaskPriority
 ) {
-  return request(
+  return apiClient.patch<TaskItem>(
     `/api/v1/tasks/${taskId}/priority`,
-    {
-      method: 'PATCH',
-      body: JSON.stringify({ priority })
-    },
-    accessToken
-  ) as Promise<TaskItem>;
+    { priority },
+    { accessToken }
+  );
 }
 
 export function addTaskDependency(
-  accessToken: string,
+  accessToken: string | undefined,
   taskId: string,
   dependencyId: string
 ) {
-  return request(
+  return apiClient.post<TaskItem>(
     `/api/v1/tasks/${taskId}/dependencies`,
-    {
-      method: 'POST',
-      body: JSON.stringify({ dependencyId })
-    },
-    accessToken
-  ) as Promise<TaskItem>;
+    { dependencyId },
+    { accessToken }
+  );
 }
 
 export function removeTaskDependency(
-  accessToken: string,
+  accessToken: string | undefined,
   taskId: string,
   dependencyId: string
 ) {
-  return request(
+  return apiClient.delete<TaskItem>(
     `/api/v1/tasks/${taskId}/dependencies`,
-    {
-      method: 'DELETE',
-      body: JSON.stringify({ dependencyId })
-    },
-    accessToken
-  ) as Promise<TaskItem>;
+    { dependencyId },
+    { accessToken }
+  );
 }

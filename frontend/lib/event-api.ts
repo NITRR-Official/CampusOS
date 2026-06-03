@@ -1,3 +1,6 @@
+import { apiClient } from './api/client';
+export { ApiError as EventApiError } from './api/errors';
+
 export interface EventItem {
   id: string;
   title: string;
@@ -20,46 +23,17 @@ export interface EventItem {
   updatedAt: string;
 }
 
-export class EventApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'EventApiError';
-    this.status = status;
-  }
+export function fetchEvents() {
+  return apiClient.get<EventItem[]>('/api/v1/events');
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
-async function request(path: string, init?: RequestInit) {
-  const response = await fetch(`${API_BASE_URL}${path}`, init);
-  const json = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new EventApiError(json?.message || 'Request failed', response.status);
-  }
-
-  return json?.data;
+export function fetchEventById(eventId: string) {
+  return apiClient.get<EventItem>(`/api/v1/events/${eventId}`);
 }
 
-export async function fetchEvents() {
-  return (await request('/api/v1/events')) as EventItem[];
-}
-
-export async function fetchEventById(eventId: string) {
-  return (await request(`/api/v1/events/${eventId}`)) as EventItem;
-}
-
-export async function registerForEvent(
+export function registerForEvent(
   eventId: string,
   payload: { attendeeName: string; attendeeEmail: string }
 ) {
-  return request(`/api/v1/events/${eventId}/registrations`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
+  return apiClient.post(`/api/v1/events/${eventId}/registrations`, payload);
 }
