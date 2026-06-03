@@ -3,10 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '../../../../backend/src/database/connection.js';
-import {
-  Conflict,
-  TimeSlot
-} from '../../../../backend/src/database/schemas/scheduling.schema.js';
+import { Conflict, TimeSlot } from '../schema/scheduling.schema.js';
 import { SchedulingService } from './scheduling.service.js';
 
 describe('SchedulingService', () => {

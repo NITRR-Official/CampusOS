@@ -1,143 +1,104 @@
 /**
  * Budget Schema
- * Defines the structure for budget allocation and expense tracking
+ * Mongoose schema for budget and expense tracking
  */
 
-export const BudgetSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
-  },
-  eventId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Event'
-  },
-  totalAllocation: {
-    type: 'number',
-    required: true,
-    description: 'Total budget allocated for event'
-  },
-  budgetBreakdown: {
-    type: 'array',
-    items: {
-      category: 'string',
-      amount: 'number',
-      description: 'string'
-    },
-    description: 'Breakdown of budget by category'
-  },
-  currency: {
-    type: 'string',
-    default: 'INR',
-    description: 'Currency code'
-  },
-  approvalStatus: {
-    type: 'string',
-    enum: ['draft', 'pending', 'approved', 'rejected'],
-    default: 'draft',
-    description: 'Budget approval status'
-  },
-  approvedBy: {
-    type: 'string',
-    nullable: true,
-    description: 'User ID who approved the budget'
-  },
-  approvedDate: {
-    type: 'date',
-    nullable: true,
-    description: 'Date when budget was approved'
-  },
-  notes: {
-    type: 'string',
-    nullable: true,
-    description: 'Additional budget notes'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  }
-};
+import mongoose from 'mongoose';
 
-export const ExpenseSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
+const budgetSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    eventId: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    totalAllocation: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    budgetBreakdown: [
+      {
+        category: String,
+        amount: Number,
+        description: String
+      }
+    ],
+    currency: {
+      type: String,
+      default: 'INR'
+    },
+    approvalStatus: {
+      type: String,
+      enum: ['draft', 'approved', 'rejected'],
+      default: 'draft'
+    },
+    approvedBy: String,
+    approvedDate: Date,
+    notes: String
   },
-  budgetId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Budget'
-  },
-  category: {
-    type: 'string',
-    enum: ['vendor', 'resource', 'supplies', 'personnel', 'other'],
-    required: true,
-    description: 'Expense category'
-  },
-  description: {
-    type: 'string',
-    required: true,
-    description: 'Detailed description of expense'
-  },
-  amount: {
-    type: 'number',
-    required: true,
-    description: 'Expense amount'
-  },
-  vendor: {
-    type: 'string',
-    nullable: true,
-    description: 'Vendor or recipient name'
-  },
-  paymentMethod: {
-    type: 'string',
-    enum: ['cash', 'check', 'transfer', 'card', 'pending'],
-    default: 'pending',
-    description: 'Payment method'
-  },
-  paymentStatus: {
-    type: 'string',
-    enum: ['pending', 'paid', 'refunded'],
-    default: 'pending',
-    description: 'Payment status'
-  },
-  paidDate: {
-    type: 'date',
-    nullable: true,
-    description: 'Date when expense was paid'
-  },
-  receipt: {
-    type: 'string',
-    nullable: true,
-    description: 'Receipt file reference/URL'
-  },
-  approvedBy: {
-    type: 'string',
-    nullable: true,
-    description: 'User ID who approved expense'
-  },
-  notes: {
-    type: 'string',
-    nullable: true,
-    description: 'Additional notes'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
+  {
+    timestamps: true,
+    collection: 'budgets'
   }
-};
+);
+
+const expenseSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    budgetId: {
+      type: String,
+      required: true,
+      index: true
+    },
+    category: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    vendor: String,
+    paymentMethod: {
+      type: String,
+      default: 'pending'
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'refunded'],
+      default: 'pending'
+    },
+    paidDate: Date,
+    receipt: String,
+    approvedBy: String,
+    notes: String
+  },
+  {
+    timestamps: true,
+    collection: 'expenses'
+  }
+);
+
+// Indexes
+budgetSchema.index({ approvalStatus: 1 });
+
+expenseSchema.index({ category: 1 });
+expenseSchema.index({ paymentStatus: 1 });
+
+export const Budget = mongoose.model('Budget', budgetSchema);
+export const Expense = mongoose.model('Expense', expenseSchema);
+
+export default { Budget, Expense };

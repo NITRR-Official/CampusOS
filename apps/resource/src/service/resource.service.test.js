@@ -3,7 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '../../../../backend/src/database/connection.js';
-import { Resource } from '../../../../backend/src/database/schemas/resource.schema.js';
+import { Resource } from '../schema/resource.schema.js';
 import { ResourceService } from './resource.service.js';
 
 describe('ResourceService', () => {

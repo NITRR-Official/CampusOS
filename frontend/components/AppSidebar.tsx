@@ -28,17 +28,45 @@ import {
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Events', href: '/events', icon: Ticket },
-  { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { name: 'Calendar', href: '/calendar', icon: Calendar },
-  { name: 'Participants', href: '/participants', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings }
 ];
 
-export function AppSidebar() {
+import { registry } from '@/lib/plugins/registry';
+import { initializePlugins } from '@/lib/plugins/init';
+
+// Call it once when module is loaded on client
+initializePlugins();
+
+export function AppSidebar({
+  activePlugins = []
+}: {
+  activePlugins?: string[];
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { logout } = useAuth();
+
+  // Map string icons back to Lucide components
+  const iconMap: Record<string, React.ElementType> = {
+    Ticket,
+    CheckSquare,
+    Calendar,
+    Users,
+    Settings,
+    Home
+  };
+
+  // Combine core navigation with plugin navigation
+  const pluginLinks = registry
+    .getSidebarLinks()
+    .filter((link) => activePlugins.includes(link.pluginId))
+    .map((link) => ({
+      name: link.title,
+      href: link.url,
+      icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : Settings
+    }));
+
+  const allNavigation = [...navigation, ...pluginLinks];
 
   return (
     <Sidebar
@@ -68,7 +96,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map((item) => {
+              {allNavigation.map((item) => {
                 const isActive =
                   pathname === item.href ||
                   (item.href !== '/' && pathname?.startsWith(item.href));

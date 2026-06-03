@@ -19,10 +19,20 @@ flowchart TD
     Init --> Log["5. Log success or failure per module"]
 ```
 
+> **Note (ADR-006):** Before loading a plugin, the loader checks the `Plugin` collection in MongoDB. If a plugin is marked as `enabled: false`, it is skipped. New, undiscovered plugins dropped into `/apps/` are automatically inserted into MongoDB and disabled by default for security.
+
 If a module fails to load:
 
 - **Development**: Error is logged, other modules continue loading
 - **Production**: The entire server crashes (fail-fast)
+
+## Plugin Management (ADR 006)
+
+Plugins are managed via the built-in `plugin-manager` module. This provides a `super-admin` API to list plugins, toggle them in MongoDB, and trigger a safe restart of the server (`SIGTERM`) to apply the new configuration dynamically without breaking the Express router stack.
+
+## Frontend Plugin Architecture (ADR 007)
+
+When a plugin introduces UI components, CampusOS uses **Build-Time Integration**. The frontend components are injected into the frontend directory, and the system runs `pnpm build`. This avoids complex micro-frontend configurations while maintaining perfect type safety and native performance.
 
 ## Real Plugin Entry Points
 

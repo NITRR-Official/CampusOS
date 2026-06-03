@@ -3,10 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '../../../../backend/src/database/connection.js';
-import {
-  Budget,
-  Expense
-} from '../../../../backend/src/database/schemas/budget.schema.js';
+import { Budget, Expense } from '../schema/budget.schema.js';
 import { BudgetService } from './budget.service.js';
 
 describe('BudgetService', () => {

@@ -3,7 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '../../../../backend/src/database/connection.js';
-import { Vendor } from '../../../../backend/src/database/schemas/vendor.schema.js';
+import { Vendor } from '../schema/vendor.schema.js';
 import { VendorService } from './vendor.service.js';
 
 describe('VendorService', () => {

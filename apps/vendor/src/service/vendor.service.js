@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Vendor } from '../../../../backend/src/database/schemas/vendor.schema.js';
+import Vendor from '../schema/vendor.schema.js';
 
 /**
  * Vendor Service

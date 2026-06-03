@@ -1,0 +1,14 @@
+{
+  "auth": false,
+  "budget": false,
+  "calendar": false,
+  "checkin": false,
+  "club": false,
+  "event": false,
+  "institute": false,
+  "plugin-manager": false,
+  "resource": false,
+  "scheduling": false,
+  "task": false,
+  "vendor": false
+}

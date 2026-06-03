@@ -16,7 +16,6 @@ CampusOS is organized into 6 functional layers, each handling a specific concern
 
 - Auth (JWT-based authentication)
 - Users (user profiles and management)
-- Institutes (organization management)
 - Clubs (organizational structure)
 - RBAC (role-based access control)
 

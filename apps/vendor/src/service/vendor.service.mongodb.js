@@ -3,7 +3,7 @@
  * Manages vendor and supplier information, assignments, and tracking
  */
 
-import { Vendor } from '../../../backend/src/database/schemas/vendor.schema.js';
+import { Vendor } from '../schema/vendor.schema.js';
 
 export class VendorService {
   /**
