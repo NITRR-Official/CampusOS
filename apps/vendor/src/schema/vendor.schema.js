@@ -1,131 +1,153 @@
 /**
  * Vendor Schema
- * Defines the structure for vendor and supplier information
+ * Mongoose schema for vendor data persistence
  */
 
-export const VendorSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
-  },
-  name: {
-    type: 'string',
-    required: true,
-    description: 'Vendor/supplier name'
-  },
-  category: {
-    type: 'string',
-    enum: ['catering', 'decoration', 'equipment', 'transportation', 'other'],
-    required: true,
-    description: 'Type of vendor service'
-  },
-  contactPerson: {
-    type: 'string',
-    required: true,
-    description: 'Primary contact person name'
-  },
-  email: {
-    type: 'string',
-    required: true,
-    description: 'Vendor email address'
-  },
-  phone: {
-    type: 'string',
-    required: true,
-    description: 'Vendor contact number'
-  },
-  address: {
-    type: 'string',
-    nullable: true,
-    description: 'Vendor business address'
-  },
-  bankDetails: {
-    type: 'object',
-    nullable: true,
-    properties: {
-      accountName: 'string',
-      accountNumber: 'string',
-      bankName: 'string',
-      ifscCode: 'string'
-    },
-    description: 'Bank account details for payments'
-  },
-  status: {
-    type: 'string',
-    enum: ['active', 'inactive', 'blocked'],
-    default: 'active',
-    description: 'Vendor status'
-  },
-  rating: {
-    type: 'number',
-    min: 0,
-    max: 5,
-    default: 0,
-    description: 'Vendor rating based on events'
-  },
-  totalEvents: {
-    type: 'number',
-    default: 0,
-    description: 'Number of events vendor has participated in'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  }
-};
+import mongoose from 'mongoose';
 
-export const VendorAssignmentSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
+const vendorSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    nameLower: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    category: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    contactPerson: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    phone: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    address: {
+      type: String,
+      trim: true
+    },
+    bankDetails: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
+    serviceDescription: {
+      type: String,
+      trim: true
+    },
+    pricing: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
+    },
+    status: {
+      type: String,
+      default: 'active'
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
+    },
+    totalEvents: {
+      type: Number,
+      default: 0
+    },
+    ratings: [
+      {
+        rating: {
+          type: Number,
+          min: 0,
+          max: 5
+        },
+        comment: String,
+        ratedBy: String,
+        ratedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
+    averageRating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5
+    },
+    totalRatings: {
+      type: Number,
+      default: 0
+    },
+    assignments: [
+      {
+        assignmentId: {
+          type: String,
+          required: true
+        },
+        eventId: {
+          type: String,
+          required: true
+        },
+        amount: {
+          type: Number,
+          default: null
+        },
+        assignedAt: {
+          type: Date,
+          default: Date.now
+        },
+        status: {
+          type: String,
+          enum: ['assigned', 'confirmed', 'completed', 'cancelled'],
+          default: 'assigned'
+        },
+        notes: String,
+        createdAt: {
+          type: Date,
+          default: Date.now
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
+    isActive: {
+      type: Boolean,
+      default: true
+    }
   },
-  eventId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Event'
-  },
-  vendorId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Vendor'
-  },
-  assignedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  amount: {
-    type: 'number',
-    nullable: true,
-    description: 'Payment amount for this assignment'
-  },
-  status: {
-    type: 'string',
-    enum: ['assigned', 'confirmed', 'completed', 'cancelled'],
-    default: 'assigned',
-    description: 'Assignment status'
-  },
-  notes: {
-    type: 'string',
-    nullable: true,
-    description: 'Additional notes about vendor assignment'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
+  {
+    timestamps: true,
+    collection: 'vendors'
   }
-};
+);
+
+// Indexes for better query performance
+vendorSchema.index({ category: 1 });
+vendorSchema.index({ email: 1 });
+vendorSchema.index({ nameLower: 1 });
+vendorSchema.index({ 'assignments.eventId': 1 });
+vendorSchema.index({ 'assignments.assignmentId': 1 });
+
+export const Vendor = mongoose.model('Vendor', vendorSchema);
+
+export default Vendor;

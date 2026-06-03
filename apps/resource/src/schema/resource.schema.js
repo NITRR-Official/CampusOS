@@ -1,144 +1,115 @@
 /**
  * Resource Schema
- * Defines the structure for equipment and resource information
+ * Mongoose schema for resource/equipment data persistence
  */
 
-export const ResourceSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
-  },
-  name: {
-    type: 'string',
-    required: true,
-    description: 'Resource/equipment name'
-  },
-  type: {
-    type: 'string',
-    enum: [
-      'audio',
-      'visual',
-      'lighting',
-      'seating',
-      'stage',
-      'decoration',
-      'other'
-    ],
-    required: true,
-    description: 'Type of resource'
-  },
-  quantity: {
-    type: 'number',
-    required: true,
-    default: 1,
-    description: 'Total quantity available'
-  },
-  availableQuantity: {
-    type: 'number',
-    required: true,
-    default: 1,
-    description: 'Currently available quantity'
-  },
-  description: {
-    type: 'string',
-    nullable: true,
-    description: 'Detailed description of resource'
-  },
-  location: {
-    type: 'string',
-    nullable: true,
-    description: 'Storage location or building'
-  },
-  condition: {
-    type: 'string',
-    enum: ['excellent', 'good', 'fair', 'needs-repair'],
-    default: 'good',
-    description: 'Current condition status'
-  },
-  maintenanceDate: {
-    type: 'date',
-    nullable: true,
-    description: 'Last maintenance/service date'
-  },
-  owner: {
-    type: 'string',
-    nullable: true,
-    description: 'Owner or department name'
-  },
-  cost: {
-    type: 'number',
-    nullable: true,
-    description: 'Purchase/replacement cost'
-  },
-  status: {
-    type: 'string',
-    enum: ['available', 'in-use', 'maintenance', 'retired'],
-    default: 'available',
-    description: 'Resource status'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  }
-};
+import mongoose from 'mongoose';
 
-export const ResourceAllocationSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
+const resourceSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ['equipment', 'furniture', 'technology', 'consumable', 'other'],
+      trim: true
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+    availableQuantity: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    unit: {
+      type: String,
+      default: 'pieces',
+      trim: true
+    },
+    location: {
+      type: String,
+      trim: true
+    },
+    owner: {
+      type: String,
+      trim: true
+    },
+    condition: {
+      type: String,
+      enum: ['excellent', 'good', 'fair', 'poor'],
+      default: 'good'
+    },
+    status: {
+      type: String,
+      default: 'available'
+    },
+    purchaseDate: Date,
+    lastMaintenanceDate: Date,
+    nextMaintenanceDate: Date,
+    maintenanceDate: Date,
+    maintenanceNotes: String,
+    cost: {
+      type: Number,
+      default: 0
+    },
+    allocations: [
+      {
+        allocationId: String,
+        eventId: String,
+        allocatedQuantity: Number,
+        startDate: Date,
+        endDate: Date,
+        status: {
+          type: String,
+          enum: ['pending', 'allocated', 'in-use', 'returned', 'damaged'],
+          default: 'pending'
+        },
+        notes: String,
+        allocatedAt: {
+          type: Date,
+          default: Date.now
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
+    isActive: {
+      type: Boolean,
+      default: true
+    }
   },
-  eventId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Event'
-  },
-  resourceId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Resource'
-  },
-  allocatedQuantity: {
-    type: 'number',
-    required: true,
-    description: 'Quantity allocated for this event'
-  },
-  startDate: {
-    type: 'date',
-    required: true,
-    description: 'Start date of allocation'
-  },
-  endDate: {
-    type: 'date',
-    required: true,
-    description: 'End date of allocation'
-  },
-  notes: {
-    type: 'string',
-    nullable: true,
-    description: 'Additional notes about allocation'
-  },
-  status: {
-    type: 'string',
-    enum: ['allocated', 'in-use', 'returned', 'damaged'],
-    default: 'allocated',
-    description: 'Allocation status'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
+  {
+    timestamps: true,
+    collection: 'resources'
   }
-};
+);
+
+// Indexes
+resourceSchema.index({ type: 1 });
+resourceSchema.index({ 'allocations.eventId': 1 });
+resourceSchema.index({ condition: 1 });
+
+export const Resource = mongoose.model('Resource', resourceSchema);
+
+export default Resource;

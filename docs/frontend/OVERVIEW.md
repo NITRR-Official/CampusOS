@@ -61,7 +61,16 @@ frontend/
     ├── budget-api.ts      # Budget endpoints
     ├── theme-provider.tsx # Dark mode context provider
     ├── utils.ts           # cn() utility for class merging
-    └── validations/       # Zod schemas for form validation
+    ├── validations/       # Zod schemas for form validation
+    └── plugins/           # Core plugin infrastructure
+        ├── registry.ts    # PluginRegistry for Sidebar Links & Widgets
+        └── init.ts        # Build-time plugin loader script
+├── plugins/                # Frontend Plugin Implementations
+│   ├── event/             # Event plugin UI components & init
+│   ├── club/              # Club plugin UI components & init
+│   ├── task/              # Task plugin UI components & init
+│   ├── vendor/            # Vendor plugin UI components & init
+│   └── calendar/          # Calendar plugin UI components & init
 ```
 
 ## How API Calls Work

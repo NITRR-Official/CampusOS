@@ -16,7 +16,7 @@ flowchart TD
         p2[CORS]
         p3[Logger]
         p4["Auth (JWT)"]
-        p5[Plugin Loader] -.-> scan["Scans /apps/<br/>and loads modules"]
+        p5["Plugin Loader<br/><small>(Reads plugins.json)</small>"] -.-> scan["Scans /apps/<br/>and loads active modules"]
         p6[404 handler]
         p7[Error handler]
     end

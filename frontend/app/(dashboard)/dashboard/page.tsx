@@ -1,6 +1,20 @@
 import Link from 'next/link';
+import { ExtensionPoint } from '@/components/ExtensionPoint';
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  let activePlugins: string[] = [];
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+    const res = await fetch(`${apiUrl}/system/modules`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      activePlugins = data.modules || [];
+    }
+  } catch (err: any) {
+    if (err.digest === 'DYNAMIC_SERVER_USAGE') throw err;
+    console.error('Failed to fetch active plugins for dashboard:', err);
+  }
+
   return (
     <div className="w-full">
       {/* Background decorations matching the landing page */}
@@ -24,85 +38,26 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Plugin Extension Point: dashboard-top */}
+        <ExtensionPoint id="dashboard-top" activePlugins={activePlugins} context={{ dashboard: true }} />
+
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
-          <div className="bg-card/80 backdrop-blur text-card-foreground rounded-lg shadow-sm border border-border/60 p-6 flex items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 text-2xl min-w-fit">
-              🎯
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
-                Clubs
-              </p>
-              <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
-                0
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-card/80 backdrop-blur text-card-foreground rounded-lg shadow-sm border border-border/60 p-6 flex items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500 text-2xl min-w-fit">
-              📅
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
-                Events
-              </p>
-              <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
-                0
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-card/80 backdrop-blur text-card-foreground rounded-lg shadow-sm border border-border/60 p-6 flex items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 text-2xl min-w-fit">
-              👥
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
-                Members
-              </p>
-              <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
-                0
-              </p>
-            </div>
-          </div>
-        </div>
+        <ExtensionPoint 
+          id="dashboard-stats" 
+          activePlugins={activePlugins} 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10" 
+        />
 
         {/* Quick Actions */}
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
             Quick Actions
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <button className="group relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6 bg-card/80 backdrop-blur text-card-foreground border border-border/60 shadow-sm rounded-xl cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 text-center min-h-[140px]">
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border/50 text-foreground shadow-sm group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 transition-colors">
-                <span className="text-xl">➕</span>
-              </div>
-              <span className="relative text-sm font-semibold tracking-wide text-foreground">
-                Create Club
-              </span>
-            </button>
-            <button className="group relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6 bg-card/80 backdrop-blur text-card-foreground border border-border/60 shadow-sm rounded-xl cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 text-center min-h-[140px]">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border/50 text-foreground shadow-sm group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500 transition-colors">
-                <span className="text-xl">➕</span>
-              </div>
-              <span className="relative text-sm font-semibold tracking-wide text-foreground">
-                Schedule Event
-              </span>
-            </button>
-            <button className="group relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6 bg-card/80 backdrop-blur text-card-foreground border border-border/60 shadow-sm rounded-xl cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 text-center min-h-[140px]">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border/50 text-foreground shadow-sm group-hover:bg-purple-500 group-hover:text-white group-hover:border-purple-500 transition-colors">
-                <span className="text-xl">👥</span>
-              </div>
-              <span className="relative text-sm font-semibold tracking-wide text-foreground">
-                Invite Member
-              </span>
-            </button>
-          </div>
+          <ExtensionPoint 
+            id="dashboard-actions" 
+            activePlugins={activePlugins} 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" 
+          />
         </div>
 
         {/* Recent Activity */}

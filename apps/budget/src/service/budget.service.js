@@ -1,8 +1,5 @@
 import crypto from 'crypto';
-import {
-  Budget,
-  Expense
-} from '../../../../backend/src/database/schemas/budget.schema.js';
+import { Budget, Expense } from '../schema/budget.schema.js';
 
 /**
  * Budget Service

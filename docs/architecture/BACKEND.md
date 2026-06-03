@@ -106,13 +106,16 @@ This is how modules communicate without importing each other.
 
 `plugin-loader.js` scans the `/apps/` directory and loads each module:
 
-1. Reads all directories in `/apps/`
-2. For each directory, looks for an entry point in this order:
+1. Connects to MongoDB via `connectDB()`
+2. Reads all directories in `/apps/`
+3. Queries the `Plugin` MongoDB collection to find which plugins are enabled
+4. For each directory, checks if it's marked `enabled: true` in the DB
+5. Looks for an entry point in this order:
    - `plugin.js` (root of module)
    - `src/index.js`
-3. Dynamically imports the entry file
-4. Calls `init(app, registry)` — the module's exported function
-5. If a module fails to load, it logs the error but continues loading others
+6. Dynamically imports the entry file
+7. Calls `init(app, registry)` — the module's exported function
+8. If a module fails to load, it logs the error but continues loading others
 
 In production, a plugin failure is fatal. In development, it's logged and skipped.
 

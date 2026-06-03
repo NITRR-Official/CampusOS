@@ -1,121 +1,114 @@
 /**
  * Scheduling Schema
- * Defines the structure for time slot bookings and scheduling
+ * Mongoose schema for time slot and venue scheduling
  */
 
-export const TimeSlotSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
-  },
-  eventId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Event'
-  },
-  venue: {
-    type: 'string',
-    required: true,
-    description: 'Venue or location name'
-  },
-  startTime: {
-    type: 'date',
-    required: true,
-    description: 'Slot start time'
-  },
-  endTime: {
-    type: 'date',
-    required: true,
-    description: 'Slot end time'
-  },
-  capacity: {
-    type: 'number',
-    required: true,
-    description: 'Venue capacity'
-  },
-  allocatedResources: {
-    type: 'array',
-    items: {
-      resourceId: 'string',
-      quantity: 'number'
-    },
-    description: 'Resources allocated to this slot'
-  },
-  status: {
-    type: 'string',
-    enum: ['scheduled', 'in-progress', 'completed', 'cancelled'],
-    default: 'scheduled',
-    description: 'Slot status'
-  },
-  notes: {
-    type: 'string',
-    nullable: true,
-    description: 'Additional scheduling notes'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  }
-};
+import mongoose from 'mongoose';
 
-export const ScheduleConflictSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
+const timeSlotSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    eventId: {
+      type: String,
+      required: true,
+      index: true
+    },
+    venue: {
+      type: String,
+      required: true
+    },
+    startTime: {
+      type: Date,
+      required: true
+    },
+    endTime: {
+      type: Date,
+      required: true
+    },
+    capacity: {
+      type: Number,
+      min: 1
+    },
+    purpose: {
+      type: String,
+      trim: true
+    },
+    resourcesAllocated: [
+      {
+        resourceId: String,
+        quantity: Number
+      }
+    ],
+    status: {
+      type: String,
+      default: 'scheduled'
+    },
+    notes: String
   },
-  slotId1: {
-    type: 'string',
-    required: true,
-    description: 'First conflicting slot ID'
-  },
-  slotId2: {
-    type: 'string',
-    required: true,
-    description: 'Second conflicting slot ID'
-  },
-  conflictType: {
-    type: 'string',
-    enum: ['resource-overlap', 'venue-overlap', 'time-overlap'],
-    required: true,
-    description: 'Type of conflict'
-  },
-  severity: {
-    type: 'string',
-    enum: ['low', 'medium', 'high'],
-    required: true,
-    description: 'Conflict severity level'
-  },
-  description: {
-    type: 'string',
-    required: true,
-    description: 'Detailed conflict description'
-  },
-  resolved: {
-    type: 'boolean',
-    default: false,
-    description: 'Whether conflict has been resolved'
-  },
-  resolution: {
-    type: 'string',
-    nullable: true,
-    description: 'How conflict was resolved'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
+  {
+    timestamps: true,
+    collection: 'timeslots'
   }
-};
+);
+
+const conflictSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString()
+    },
+    slotId1: {
+      type: String,
+      required: true
+    },
+    slotId2: {
+      type: String,
+      required: true
+    },
+    conflictType: {
+      type: String,
+      enum: [
+        'venue',
+        'resource',
+        'time',
+        'capacity',
+        'venue-overlap',
+        'resource-overlap',
+        'time-overlap'
+      ],
+      required: true
+    },
+    severity: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium'
+    },
+    description: String,
+    resolved: {
+      type: Boolean,
+      default: false
+    },
+    resolution: String,
+    resolvedAt: Date,
+    resolvedBy: String
+  },
+  {
+    timestamps: true,
+    collection: 'conflicts'
+  }
+);
+
+// Indexes
+timeSlotSchema.index({ venue: 1 });
+timeSlotSchema.index({ startTime: 1, endTime: 1 });
+
+conflictSchema.index({ slotId1: 1, slotId2: 1 });
+conflictSchema.index({ resolved: 1 });
+
+export const TimeSlot = mongoose.model('TimeSlot', timeSlotSchema);
+export const Conflict = mongoose.model('Conflict', conflictSchema);
+
+export default { TimeSlot, Conflict };

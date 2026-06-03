@@ -77,6 +77,12 @@ export async function createApp(registry) {
     });
   });
 
+  // Public endpoint for frontend to discover active modules (no auth required)
+  app.get('/api/v1/system/modules', (req, res) => {
+    const activeModules = Array.from(registry.modules.keys());
+    res.json({ success: true, modules: activeModules });
+  });
+
   // 5. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);
   registry.registerService('requireRoles', requireRoles);

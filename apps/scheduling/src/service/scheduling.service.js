@@ -1,8 +1,5 @@
 import crypto from 'crypto';
-import {
-  Conflict,
-  TimeSlot
-} from '../../../../backend/src/database/schemas/scheduling.schema.js';
+import { TimeSlot, Conflict } from '../schema/scheduling.schema.js';
 
 /**
  * Scheduling Service
