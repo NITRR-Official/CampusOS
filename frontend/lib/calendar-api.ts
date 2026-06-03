@@ -1,3 +1,6 @@
+import { apiClient } from './api/client';
+export { ApiError as CalendarApiError } from './api/errors';
+
 export type CalendarEventType = 'task-deadline' | 'event' | 'milestone';
 
 export interface CalendarEvent {
@@ -14,58 +17,12 @@ export interface CalendarEvent {
   updatedAt: string;
 }
 
-export class CalendarApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'CalendarApiError';
-    this.status = status;
-  }
-}
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
-async function request(
-  path: string,
-  init?: RequestInit,
-  accessToken?: string | null
-) {
-  const headers = new Headers(init?.headers || {});
-
-  if (accessToken) {
-    headers.set('Authorization', `Bearer ${accessToken}`);
-  }
-
-  if (init?.body && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers
-  });
-
-  const json = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new CalendarApiError(
-      json?.message || 'Request failed',
-      response.status
-    );
-  }
-
-  return json?.data;
-}
-
-export function fetchAllCalendarEvents(accessToken: string) {
-  return request('/api/v1/calendar', undefined, accessToken) as Promise<
-    CalendarEvent[]
-  >;
+export function fetchAllCalendarEvents(accessToken?: string) {
+  return apiClient.get<CalendarEvent[]>('/api/v1/calendar', { accessToken });
 }
 
 export function fetchCalendarEventsByRange(
-  accessToken: string,
+  accessToken: string | undefined,
   startDate: string,
   endDate: string
 ) {
@@ -73,15 +30,14 @@ export function fetchCalendarEventsByRange(
     startDate,
     endDate
   });
-  return request(
+  return apiClient.get<CalendarEvent[]>(
     `/api/v1/calendar/range?${params.toString()}`,
-    undefined,
-    accessToken
-  ) as Promise<CalendarEvent[]>;
+    { accessToken }
+  );
 }
 
 export function createCalendarEvent(
-  accessToken: string,
+  accessToken: string | undefined,
   payload: {
     title: string;
     eventType: CalendarEventType;
@@ -92,20 +48,16 @@ export function createCalendarEvent(
     linkedEventId?: string;
   }
 ) {
-  return request(
-    '/api/v1/calendar',
-    {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    },
+  return apiClient.post<CalendarEvent>('/api/v1/calendar', payload, {
     accessToken
-  ) as Promise<CalendarEvent>;
+  });
 }
 
-export function deleteCalendarEvent(accessToken: string, eventId: string) {
-  return request(
-    `/api/v1/calendar/${eventId}`,
-    { method: 'DELETE' },
+export function deleteCalendarEvent(
+  accessToken: string | undefined,
+  eventId: string
+) {
+  return apiClient.delete(`/api/v1/calendar/${eventId}`, undefined, {
     accessToken
-  );
+  });
 }

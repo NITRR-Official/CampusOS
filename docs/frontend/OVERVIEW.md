@@ -66,45 +66,30 @@ frontend/
 
 ## How API Calls Work
 
-Every backend domain has a corresponding API client in `lib/`. These use `fetch` directly (not Axios):
+The frontend uses a centralized `apiClient` located in `lib/api/client.ts`. This wrapper automatically prepends the backend's base URL, handles global error parsing via the `ApiError` class, and injects the JWT access token into the `Authorization` header.
+
+Every backend domain has a corresponding API service file in `lib/` that utilizes this client:
 
 ```typescript
 // lib/auth-api.ts — simplified
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
-async function requestAuth(path: string, body: Record<string, string>) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-
-  const json = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    throw new ApiError(json?.message || 'Request failed', response.status);
-  }
-
-  return json?.data as AuthResponseData | null;
-}
+import { apiClient } from './api/client';
+export { ApiError } from './api/errors';
 
 export function login(payload: { email: string; password: string }) {
-  return requestAuth('/api/v1/auth/login', payload);
+  return apiClient.post<AuthResponseData>('/api/v1/auth/login', payload);
 }
 ```
 
-For authenticated endpoints, the token is read from `localStorage` via `readAccessToken()` in `lib/auth-session.ts`:
+### Authentication Token Injection
+
+For authenticated endpoints, the token is automatically read from cookies or `localStorage` via `readAccessToken()` in `lib/auth-session.ts` and injected into the request headers by the `apiClient`.
+
+If you are calling an API from a **Server Component**, you can explicitly pass the token into the options:
 
 ```typescript
-const AUTH_STORAGE_KEY = 'campusos.auth-session';
-
-export function readAccessToken() {
-  return readAuthSession()?.accessToken || null;
-}
-
-export function clearAuthSession() {
-  window.localStorage.removeItem(AUTH_STORAGE_KEY);
-}
+// Example usage in a Server Component
+const token = cookies().get('campusos_access_token')?.value;
+const tasks = await fetchTasks(token);
 ```
 
 ## Styling
