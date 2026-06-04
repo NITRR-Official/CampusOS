@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { Plugin } from './database/schemas/index.js';
+import { eventBus } from './core/event-bus.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -111,8 +112,8 @@ export async function loadPlugins(app, registry) {
         );
       }
 
-      // Initialize the module, passing Express app and registry
-      await init(app, registry);
+      // Initialize the module, passing Express app, registry, and the eventBus
+      await init(app, registry, eventBus);
 
       console.log(`✓ Loaded plugin: ${moduleName}`);
     } catch (error) {

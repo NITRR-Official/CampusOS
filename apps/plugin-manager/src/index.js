@@ -1,6 +1,6 @@
 import { registerPluginRoutes } from './routes/plugin.routes.js';
 
-export async function init(app, registry) {
+export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
 
   if (typeof requireRoles !== 'function') {
