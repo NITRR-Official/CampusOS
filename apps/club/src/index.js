@@ -1,7 +1,7 @@
 import { createClubController } from './controller/club.controller.js';
 import { registerClubRoutes } from './routes/club.routes.js';
 
-export async function init(app, registry) {
+export async function init(app, registry, eventBus) {
   const clubController = createClubController();
   const requireRoles = registry.getService('requireRoles');
 

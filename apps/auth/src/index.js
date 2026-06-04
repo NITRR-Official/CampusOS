@@ -1,7 +1,7 @@
 import { createAuthController } from './controller/auth.controller.js';
 import { registerAuthRoutes } from './routes/auth.routes.js';
 
-export async function init(app, registry) {
+export async function init(app, registry, eventBus) {
   const authController = createAuthController({ registry });
   registerAuthRoutes(app, authController);
 

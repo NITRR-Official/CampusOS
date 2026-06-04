@@ -1,7 +1,7 @@
 import { createCalendarController } from './controller/calendar.controller.js';
 import { registerCalendarRoutes } from './routes/calendar.routes.js';
 
-export async function init(app, registry) {
+export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
 
   if (typeof requireRoles !== 'function') {

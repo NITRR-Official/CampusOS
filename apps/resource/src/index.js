@@ -5,7 +5,7 @@
 
 import { registerResourceRoutes } from './routes/resource.routes.js';
 
-export async function init(app, registry) {
+export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
 
   if (typeof requireRoles !== 'function') {
