@@ -10,7 +10,7 @@ class CampusEventBus extends EventEmitter {
   /**
    * Emit an event to the global bus.
    * Convention: Do NOT emit sensitive data (PII, passwords). Emit IDs and non-sensitive metadata.
-   * 
+   *
    * @param {string} eventName - e.g., 'event:created', 'user:registered'
    * @param {Object} payload - The data payload containing IDs or basic details
    */
