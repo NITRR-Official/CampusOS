@@ -4,6 +4,7 @@ import { RequireAuth } from '@/app/components/auth/AuthGuard';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { API_BASE_URL } from '@/lib/api/client';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -19,10 +20,8 @@ export default async function DashboardLayout({
   // Next.js caches this fetch automatically, saving API hits on every page load.
   let activePlugins: string[] = [];
   try {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
     // Using no-store so plugin toggles reflect immediately without waiting 5 minutes.
-    const res = await fetch(`${apiUrl}/system/modules`, {
+    const res = await fetch(`${API_BASE_URL}/system/modules`, {
       cache: 'no-store'
     });
     if (res.ok) {

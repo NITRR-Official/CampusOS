@@ -22,9 +22,9 @@ export function signup(payload: {
   email: string;
   password: string;
 }) {
-  return apiClient.post<AuthResponseData>('/api/v1/auth/signup', payload);
+  return apiClient.post<AuthResponseData>('/auth/signup', payload);
 }
 
 export function login(payload: { email: string; password: string }) {
-  return apiClient.post<AuthResponseData>('/api/v1/auth/login', payload);
+  return apiClient.post<AuthResponseData>('/auth/login', payload);
 }

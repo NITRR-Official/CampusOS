@@ -2,7 +2,7 @@ import { apiClient } from './api/client';
 
 export const resourceAPI = {
   createResource(resourceData: Record<string, unknown>) {
-    return apiClient.post('/api/v1/resources', resourceData);
+    return apiClient.post('/resources', resourceData);
   },
 
   getAllResources(filters: Record<string, unknown> = {}) {
@@ -12,7 +12,7 @@ export const resourceAPI = {
     if (filters.condition)
       params.append('condition', String(filters.condition));
 
-    return apiClient.get(`/api/v1/resources?${params}`);
+    return apiClient.get(`/resources?${params}`);
   },
 
   getAvailableResources(filters: Record<string, unknown> = {}) {
@@ -22,19 +22,19 @@ export const resourceAPI = {
     if (filters.condition)
       params.append('condition', String(filters.condition));
 
-    return apiClient.get(`/api/v1/resources/available?${params}`);
+    return apiClient.get(`/resources/available?${params}`);
   },
 
   getResourceById(resourceId: string) {
-    return apiClient.get(`/api/v1/resources/${resourceId}`);
+    return apiClient.get(`/resources/${resourceId}`);
   },
 
   updateResource(resourceId: string, updateData: Record<string, unknown>) {
-    return apiClient.put(`/api/v1/resources/${resourceId}`, updateData);
+    return apiClient.put(`/resources/${resourceId}`, updateData);
   },
 
   deleteResource(resourceId: string) {
-    return apiClient.delete(`/api/v1/resources/${resourceId}`);
+    return apiClient.delete(`/resources/${resourceId}`);
   },
 
   allocateResourceToEvent(
@@ -43,28 +43,27 @@ export const resourceAPI = {
     allocationData: Record<string, unknown>
   ) {
     return apiClient.post(
-      `/api/v1/events/${eventId}/resources/${resourceId}`,
+      `/events/${eventId}/resources/${resourceId}`,
       allocationData
     );
   },
 
   getEventResources(eventId: string) {
-    return apiClient.get(`/api/v1/events/${eventId}/resources`);
+    return apiClient.get(`/events/${eventId}/resources`);
   },
 
   getResourceAllocations(resourceId: string) {
-    return apiClient.get(`/api/v1/resources/${resourceId}/allocations`);
+    return apiClient.get(`/resources/${resourceId}/allocations`);
   },
 
   updateAllocationStatus(allocationId: string, status: string) {
-    return apiClient.put(
-      `/api/v1/resources/allocations/${allocationId}/status`,
-      { status }
-    );
+    return apiClient.put(`/resources/allocations/${allocationId}/status`, {
+      status
+    });
   },
 
   updateMaintenance(resourceId: string, maintenanceDate: string) {
-    return apiClient.put(`/api/v1/resources/${resourceId}/maintenance`, {
+    return apiClient.put(`/resources/${resourceId}/maintenance`, {
       maintenanceDate
     });
   }

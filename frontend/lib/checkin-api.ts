@@ -25,7 +25,7 @@ export async function fetchCheckIns(
   eventId: string
 ): Promise<CheckInRecord[]> {
   const data = await apiClient.get<{ checkIns?: CheckInRecord[] }>(
-    `/api/v1/events/${eventId}/checkins`,
+    `/events/${eventId}/checkins`,
     { accessToken }
   );
   return data?.checkIns || (data as unknown as CheckInRecord[]) || [];
@@ -37,7 +37,7 @@ export async function createCheckIn(
   userId: string
 ): Promise<CheckInRecord> {
   return apiClient.post<CheckInRecord>(
-    `/api/v1/events/${eventId}/checkins`,
+    `/events/${eventId}/checkins`,
     { userId },
     { accessToken }
   );
@@ -49,14 +49,14 @@ export async function getCheckInStatus(
   userId: string
 ): Promise<CheckInRecord> {
   return apiClient.get<CheckInRecord>(
-    `/api/v1/events/${eventId}/checkins/status/${userId}`,
+    `/events/${eventId}/checkins/status/${userId}`,
     { accessToken }
   );
 }
 
 export async function scanQRCode(qrCode: string): Promise<CheckInRecord> {
   const data = await apiClient.post<{ checkIn: CheckInRecord }>(
-    `/api/v1/checkins/scan`,
+    `/checkins/scan`,
     { qrCode }
   );
   return data?.checkIn || (data as unknown as CheckInRecord);
@@ -66,8 +66,7 @@ export async function fetchAttendanceStats(
   accessToken: string | undefined,
   eventId: string
 ): Promise<AttendanceStats> {
-  return apiClient.get<AttendanceStats>(
-    `/api/v1/events/${eventId}/attendance-stats`,
-    { accessToken }
-  );
+  return apiClient.get<AttendanceStats>(`/events/${eventId}/attendance-stats`, {
+    accessToken
+  });
 }

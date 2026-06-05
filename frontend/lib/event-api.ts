@@ -24,16 +24,16 @@ export interface EventItem {
 }
 
 export function fetchEvents() {
-  return apiClient.get<EventItem[]>('/api/v1/events');
+  return apiClient.get<EventItem[]>('/events');
 }
 
 export function fetchEventById(eventId: string) {
-  return apiClient.get<EventItem>(`/api/v1/events/${eventId}`);
+  return apiClient.get<EventItem>(`/events/${eventId}`);
 }
 
 export function registerForEvent(
   eventId: string,
   payload: { attendeeName: string; attendeeEmail: string }
 ) {
-  return apiClient.post(`/api/v1/events/${eventId}/registrations`, payload);
+  return apiClient.post(`/events/${eventId}/registrations`, payload);
 }

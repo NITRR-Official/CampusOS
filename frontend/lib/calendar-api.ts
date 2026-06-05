@@ -18,7 +18,7 @@ export interface CalendarEvent {
 }
 
 export function fetchAllCalendarEvents(accessToken?: string) {
-  return apiClient.get<CalendarEvent[]>('/api/v1/calendar', { accessToken });
+  return apiClient.get<CalendarEvent[]>('/calendar', { accessToken });
 }
 
 export function fetchCalendarEventsByRange(
@@ -31,7 +31,7 @@ export function fetchCalendarEventsByRange(
     endDate
   });
   return apiClient.get<CalendarEvent[]>(
-    `/api/v1/calendar/range?${params.toString()}`,
+    `/calendar/range?${params.toString()}`,
     { accessToken }
   );
 }
@@ -48,7 +48,7 @@ export function createCalendarEvent(
     linkedEventId?: string;
   }
 ) {
-  return apiClient.post<CalendarEvent>('/api/v1/calendar', payload, {
+  return apiClient.post<CalendarEvent>('/calendar', payload, {
     accessToken
   });
 }
@@ -57,7 +57,7 @@ export function deleteCalendarEvent(
   accessToken: string | undefined,
   eventId: string
 ) {
-  return apiClient.delete(`/api/v1/calendar/${eventId}`, undefined, {
+  return apiClient.delete(`/calendar/${eventId}`, undefined, {
     accessToken
   });
 }
