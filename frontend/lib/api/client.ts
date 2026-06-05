@@ -1,7 +1,8 @@
 import { ApiError } from './errors';
 import { readAccessToken } from '../auth-session';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export const API_BASE_URL = baseUrl.endsWith('/api/v1') ? baseUrl : `${baseUrl}/api/v1`;
 
 interface RequestOptions extends RequestInit {
   accessToken?: string | null;
@@ -16,6 +17,12 @@ async function request<T>(
 ): Promise<T> {
   const { accessToken, ...init } = options;
 
+  // Normalize path: strip leading /api/v1 if present to avoid duplication
+  let cleanPath = path.startsWith('/') ? path : `/${path}`;
+  if (cleanPath.startsWith('/api/v1/')) {
+    cleanPath = cleanPath.substring(7);
+  }
+
   // Resolve token: explicit token > auth-session token > null
   const token = accessToken !== undefined ? accessToken : readAccessToken();
 
@@ -29,7 +36,7 @@ async function request<T>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
     ...init,
     headers
   });

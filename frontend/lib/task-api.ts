@@ -20,7 +20,7 @@ export interface TaskItem {
 }
 
 export function fetchTasks(accessToken?: string) {
-  return apiClient.get<TaskItem[]>('/api/v1/tasks', { accessToken });
+  return apiClient.get<TaskItem[]>('/tasks', { accessToken });
 }
 
 export function createTask(
@@ -33,7 +33,7 @@ export function createTask(
     priority: TaskPriority;
   }
 ) {
-  return apiClient.post<TaskItem>('/api/v1/tasks', payload, { accessToken });
+  return apiClient.post<TaskItem>('/tasks', payload, { accessToken });
 }
 
 export function assignTask(
@@ -42,7 +42,7 @@ export function assignTask(
   assigneeName: string
 ) {
   return apiClient.patch<TaskItem>(
-    `/api/v1/tasks/${taskId}/assign`,
+    `/tasks/${taskId}/assign`,
     { assigneeName },
     { accessToken }
   );
@@ -54,7 +54,7 @@ export function updateTaskStatus(
   status: TaskStatus
 ) {
   return apiClient.patch<TaskItem>(
-    `/api/v1/tasks/${taskId}/status`,
+    `/tasks/${taskId}/status`,
     { status },
     { accessToken }
   );
@@ -66,7 +66,7 @@ export function updateTaskPriority(
   priority: TaskPriority
 ) {
   return apiClient.patch<TaskItem>(
-    `/api/v1/tasks/${taskId}/priority`,
+    `/tasks/${taskId}/priority`,
     { priority },
     { accessToken }
   );
@@ -78,7 +78,7 @@ export function addTaskDependency(
   dependencyId: string
 ) {
   return apiClient.post<TaskItem>(
-    `/api/v1/tasks/${taskId}/dependencies`,
+    `/tasks/${taskId}/dependencies`,
     { dependencyId },
     { accessToken }
   );
@@ -90,7 +90,7 @@ export function removeTaskDependency(
   dependencyId: string
 ) {
   return apiClient.delete<TaskItem>(
-    `/api/v1/tasks/${taskId}/dependencies`,
+    `/tasks/${taskId}/dependencies`,
     { dependencyId },
     { accessToken }
   );

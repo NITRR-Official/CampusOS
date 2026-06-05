@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { ExtensionPoint } from '@/components/ExtensionPoint';
+import { API_BASE_URL } from '@/lib/api/client';
 
 export default async function Dashboard() {
   let activePlugins: string[] = [];
   try {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-    const res = await fetch(`${apiUrl}/system/modules`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/system/modules`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       activePlugins = data.modules || [];

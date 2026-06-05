@@ -2,23 +2,23 @@ import { apiClient } from './api/client';
 
 export const schedulingAPI = {
   createTimeSlot(eventId: string, slotData: Record<string, unknown>) {
-    return apiClient.post(`/api/v1/events/${eventId}/schedule`, slotData);
+    return apiClient.post(`/events/${eventId}/schedule`, slotData);
   },
 
   getEventSchedule(eventId: string) {
-    return apiClient.get(`/api/v1/events/${eventId}/schedule`);
+    return apiClient.get(`/events/${eventId}/schedule`);
   },
 
   getTimeSlot(slotId: string) {
-    return apiClient.get(`/api/v1/schedule/${slotId}`);
+    return apiClient.get(`/schedule/${slotId}`);
   },
 
   updateTimeSlot(slotId: string, updateData: Record<string, unknown>) {
-    return apiClient.put(`/api/v1/schedule/${slotId}`, updateData);
+    return apiClient.put(`/schedule/${slotId}`, updateData);
   },
 
   deleteTimeSlot(slotId: string) {
-    return apiClient.delete(`/api/v1/schedule/${slotId}`);
+    return apiClient.delete(`/schedule/${slotId}`);
   },
 
   getAllConflicts(filters: Record<string, unknown> = {}) {
@@ -27,15 +27,15 @@ export const schedulingAPI = {
       params.append('resolved', String(filters.resolved));
     if (filters.severity) params.append('severity', String(filters.severity));
 
-    return apiClient.get(`/api/v1/schedule/conflicts?${params}`);
+    return apiClient.get(`/schedule/conflicts?${params}`);
   },
 
   getSlotConflicts(slotId: string) {
-    return apiClient.get(`/api/v1/schedule/${slotId}/conflicts`);
+    return apiClient.get(`/schedule/${slotId}/conflicts`);
   },
 
   resolveConflict(conflictId: string, resolution: string) {
-    return apiClient.put(`/api/v1/schedule/conflicts/${conflictId}/resolve`, {
+    return apiClient.put(`/schedule/conflicts/${conflictId}/resolve`, {
       resolution
     });
   },
@@ -50,11 +50,11 @@ export const schedulingAPI = {
       endTime: new Date(endTime).toISOString()
     });
 
-    return apiClient.get(`/api/v1/schedule/venue/${venue}/available?${params}`);
+    return apiClient.get(`/schedule/venue/${venue}/available?${params}`);
   },
 
   getScheduleOverview(eventId: string) {
-    return apiClient.get(`/api/v1/events/${eventId}/schedule/overview`);
+    return apiClient.get(`/events/${eventId}/schedule/overview`);
   }
 };
 

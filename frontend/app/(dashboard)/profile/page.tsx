@@ -1,15 +1,14 @@
 import { ExtensionPoint } from '@/components/ExtensionPoint';
 import { UserCircle, Mail, ShieldCheck } from 'lucide-react';
 import { cookies } from 'next/headers';
+import { API_BASE_URL } from '@/lib/api/client';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
   let activePlugins: string[] = [];
   try {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-    const res = await fetch(`${apiUrl}/system/modules`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/system/modules`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       activePlugins = data.modules || [];
