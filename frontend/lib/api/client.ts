@@ -1,7 +1,8 @@
 import { ApiError } from './errors';
 import { readAccessToken } from '../auth-session';
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const baseUrl = rawBaseUrl.replace(/\/+$/, '');
 export const API_BASE_URL = baseUrl.endsWith('/api/v1')
   ? baseUrl
   : `${baseUrl}/api/v1`;
@@ -21,8 +22,9 @@ async function request<T>(
 
   // Normalize path: strip leading /api/v1 if present to avoid duplication
   let cleanPath = path.startsWith('/') ? path : `/${path}`;
-  if (cleanPath.startsWith('/api/v1/')) {
-    cleanPath = cleanPath.substring(7);
+  cleanPath = cleanPath.replace(/^(?:\/api\/v1)+/, '');
+  if (cleanPath && !cleanPath.startsWith('/') && !cleanPath.startsWith('?')) {
+    cleanPath = `/${cleanPath}`;
   }
 
   // Resolve token: explicit token > auth-session token > null
