@@ -5,7 +5,7 @@ import { Users, Building2 } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function ClubsPage() {
-  const clubs = await fetchClubs();
+  const clubs = await fetchClubs('active');
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">

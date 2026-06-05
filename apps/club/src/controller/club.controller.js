@@ -155,12 +155,38 @@ export function createClubController() {
     });
   }
 
+  function approveClub(req, res, next) {
+    const { clubId } = req.params;
+    const club = clubService.updateClubStatus(clubId, 'active');
+
+    if (!club) {
+      next(createHttpError(404, 'Club not found', 'CLUB_NOT_FOUND'));
+      return;
+    }
+
+    res.status(200).json({ success: true, data: club });
+  }
+
+  function rejectClub(req, res, next) {
+    const { clubId } = req.params;
+    const club = clubService.updateClubStatus(clubId, 'rejected');
+
+    if (!club) {
+      next(createHttpError(404, 'Club not found', 'CLUB_NOT_FOUND'));
+      return;
+    }
+
+    res.status(200).json({ success: true, data: club });
+  }
+
   return {
     create,
     list,
     addMember,
     removeMember,
-    assignRole
+    assignRole,
+    approveClub,
+    rejectClub
   };
 }
 

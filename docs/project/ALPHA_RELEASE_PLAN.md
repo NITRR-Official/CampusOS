@@ -29,7 +29,7 @@ Rigid roles (`admin`, `user`) are insufficient for a university ecosystem.
 - **Resource Binding**: Users will hold specific roles _within_ specific clubs, rather than just global roles.
 - **Goal**: Enable institutes to create custom roles ("Treasurer", "Event Coordinator") with tailored permissions.
 
-## 📱 4. Essential Public Routes & UX
+## 📱 4. Essential Public Routes & UX (In-progress)
 
 The core MVP requires a polished frontend for end-users (students) to interact with the platform.
 
