@@ -2,7 +2,9 @@ import { ApiError } from './errors';
 import { readAccessToken } from '../auth-session';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-export const API_BASE_URL = baseUrl.endsWith('/api/v1') ? baseUrl : `${baseUrl}/api/v1`;
+export const API_BASE_URL = baseUrl.endsWith('/api/v1')
+  ? baseUrl
+  : `${baseUrl}/api/v1`;
 
 interface RequestOptions extends RequestInit {
   accessToken?: string | null;

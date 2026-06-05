@@ -66,8 +66,7 @@ export async function fetchAttendanceStats(
   accessToken: string | undefined,
   eventId: string
 ): Promise<AttendanceStats> {
-  return apiClient.get<AttendanceStats>(
-    `/events/${eventId}/attendance-stats`,
-    { accessToken }
-  );
+  return apiClient.get<AttendanceStats>(`/events/${eventId}/attendance-stats`, {
+    accessToken
+  });
 }

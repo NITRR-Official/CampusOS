@@ -57,10 +57,9 @@ export const resourceAPI = {
   },
 
   updateAllocationStatus(allocationId: string, status: string) {
-    return apiClient.put(
-      `/resources/allocations/${allocationId}/status`,
-      { status }
-    );
+    return apiClient.put(`/resources/allocations/${allocationId}/status`, {
+      status
+    });
   },
 
   updateMaintenance(resourceId: string, maintenanceDate: string) {

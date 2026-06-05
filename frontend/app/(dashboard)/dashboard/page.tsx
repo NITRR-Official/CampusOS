@@ -5,7 +5,9 @@ import { API_BASE_URL } from '@/lib/api/client';
 export default async function Dashboard() {
   let activePlugins: string[] = [];
   try {
-    const res = await fetch(`${API_BASE_URL}/system/modules`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/system/modules`, {
+      cache: 'no-store'
+    });
     if (res.ok) {
       const data = await res.json();
       activePlugins = data.modules || [];

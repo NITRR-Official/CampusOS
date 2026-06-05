@@ -8,7 +8,9 @@ export const dynamic = 'force-dynamic';
 export default async function ProfilePage() {
   let activePlugins: string[] = [];
   try {
-    const res = await fetch(`${API_BASE_URL}/system/modules`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/system/modules`, {
+      cache: 'no-store'
+    });
     if (res.ok) {
       const data = await res.json();
       activePlugins = data.modules || [];
