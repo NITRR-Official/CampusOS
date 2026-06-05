@@ -9,14 +9,14 @@ export interface Club {
   logoUrl?: string;
   bannerUrl?: string;
   memberCount: number;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'pending' | 'rejected';
   createdAt: string;
 }
 
 // TOGGLE THIS FLAG TO SWITCH BETWEEN MOCK AND REAL API
 const USE_MOCK_DATA = true;
 
-const MOCK_CLUBS: Club[] = [
+const INITIAL_MOCK_CLUBS: Club[] = [
   {
     id: 'c1',
     name: 'Tech Innovators',
@@ -49,21 +49,91 @@ const MOCK_CLUBS: Club[] = [
   }
 ];
 
-export async function fetchClubs(): Promise<Club[]> {
+function getMockClubs(): Club[] {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('MOCK_CLUBS');
+    if (stored) return JSON.parse(stored);
+    localStorage.setItem('MOCK_CLUBS', JSON.stringify(INITIAL_MOCK_CLUBS));
+  }
+  return INITIAL_MOCK_CLUBS;
+}
+
+function saveMockClubs(clubs: Club[]) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('MOCK_CLUBS', JSON.stringify(clubs));
+  }
+}
+
+export async function fetchClubs(
+  status?: 'active' | 'pending' | 'rejected'
+): Promise<Club[]> {
   if (USE_MOCK_DATA) {
-    // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 500));
-    return MOCK_CLUBS;
+    let clubs = getMockClubs();
+    if (status) {
+      clubs = clubs.filter((c) => c.status === status);
+    }
+    return clubs;
   }
 
-  return apiClient.get('/clubs');
+  const query = status ? `?status=${status}` : '';
+  return apiClient.get(`/clubs${query}`);
 }
 
 export async function fetchClubBySlug(slug: string): Promise<Club | null> {
   if (USE_MOCK_DATA) {
     await new Promise((resolve) => setTimeout(resolve, 300));
-    return MOCK_CLUBS.find((c) => c.slug === slug) || null;
+    return getMockClubs().find((c) => c.slug === slug) || null;
   }
 
   return apiClient.get(`/clubs/${slug}`);
+}
+
+export async function createClub(payload: Partial<Club>): Promise<Club> {
+  if (USE_MOCK_DATA) {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    const clubs = getMockClubs();
+    const newClub: Club = {
+      id: `c${clubs.length + 1}`,
+      name: payload.name || '',
+      slug: (payload.name || '').toLowerCase().replace(/ /g, '-'),
+      description: payload.description || '',
+      category: payload.category || 'General',
+      memberCount: 1,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    clubs.push(newClub);
+    saveMockClubs(clubs);
+    return newClub;
+  }
+  return apiClient.post('/clubs', payload);
+}
+
+export async function approveClub(id: string): Promise<Club> {
+  if (USE_MOCK_DATA) {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const clubs = getMockClubs();
+    const club = clubs.find((c) => c.id === id);
+    if (club) {
+      club.status = 'active';
+      saveMockClubs(clubs);
+    }
+    return club as Club;
+  }
+  return apiClient.patch(`/clubs/${id}/approve`, {});
+}
+
+export async function rejectClub(id: string): Promise<Club> {
+  if (USE_MOCK_DATA) {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const clubs = getMockClubs();
+    const club = clubs.find((c) => c.id === id);
+    if (club) {
+      club.status = 'rejected';
+      saveMockClubs(clubs);
+    }
+    return club as Club;
+  }
+  return apiClient.patch(`/clubs/${id}/reject`, {});
 }

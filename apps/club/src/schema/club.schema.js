@@ -18,6 +18,7 @@ export function validateCreateClubPayload(payload = {}) {
   const name = normalizeText(payload.name);
   const instituteId = normalizeText(payload.instituteId);
   const description = normalizeText(payload.description);
+  const category = normalizeText(payload.category);
   const errors = [];
 
   if (name.length < 3 || name.length > 120) {
@@ -41,12 +42,21 @@ export function validateCreateClubPayload(payload = {}) {
     });
   }
 
+  if (!category) {
+    errors.push({
+      field: 'category',
+      message: 'Category is required'
+    });
+  }
+
   return {
     errors,
     value: {
       name,
       instituteId,
-      description
+      description,
+      category,
+      status: 'pending'
     }
   };
 }

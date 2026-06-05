@@ -3,12 +3,14 @@ import crypto from 'node:crypto';
 const clubsById = new Map();
 
 class ClubService {
-  createClub({ name, instituteId, description, createdBy }) {
+  createClub({ name, instituteId, description, category, createdBy }) {
     const club = {
       id: crypto.randomUUID(),
       name,
       instituteId,
       description: description || null,
+      category: category || 'General',
+      status: 'pending',
       createdBy,
       createdAt: new Date().toISOString(),
       members: []
@@ -18,8 +20,19 @@ class ClubService {
     return club;
   }
 
-  listClubs() {
-    return Array.from(clubsById.values());
+  listClubs(status) {
+    const clubs = Array.from(clubsById.values());
+    if (status) {
+      return clubs.filter((c) => c.status === status);
+    }
+    return clubs;
+  }
+
+  updateClubStatus(clubId, status) {
+    const club = clubsById.get(clubId);
+    if (!club) return null;
+    club.status = status;
+    return club;
   }
 
   addMember(clubId, member) {
