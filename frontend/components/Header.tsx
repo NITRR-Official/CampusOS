@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/lib/auth-provider';
+import { useUIStore } from '@/lib/store';
 
 function getInitials(value: string) {
   const parts = value.split(' ').filter(Boolean);
@@ -37,6 +38,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, role, logout } = useAuth();
+  const { isSearchOpen, toggleSearch } = useUIStore();
 
   const getBreadcrumbs = () => {
     if (!pathname || pathname === '/')
@@ -102,14 +104,17 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
+          onClick={toggleSearch}
           className="lg:hidden relative size-9 rounded-full"
         >
           <Search className="size-5 text-muted-foreground" />
           <span className="sr-only">Search</span>
         </Button>
 
-        {/* Desktop Search Bar */}
-        <div className="relative hidden w-64 lg:block">
+        {/* Desktop / Toggled Search Bar */}
+        <div
+          className={`relative ${isSearchOpen ? 'block' : 'hidden'} lg:block w-64`}
+        >
           <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
           <Input
             type="search"
