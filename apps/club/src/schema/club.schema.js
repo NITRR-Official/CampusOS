@@ -1,4 +1,7 @@
+import mongoose from "mongoose";
+
 const VALID_ROLES = new Set(['admin', 'coordinator', 'volunteer']);
+
 
 function isValidRole(role) {
   return VALID_ROLES.has(role);
@@ -113,3 +116,15 @@ export function validateAssignRolePayload(payload = {}) {
     value: { role }
   };
 }
+
+
+const clubSchema=new mongoose.Schema({
+  name:{type:String,required:true},
+  instituteId:{type:String,required:true},
+  description:{type:String,default:null},
+  createdBy:{type:String,required:true},
+  email:{type:String,required:true,unique:true}
+},{timestamps:true});
+
+export const Club=mongoose.model('Club',clubSchema);
+

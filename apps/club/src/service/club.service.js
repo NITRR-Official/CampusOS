@@ -1,10 +1,13 @@
 import crypto from 'node:crypto';
-
-const clubsById = new Map();
+import { Club } from '../schema/club.schema.js';
+import { Role } from '../schema/role.schema.js';
+import { ClubMember } from '../schema/clubmemeber.schema.js';
+//import { userInfo } from 'node:os';
+//const clubsById = new Map();
 
 class ClubService {
-  createClub({ name, instituteId, description, createdBy }) {
-    const club = {
+  async createClub({ name, instituteId, description, createdBy, email }) {
+    /*const club = {
       id: crypto.randomUUID(),
       name,
       instituteId,
@@ -12,72 +15,66 @@ class ClubService {
       createdBy,
       createdAt: new Date().toISOString(),
       members: []
-    };
+    };*/
 
-    clubsById.set(club.id, club);
+    //clubsById.set(club.id, club);
+
+
+    const fallbackEmail = `${name.toLowerCase().replace(/\s+/g, '')}@campusos.org`;
+    const club = await Club.create({
+      name,
+      instituteId,
+      description: description || null,
+      createdBy,
+      email: email || fallbackEmail,
+    });
     return club;
   }
 
-  listClubs() {
-    return Array.from(clubsById.values());
+  async listClubs() {
+    return await Club.find({});
   }
 
-  addMember(clubId, member) {
-    const club = clubsById.get(clubId);
-
-    if (!club) {
+  async addMember(clubId, member) {
+    const clubExist = await Club.findById(clubId);
+    if (!clubExist) {
       return null;
     }
 
-    const exists = club.members.some((item) => item.userId === member.userId);
-
+    const exists = await ClubMember.findOne({ userId: member.userId, clubId });
     if (exists) {
       const error = new Error('Member already exists in this club');
       error.code = 'MEMBER_EXISTS';
       throw error;
     }
 
-    const clubMember = {
+    const clubMember = await ClubMember.create({
       userId: member.userId,
-      name: member.name,
-      email: member.email,
-      role: member.role,
-      joinedAt: new Date().toISOString()
-    };
-
-    club.members.push(clubMember);
+      clubId: clubId,
+      roles: []
+    });
     return clubMember;
   }
 
-  removeMember(clubId, memberUserId) {
-    const club = clubsById.get(clubId);
-
-    if (!club) {
-      return null;
-    }
-
-    const initialCount = club.members.length;
-    club.members = club.members.filter(
-      (member) => member.userId !== memberUserId
-    );
-
-    return club.members.length < initialCount;
+  async removeMember(clubId, memberUserId) {
+    const result = await ClubMember.deleteOne({ clubId, userId: memberUserId });
+    // result.deletedCount tells us if something was actually removed (1) or not found (0)
+    return result.deletedCount > 0;
   }
 
-  assignRole(clubId, memberUserId, role) {
-    const club = clubsById.get(clubId);
-
-    if (!club) {
+  async assignRole(clubId, memberUserId, roleId) {
+    const member = await ClubMember.findOne({ clubId, userId: memberUserId });
+    if (!member) {
       return null;
     }
 
-    const member = club.members.find((item) => item.userId === memberUserId);
+    const roleExists = await Role.findById(roleId);
+    if (!roleExists) return undefined;
 
-    if (!member) {
-      return undefined;
+    if (!member.roles.includes(roleId)) {
+      member.roles.push(roleId);
+      await member.save();
     }
-
-    member.role = role;
     return member;
   }
 }
