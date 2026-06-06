@@ -3,12 +3,15 @@
  * Central registry for managing plugin modules and services
  */
 
+import { PermissionRegistry } from '../core/permission-registry.js';
+
 class ModuleRegistry {
   constructor() {
     this.modules = new Map();
     this.services = new Map();
     this.authenticators = new Map();
     this.resolvers = new Map();
+    this.permissions = new PermissionRegistry();
   }
 
   /**
