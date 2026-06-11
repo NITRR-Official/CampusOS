@@ -1,24 +1,24 @@
-export function registerEventRoutes(app, eventController, requireRoles) {
-  const manageEvents = requireRoles('admin', 'coordinator');
+export function registerEventRoutes(app, eventController, requireRoles, requirePermissions) {
+  const managePermissions = requirePermissions || requireRoles;
 
   app.get('/api/v1/events', eventController.list);
   app.get('/api/v1/events/:eventId', eventController.getById);
-  app.post('/api/v1/events', manageEvents, eventController.create);
-  app.patch('/api/v1/events/:eventId', manageEvents, eventController.update);
+  app.post('/api/v1/events', managePermissions('event:create'), eventController.create);
+  app.patch('/api/v1/events/:eventId', managePermissions('event:manage'), eventController.update);
   app.post(
     '/api/v1/events/:eventId/publish',
-    manageEvents,
+    managePermissions('event:manage'),
     eventController.publish
   );
   app.post(
     '/api/v1/events/:eventId/unpublish',
-    manageEvents,
+    managePermissions('event:manage'),
     eventController.unpublish
   );
   app.post('/api/v1/events/:eventId/registrations', eventController.register);
   app.get(
     '/api/v1/events/:eventId/registrations',
-    manageEvents,
+    managePermissions('event:manage'),
     eventController.listRegistrations
   );
 }

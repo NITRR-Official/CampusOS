@@ -35,7 +35,8 @@ function toPublicUser(user) {
     id: user.id || user._id,
     name: user.name,
     email: user.email,
-    role: user.role,
+    role: user.isSuperAdmin ? 'admin' : 'volunteer', // Backward compatibility for frontend
+    isSuperAdmin: user.isSuperAdmin || false,
     createdAt
   };
 }
@@ -53,14 +54,14 @@ class AuthService {
 
     const passwordHash = await createPasswordHash(password);
     const hasUsers = await User.exists({});
-    const role = hasUsers ? 'volunteer' : 'admin';
+    const isSuperAdmin = !hasUsers;
 
     try {
       const user = await User.create({
         name,
         email: normalizedEmail,
         passwordHash,
-        role
+        isSuperAdmin
       });
 
       return toPublicUser(user);

@@ -27,14 +27,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    role: {
-      type: String,
-      enum: ['admin', 'coordinator', 'volunteer', 'user'],
-      default: 'volunteer'
-    },
     isActive: {
       type: Boolean,
       default: true
+    },
+    isSuperAdmin: {
+      type: Boolean,
+      default: false
     }
   },
   {
@@ -42,7 +41,5 @@ const userSchema = new mongoose.Schema(
     collection: 'users'
   }
 );
-
-userSchema.index({ role: 1 });
 
 export const User = mongoose.model('User', userSchema);

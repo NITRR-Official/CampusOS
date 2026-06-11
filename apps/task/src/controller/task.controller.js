@@ -24,7 +24,7 @@ function createHttpError(status, message, code, details) {
 export function createTaskController() {
   const taskService = getTaskService();
 
-  function create(req, res, next) {
+  async function create(req, res, next) {
     const { errors, value } = validateCreateTaskPayload(req.body);
 
     if (errors.length > 0) {
@@ -39,15 +39,19 @@ export function createTaskController() {
       return;
     }
 
-    const task = taskService.createTask({
-      ...value,
-      createdBy: req.user?.id || 'unknown'
-    });
+    try {
+      const task = await taskService.createTask({
+        ...value,
+        createdBy: req.user?.id || 'unknown'
+      });
 
-    res.status(201).json({
-      success: true,
-      data: task
-    });
+      res.status(201).json({
+        success: true,
+        data: task
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   function list(req, res) {
@@ -72,7 +76,7 @@ export function createTaskController() {
     });
   }
 
-  function assign(req, res, next) {
+  async function assign(req, res, next) {
     const { taskId } = req.params;
     const { errors, value } = validateAssignTaskPayload(req.body);
 
@@ -88,17 +92,21 @@ export function createTaskController() {
       return;
     }
 
-    const task = taskService.assignTask(taskId, value);
+    try {
+      const task = await taskService.assignTask(taskId, value);
 
-    if (!task) {
-      next(createHttpError(404, 'Task not found', 'TASK_NOT_FOUND'));
-      return;
+      if (!task) {
+        next(createHttpError(404, 'Task not found', 'TASK_NOT_FOUND'));
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: task
+      });
+    } catch (error) {
+      next(error);
     }
-
-    res.status(200).json({
-      success: true,
-      data: task
-    });
   }
 
   function updateStatus(req, res, next) {

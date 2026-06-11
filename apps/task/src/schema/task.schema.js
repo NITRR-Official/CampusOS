@@ -19,6 +19,8 @@ export function validateCreateTaskPayload(payload = {}) {
   const title = normalizeText(payload.title);
   const description = normalizeText(payload.description);
   const assigneeName = normalizeText(payload.assigneeName);
+  const assignedTeamId = normalizeText(payload.assignedTeamId);
+  const clubId = normalizeText(payload.clubId);
   const dueDate = normalizeDate(payload.dueDate);
   const priority = normalizePriority(payload.priority);
   const errors = [];
@@ -64,6 +66,8 @@ export function validateCreateTaskPayload(payload = {}) {
       title,
       description,
       assigneeName: assigneeName || null,
+      assignedTeamId: assignedTeamId || null,
+      clubId: clubId || null,
       dueDate,
       priority
     }
@@ -72,9 +76,17 @@ export function validateCreateTaskPayload(payload = {}) {
 
 export function validateAssignTaskPayload(payload = {}) {
   const assigneeName = normalizeText(payload.assigneeName);
+  const assignedTeamId = normalizeText(payload.assignedTeamId);
   const errors = [];
 
-  if (assigneeName.length < 2 || assigneeName.length > 80) {
+  if (!assigneeName && !assignedTeamId) {
+    errors.push({
+      field: 'assignee',
+      message: 'Either assigneeName or assignedTeamId is required'
+    });
+  }
+
+  if (assigneeName && (assigneeName.length < 2 || assigneeName.length > 80)) {
     errors.push({
       field: 'assigneeName',
       message: 'Assignee name must be between 2 and 80 characters'
@@ -84,7 +96,8 @@ export function validateAssignTaskPayload(payload = {}) {
   return {
     errors,
     value: {
-      assigneeName
+      assigneeName: assigneeName || null,
+      assignedTeamId: assignedTeamId || null
     }
   };
 }

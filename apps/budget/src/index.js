@@ -7,12 +7,13 @@ import { registerBudgetRoutes } from './routes/budget.routes.js';
 
 export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
+  const requirePermissions = registry.getService('requirePermissions') || requireRoles;
 
   if (typeof requireRoles !== 'function') {
     throw new Error('Permission middleware service is not configured');
   }
 
-  registerBudgetRoutes(app, requireRoles);
+  registerBudgetRoutes(app, requirePermissions);
 
   registry.registerModule('budget', {
     routes: [
@@ -31,6 +32,22 @@ export async function init(app, registry, eventBus) {
       'GET /api/v1/budget/:budgetId/vs-actual'
     ]
   });
+
+  // Register atomic permissions for RBAC
+  if (registry.permissions) {
+    registry.permissions.register({
+      id: 'budget:view',
+      module: 'budget',
+      label: 'View Budget',
+      description: 'Allows viewing event budget details and expenses'
+    });
+    registry.permissions.register({
+      id: 'budget:manage',
+      module: 'budget',
+      label: 'Manage Budget',
+      description: 'Allows creating, updating, and approving/rejecting budgets and logging expenses'
+    });
+  }
 }
 
 export default init;

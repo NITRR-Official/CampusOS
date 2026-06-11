@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 const VALID_ROLES = new Set(['admin', 'coordinator', 'volunteer']);
 
 function isValidRole(role) {
@@ -121,5 +122,76 @@ export function validateAssignRolePayload(payload = {}) {
   return {
     errors,
     value: { role }
+  };
+}
+
+const clubSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    instituteId: { type: String, required: true, trim: true },
+    description: { type: String, default: null, trim: true },
+    createdBy: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    status: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending'
+    }
+  },
+  { timestamps: true }
+);
+
+export const Club = mongoose.model('Club', clubSchema);
+
+export function validateCreateRolePayload(payload = {}) {
+  const name = normalizeText(payload.name);
+  const permissions = Array.isArray(payload.permissions)
+    ? payload.permissions.map(normalizeText).filter(Boolean)
+    : [];
+  const hierarchyLevel = typeof payload.hierarchyLevel === 'number' ? payload.hierarchyLevel : 0;
+  const roleType = normalizeText(payload.roleType) || 'role';
+  const color = normalizeText(payload.color);
+  const errors = [];
+
+  if (!name) {
+    errors.push({ field: 'name', message: 'Name is required' });
+  }
+
+  if (hierarchyLevel < 0) {
+    errors.push({ field: 'hierarchyLevel', message: 'Hierarchy level must be 0 or higher' });
+  }
+
+  if (roleType !== 'role' && roleType !== 'team') {
+    errors.push({ field: 'roleType', message: 'roleType must be role or team' });
+  }
+
+  return {
+    errors,
+    value: {
+      name,
+      permissions,
+      hierarchyLevel,
+      roleType,
+      color: color || null
+    }
+  };
+}
+
+export function validateAdminApprovePayload(payload = {}) {
+  const clubId = normalizeText(payload.clubId);
+  const action = normalizeText(payload.action).toLowerCase() || 'approve';
+  const errors = [];
+
+  if (!clubId) {
+    errors.push({ field: 'clubId', message: 'Club ID is required' });
+  }
+
+  if (action !== 'approve' && action !== 'reject') {
+    errors.push({ field: 'action', message: 'Action must be approve or reject' });
+  }
+
+  return {
+    errors,
+    value: { clubId, action }
   };
 }

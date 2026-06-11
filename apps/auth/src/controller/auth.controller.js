@@ -35,7 +35,8 @@ export function createAuthController({ registry }) {
     return jwtAuthenticator.sign({
       sub: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      isSuperAdmin: user.isSuperAdmin || false
     });
   }
 

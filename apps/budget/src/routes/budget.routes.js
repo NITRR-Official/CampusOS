@@ -5,80 +5,95 @@
 
 import budgetController from '../controller/budget.controller.js';
 
-export function registerBudgetRoutes(app, requireRoles) {
-  // Create budget (admin/coordinator only)
+export function registerBudgetRoutes(app, requirePermissions) {
+  // Create budget (needs budget:manage)
   app.post(
     '/api/v1/events/:eventId/budget',
-    requireRoles('admin', 'coordinator'),
+    requirePermissions('budget:manage'),
     budgetController.createBudget
   );
 
-  // Get budget for event
-  app.get('/api/v1/events/:eventId/budget', budgetController.getEventBudget);
+  // Get budget for event (needs budget:view)
+  app.get(
+    '/api/v1/events/:eventId/budget',
+    requirePermissions('budget:view'),
+    budgetController.getEventBudget
+  );
 
-  // Get budget by ID
-  app.get('/api/v1/budget/:budgetId', budgetController.getBudget);
+  // Get budget by ID (needs budget:view)
+  app.get(
+    '/api/v1/budget/:budgetId',
+    requirePermissions('budget:view'),
+    budgetController.getBudget
+  );
 
-  // Update budget (admin/coordinator only)
+  // Update budget (needs budget:manage)
   app.put(
     '/api/v1/budget/:budgetId',
-    requireRoles('admin', 'coordinator'),
+    requirePermissions('budget:manage'),
     budgetController.updateBudget
   );
 
-  // Approve budget (admin only)
+  // Approve budget (needs budget:manage)
   app.post(
     '/api/v1/budget/:budgetId/approve',
-    requireRoles('admin'),
+    requirePermissions('budget:manage'),
     budgetController.approveBudget
   );
 
-  // Reject budget (admin only)
+  // Reject budget (needs budget:manage)
   app.post(
     '/api/v1/budget/:budgetId/reject',
-    requireRoles('admin'),
+    requirePermissions('budget:manage'),
     budgetController.rejectBudget
   );
 
-  // Log expense (admin/coordinator only)
+  // Log expense (needs budget:manage)
   app.post(
     '/api/v1/budget/:budgetId/expense',
-    requireRoles('admin', 'coordinator'),
+    requirePermissions('budget:manage'),
     budgetController.logExpense
   );
 
-  // Get expenses for budget
+  // Get expenses for budget (needs budget:view)
   app.get(
     '/api/v1/budget/:budgetId/expenses',
+    requirePermissions('budget:view'),
     budgetController.getBudgetExpenses
   );
 
-  // Get expense by ID
-  app.get('/api/v1/budget/expense/:expenseId', budgetController.getExpense);
+  // Get expense by ID (needs budget:view)
+  app.get(
+    '/api/v1/budget/expense/:expenseId',
+    requirePermissions('budget:view'),
+    budgetController.getExpense
+  );
 
-  // Update expense (admin/coordinator only)
+  // Update expense (needs budget:manage)
   app.put(
     '/api/v1/budget/expense/:expenseId',
-    requireRoles('admin', 'coordinator'),
+    requirePermissions('budget:manage'),
     budgetController.updateExpense
   );
 
-  // Mark expense as paid (admin/coordinator only)
+  // Mark expense as paid (needs budget:manage)
   app.post(
     '/api/v1/budget/expense/:expenseId/mark-paid',
-    requireRoles('admin', 'coordinator'),
+    requirePermissions('budget:manage'),
     budgetController.markExpenseAsPaid
   );
 
-  // Get budget summary
+  // Get budget summary (needs budget:view)
   app.get(
     '/api/v1/budget/:budgetId/summary',
+    requirePermissions('budget:view'),
     budgetController.getBudgetSummary
   );
 
-  // Get budget vs actual
+  // Get budget vs actual (needs budget:view)
   app.get(
     '/api/v1/budget/:budgetId/vs-actual',
+    requirePermissions('budget:view'),
     budgetController.getBudgetVsActual
   );
 }

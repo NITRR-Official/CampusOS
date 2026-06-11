@@ -1,6 +1,35 @@
 import crypto from 'node:crypto';
+import { Role } from '../../../club/src/schema/role.schema.js';
 
 const tasksById = new Map();
+
+async function resolveTeamMentions(text, clubId) {
+  if (!text || !clubId) return [];
+  const matches = text.match(/@([\w-]+)/g);
+  if (!matches) return [];
+
+  const teamNames = matches.map((m) => m.substring(1).toLowerCase());
+
+  try {
+    // Find matching roles of type 'team' in the club
+    const teams = await Role.find({
+      clubId,
+      roleType: 'team'
+    }).lean();
+
+    const mentionedTeamIds = [];
+    teams.forEach((team) => {
+      if (team && team.name && teamNames.includes(team.name.toLowerCase())) {
+        mentionedTeamIds.push(team._id.toString());
+      }
+    });
+
+    return mentionedTeamIds;
+  } catch (error) {
+    console.error('[TaskService] Error resolving team mentions:', error.message);
+    return [];
+  }
+}
 
 function createTaskRecord(payload) {
   const now = new Date().toISOString();
@@ -10,20 +39,30 @@ function createTaskRecord(payload) {
     title: payload.title,
     description: payload.description || null,
     assigneeName: payload.assigneeName || null,
+    assignedTeamId: payload.assignedTeamId || null,
+    mentionedTeams: [],
     dueDate: payload.dueDate || null,
     priority: payload.priority || 'medium',
     status: 'todo',
     dependsOn: [], // Array of task IDs this task depends on
     createdBy: payload.createdBy,
-    assignedAt: payload.assigneeName ? now : null,
+    clubId: payload.clubId || null,
+    assignedAt: (payload.assigneeName || payload.assignedTeamId) ? now : null,
     createdAt: now,
     updatedAt: now
   };
 }
 
 class TaskService {
-  createTask(payload) {
+  async createTask(payload) {
     const task = createTaskRecord(payload);
+
+    if (payload.clubId) {
+      task.mentionedTeams = await resolveTeamMentions(
+        `${payload.title} ${payload.description || ''}`,
+        payload.clubId
+      );
+    }
 
     tasksById.set(task.id, task);
     return task;
@@ -39,16 +78,24 @@ class TaskService {
     return tasksById.get(taskId) || null;
   }
 
-  assignTask(taskId, payload) {
+  async assignTask(taskId, payload) {
     const task = tasksById.get(taskId);
 
     if (!task) {
       return null;
     }
 
-    task.assigneeName = payload.assigneeName;
+    task.assigneeName = payload.assigneeName || null;
+    task.assignedTeamId = payload.assignedTeamId || null;
     task.assignedAt = new Date().toISOString();
     task.updatedAt = task.assignedAt;
+
+    if (task.clubId) {
+      task.mentionedTeams = await resolveTeamMentions(
+        `${task.title} ${task.description || ''}`,
+        task.clubId
+      );
+    }
 
     return task;
   }
