@@ -1,11 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeAll,
-  afterAll,
-  beforeEach
-} from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import fc from 'fast-check';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
@@ -349,7 +342,9 @@ describe('MongoCalendarEventRepository (integration)', () => {
 
     it('returns null for falsy ids without throwing', async () => {
       expect(await repository.updateEvent(null, { title: 'x' })).toBeNull();
-      expect(await repository.updateEvent(undefined, { title: 'x' })).toBeNull();
+      expect(
+        await repository.updateEvent(undefined, { title: 'x' })
+      ).toBeNull();
       expect(await repository.updateEvent('', { title: 'x' })).toBeNull();
     });
   });
@@ -400,7 +395,9 @@ describe('MongoCalendarEventRepository (integration)', () => {
             expect(Object.keys(read).sort()).toEqual(EXPECTED_KEYS);
             expect(read.title).toBe(payload.title);
             expect(read.eventType).toBe(payload.eventType);
-            expect(read.startsAt).toBe(new Date(payload.startsAt).toISOString());
+            expect(read.startsAt).toBe(
+              new Date(payload.startsAt).toISOString()
+            );
             expect(read.createdBy).toBe(payload.createdBy);
           }),
           { numRuns: NUM_RUNS }
