@@ -83,6 +83,12 @@ export async function createApp(registry) {
     res.json({ success: true, modules: activeModules });
   });
 
+  // Public endpoint for frontend to discover all registered permissions
+  app.get('/api/v1/system/permissions', (req, res) => {
+    const permissions = registry.permissions.getAllGrouped();
+    res.json({ success: true, permissions });
+  });
+
   // 5. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);
   registry.registerService('requireRoles', requireRoles);
