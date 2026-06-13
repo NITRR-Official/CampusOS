@@ -27,8 +27,10 @@ export interface StatCardData {
 export function StatCard({ stat }: { stat: StatCardData }) {
   const Icon = dashboardIcons[stat.icon] ?? FallbackIcon;
   const accent = stat.accent ?? 'primary';
-  const isDown = stat.trend === 'down';
-  const TrendIcon = isDown ? TrendingDown : TrendingUp;
+  const trend = stat.trend ?? 'neutral';
+  const isDown = trend === 'down';
+  const isUp = trend === 'up';
+  const TrendIcon = isDown ? TrendingDown : isUp ? TrendingUp : null;
 
   return (
     <div className="bg-card/80 backdrop-blur text-card-foreground rounded-xl shadow-sm border border-border/60 p-6 flex items-center gap-4 transition-all duration-200 hover:border-primary/50 hover:shadow-md">
@@ -53,10 +55,16 @@ export function StatCard({ stat }: { stat: StatCardData }) {
             <span
               className={cn(
                 'inline-flex items-center gap-0.5 text-xs font-medium',
-                isDown ? 'text-red-500' : 'text-emerald-500'
+                isDown
+                  ? 'text-red-500'
+                  : isUp
+                    ? 'text-emerald-500'
+                    : 'text-muted-foreground'
               )}
             >
-              <TrendIcon className="size-3.5" aria-hidden="true" />
+              {TrendIcon ? (
+                <TrendIcon className="size-3.5" aria-hidden="true" />
+              ) : null}
               {stat.change}
             </span>
           ) : null}
