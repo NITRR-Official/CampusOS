@@ -398,6 +398,31 @@ dependency (already used by the vendor suite).
 | `createdAt`     | Date          | yes (timestamps) | now                  | ISO 8601 string                                |
 | `updatedAt`     | Date          | yes (timestamps) | now                  | ISO 8601 string                                |
 
+#### Workflow-extensibility fields (foundational — not yet exposed by the API)
+
+To support future workflow features (issue #41) without breaking the current API,
+the persisted document also carries the following **optional, sensibly-defaulted**
+fields. They are written/persisted but intentionally **excluded** from
+`serializeEvent`, so the API response shape remains the exact 11-field set above.
+
+| Field           | Mongo type       | Required | Default     | Group              | Purpose                                                       |
+| --------------- | ---------------- | -------- | ----------- | ------------------ | ------------------------------------------------------------- |
+| `status`        | String (enum)    | no       | `scheduled` | lifecycle          | Workflow state: `scheduled`\|`in-progress`\|`completed`\|`cancelled` (indexed) |
+| `recurrence`    | Mixed/Object     | no       | `null`      | recurrence         | Placeholder for future RRULE-style recurring scheduling       |
+| `category`      | String           | no       | `null`      | recurrence         | Optional categorization label                                 |
+| `assignedTeams` | [String]         | no       | `[]`        | workflow ownership | Teams responsible for the event                               |
+| `assignees`     | [String]         | no       | `[]`        | workflow ownership | Individual assignees                                          |
+| `coordinators`  | [String]         | no       | `[]`        | workflow ownership | Coordinating users                                            |
+| `linkedTaskIds` | [String]         | no       | `[]`        | linkage            | Forward-looking multi-link (singular `linkedTaskId` retained) |
+
+**Note:** These workflow ownership arrays, lifecycle status, recurrence, and the
+multi-link `linkedTaskIds` are **foundational** groundwork for upcoming workflow
+features. They default such that existing create calls keep working, and they are
+**not yet exposed** through the current HTTP API — the serialized response shape
+is unchanged (still exactly the 11 fields below). This documents the schema's data
+relationships (core, linkage, lifecycle, workflow ownership, recurrence) per the
+issue's acceptance criterion.
+
 ### API response shape (per event)
 
 ```json
