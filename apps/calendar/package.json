@@ -16,8 +16,6 @@
   "author": "CampusOS Contributors",
   "license": "MIT",
   "devDependencies": {
-    "fast-check": "^3.23.2",
-    "mongodb-memory-server": "^11.2.0",
-    "vitest": "^1.6.1"
+    "vitest": "^1.0.0"
   }
 }

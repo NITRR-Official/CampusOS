@@ -24,6 +24,9 @@ importers:
       eslint:
         specifier: ^10.3.0
         version: 10.4.0(jiti@2.7.0)
+      fast-check:
+        specifier: ^3.23.2
+        version: 3.23.2
       globals:
         specifier: ^17.6.0
         version: 17.6.0
@@ -48,14 +51,8 @@ importers:
 
   apps/calendar:
     devDependencies:
-      fast-check:
-        specifier: ^3.23.2
-        version: 3.23.2
-      mongodb-memory-server:
-        specifier: ^11.2.0
-        version: 11.2.0
       vitest:
-        specifier: ^1.6.1
+        specifier: ^1.0.0
         version: 1.6.1(@types/node@25.9.0)(lightningcss@1.32.0)
 
   apps/checkin: {}
@@ -4550,16 +4547,8 @@ packages:
     resolution: {integrity: sha512-GwpnJVIiUyXdi5BoTsExrvLupSt3sJzCSX5P6fxlr0dCrJkhumiq8SQIqtTBqTu2mMpFMCHdjSS0QMUvFMpbWw==}
     engines: {node: '>=20.19.0'}
 
-  mongodb-memory-server-core@11.2.0:
-    resolution: {integrity: sha512-vOoDtn0JiLrHvZY81Rp/UtKXXK0rtJHZGZFVnccvJwYitPLNspO0Ty0grqFQOe7iAET8+GI4zAQcphg+R3vxQg==}
-    engines: {node: '>=20.19.0'}
-
   mongodb-memory-server@11.1.0:
     resolution: {integrity: sha512-x9psV1KXRgG5t14AmsrfcWCqlNXvPOzcyroMSeRU5vkAm8jxEF5WiLGdGCONLOgeCNjRnpg6igyDum/eTwiooA==}
-    engines: {node: '>=20.19.0'}
-
-  mongodb-memory-server@11.2.0:
-    resolution: {integrity: sha512-506AD8qvClVx8Raw/WhAUUWBgIXPyi856iC01aa5vAzHmn6WOXC6ulvudkTF7oTMzJxkyA0A84VpD4BpyfqJ9w==}
     engines: {node: '>=20.19.0'}
 
   mongodb@7.2.0:
@@ -5812,10 +5801,6 @@ packages:
 
   yauzl@3.3.0:
     resolution: {integrity: sha512-PtGEvEP30p7sbIBJKUBjUnqgTVOyMURc4dLo9iNyAJnNIEz9pm88cCXF21w94Kg3k6RXkeZh5DHOGS0qEONvNQ==}
-    engines: {node: '>=12'}
-
-  yauzl@3.4.0:
-    resolution: {integrity: sha512-jIH9yLR9wqr0wOS0TpBvo/g/2UgZH5qePVbjgRliiF0BYvOZyaBknKsF+x9Iht0O6sqgnB93rCICdOZFecJuDw==}
     engines: {node: '>=12'}
 
   yocto-queue@0.1.0:
@@ -10662,53 +10647,9 @@ snapshots:
       - socks
       - supports-color
 
-  mongodb-memory-server-core@11.2.0:
-    dependencies:
-      async-mutex: 0.5.0
-      camelcase: 6.3.0
-      debug: 4.4.3
-      find-cache-dir: 3.3.2
-      follow-redirects: 1.16.0(debug@4.4.3)
-      https-proxy-agent: 7.0.6
-      mongodb: 7.2.0
-      new-find-package-json: 2.0.0
-      semver: 7.8.0
-      tar-stream: 3.2.0
-      tslib: 2.8.1
-      yauzl: 3.4.0
-    transitivePeerDependencies:
-      - '@aws-sdk/credential-providers'
-      - '@mongodb-js/zstd'
-      - bare-abort-controller
-      - bare-buffer
-      - gcp-metadata
-      - kerberos
-      - mongodb-client-encryption
-      - react-native-b4a
-      - snappy
-      - socks
-      - supports-color
-
   mongodb-memory-server@11.1.0:
     dependencies:
       mongodb-memory-server-core: 11.1.0
-      tslib: 2.8.1
-    transitivePeerDependencies:
-      - '@aws-sdk/credential-providers'
-      - '@mongodb-js/zstd'
-      - bare-abort-controller
-      - bare-buffer
-      - gcp-metadata
-      - kerberos
-      - mongodb-client-encryption
-      - react-native-b4a
-      - snappy
-      - socks
-      - supports-color
-
-  mongodb-memory-server@11.2.0:
-    dependencies:
-      mongodb-memory-server-core: 11.2.0
       tslib: 2.8.1
     transitivePeerDependencies:
       - '@aws-sdk/credential-providers'
@@ -12241,10 +12182,6 @@ snapshots:
   yauzl@3.3.0:
     dependencies:
       buffer-crc32: 0.2.13
-      pend: 1.2.0
-
-  yauzl@3.4.0:
-    dependencies:
       pend: 1.2.0
 
   yocto-queue@0.1.0: {}
