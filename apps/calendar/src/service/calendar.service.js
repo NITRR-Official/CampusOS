@@ -1,101 +1,60 @@
-import { CalendarEvent } from '../schema/calendar.model.js';
+import { MongoCalendarEventRepository } from '../repository/mongo-calendar-event.repository.js';
 
 /**
- * Convert a date-like value to an ISO 8601 string.
- * Returns null for nullish values so nullable date fields are preserved.
+ * Calendar workflow service (GitHub issue #45, sub-issue of #22).
+ *
+ * This service depends on the storage-agnostic
+ * {@link import('../repository/calendar-event.repository.js').CalendarEventRepository}
+ * abstraction rather than on a database driver directly. It owns no persistence
+ * or normalization logic of its own; every public method delegates to the
+ * injected repository, which is responsible for talking to the underlying store
+ * and returning normalized domain objects (`id` + ISO 8601 date strings).
+ *
+ * The repository is injected via the constructor so the service can be tested
+ * with a fake/mock repository (issue #46) without a real database. By default
+ * it uses the MongoDB-backed adapter.
+ *
+ * Repository rejections are intentionally NOT caught here; they propagate to the
+ * controller layer, which is responsible for error handling.
  */
-function toIso(value) {
-  if (value == null) {
-    return null;
+export class CalendarService {
+  /**
+   * @param {import('../repository/calendar-event.repository.js').CalendarEventRepository} [repository]
+   *   The persistence adapter to delegate to. Defaults to a new
+   *   {@link MongoCalendarEventRepository}.
+   */
+  constructor(repository = new MongoCalendarEventRepository()) {
+    this.repository = repository;
   }
 
-  return value instanceof Date
-    ? value.toISOString()
-    : new Date(value).toISOString();
-}
-
-/**
- * Map a Mongoose document (or `.lean()` object) to the API response shape.
- * Maps `_id -> id`, emits exactly the 11 documented keys, converts Date fields
- * to ISO 8601 strings, and preserves null for nullable fields.
- */
-function serializeEvent(doc) {
-  if (!doc) {
-    return null;
-  }
-
-  const obj = typeof doc.toObject === 'function' ? doc.toObject() : doc;
-
-  return {
-    id: obj._id,
-    title: obj.title,
-    eventType: obj.eventType,
-    startsAt: toIso(obj.startsAt),
-    endsAt: toIso(obj.endsAt),
-    description: obj.description ?? null,
-    linkedTaskId: obj.linkedTaskId ?? null,
-    linkedEventId: obj.linkedEventId ?? null,
-    createdBy: obj.createdBy,
-    createdAt: toIso(obj.createdAt),
-    updatedAt: toIso(obj.updatedAt)
-  };
-}
-
-class CalendarService {
   async createEvent(payload) {
-    const doc = await CalendarEvent.create({
-      title: payload.title,
-      eventType: payload.eventType,
-      startsAt: payload.startsAt,
-      endsAt: payload.endsAt ?? null,
-      description: payload.description ?? null,
-      linkedTaskId: payload.linkedTaskId ?? null,
-      linkedEventId: payload.linkedEventId ?? null,
-      createdBy: payload.createdBy
-    });
-
-    return serializeEvent(doc);
+    return this.repository.createEvent(payload);
   }
 
   async listEvents() {
-    const docs = await CalendarEvent.find()
-      .sort({ startsAt: 1, _id: 1 })
-      .lean();
-    return docs.map(serializeEvent);
+    return this.repository.listEvents();
   }
 
   async getEventsBetween(startDate, endDate) {
-    const docs = await CalendarEvent.find({
-      startsAt: { $gte: new Date(startDate), $lte: new Date(endDate) }
-    })
-      .sort({ startsAt: 1, _id: 1 })
-      .lean();
-
-    return docs.map(serializeEvent);
+    return this.repository.queryEventsByRange(startDate, endDate);
   }
 
   async getEvent(eventId) {
-    if (!eventId) {
-      return null;
-    }
-
-    const doc = await CalendarEvent.findById(eventId).lean();
-    return serializeEvent(doc);
+    return this.repository.getEventById(eventId);
   }
 
   async deleteEvent(eventId) {
-    if (!eventId) {
-      return false;
-    }
-
-    const result = await CalendarEvent.deleteOne({ _id: eventId });
-    return result.deletedCount > 0;
+    return this.repository.deleteEvent(eventId);
   }
 }
 
-const calendarService = new CalendarService();
+let calendarService = null;
 
 export function getCalendarService() {
+  if (!calendarService) {
+    calendarService = new CalendarService();
+  }
+
   return calendarService;
 }
 
