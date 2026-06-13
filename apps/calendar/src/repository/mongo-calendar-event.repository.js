@@ -21,6 +21,56 @@ import { CalendarEvent } from '../schema/calendar.model.js';
 import { CalendarEventRepository } from './calendar-event.repository.js';
 
 /**
+ * Fields a caller is permitted to modify via `updateEvent`. Immutable fields
+ * (`_id`, `createdBy`, `createdAt`, `updatedAt`) are intentionally excluded so
+ * a partial-update payload cannot overwrite identity, ownership, or
+ * timestamp-managed metadata.
+ */
+const UPDATABLE_FIELDS = [
+  'title',
+  'eventType',
+  'startsAt',
+  'endsAt',
+  'description',
+  'linkedTaskId',
+  'linkedEventId',
+  'linkedTaskIds',
+  'status',
+  'recurrence',
+  'category',
+  'assignedTeams',
+  'assignees',
+  'coordinators'
+];
+
+/**
+ * Whitelist a partial-update payload: keep only updatable fields and drop keys
+ * whose value is `undefined` (which has inconsistent `$set` semantics). This
+ * prevents clients from mutating immutable fields such as `_id`/`createdBy`.
+ *
+ * @param {Object|null|undefined} changes
+ * @returns {Object} A sanitized object safe to pass to `$set`.
+ */
+function sanitizeUpdate(changes) {
+  const sanitized = {};
+
+  if (!changes || typeof changes !== 'object') {
+    return sanitized;
+  }
+
+  for (const field of UPDATABLE_FIELDS) {
+    if (
+      Object.prototype.hasOwnProperty.call(changes, field) &&
+      changes[field] !== undefined
+    ) {
+      sanitized[field] = changes[field];
+    }
+  }
+
+  return sanitized;
+}
+
+/**
  * Convert a date-like value to an ISO 8601 string.
  * Returns null for nullish values so nullable date fields are preserved.
  *
@@ -134,8 +184,16 @@ export class MongoCalendarEventRepository extends CalendarEventRepository {
    * @returns {Promise<import('./calendar-event.repository.js').CalendarEvent[]>}
    */
   async queryEventsByRange(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Unsatisfiable range: skip the DB round-trip and honor the contract.
+    if (start.getTime() > end.getTime()) {
+      return [];
+    }
+
     const docs = await CalendarEvent.find({
-      startsAt: { $gte: new Date(startDate), $lte: new Date(endDate) }
+      startsAt: { $gte: start, $lte: end }
     })
       .sort({ startsAt: 1, _id: 1 })
       .lean();
@@ -157,7 +215,7 @@ export class MongoCalendarEventRepository extends CalendarEventRepository {
 
     const result = await CalendarEvent.findByIdAndUpdate(
       id,
-      { $set: changes },
+      { $set: sanitizeUpdate(changes) },
       { new: true, runValidators: true }
     ).lean();
 

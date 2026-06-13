@@ -347,6 +347,41 @@ describe('MongoCalendarEventRepository (integration)', () => {
       ).toBeNull();
       expect(await repository.updateEvent('', { title: 'x' })).toBeNull();
     });
+
+    it('ignores attempts to mutate immutable fields (_id, createdBy, createdAt)', async () => {
+      const created = await repository.createEvent(samplePayload);
+
+      const updated = await repository.updateEvent(created.id, {
+        _id: 'hacked-id',
+        createdBy: 'attacker',
+        createdAt: '1970-01-01T00:00:00.000Z',
+        title: 'Legit Change'
+      });
+
+      expect(updated.id).toBe(created.id);
+      expect(updated.createdBy).toBe(created.createdBy);
+      expect(updated.createdAt).toBe(created.createdAt);
+      expect(updated.title).toBe('Legit Change');
+
+      const reread = await repository.getEventById(created.id);
+      expect(reread.id).toBe(created.id);
+      expect(reread.createdBy).toBe(created.createdBy);
+    });
+
+    it('drops undefined-valued keys instead of writing them', async () => {
+      const created = await repository.createEvent({
+        ...samplePayload,
+        description: 'original'
+      });
+
+      const updated = await repository.updateEvent(created.id, {
+        title: 'Kept',
+        description: undefined
+      });
+
+      expect(updated.title).toBe('Kept');
+      expect(updated.description).toBe('original');
+    });
   });
 
   // ---------------------------------------------------------------------------
