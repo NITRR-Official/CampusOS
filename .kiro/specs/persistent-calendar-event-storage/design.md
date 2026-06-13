@@ -3,21 +3,38 @@
 ## Overview
 
 This feature (GitHub issue #22) migrates the calendar module's persistence layer from a
-process-local in-memory `Map` to MongoDB via Mongoose. The change is intentionally
-narrow: it swaps the **system of record** and converts the `CalendarService` methods from
-synchronous to asynchronous, while preserving every externally observable behavior of the
-HTTP API — the response shape, the validation rules, the ordering guarantees, the route
-authorization, and the status codes.
+process-local in-memory `Map` to MongoDB. The change converts the `CalendarService`
+methods from synchronous to asynchronous while preserving every externally observable
+behavior of the HTTP API — the response shape, the validation rules, the ordering
+guarantees, the route authorization, and the status codes.
 
-The migration follows the convention already established by the sibling `vendor` module
-(and `resource`, `scheduling`, `budget`):
+Rather than wiring the service directly to a Mongoose model, the persistence was
+restructured into a **layered repository/adapter architecture** so the storage engine
+sits behind a storage-agnostic abstraction. This was delivered through a set of focused
+sub-issues under parent issue #22:
+
+- **#41** — the Mongoose model (`schema/calendar.model.js`) with the core fields plus
+  foundational workflow-extensibility fields and indexes.
+- **#43** — the abstract `CalendarEventRepository` base class defining the
+  storage-agnostic persistence contract (no Mongoose import).
+- **#44** — the concrete `MongoCalendarEventRepository` adapter that binds the contract to
+  the Mongoose model and owns the document → response normalization (`serializeEvent`).
+- **#45** — the refactored `CalendarService`, which takes an injectable repository via its
+  constructor and delegates every method to it (no direct DB access).
+- **#46** — the test suite (model, service property/edge, controller wiring, repository
+  adapter integration, and DB-free delegation tests).
+
+The result keeps the HTTP layering intact while introducing a clean seam between workflow
+logic and storage:
 
 - A **Mongoose model** declared in the module's `schema/` directory.
-- A **service** whose methods are `async` and delegate to the Mongoose model.
-- An **explicit document-to-response serializer** in the service that maps `_id → id` and
-  normalizes types, so the controller can serialize the result unchanged.
+- A **repository abstraction** that workflow/service code depends on instead of a database
+  driver — the storage engine is swappable and the service is mockable.
+- A **MongoDB adapter** implementing that abstraction, which owns the explicit
+  document-to-response serializer mapping `_id → id` and normalizing types.
+- A **service** whose methods are `async` and delegate to the injected repository.
 - A **test suite** backed by `mongodb-memory-server`, using the shared connection helpers
-  in `backend/src/database/connection.js`.
+  in `backend/src/database/connection.js`, plus DB-free delegation tests.
 
 ### Goals
 
@@ -36,30 +53,47 @@ The migration follows the convention already established by the sibling `vendor`
 
 ### Key Design Decisions
 
-| Decision                    | Choice                                                                                       | Rationale                                                                                                                                                                                                                                                                                                                                                                           |
-| --------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Mongoose model file name    | `apps/calendar/src/schema/calendar.model.js`                                                 | The conventional name `calendar.schema.js` is **already taken** by the request-validation module. The vendor module uses `*.schema.js` for its Mongoose model because it has no separate validation file; calendar cannot, so the model gets a distinct `calendar.model.js`. This keeps validation and persistence concerns in clearly separated files and avoids a name collision. |
-| Service file                | Rewrite existing `apps/calendar/src/service/calendar.service.js` in place                    | The controller already depends on `getCalendarService()` from this path. Rewriting in place (rather than adding a `.mongodb.js` variant) keeps the singleton accessor stable and avoids dangling dead code.                                                                                                                                                                         |
-| Document → response mapping | **Explicit serializer function** in the service (not a schema `toJSON`/`toObject` transform) | Matches the vendor convention (`normalizeVendor`), produces a single pure, unit-testable mapping, and reliably converts `Date` objects to ISO 8601 strings — something a `.lean()` read plus a passive transform does not guarantee. The serializer also enforces the exact field set.                                                                                              |
-| Service return shape        | Plain serialized event objects (and `boolean` for delete)                                    | Preserves the pre-migration contract the controller and clients already expect. Unlike `vendor.service.js`, calendar does **not** wrap results in `{ success, ... }`; the existing controller reads the value directly, so the rewrite keeps that contract.                                                                                                                         |
-| Date storage                | Store `startsAt`/`endsAt` as Mongoose `Date`                                                 | Enables correct range queries and ascending sort at the database level (Requirement 6, 5.2). The serializer converts back to ISO strings on read.                                                                                                                                                                                                                                   |
+| Decision                    | Choice                                                                                                                                        | Rationale                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mongoose model file name    | `apps/calendar/src/schema/calendar.model.js`                                                                                                  | The conventional name `calendar.schema.js` is **already taken** by the request-validation module. The vendor module uses `*.schema.js` for its Mongoose model because it has no separate validation file; calendar cannot, so the model gets a distinct `calendar.model.js`. This keeps validation and persistence concerns in clearly separated files and avoids a name collision.                                                                                                                  |
+| Persistence abstraction     | **Repository pattern** — an abstract `CalendarEventRepository` base class with a concrete `MongoCalendarEventRepository` adapter (#43, #44)   | The service depends on a storage-agnostic contract instead of a database driver. This decouples workflow logic from MongoDB (database portability — swapping engines means writing a new subclass), enables dependency injection so the service can be tested with a fake/mock repository without a real database (testability), and documents the contract in one authoritative place. The base class throws "not implemented" for each method so a subclass that forgets to override fails loudly. |
+| Service file                | Rewrite `apps/calendar/src/service/calendar.service.js` in place as a thin delegator over an injectable repository (#45)                      | The controller already depends on `getCalendarService()` from this path. Rewriting in place keeps the singleton accessor stable. The `CalendarService` class is now exported and takes a repository via its constructor (defaulting to `MongoCalendarEventRepository`); each method delegates to the repository and holds no direct DB access or normalization logic.                                                                                                                                |
+| Document → response mapping | **Explicit serializer function** living in the **MongoDB adapter** (`MongoCalendarEventRepository`), not in the service or a schema transform | The serializer (`serializeEvent`/`toIso`) is a persistence concern, so it belongs with the concrete adapter that produces the normalized domain object. It produces a single pure, unit-testable mapping, reliably converts `Date` objects to ISO 8601 strings — something a `.lean()` read plus a passive transform does not guarantee — and enforces the exact 11-key field set. The repository abstraction and service deal only in already-normalized domain objects (`id` + ISO strings).       |
+| Service return shape        | Plain serialized event objects (and `boolean` for delete)                                                                                     | Preserves the pre-migration contract the controller and clients already expect. Unlike `vendor.service.js`, calendar does **not** wrap results in `{ success, ... }`; the existing controller reads the value directly, so the rewrite keeps that contract.                                                                                                                                                                                                                                          |
+| Date storage                | Store `startsAt`/`endsAt` as Mongoose `Date`                                                                                                  | Enables correct range queries and ascending sort at the database level (Requirement 6, 5.2). The serializer converts back to ISO strings on read.                                                                                                                                                                                                                                                                                                                                                    |
 
 ## Architecture
 
-The layering is unchanged; only the service's internals and its sync/async nature change.
+The HTTP layering (routes → controller → service) is preserved. The service no longer
+talks to Mongoose directly; instead it delegates to a repository abstraction, and a
+MongoDB adapter binds that abstraction to the model. The repository seam is the
+injectable/mockable boundary: in production the service is constructed with a
+`MongoCalendarEventRepository`, while tests can inject a fake repository.
 
 ```mermaid
 flowchart TD
     Client[HTTP Client] -->|request| Routes[calendar.routes.js<br/>requireRoles auth]
-    Routes --> Controller[calendar.controller.js<br/>async handlers]
+    Routes --> Controller[calendar.controller.js<br/>async handlers, UNCHANGED]
     Controller -->|validate| Validation[calendar.schema.js<br/>UNCHANGED]
-    Controller -->|await| Service[calendar.service.js<br/>async, MongoDB-backed]
-    Service --> Serializer[serializeEvent<br/>_id→id, Date→ISO]
-    Service --> Model[calendar.model.js<br/>Mongoose model]
+    Controller -->|await| Service[calendar.service.js<br/>CalendarService, async]
+    Service -->|delegates to| Repo[CalendarEventRepository<br/>abstract contract, storage-agnostic]
+
+    subgraph Injectable["injectable / mockable boundary"]
+        Repo -.->|production default| Adapter[MongoCalendarEventRepository<br/>adapter + serializeEvent _id→id, Date→ISO]
+        Repo -.->|tests inject| Fake[Fake/mock repository<br/>DB-free delegation tests]
+    end
+
+    Adapter --> Model[calendar.model.js<br/>Mongoose model]
     Model --> Mongo[(MongoDB<br/>calendarevents)]
     Controller -->|next error| ErrorMw[backend error.js<br/>status || 500]
     Connection[backend/database/connection.js] -.-> Mongo
 ```
+
+The service is constructed via `new CalendarService(repository)` (default
+`new MongoCalendarEventRepository()`); `getCalendarService()` remains a lazy singleton
+accessor. The repository contract is `createEvent`, `getEventById`, `listEvents`,
+`queryEventsByRange`, `updateEvent`, and `deleteEvent`; the service maps its public method
+names onto these (see Components and Interfaces).
 
 ### Request flows
 
@@ -90,15 +124,36 @@ err.statusCode || 500`) maps to **500** — distinct from 400 (Requirement 12.2,
 
 ## Components and Interfaces
 
-### 1. Mongoose model — `apps/calendar/src/schema/calendar.model.js` (new)
+The persistence concern is split across four layers — model, repository abstraction,
+MongoDB adapter, and service — plus the unchanged controller and validation/routes.
 
-Follows `vendor.schema.js` structure: String `_id` defaulting to a stringified ObjectId,
-`timestamps: true`, an explicit `collection` name, and indexes.
+### Sub-issue mapping
+
+| Layer                                              | File                                              | Sub-issue |
+| -------------------------------------------------- | ------------------------------------------------- | --------- |
+| Mongoose model (+ workflow-extensibility fields)   | `schema/calendar.model.js`                        | **#41**   |
+| Repository abstraction (storage-agnostic contract) | `repository/calendar-event.repository.js`         | **#43**   |
+| MongoDB adapter (+ serializer)                     | `repository/mongo-calendar-event.repository.js`   | **#44**   |
+| Refactored service (DI + delegation)               | `service/calendar.service.js`                     | **#45**   |
+| Test suite (5 files, 82 tests)                     | `*.test.js` across schema/service/controller/repo | **#46**   |
+
+All sit under parent issue **#22**.
+
+### 1. Mongoose model — `apps/calendar/src/schema/calendar.model.js` (#41)
+
+Defines a String `_id` defaulting to a stringified ObjectId, `timestamps: true`, an
+explicit `collection` name, and indexes. Beyond the core API fields it carries
+foundational **workflow-extensibility** fields (`status`, `recurrence`, `category`,
+`assignedTeams`, `assignees`, `coordinators`, `linkedTaskIds`) that are persisted but
+intentionally **not** exposed by the current API serializer, so the API response stays the
+exact 11-field set. There are indexes on `startsAt` (ascending listing/range queries) and
+`status` (future lifecycle filtering).
 
 ```js
 import mongoose from 'mongoose';
 
 const EVENT_TYPES = ['task-deadline', 'event', 'milestone'];
+const STATUS_VALUES = ['scheduled', 'in-progress', 'completed', 'cancelled'];
 
 const calendarEventSchema = new mongoose.Schema(
   {
@@ -106,14 +161,33 @@ const calendarEventSchema = new mongoose.Schema(
       type: String,
       default: () => new mongoose.Types.ObjectId().toString()
     },
+
+    // --- CORE (exposed by current API) ---
     title: { type: String, required: true, trim: true },
     eventType: { type: String, required: true, enum: EVENT_TYPES },
     startsAt: { type: Date, required: true },
     endsAt: { type: Date, default: null },
     description: { type: String, default: null },
-    linkedTaskId: { type: String, default: null },
-    linkedEventId: { type: String, default: null },
-    createdBy: { type: String, required: true }
+
+    // --- LINKAGE ---
+    linkedTaskId: { type: String, default: null }, // singular, exposed by API
+    linkedEventId: { type: String, default: null }, // singular, exposed by API
+    linkedTaskIds: { type: [String], default: [] }, // multi-link, foundational
+
+    // --- CORE (exposed by current API) ---
+    createdBy: { type: String, required: true },
+
+    // --- LIFECYCLE (foundational, not yet exposed) ---
+    status: { type: String, enum: STATUS_VALUES, default: 'scheduled' },
+
+    // --- WORKFLOW OWNERSHIP (foundational, not yet exposed) ---
+    assignedTeams: { type: [String], default: [] },
+    assignees: { type: [String], default: [] },
+    coordinators: { type: [String], default: [] },
+
+    // --- RECURRENCE / CATEGORIZATION (foundational, not yet exposed) ---
+    recurrence: { type: mongoose.Schema.Types.Mixed, default: null },
+    category: { type: String, default: null }
   },
   {
     timestamps: true,
@@ -121,8 +195,10 @@ const calendarEventSchema = new mongoose.Schema(
   }
 );
 
-// Ascending index supports ascending-ordered listing and range queries.
+// Ascending index supports ascending-ordered listing and date-range queries.
 calendarEventSchema.index({ startsAt: 1 });
+// Lifecycle index supports filtering/aggregating events by workflow status.
+calendarEventSchema.index({ status: 1 });
 
 export const CalendarEvent = mongoose.model(
   'CalendarEvent',
@@ -137,21 +213,91 @@ Notes:
   the controller-level `calendar.schema.js` already rejects bad values with a 400 first.
 - The collection name `calendarevents` (Requirement 1.3) is set explicitly rather than
   relying on Mongoose pluralization, to make the contract unambiguous.
+- The workflow-extensibility fields are optional and sensibly defaulted so existing create
+  calls keep working; they are excluded from the adapter's serializer.
 
-### 2. Serializer — `serializeEvent(doc)` (private helper in the service)
+### 2. Repository abstraction — `apps/calendar/src/repository/calendar-event.repository.js` (#43)
 
-A pure function mapping a Mongoose document or `.lean()` object to the API response shape.
+A storage-agnostic contract modelled as an abstract base class (plain JS has no native
+interfaces). It does **not** import mongoose or the model. Every method throws a clear
+"not implemented" error so a subclass that forgets to override one fails loudly, and the
+contract is documented in one authoritative place. Services depend on this type so the
+storage engine stays swappable and the service stays mockable.
 
-Responsibilities:
+The contract (all returning normalized domain objects with `id` and ISO 8601 date strings,
+never raw documents):
 
-- Map `_id → id`; never expose `_id`.
-- Emit **exactly** these keys: `id`, `title`, `eventType`, `startsAt`, `endsAt`,
-  `description`, `linkedTaskId`, `linkedEventId`, `createdBy`, `createdAt`, `updatedAt`.
-- Convert `Date` values to ISO 8601 strings via `toISOString()`; pass through `null`
-  for nullable date fields (`endsAt`).
-- Preserve `null` for nullable string fields (`description`, `linkedTaskId`, `linkedEventId`).
+- `createEvent(payload)` → `Promise<CalendarEvent>`
+- `getEventById(id)` → `Promise<CalendarEvent | null>`
+- `listEvents()` → `Promise<CalendarEvent[]>` (ordered by `startsAt` asc, then `id`)
+- `queryEventsByRange(startDate, endDate)` → `Promise<CalendarEvent[]>` (inclusive bounds)
+- `updateEvent(id, changes)` → `Promise<CalendarEvent | null>` (partial update; forward-looking)
+- `deleteEvent(id)` → `Promise<boolean>`
 
 ```js
+/**
+ * Abstract base class declaring the calendar event persistence contract.
+ * Storage-agnostic: no mongoose / model imports. Concrete adapters extend
+ * this and override every method.
+ * @abstract
+ */
+export class CalendarEventRepository {
+  async createEvent(payload) {
+    throw new Error(
+      'CalendarEventRepository.createEvent must be implemented by a subclass'
+    );
+  }
+
+  async getEventById(id) {
+    throw new Error(
+      'CalendarEventRepository.getEventById must be implemented by a subclass'
+    );
+  }
+
+  async listEvents() {
+    throw new Error(
+      'CalendarEventRepository.listEvents must be implemented by a subclass'
+    );
+  }
+
+  async queryEventsByRange(startDate, endDate) {
+    throw new Error(
+      'CalendarEventRepository.queryEventsByRange must be implemented by a subclass'
+    );
+  }
+
+  async updateEvent(id, changes) {
+    throw new Error(
+      'CalendarEventRepository.updateEvent must be implemented by a subclass'
+    );
+  }
+
+  async deleteEvent(id) {
+    throw new Error(
+      'CalendarEventRepository.deleteEvent must be implemented by a subclass'
+    );
+  }
+}
+
+export default CalendarEventRepository;
+```
+
+`updateEvent` is part of the contract to support future event editing (forward-looking for
+issue #23) even though the current service does not yet expose an update operation.
+
+### 3. MongoDB adapter — `apps/calendar/src/repository/mongo-calendar-event.repository.js` (#44)
+
+`MongoCalendarEventRepository extends CalendarEventRepository` — the single place the
+storage-agnostic contract is bound to the Mongoose model. It **owns** the `toIso`/
+`serializeEvent` normalization: every method that resolves with an event resolves with the
+normalized 11-key domain object (`_id → id`, `Date → ISO 8601`, nulls preserved), never a
+raw Mongoose document. Database errors are **not** swallowed; they propagate (reject) to be
+handled upstream.
+
+```js
+import { CalendarEvent } from '../schema/calendar.model.js';
+import { CalendarEventRepository } from './calendar-event.repository.js';
+
 function toIso(value) {
   if (value == null) return null;
   return value instanceof Date
@@ -159,6 +305,8 @@ function toIso(value) {
     : new Date(value).toISOString();
 }
 
+// Maps _id -> id, emits exactly the 11 documented keys, converts Date fields to
+// ISO 8601 strings, and preserves null for nullable fields.
 function serializeEvent(doc) {
   if (!doc) return null;
   const obj = typeof doc.toObject === 'function' ? doc.toObject() : doc;
@@ -176,17 +324,8 @@ function serializeEvent(doc) {
     updatedAt: toIso(obj.updatedAt)
   };
 }
-```
 
-### 3. Service — `apps/calendar/src/service/calendar.service.js` (rewritten)
-
-Same public surface and singleton accessor as today; methods become `async`. The `Map` is
-removed entirely (Requirement 1.4).
-
-```js
-import { CalendarEvent } from '../schema/calendar.model.js';
-
-class CalendarService {
+export class MongoCalendarEventRepository extends CalendarEventRepository {
   async createEvent(payload) {
     const doc = await CalendarEvent.create({
       title: payload.title,
@@ -201,6 +340,11 @@ class CalendarService {
     return serializeEvent(doc);
   }
 
+  async getEventById(id) {
+    if (!id) return null;
+    return serializeEvent(await CalendarEvent.findById(id).lean());
+  }
+
   async listEvents() {
     const docs = await CalendarEvent.find()
       .sort({ startsAt: 1, _id: 1 })
@@ -208,7 +352,7 @@ class CalendarService {
     return docs.map(serializeEvent);
   }
 
-  async getEventsBetween(startDate, endDate) {
+  async queryEventsByRange(startDate, endDate) {
     const docs = await CalendarEvent.find({
       startsAt: { $gte: new Date(startDate), $lte: new Date(endDate) }
     })
@@ -217,41 +361,115 @@ class CalendarService {
     return docs.map(serializeEvent);
   }
 
-  async getEvent(eventId) {
-    if (!eventId) return null; // null/undefined/empty → null (Req 7.3)
-    const doc = await CalendarEvent.findById(eventId).lean();
-    return serializeEvent(doc); // no match → serializeEvent(null) → null
+  async updateEvent(id, changes) {
+    if (!id) return null;
+    const result = await CalendarEvent.findByIdAndUpdate(
+      id,
+      { $set: changes },
+      { new: true, runValidators: true }
+    ).lean();
+    return serializeEvent(result);
   }
 
-  async deleteEvent(eventId) {
-    if (!eventId) return false; // absent/null/empty → falsy (Req 8.4)
-    const result = await CalendarEvent.deleteOne({ _id: eventId });
+  async deleteEvent(id) {
+    if (!id) return false;
+    const result = await CalendarEvent.deleteOne({ _id: id });
     return result.deletedCount > 0;
   }
 }
 
-const calendarService = new CalendarService();
+export default MongoCalendarEventRepository;
+```
+
+Behavioral notes:
+
+- `serializeEvent` excludes the workflow-extensibility fields, enforcing the exact 11-key
+  API response shape (Property 10).
+- Guarded inputs (null/undefined/empty id) short-circuit to `null`/`false` in
+  `getEventById`/`updateEvent`/`deleteEvent` without touching the database (Req 7.3, 8.4).
+- DB errors are never caught here, so rejections propagate through the service to the
+  controller (Req 12.1–12.5). A failed `create` persists nothing; a failed `delete`/`update`
+  leaves the record intact.
+- Tie-break ordering uses `_id` ascending, which equals `id` ascending since `id` is `_id`
+  (Requirement 5.2, 6.2).
+
+### 4. Service — `apps/calendar/src/service/calendar.service.js` (#45, refactored)
+
+`CalendarService` is now **exported** and takes an injectable repository via its
+constructor (defaulting to `new MongoCalendarEventRepository()`). It owns no persistence or
+normalization logic; every public method delegates to the injected repository. Repository
+rejections are intentionally **not** caught here — they propagate to the controller.
+`getCalendarService()` remains a lazy singleton accessor and the public method surface is
+unchanged, so the controller is unaffected.
+
+Method delegation (public service method → repository contract method):
+
+- `createEvent` → `repository.createEvent`
+- `listEvents` → `repository.listEvents`
+- `getEventsBetween` → `repository.queryEventsByRange`
+- `getEvent` → `repository.getEventById`
+- `deleteEvent` → `repository.deleteEvent`
+
+```js
+import { MongoCalendarEventRepository } from '../repository/mongo-calendar-event.repository.js';
+
+export class CalendarService {
+  /**
+   * @param {import('../repository/calendar-event.repository.js').CalendarEventRepository} [repository]
+   *   Persistence adapter to delegate to. Defaults to a new MongoCalendarEventRepository.
+   */
+  constructor(repository = new MongoCalendarEventRepository()) {
+    this.repository = repository;
+  }
+
+  async createEvent(payload) {
+    return this.repository.createEvent(payload);
+  }
+
+  async listEvents() {
+    return this.repository.listEvents();
+  }
+
+  async getEventsBetween(startDate, endDate) {
+    return this.repository.queryEventsByRange(startDate, endDate);
+  }
+
+  async getEvent(eventId) {
+    return this.repository.getEventById(eventId);
+  }
+
+  async deleteEvent(eventId) {
+    return this.repository.deleteEvent(eventId);
+  }
+}
+
+let calendarService = null;
+
 export function getCalendarService() {
+  if (!calendarService) {
+    calendarService = new CalendarService();
+  }
   return calendarService;
 }
+
 export default getCalendarService;
 ```
 
 Behavioral notes:
 
-- `createEvent` lets DB/validation errors reject (no try/catch swallowing) so the controller
-  can propagate them (Requirement 12.1, 12.4). A failed `create` persists nothing.
-- `getEvent` returns `null` for both missing ids and no-match (Requirement 7.2, 7.3) without
-  signaling an error. `findById` with a non-matching String `_id` resolves to `null`.
-- `deleteEvent` uses `deleteOne` and returns a boolean (Requirement 8.1, 8.2, 8.4). A DB
-  failure rejects, leaving the record intact (Requirement 12.5).
-- Tie-break ordering uses `_id` ascending, which equals `id` ascending since `id` is `_id`
-  (Requirement 5.2, 6.2).
+- Because the repository normalizes results, `getEvent` returns `null` for both missing ids
+  and no-match (Req 7.2, 7.3), and `deleteEvent` returns a boolean (Req 8.1, 8.2, 8.4).
+- DB/validation errors reject through the delegation (no swallowing), so the controller can
+  propagate them (Req 12.1, 12.4).
+- The constructor seam lets tests inject a fake/mock repository for DB-free delegation tests
+  (issue #46).
 
-### 4. Controller — `apps/calendar/src/controller/calendar.controller.js` (modified)
+### 5. Controller — `apps/calendar/src/controller/calendar.controller.js` (unchanged)
 
-Each handler becomes `async`, awaits the service, and wraps the service call in `try/catch`
-to forward DB rejections via `next(error)`. Validation and 404 logic are unchanged.
+The controller is unchanged by the repository refactor. Each handler is `async`, awaits the
+service, and wraps the service call in `try/catch` to forward DB rejections via
+`next(error)`. Validation and 404 logic are unchanged. Because the service keeps the same
+public method surface and singleton accessor, no controller change was needed.
 
 ```js
 async function create(req, res, next) {
@@ -352,7 +570,7 @@ async function deleteEvent(req, res, next) {
 }
 ```
 
-### 5. Validation, routes, module wiring — unchanged
+### 6. Validation, routes, module wiring — unchanged
 
 - `calendar.schema.js` (validation) is **not modified** (Requirement 10).
 - `calendar.routes.js` registration and `requireRoles('admin','coordinator')` for
@@ -360,7 +578,7 @@ async function deleteEvent(req, res, next) {
 - `index.js` continues to call `getCalendarService()` indirectly via the controller; no
   change required.
 
-### 6. Test tooling — `apps/calendar/package.json`, `vitest.config.js` (new)
+### 7. Test tooling — `apps/calendar/package.json`, `vitest.config.js` (new)
 
 Calendar currently lacks an app-level `package.json`/test config. Mirror the vendor module:
 
@@ -405,15 +623,15 @@ the persisted document also carries the following **optional, sensibly-defaulted
 fields. They are written/persisted but intentionally **excluded** from
 `serializeEvent`, so the API response shape remains the exact 11-field set above.
 
-| Field           | Mongo type       | Required | Default     | Group              | Purpose                                                       |
-| --------------- | ---------------- | -------- | ----------- | ------------------ | ------------------------------------------------------------- |
-| `status`        | String (enum)    | no       | `scheduled` | lifecycle          | Workflow state: `scheduled`\|`in-progress`\|`completed`\|`cancelled` (indexed) |
-| `recurrence`    | Mixed/Object     | no       | `null`      | recurrence         | Placeholder for future RRULE-style recurring scheduling       |
-| `category`      | String           | no       | `null`      | recurrence         | Optional categorization label                                 |
-| `assignedTeams` | [String]         | no       | `[]`        | workflow ownership | Teams responsible for the event                               |
-| `assignees`     | [String]         | no       | `[]`        | workflow ownership | Individual assignees                                          |
-| `coordinators`  | [String]         | no       | `[]`        | workflow ownership | Coordinating users                                            |
-| `linkedTaskIds` | [String]         | no       | `[]`        | linkage            | Forward-looking multi-link (singular `linkedTaskId` retained) |
+| Field           | Mongo type    | Required | Default     | Group              | Purpose                                                                        |
+| --------------- | ------------- | -------- | ----------- | ------------------ | ------------------------------------------------------------------------------ |
+| `status`        | String (enum) | no       | `scheduled` | lifecycle          | Workflow state: `scheduled`\|`in-progress`\|`completed`\|`cancelled` (indexed) |
+| `recurrence`    | Mixed/Object  | no       | `null`      | recurrence         | Placeholder for future RRULE-style recurring scheduling                        |
+| `category`      | String        | no       | `null`      | recurrence         | Optional categorization label                                                  |
+| `assignedTeams` | [String]      | no       | `[]`        | workflow ownership | Teams responsible for the event                                                |
+| `assignees`     | [String]      | no       | `[]`        | workflow ownership | Individual assignees                                                           |
+| `coordinators`  | [String]      | no       | `[]`        | workflow ownership | Coordinating users                                                             |
+| `linkedTaskIds` | [String]      | no       | `[]`        | linkage            | Forward-looking multi-link (singular `linkedTaskId` retained)                  |
 
 **Note:** These workflow ownership arrays, lifecycle status, recurrence, and the
 multi-link `linkedTaskIds` are **foundational** groundwork for upcoming workflow
@@ -577,6 +795,17 @@ with large input spaces and clear universal invariants. Property-based tests are
 complemented by example, edge-case, integration, and smoke tests for behaviors that do not
 vary meaningfully with input (validation, authorization, async wiring, configuration).
 
+The layered architecture is covered by **5 test files totaling 82 tests** (#46), spread
+across the layers so each seam is verified independently:
+
+| Test file                                            | Layer / focus                                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `schema/calendar.model.test.js`                      | Model schema: required fields, enums, defaults (incl. workflow-extensibility fields), collection name                    |
+| `service/calendar.service.test.js`                   | Service behavior end-to-end via the real MongoDB adapter — property tests + edge cases (`mongodb-memory-server`)         |
+| `controller/calendar.controller.test.js`             | Controller wiring: validation, authorization, 404, and error-forwarding (`next(err)`)                                    |
+| `repository/mongo-calendar-event.repository.test.js` | MongoDB adapter integration incl. `updateEvent` and 2 adapter-level properties (`mongodb-memory-server`)                 |
+| `service/calendar.service.repository.test.js`        | **DB-free** delegation/decoupling: a fake/mock repository proves the service delegates each method and holds no DB logic |
+
 ### Tooling
 
 - **Test runner:** `vitest` (matching the vendor module's `vitest run` script).
@@ -614,10 +843,19 @@ vary meaningfully with input (validation, authorization, async wiring, configura
   400 + `VALIDATION_ERROR`.
 - **Authorization (Req 11):** integration examples per route verifying `admin`/`coordinator`
   may create/delete and other roles are rejected (middleware unchanged).
-- **Async/error wiring (Req 3, 12):** mock the model to throw and assert the service method
-  **rejects**, the controller forwards via `next(err)`, and the response is **500** (distinct
-  from 400); assert a failed `create` persists nothing and a failed `delete` leaves the
-  record intact.
+- **Async/error wiring (Req 3, 12):** make the repository (or model) reject and assert the
+  service method **rejects**, the controller forwards via `next(err)`, and the response is
+  **500** (distinct from 400); assert a failed `create` persists nothing and a failed
+  `delete` leaves the record intact.
+- **Repository adapter integration (#44):** `mongo-calendar-event.repository.test.js`
+  exercises the adapter directly against `mongodb-memory-server` — create/get/list/range/
+  delete plus `updateEvent`, the `serializeEvent` 11-key shape, and 2 adapter-level
+  properties.
+- **DB-free service delegation (#45/#46):** `calendar.service.repository.test.js` injects a
+  fake repository (no database) to verify each `CalendarService` method delegates to the
+  matching repository method (`createEvent`→`createEvent`, `getEvent`→`getEventById`,
+  `getEventsBetween`→`queryEventsByRange`, etc.) and that the service adds no persistence or
+  normalization logic of its own — proving the storage decoupling.
 - **Edge cases:** empty store → `listEvents` returns `[]` (5.3); range matching nothing and
   `start > end` → `[]` (6.3, 6.4); `getEvent`/`deleteEvent` with non-matching and
   null/undefined/empty ids → `null`/`false` (7.2, 7.3, 8.2, 8.4); non-enum `eventType` and
