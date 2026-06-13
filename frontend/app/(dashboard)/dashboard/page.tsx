@@ -1,6 +1,18 @@
-import Link from 'next/link';
 import { ExtensionPoint } from '@/components/ExtensionPoint';
 import { API_BASE_URL } from '@/lib/api/client';
+import {
+  dashboardStats,
+  dashboardQuickActions,
+  dashboardActivity,
+  dashboardEvents,
+  dashboardTasks
+} from '@/lib/mock/dashboard';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
+import { RecentActivity } from './components/RecentActivity';
+import { UpcomingEvents } from './components/UpcomingEvents';
+import { TaskList } from './components/TaskList';
+import { DashboardSlot } from './components/DashboardSlot';
 
 export default async function Dashboard() {
   let activePlugins: string[] = [];
@@ -53,44 +65,57 @@ export default async function Dashboard() {
           context={{ dashboard: true }}
         />
 
-        {/* Quick Stats */}
-        <ExtensionPoint
-          id="dashboard-stats"
-          activePlugins={activePlugins}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
-        />
+        {/* Quick Stats — plugin widgets when available, mock data as fallback */}
+        <div className="mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <DashboardSlot
+            extensionId="dashboard-stats"
+            activePlugins={activePlugins}
+          >
+            {dashboardStats.map((stat) => (
+              <StatCard key={stat.id} stat={stat} />
+            ))}
+          </DashboardSlot>
+        </div>
 
-        {/* Quick Actions */}
+        {/* Quick Actions — plugin widgets when available, mock data as fallback */}
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
             Quick Actions
           </p>
-          <ExtensionPoint
-            id="dashboard-actions"
-            activePlugins={activePlugins}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <DashboardSlot
+              extensionId="dashboard-actions"
+              activePlugins={activePlugins}
+            >
+              {dashboardQuickActions.map((action) => (
+                <QuickActionCard key={action.id} action={action} />
+              ))}
+            </DashboardSlot>
+          </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Activity + Upcoming Events */}
+        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
+              Recent Activity
+            </p>
+            <RecentActivity activities={dashboardActivity} />
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
+              Upcoming Events
+            </p>
+            <UpcomingEvents events={dashboardEvents} />
+          </div>
+        </div>
+
+        {/* My Tasks */}
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
-            Recent Activity
+            My Tasks
           </p>
-          <div className="bg-card/80 backdrop-blur rounded-xl border border-border/60 p-8 md:p-12 text-center shadow-sm">
-            <p className="text-muted-foreground text-sm md:text-base m-0">
-              No recent activity. Create a club or schedule an event to get
-              started!
-            </p>
-            <div className="mt-6 flex justify-center">
-              <Link
-                href="/events/new"
-                className="inline-flex items-center justify-center min-h-[40px] px-6 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-medium transition-colors text-sm"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
+          <TaskList tasks={dashboardTasks} />
         </div>
       </div>
     </div>
