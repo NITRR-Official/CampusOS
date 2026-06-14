@@ -20,8 +20,18 @@ function createHttpError(status, message, code, details) {
   return error;
 }
 
-export function createCalendarController() {
+export function createCalendarController({ eventBus } = {}) {
   const calendarService = getCalendarService();
+
+  /**
+   * Emit a calendar lifecycle event on the core event bus, if one is wired.
+   * Per ADR-008, only non-sensitive identifiers/metadata are emitted (no PII).
+   */
+  function emitEvent(name, payload) {
+    if (eventBus && typeof eventBus.emit === 'function') {
+      eventBus.emit(name, payload);
+    }
+  }
 
   async function create(req, res, next) {
     const { errors, value } = validateCreateCalendarEventPayload(req.body);
@@ -47,6 +57,11 @@ export function createCalendarController() {
       res.status(201).json({
         success: true,
         data: event
+      });
+
+      emitEvent('calendar:created', {
+        eventId: event.id,
+        eventType: event.eventType
       });
     } catch (err) {
       next(err);
@@ -141,6 +156,8 @@ export function createCalendarController() {
         success: true,
         data: { deleted: true, eventId }
       });
+
+      emitEvent('calendar:deleted', { eventId });
     } catch (err) {
       next(err);
     }

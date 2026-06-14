@@ -74,6 +74,92 @@ describe('Calendar controller and middleware wiring', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Core event bus wiring (ADR-008) - emits id-only lifecycle events
+  // ---------------------------------------------------------------------------
+
+  describe('event bus emission', () => {
+    it('emits calendar:created with id + eventType after a successful create', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+      const res = makeRes();
+
+      await controller.create(
+        { body: validBody, user: { id: 'user-1' } },
+        res,
+        vi.fn()
+      );
+
+      expect(res.statusCode).toBe(201);
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(emit).toHaveBeenCalledWith('calendar:created', {
+        eventId: res.body.data.id,
+        eventType: 'event'
+      });
+    });
+
+    it('emits calendar:deleted with the eventId after a successful delete', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+
+      const createRes = makeRes();
+      await controller.create(
+        { body: validBody, user: { id: 'user-1' } },
+        createRes,
+        vi.fn()
+      );
+      const { id } = createRes.body.data;
+      emit.mockClear();
+
+      const deleteRes = makeRes();
+      await controller.deleteEvent(
+        { params: { eventId: id } },
+        deleteRes,
+        vi.fn()
+      );
+
+      expect(deleteRes.statusCode).toBe(200);
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(emit).toHaveBeenCalledWith('calendar:deleted', { eventId: id });
+    });
+
+    it('does not emit when validation fails', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+      const next = vi.fn();
+
+      await controller.create({ body: { title: 'x' } }, makeRes(), next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('does not emit calendar:deleted when the event does not exist', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+      const next = vi.fn();
+
+      await controller.deleteEvent(
+        { params: { eventId: 'missing-id' } },
+        makeRes(),
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
+    it('works without an event bus (no-op emit)', async () => {
+      const controller = createCalendarController();
+      const res = makeRes();
+
+      await expect(
+        controller.create({ body: validBody, user: { id: 'u' } }, res, vi.fn())
+      ).resolves.toBeUndefined();
+      expect(res.statusCode).toBe(201);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Task 6.2 - Async / error wiring (Req 3.3, 3.4, 12.1, 12.2, 12.3, 12.4, 12.5)
   // ---------------------------------------------------------------------------
 

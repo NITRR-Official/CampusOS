@@ -598,6 +598,41 @@ Calendar currently lacks an app-level `package.json`/test config. Mirror the ven
 `index.js`, `routes/`, `controller/`). `mongodb-memory-server` must be available as a dev
 dependency (already used by the vendor suite).
 
+## Core Platform Integration
+
+The module wires into the two core systems the platform exposes, in addition to the
+service registry. This keeps the calendar module discoverable and decoupled per the
+project's architecture (ADR-008).
+
+### Permission registry (`registry.permissions`)
+
+`init()` registers the module's atomic permissions with the core `PermissionRegistry`
+so the platform (and a future super-admin UI) can discover them without static coupling:
+
+- `calendar:create`, `calendar:read`, `calendar:update`, `calendar:delete` — all under
+  the `calendar` module group.
+
+Registration is the catalog concern only; **enforcement is unchanged** — the routes still
+use `requireRoles('admin','coordinator')` for `POST`/`DELETE`. The registration is guarded
+so the module still loads if a host lacks `registry.permissions`.
+
+### Event bus (ADR-008)
+
+The `eventBus` injected as the third `init(app, registry, eventBus)` argument is passed to
+the controller, which emits **id-only** lifecycle events after a successful mutation (no
+PII, per the ADR's payload convention):
+
+| Operation | Event              | Payload                           |
+| --------- | ------------------ | --------------------------------- |
+| create    | `calendar:created` | `{ eventId, eventType }`          |
+| delete    | `calendar:deleted` | `{ eventId }`                     |
+| update    | `calendar:updated` | _(reserved for the #23 endpoint)_ |
+
+Events are emitted only on success — never on validation failure, a 404, or a DB error.
+The emit is a no-op when no event bus is wired, so the controller stays testable in
+isolation. This lets other plugins (e.g. notifications, workflow) react to calendar
+changes without importing the calendar module.
+
 ## Data Models
 
 ### Calendar_Event (persisted document)
