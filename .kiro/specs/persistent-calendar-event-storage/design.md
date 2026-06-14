@@ -62,6 +62,25 @@ logic and storage:
 | Service return shape        | Plain serialized event objects (and `boolean` for delete)                                                                                     | Preserves the pre-migration contract the controller and clients already expect. Unlike `vendor.service.js`, calendar does **not** wrap results in `{ success, ... }`; the existing controller reads the value directly, so the rewrite keeps that contract.                                                                                                                                                                                                                                          |
 | Date storage                | Store `startsAt`/`endsAt` as Mongoose `Date`                                                                                                  | Enables correct range queries and ascending sort at the database level (Requirement 6, 5.2). The serializer converts back to ISO strings on read.                                                                                                                                                                                                                                                                                                                                                    |
 
+### Trade-off: extensibility & repository layering vs. ADR-000
+
+ADR-000 states the general principle "do not over-engineer / don't build for future
+flexibility," and the canonical module layout (`COPILOT.md`, `CODING_GUIDELINES.md`) is
+`controller/ routes/ schema/ service/` with no `repository/` layer. This design
+**intentionally diverges** from that general guidance on two points:
+
+1. **Repository abstraction + adapter** (a new `repository/` layer), and
+2. **Forward-looking schema fields** (`status`, `recurrence`, `category`, `assignedTeams`,
+   `assignees`, `coordinators`, `linkedTaskIds`) that the current API does not yet expose.
+
+This is a **deliberate, maintainer-approved decision**, not an oversight: the parent epic
+issue #22 is explicitly scoped as _foundational_ work, and its sub-issues mandate exactly
+this structure — #41 (design an extensible schema for "future workflow extensibility"),
+#43 (create a repository abstraction), and #44 (implement a persistence adapter). Where the
+specific, newer sub-issues conflict with the older general ADR-000 guideline, the
+sub-issues win for this module. The extensibility fields remain inert and unexposed (the
+API response shape is unchanged) until the workflow features that consume them are built.
+
 ## Architecture
 
 The HTTP layering (routes → controller → service) is preserved. The service no longer
