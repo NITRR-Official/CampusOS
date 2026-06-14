@@ -32,7 +32,8 @@ const roleSchema = new mongoose.Schema({
           (p) => p === 'administrator' || registry.permissions.has(p)
         );
       },
-      message: (props) => `One or more permissions in [${props.value}] are not registered in the system.`
+      message: (props) =>
+        `One or more permissions in [${props.value}] are not registered in the system.`
     }
   },
   hierarchyLevel: { type: Number, default: 0 },

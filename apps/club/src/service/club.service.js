@@ -94,9 +94,10 @@ class ClubService {
 
     if (!ownerUser) {
       tempPassword = crypto.randomBytes(12).toString('hex');
-      const authServiceModule = await import('../../../auth/src/service/auth.service.js');
+      const authServiceModule =
+        await import('../../../auth/src/service/auth.service.js');
       const authService = authServiceModule.getAuthService();
-      
+
       ownerUser = await authService.createUser({
         name: `${club.name} Owner`,
         email: club.email,
@@ -155,7 +156,10 @@ class ClubService {
     const createdRoles = [];
     for (const t of templates) {
       // Check if role already exists (to prevent duplicates if pipeline runs twice)
-      let role = await Role.findOne({ clubId: club._id.toString(), name: t.name });
+      let role = await Role.findOne({
+        clubId: club._id.toString(),
+        name: t.name
+      });
       if (!role) {
         role = await Role.create({
           clubId: club._id.toString(),

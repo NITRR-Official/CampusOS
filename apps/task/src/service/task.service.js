@@ -26,7 +26,10 @@ async function resolveTeamMentions(text, clubId) {
 
     return mentionedTeamIds;
   } catch (error) {
-    console.error('[TaskService] Error resolving team mentions:', error.message);
+    console.error(
+      '[TaskService] Error resolving team mentions:',
+      error.message
+    );
     return [];
   }
 }
@@ -47,7 +50,7 @@ function createTaskRecord(payload) {
     dependsOn: [], // Array of task IDs this task depends on
     createdBy: payload.createdBy,
     clubId: payload.clubId || null,
-    assignedAt: (payload.assigneeName || payload.assignedTeamId) ? now : null,
+    assignedAt: payload.assigneeName || payload.assignedTeamId ? now : null,
     createdAt: now,
     updatedAt: now
   };

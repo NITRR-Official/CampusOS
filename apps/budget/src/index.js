@@ -7,7 +7,8 @@ import { registerBudgetRoutes } from './routes/budget.routes.js';
 
 export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
-  const requirePermissions = registry.getService('requirePermissions') || requireRoles;
+  const requirePermissions =
+    registry.getService('requirePermissions') || requireRoles;
 
   if (typeof requireRoles !== 'function') {
     throw new Error('Permission middleware service is not configured');
@@ -45,7 +46,8 @@ export async function init(app, registry, eventBus) {
       id: 'budget:manage',
       module: 'budget',
       label: 'Manage Budget',
-      description: 'Allows creating, updating, and approving/rejecting budgets and logging expenses'
+      description:
+        'Allows creating, updating, and approving/rejecting budgets and logging expenses'
     });
   }
 }

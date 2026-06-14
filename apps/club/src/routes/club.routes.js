@@ -1,4 +1,9 @@
-export function registerClubRoutes(app, clubController, requireRoles, requirePermissions) {
+export function registerClubRoutes(
+  app,
+  clubController,
+  requireRoles,
+  requirePermissions
+) {
   const manageClubRoles = requireRoles('admin', 'coordinator');
   const managePermissions = requirePermissions || requireRoles;
 
@@ -7,14 +12,8 @@ export function registerClubRoutes(app, clubController, requireRoles, requirePer
   app.post('/api/v1/clubs', clubController.create);
 
   // Super Admin approval endpoints
-  app.patch(
-    '/api/v1/clubs/:clubId/approve',
-    clubController.approveClub
-  );
-  app.patch(
-    '/api/v1/clubs/:clubId/reject',
-    clubController.rejectClub
-  );
+  app.patch('/api/v1/clubs/:clubId/approve', clubController.approveClub);
+  app.patch('/api/v1/clubs/:clubId/reject', clubController.rejectClub);
 
   // Member management (requires member:manage permission)
   app.post(
@@ -44,10 +43,7 @@ export function registerClubRoutes(app, clubController, requireRoles, requirePer
     managePermissions('role:manage'),
     clubController.createRole
   );
-  app.post(
-    '/api/v1/admin/clubs',
-    clubController.adminApproveClub
-  );
+  app.post('/api/v1/admin/clubs', clubController.adminApproveClub);
 }
 
 export default registerClubRoutes;

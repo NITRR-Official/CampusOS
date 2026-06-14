@@ -3,7 +3,8 @@ import { registerEventRoutes } from './routes/event.routes.js';
 
 export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
-  const requirePermissions = registry.getService('requirePermissions') || requireRoles;
+  const requirePermissions =
+    registry.getService('requirePermissions') || requireRoles;
 
   if (typeof requireRoles !== 'function') {
     throw new Error('Permission middleware service is not configured');

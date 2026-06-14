@@ -16,7 +16,8 @@ async function resolveResourceContext(req) {
   // 2. Event Context Lookup (since Event is stored in-memory in EventService)
   if (params.eventId) {
     try {
-      const eventServiceModule = await import('../../../apps/event/src/service/event.service.js');
+      const eventServiceModule =
+        await import('../../../apps/event/src/service/event.service.js');
       const eventService = eventServiceModule.getEventService();
       if (eventService) {
         const event = eventService.getEvent(params.eventId);
@@ -24,12 +25,19 @@ async function resolveResourceContext(req) {
           if (event.clubId) {
             return { clubId: event.clubId };
           } else {
-            return { personal: true, ownerId: event.createdBy, resource: event };
+            return {
+              personal: true,
+              ownerId: event.createdBy,
+              resource: event
+            };
           }
         }
       }
     } catch (e) {
-      console.error('[requirePermissions] Error resolving event context:', e.message);
+      console.error(
+        '[requirePermissions] Error resolving event context:',
+        e.message
+      );
     }
   }
 
@@ -44,7 +52,10 @@ async function resolveResourceContext(req) {
         }
       }
     } catch (e) {
-      console.error('[requirePermissions] Error resolving budget context:', e.message);
+      console.error(
+        '[requirePermissions] Error resolving budget context:',
+        e.message
+      );
     }
   }
 
@@ -61,7 +72,10 @@ async function resolveResourceContext(req) {
         }
       }
     } catch (e) {
-      console.error('[requirePermissions] Error resolving task context:', e.message);
+      console.error(
+        '[requirePermissions] Error resolving task context:',
+        e.message
+      );
     }
   }
 
@@ -132,7 +146,10 @@ export const requirePermissions = (requiredPermission) => {
         }
 
         // Check if user has administrator role or the specific permission
-        if (userPermissions.has('administrator') || userPermissions.has(requiredPermission)) {
+        if (
+          userPermissions.has('administrator') ||
+          userPermissions.has(requiredPermission)
+        ) {
           return next();
         }
 
@@ -158,7 +175,8 @@ export const requirePermissions = (requiredPermission) => {
         return res.status(403).json({
           success: false,
           error: 'Forbidden',
-          message: 'You do not own this resource and have not been granted access'
+          message:
+            'You do not own this resource and have not been granted access'
         });
       }
 

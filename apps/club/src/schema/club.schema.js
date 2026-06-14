@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 const VALID_ROLES = new Set(['admin', 'coordinator', 'volunteer']);
 
 function isValidRole(role) {
@@ -131,7 +131,13 @@ const clubSchema = new mongoose.Schema(
     instituteId: { type: String, required: true, trim: true },
     description: { type: String, default: null, trim: true },
     createdBy: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
     status: {
       type: String,
       enum: ['pending', 'approved', 'rejected'],
@@ -148,7 +154,8 @@ export function validateCreateRolePayload(payload = {}) {
   const permissions = Array.isArray(payload.permissions)
     ? payload.permissions.map(normalizeText).filter(Boolean)
     : [];
-  const hierarchyLevel = typeof payload.hierarchyLevel === 'number' ? payload.hierarchyLevel : 0;
+  const hierarchyLevel =
+    typeof payload.hierarchyLevel === 'number' ? payload.hierarchyLevel : 0;
   const roleType = normalizeText(payload.roleType) || 'role';
   const color = normalizeText(payload.color);
   const errors = [];
@@ -158,11 +165,17 @@ export function validateCreateRolePayload(payload = {}) {
   }
 
   if (hierarchyLevel < 0) {
-    errors.push({ field: 'hierarchyLevel', message: 'Hierarchy level must be 0 or higher' });
+    errors.push({
+      field: 'hierarchyLevel',
+      message: 'Hierarchy level must be 0 or higher'
+    });
   }
 
   if (roleType !== 'role' && roleType !== 'team') {
-    errors.push({ field: 'roleType', message: 'roleType must be role or team' });
+    errors.push({
+      field: 'roleType',
+      message: 'roleType must be role or team'
+    });
   }
 
   return {
@@ -187,7 +200,10 @@ export function validateAdminApprovePayload(payload = {}) {
   }
 
   if (action !== 'approve' && action !== 'reject') {
-    errors.push({ field: 'action', message: 'Action must be approve or reject' });
+    errors.push({
+      field: 'action',
+      message: 'Action must be approve or reject'
+    });
   }
 
   return {

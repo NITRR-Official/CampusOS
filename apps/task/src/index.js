@@ -3,7 +3,8 @@ import { registerTaskRoutes } from './routes/task.routes.js';
 
 export async function init(app, registry, eventBus) {
   const requireRoles = registry.getService('requireRoles');
-  const requirePermissions = registry.getService('requirePermissions') || requireRoles;
+  const requirePermissions =
+    registry.getService('requirePermissions') || requireRoles;
 
   if (typeof requireRoles !== 'function') {
     throw new Error('Permission middleware service is not configured');
@@ -28,7 +29,8 @@ export async function init(app, registry, eventBus) {
       id: 'task:manage',
       module: 'task',
       label: 'Manage Tasks',
-      description: 'Allows creating, assigning, updating, and managing dependencies of tasks'
+      description:
+        'Allows creating, assigning, updating, and managing dependencies of tasks'
     });
   }
 }
