@@ -1,59 +1,60 @@
-import crypto from 'node:crypto';
-// TODO - DB implementation in this plugin
-const calendarEventsById = new Map();
+import { MongoCalendarEventRepository } from '../repository/mongo-calendar-event.repository.js';
 
-class CalendarService {
-  createEvent(payload) {
-    const event = {
-      id: crypto.randomUUID(),
-      title: payload.title,
-      eventType: payload.eventType,
-      startsAt: payload.startsAt,
-      endsAt: payload.endsAt || null,
-      description: payload.description || null,
-      linkedTaskId: payload.linkedTaskId || null,
-      linkedEventId: payload.linkedEventId || null,
-      createdBy: payload.createdBy,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    calendarEventsById.set(event.id, event);
-    return event;
+/**
+ * Calendar workflow service (GitHub issue #45, sub-issue of #22).
+ *
+ * This service depends on the storage-agnostic
+ * {@link import('../repository/calendar-event.repository.js').CalendarEventRepository}
+ * abstraction rather than on a database driver directly. It owns no persistence
+ * or normalization logic of its own; every public method delegates to the
+ * injected repository, which is responsible for talking to the underlying store
+ * and returning normalized domain objects (`id` + ISO 8601 date strings).
+ *
+ * The repository is injected via the constructor so the service can be tested
+ * with a fake/mock repository (issue #46) without a real database. By default
+ * it uses the MongoDB-backed adapter.
+ *
+ * Repository rejections are intentionally NOT caught here; they propagate to the
+ * controller layer, which is responsible for error handling.
+ */
+export class CalendarService {
+  /**
+   * @param {import('../repository/calendar-event.repository.js').CalendarEventRepository} [repository]
+   *   The persistence adapter to delegate to. Defaults to a new
+   *   {@link MongoCalendarEventRepository}.
+   */
+  constructor(repository = new MongoCalendarEventRepository()) {
+    this.repository = repository;
   }
 
-  listEvents() {
-    return Array.from(calendarEventsById.values()).sort((left, right) => {
-      return Date.parse(left.startsAt) - Date.parse(right.startsAt);
-    });
+  async createEvent(payload) {
+    return this.repository.createEvent(payload);
   }
 
-  getEventsBetween(startDate, endDate) {
-    const start = Date.parse(startDate);
-    const end = Date.parse(endDate);
-
-    return Array.from(calendarEventsById.values())
-      .filter((event) => {
-        const eventStart = Date.parse(event.startsAt);
-        return eventStart >= start && eventStart <= end;
-      })
-      .sort(
-        (left, right) => Date.parse(left.startsAt) - Date.parse(right.startsAt)
-      );
+  async listEvents() {
+    return this.repository.listEvents();
   }
 
-  getEvent(eventId) {
-    return calendarEventsById.get(eventId) || null;
+  async getEventsBetween(startDate, endDate) {
+    return this.repository.queryEventsByRange(startDate, endDate);
   }
 
-  deleteEvent(eventId) {
-    return calendarEventsById.delete(eventId);
+  async getEvent(eventId) {
+    return this.repository.getEventById(eventId);
+  }
+
+  async deleteEvent(eventId) {
+    return this.repository.deleteEvent(eventId);
   }
 }
 
-const calendarService = new CalendarService();
+let calendarService = null;
 
 export function getCalendarService() {
+  if (!calendarService) {
+    calendarService = new CalendarService();
+  }
+
   return calendarService;
 }
 

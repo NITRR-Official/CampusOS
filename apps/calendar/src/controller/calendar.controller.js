@@ -20,10 +20,20 @@ function createHttpError(status, message, code, details) {
   return error;
 }
 
-export function createCalendarController() {
+export function createCalendarController({ eventBus } = {}) {
   const calendarService = getCalendarService();
 
-  function create(req, res, next) {
+  /**
+   * Emit a calendar lifecycle event on the core event bus, if one is wired.
+   * Per ADR-008, only non-sensitive identifiers/metadata are emitted (no PII).
+   */
+  function emitEvent(name, payload) {
+    if (eventBus && typeof eventBus.emit === 'function') {
+      eventBus.emit(name, payload);
+    }
+  }
+
+  async function create(req, res, next) {
     const { errors, value } = validateCreateCalendarEventPayload(req.body);
 
     if (errors.length > 0) {
@@ -38,25 +48,38 @@ export function createCalendarController() {
       return;
     }
 
-    const event = calendarService.createEvent({
-      ...value,
-      createdBy: req.user?.id || 'unknown'
-    });
+    try {
+      const event = await calendarService.createEvent({
+        ...value,
+        createdBy: req.user?.id || 'unknown'
+      });
 
-    res.status(201).json({
-      success: true,
-      data: event
-    });
+      res.status(201).json({
+        success: true,
+        data: event
+      });
+
+      emitEvent('calendar:created', {
+        eventId: event.id,
+        eventType: event.eventType
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  function list(req, res) {
-    res.status(200).json({
-      success: true,
-      data: calendarService.listEvents()
-    });
+  async function list(req, res, next) {
+    try {
+      res.status(200).json({
+        success: true,
+        data: await calendarService.listEvents()
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  function queryByRange(req, res, next) {
+  async function queryByRange(req, res, next) {
     const { errors, value } = validateQueryCalendarEventsPayload(req.query);
 
     if (errors.length > 0) {
@@ -71,57 +94,73 @@ export function createCalendarController() {
       return;
     }
 
-    const events = calendarService.getEventsBetween(
-      value.startDate,
-      value.endDate
-    );
+    try {
+      const events = await calendarService.getEventsBetween(
+        value.startDate,
+        value.endDate
+      );
 
-    res.status(200).json({
-      success: true,
-      data: events
-    });
+      res.status(200).json({
+        success: true,
+        data: events
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  function getById(req, res, next) {
+  async function getById(req, res, next) {
     const { eventId } = req.params;
-    const event = calendarService.getEvent(eventId);
 
-    if (!event) {
-      next(
-        createHttpError(
-          404,
-          'Calendar event not found',
-          'CALENDAR_EVENT_NOT_FOUND'
-        )
-      );
-      return;
+    try {
+      const event = await calendarService.getEvent(eventId);
+
+      if (!event) {
+        next(
+          createHttpError(
+            404,
+            'Calendar event not found',
+            'CALENDAR_EVENT_NOT_FOUND'
+          )
+        );
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: event
+      });
+    } catch (err) {
+      next(err);
     }
-
-    res.status(200).json({
-      success: true,
-      data: event
-    });
   }
 
-  function deleteEvent(req, res, next) {
+  async function deleteEvent(req, res, next) {
     const { eventId } = req.params;
-    const removed = calendarService.deleteEvent(eventId);
 
-    if (!removed) {
-      next(
-        createHttpError(
-          404,
-          'Calendar event not found',
-          'CALENDAR_EVENT_NOT_FOUND'
-        )
-      );
-      return;
+    try {
+      const removed = await calendarService.deleteEvent(eventId);
+
+      if (!removed) {
+        next(
+          createHttpError(
+            404,
+            'Calendar event not found',
+            'CALENDAR_EVENT_NOT_FOUND'
+          )
+        );
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: { deleted: true, eventId }
+      });
+
+      emitEvent('calendar:deleted', { eventId });
+    } catch (err) {
+      next(err);
     }
-
-    res.status(200).json({
-      success: true,
-      data: { deleted: true, eventId }
-    });
   }
 
   return {
