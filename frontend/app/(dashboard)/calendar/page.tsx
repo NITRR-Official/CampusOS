@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { FormEvent, useEffect, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { clearAuthSession, readAccessToken } from '@/lib/auth-session';
 import {
@@ -463,15 +464,17 @@ export default function CalendarPage() {
           <div className="flex items-center justify-between gap-2">
             <button
               onClick={previousMonth}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"
             >
-              ← Previous
+              <ChevronLeft size={16} />
+              Previous
             </button>
             <button
               onClick={nextMonth}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2"
             >
-              Next →
+              Next
+              <ChevronRight size={16} />
             </button>
           </div>
 

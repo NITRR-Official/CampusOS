@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Search, Bell, ChevronDown } from 'lucide-react';
 
 export default function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -20,19 +21,17 @@ export default function Header() {
             className="w-full px-2.5 py-2 border border-gray-300 rounded text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             aria-label="Search"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-            🔍
-          </span>
+          <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         </div>
 
         {/* Notifications */}
         <div className="relative flex items-center">
           <button
-            className="bg-none border-none text-2xl cursor-pointer relative p-2 rounded transition-all duration-200 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+            className="bg-none border-none cursor-pointer relative p-2 rounded transition-all duration-200 text-gray-500 hover:bg-gray-100 hover:text-gray-900 flex items-center"
             onClick={() => setShowNotifications(!showNotifications)}
             aria-label="Notifications"
           >
-            🔔
+            <Bell size={24} />
             <span className="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-semibold border-2 border-white">
               3
             </span>
@@ -74,13 +73,13 @@ export default function Header() {
             className="flex items-center gap-3 bg-none border border-gray-300 rounded p-2 cursor-pointer transition-all duration-200 text-gray-900 hover:bg-gray-50 hover:border-blue-500"
             aria-label="User menu"
           >
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-xl shrink-0">
-              👤
+            <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-semibold shrink-0">
+              A
             </div>
             <span className="text-sm font-medium hidden lg:inline">
               Admin User
             </span>
-            <span className="text-xs text-gray-400">▼</span>
+            <ChevronDown size={16} className="text-gray-400" />
           </button>
         </div>
       </div>

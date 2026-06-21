@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Calendar, CheckCircle2, Clock, XCircle } from 'lucide-react';
 
 import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
 import { fetchEvents, EventItem, EventApiError } from '@/lib/event-api';
@@ -189,8 +190,9 @@ export default function ParticipantDashboard() {
                         <p className="mt-1 text-sm text-slate-600">
                           {event.description}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">
-                          📅 {new Date(event.startsAt).toLocaleDateString()} at{' '}
+                          <p className="mt-2 text-xs text-slate-500 flex items-center gap-1">
+                            <Calendar size={14} />
+                            {new Date(event.startsAt).toLocaleDateString()} at{' '}
                           {new Date(event.startsAt).toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit'
@@ -205,12 +207,14 @@ export default function ParticipantDashboard() {
                           View Event
                         </Link>
                         {event.checkInStatus?.status === 'checked-in' ? (
-                          <span className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700">
-                            ✓ Checked In
-                          </span>
-                        ) : (
-                          <span className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700">
-                            ⟳ Pending
+                            <span className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700 flex items-center gap-1">
+                              <CheckCircle2 size={14} />
+                              Checked In
+                            </span>
+                          ) : (
+                            <span className="rounded-lg bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-700 flex items-center gap-1">
+                              <Clock size={14} />
+                              Pending
                           </span>
                         )}
                       </div>
@@ -241,17 +245,20 @@ export default function ParticipantDashboard() {
                         <p className="mt-1 text-sm text-slate-600">
                           {event.description}
                         </p>
-                        <p className="mt-2 text-xs text-slate-500">
-                          📅 {new Date(event.startsAt).toLocaleDateString()}
+                          <p className="mt-2 text-xs text-slate-500 flex items-center gap-1">
+                            <Calendar size={14} />
+                            {new Date(event.startsAt).toLocaleDateString()}
                         </p>
                       </div>
                       {event.checkInStatus?.status === 'checked-in' ? (
-                        <span className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700">
-                          ✓ Attended
-                        </span>
-                      ) : (
-                        <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
-                          ⊘ Absent
+                          <span className="rounded-lg bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700 flex items-center gap-1">
+                            <CheckCircle2 size={14} />
+                            Attended
+                          </span>
+                        ) : (
+                          <span className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 flex items-center gap-1">
+                            <XCircle size={14} />
+                            Absent
                         </span>
                       )}
                     </div>

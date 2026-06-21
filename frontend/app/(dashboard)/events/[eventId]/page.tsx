@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
 
 import RegisterForm from './RegisterForm';
 import { fetchEventById } from '@/lib/event-api';
@@ -23,9 +24,10 @@ export default async function EventDetailPage({
     <div className="mx-auto max-w-4xl">
       <Link
         href="/events"
-        className="text-sm font-medium text-muted-foreground hover:text-foreground"
+        className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
       >
-        ← Back to events
+        <ChevronLeft size={16} />
+        Back to events
       </Link>
 
       <div className="mt-4 rounded-xl border border-border bg-card p-8 shadow-sm">
