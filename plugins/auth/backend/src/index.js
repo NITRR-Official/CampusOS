@@ -12,7 +12,7 @@ export async function init(app, registry, eventBus) {
   const authRepository = createAuthRepository(models.User);
   const authService = createAuthService(authRepository);
   const authController = createAuthController({ registry, authService });
-  
+
   registerAuthRoutes(app, authController);
 
   registry.registerModule('auth', {

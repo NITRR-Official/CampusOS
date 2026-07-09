@@ -88,7 +88,7 @@ export function createEventService(eventRepository) {
 
     event.registrations.push(registration);
     event.updatedAt = new Date().toISOString();
-    
+
     await eventRepository.saveEvent(event);
 
     return {

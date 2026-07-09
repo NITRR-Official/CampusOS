@@ -137,22 +137,16 @@ export function createClubService(clubRepository) {
       });
     }
 
-    await assignRole(
-      club._id,
-      ownerUser._id || ownerUser.id,
-      adminRoleId,
-      { isSuperAdmin: true }
-    );
+    await assignRole(club._id, ownerUser._id || ownerUser.id, adminRoleId, {
+      isSuperAdmin: true
+    });
 
     if (club.createdBy && club.createdBy !== 'unknown') {
       const creator = await clubRepository.findUserById(club.createdBy);
       if (creator) {
-        await assignRole(
-          club._id,
-          creator._id || creator.id,
-          adminRoleId,
-          { isSuperAdmin: true }
-        );
+        await assignRole(club._id, creator._id || creator.id, adminRoleId, {
+          isSuperAdmin: true
+        });
       }
     }
   }
@@ -169,7 +163,10 @@ export function createClubService(clubRepository) {
       };
     }
 
-    const member = await clubRepository.findMemberWithRoles(clubId, user.id || user._id);
+    const member = await clubRepository.findMemberWithRoles(
+      clubId,
+      user.id || user._id
+    );
     if (!member || !member.roles || member.roles.length === 0) {
       return { maxHierarchy: -1, permissions: new Set(), isClubAdmin: false };
     }
@@ -229,14 +226,20 @@ export function createClubService(clubRepository) {
     const club = await clubRepository.getClubById(clubId);
     if (!club) return null;
 
-    const existingMember = await clubRepository.findMember(clubId, member.userId);
+    const existingMember = await clubRepository.findMember(
+      clubId,
+      member.userId
+    );
     if (existingMember) {
       const error = new Error('Member already exists in this club');
       error.code = 'MEMBER_EXISTS';
       throw error;
     }
 
-    const assignedRole = await clubRepository.findRole(clubId, member.role || 'volunteer');
+    const assignedRole = await clubRepository.findRole(
+      clubId,
+      member.role || 'volunteer'
+    );
     const rolesArray = assignedRole ? [assignedRole._id] : [];
 
     const clubMember = await clubRepository.createClubMember({
@@ -254,11 +257,7 @@ export function createClubService(clubRepository) {
       id: memberUserId
     });
 
-    _assertHierarchy(
-      targetContext.maxHierarchy,
-      context,
-      'remove member with'
-    );
+    _assertHierarchy(targetContext.maxHierarchy, context, 'remove member with');
 
     return clubRepository.deleteMember(clubId, memberUserId);
   }
@@ -276,7 +275,11 @@ export function createClubService(clubRepository) {
 
     _assertHierarchy(role.hierarchyLevel, context, 'assign');
 
-    const member = await clubRepository.addRoleToMember(clubId, memberUserId, role._id);
+    const member = await clubRepository.addRoleToMember(
+      clubId,
+      memberUserId,
+      role._id
+    );
 
     if (!member) {
       return undefined;

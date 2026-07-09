@@ -12,7 +12,12 @@ export async function init(app, registry, eventBus) {
     throw new Error('core:models service not found in registry');
   }
 
-  const clubRepository = createClubRepository(Club, ClubMember, ClubRole, models.User);
+  const clubRepository = createClubRepository(
+    Club,
+    ClubMember,
+    ClubRole,
+    models.User
+  );
   const clubService = createClubService(clubRepository);
   const clubController = createClubController(clubService);
   const requirePermissions = registry.getService('requirePermissions');

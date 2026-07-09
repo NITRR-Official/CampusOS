@@ -36,7 +36,9 @@ export function createCheckInController(checkInService) {
       const { userId } = req.body;
 
       if (!eventId || !userId) {
-        return res.status(400).json({ error: 'eventId and userId are required' });
+        return res
+          .status(400)
+          .json({ error: 'eventId and userId are required' });
       }
 
       try {
@@ -59,11 +61,16 @@ export function createCheckInController(checkInService) {
       const { eventId, userId } = req.params;
 
       if (!eventId || !userId) {
-        return res.status(400).json({ error: 'eventId and userId are required' });
+        return res
+          .status(400)
+          .json({ error: 'eventId and userId are required' });
       }
 
       try {
-        const checkIn = await checkInService.getUserCheckInStatus(eventId, userId);
+        const checkIn = await checkInService.getUserCheckInStatus(
+          eventId,
+          userId
+        );
         if (!checkIn) {
           return res.status(404).json({ error: 'No check-in record found' });
         }

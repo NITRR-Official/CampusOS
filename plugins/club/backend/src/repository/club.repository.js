@@ -72,7 +72,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
       $or: [{ _id: roleIdentifier }, { name: roleIdentifier }]
     }).lean();
   }
-  
+
   async function findRoleById(clubId, roleId) {
     return ClubRole.findOne({ _id: roleId, clubId }).lean();
   }

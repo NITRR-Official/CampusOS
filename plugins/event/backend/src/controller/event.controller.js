@@ -177,7 +177,10 @@ export function createEventController(eventService) {
     }
 
     try {
-      const registrationResult = await eventService.registerForEvent(eventId, value);
+      const registrationResult = await eventService.registerForEvent(
+        eventId,
+        value
+      );
 
       if (registrationResult.type === 'EVENT_NOT_FOUND') {
         next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
@@ -186,7 +189,11 @@ export function createEventController(eventService) {
 
       if (registrationResult.type === 'EVENT_CAPACITY_REACHED') {
         next(
-          createHttpError(409, 'Event capacity reached', 'EVENT_CAPACITY_REACHED')
+          createHttpError(
+            409,
+            'Event capacity reached',
+            'EVENT_CAPACITY_REACHED'
+          )
         );
         return;
       }
