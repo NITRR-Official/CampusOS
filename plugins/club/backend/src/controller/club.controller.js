@@ -5,7 +5,6 @@ import {
   validateCreateRolePayload,
   validateUpdateRolePayload
 } from '../schema/club.schema.js';
-import { getClubService } from '../service/club.service.js';
 
 function createHttpError(status, message, code, details) {
   const error = new Error(message);
@@ -22,9 +21,7 @@ function createHttpError(status, message, code, details) {
   return error;
 }
 
-export function createClubController() {
-  const clubService = getClubService();
-
+export function createClubController(clubService) {
   async function create(req, res, next) {
     const { errors, value } = validateCreateClubPayload(req.body);
 

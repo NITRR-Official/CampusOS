@@ -1,17 +1,6 @@
 import crypto from 'node:crypto';
 import { promisify } from 'node:util';
-import { Club, ClubMember, ClubRole } from '../schema/club.schema.js';
-
-let User;
-
-export function initClubService(registry) {
-  const models = registry.getService('core:models');
-  if (models && models.User) {
-    User = models.User;
-  } else {
-    throw new Error('core:models service not found in registry');
-  }
-}
+import { PERMISSIONS } from '../schema/role.model.js';
 
 const scryptAsync = promisify(crypto.scrypt);
 
@@ -49,13 +38,13 @@ function serializeClubMember(doc) {
     id: doc._id,
     userId: doc.userId,
     clubId: doc.clubId,
-    roles: doc.roles || [], // Might be populated roles or IDs
+    roles: doc.roles || [],
     joinedAt: toIso(doc.joinedAt)
   };
 }
 
-class ClubService {
-  async createClub({
+export function createClubService(clubRepository) {
+  async function createClub({
     name,
     email,
     instituteId,
@@ -63,7 +52,7 @@ class ClubService {
     category,
     createdBy
   }) {
-    const club = await Club.create({
+    const club = await clubRepository.createClub({
       name,
       email,
       instituteId,
@@ -75,40 +64,36 @@ class ClubService {
     return serializeClub(club);
   }
 
-  async listClubs(status) {
+  async function listClubs(status) {
     const filter = status ? { status } : {};
-    const clubs = await Club.find(filter).sort({ createdAt: -1 }).lean();
+    const clubs = await clubRepository.listClubs(filter);
     return clubs.map(serializeClub);
   }
 
-  async getClub(clubId) {
+  async function getClub(clubId) {
     if (!clubId) return null;
-    const club = await Club.findById(clubId).lean();
+    const club = await clubRepository.getClubById(clubId);
     return serializeClub(club);
   }
 
-  async updateClubStatus(clubId, status) {
-    const club = await Club.findByIdAndUpdate(
-      clubId,
-      { status },
-      { new: true }
-    ).lean();
+  async function updateClubStatus(clubId, status) {
+    const club = await clubRepository.updateClubStatus(clubId, status);
 
     if (!club) return null;
 
     if (status === 'approved') {
-      const existingRolesCount = await Role.countDocuments({ clubId });
+      const existingRolesCount = await clubRepository.countRoles(clubId);
       if (existingRolesCount === 0) {
-        const adminRole = await this._provisionDefaultRoles(clubId);
-        await this._provisionOwnerAccount(club, adminRole._id);
+        const adminRole = await _provisionDefaultRoles(clubId);
+        await _provisionOwnerAccount(club, adminRole._id);
       }
     }
 
     return serializeClub(club);
   }
 
-  async _provisionDefaultRoles(clubId) {
-    const roles = await Role.create([
+  async function _provisionDefaultRoles(clubId) {
+    const roles = await clubRepository.createRoles([
       {
         clubId,
         name: 'admin',
@@ -138,13 +123,13 @@ class ClubService {
     return roles.find((r) => r.name === 'admin');
   }
 
-  async _provisionOwnerAccount(club, adminRoleId) {
-    let ownerUser = await User.findOne({ email: club.email }).lean();
+  async function _provisionOwnerAccount(club, adminRoleId) {
+    let ownerUser = await clubRepository.findUserByEmail(club.email);
 
     if (!ownerUser) {
       const randomPassword = crypto.randomBytes(16).toString('hex');
       const passwordHash = await createPasswordHash(randomPassword);
-      ownerUser = await User.create({
+      ownerUser = await clubRepository.createUser({
         name: `${club.name} (Official)`,
         email: club.email,
         passwordHash,
@@ -152,19 +137,17 @@ class ClubService {
       });
     }
 
-    // Assign admin to the official club email account
-    await this.assignRole(
+    await assignRole(
       club._id,
       ownerUser._id || ownerUser.id,
       adminRoleId,
       { isSuperAdmin: true }
     );
 
-    // Also assign admin to the user who requested the club, if valid
     if (club.createdBy && club.createdBy !== 'unknown') {
-      const creator = await User.findById(club.createdBy).lean();
+      const creator = await clubRepository.findUserById(club.createdBy);
       if (creator) {
-        await this.assignRole(
+        await assignRole(
           club._id,
           creator._id || creator.id,
           adminRoleId,
@@ -174,9 +157,7 @@ class ClubService {
     }
   }
 
-  // ==== HIERARCHY & ESCALATION GUARDRAILS ====
-
-  async _getRequesterContext(clubId, user) {
+  async function _getRequesterContext(clubId, user) {
     if (!user) {
       return { maxHierarchy: -1, permissions: new Set(), isClubAdmin: false };
     }
@@ -188,12 +169,7 @@ class ClubService {
       };
     }
 
-    const member = await ClubMember.findOne({
-      clubId,
-      userId: user.id || user._id
-    })
-      .populate('roles')
-      .lean();
+    const member = await clubRepository.findMemberWithRoles(clubId, user.id || user._id);
     if (!member || !member.roles || member.roles.length === 0) {
       return { maxHierarchy: -1, permissions: new Set(), isClubAdmin: false };
     }
@@ -223,7 +199,7 @@ class ClubService {
     return { maxHierarchy, permissions, isClubAdmin };
   }
 
-  _assertPermissions(requestedPerms, context) {
+  function _assertPermissions(requestedPerms, context) {
     if (context.isClubAdmin) return;
     if (!requestedPerms || requestedPerms.length === 0) return;
 
@@ -238,7 +214,7 @@ class ClubService {
     }
   }
 
-  _assertHierarchy(targetHierarchy, context, actionDescription) {
+  function _assertHierarchy(targetHierarchy, context, actionDescription) {
     if (context.isClubAdmin) return;
     if (targetHierarchy >= context.maxHierarchy) {
       const error = new Error(
@@ -249,29 +225,21 @@ class ClubService {
     }
   }
 
-  // ==== MEMBER MANAGEMENT ====
-
-  async addMember(clubId, member) {
-    const club = await Club.findById(clubId).lean();
+  async function addMember(clubId, member) {
+    const club = await clubRepository.getClubById(clubId);
     if (!club) return null;
 
-    const existingMember = await ClubMember.findOne({
-      clubId,
-      userId: member.userId
-    }).lean();
+    const existingMember = await clubRepository.findMember(clubId, member.userId);
     if (existingMember) {
       const error = new Error('Member already exists in this club');
       error.code = 'MEMBER_EXISTS';
       throw error;
     }
 
-    let assignedRole = await Role.findOne({
-      clubId,
-      name: member.role || 'volunteer'
-    }).lean();
-    let rolesArray = assignedRole ? [assignedRole._id] : [];
+    const assignedRole = await clubRepository.findRole(clubId, member.role || 'volunteer');
+    const rolesArray = assignedRole ? [assignedRole._id] : [];
 
-    const clubMember = await ClubMember.create({
+    const clubMember = await clubRepository.createClubMember({
       userId: member.userId,
       clubId,
       roles: rolesArray
@@ -280,29 +248,25 @@ class ClubService {
     return serializeClubMember(clubMember);
   }
 
-  async removeMember(clubId, memberUserId, requesterUser) {
-    const context = await this._getRequesterContext(clubId, requesterUser);
-    const targetContext = await this._getRequesterContext(clubId, {
+  async function removeMember(clubId, memberUserId, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
+    const targetContext = await _getRequesterContext(clubId, {
       id: memberUserId
     });
 
-    this._assertHierarchy(
+    _assertHierarchy(
       targetContext.maxHierarchy,
       context,
       'remove member with'
     );
 
-    const result = await ClubMember.deleteOne({ clubId, userId: memberUserId });
-    return result.deletedCount > 0;
+    return clubRepository.deleteMember(clubId, memberUserId);
   }
 
-  async assignRole(clubId, memberUserId, roleName, requesterUser) {
-    const context = await this._getRequesterContext(clubId, requesterUser);
+  async function assignRole(clubId, memberUserId, roleName, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
 
-    const role = await Role.findOne({
-      clubId,
-      $or: [{ _id: roleName }, { name: roleName }]
-    }).lean();
+    const role = await clubRepository.findRole(clubId, roleName);
 
     if (!role) {
       const error = new Error(`Role ${roleName} not found in club`);
@@ -310,33 +274,26 @@ class ClubService {
       throw error;
     }
 
-    this._assertHierarchy(role.hierarchyLevel, context, 'assign');
+    _assertHierarchy(role.hierarchyLevel, context, 'assign');
 
-    const member = await ClubMember.findOneAndUpdate(
-      { clubId, userId: memberUserId },
-      { $addToSet: { roles: role._id } },
-      { new: true }
-    ).lean();
+    const member = await clubRepository.addRoleToMember(clubId, memberUserId, role._id);
 
     if (!member) {
-      // If member doesn't exist yet, we might want to create them. But let's assume they must exist.
       return undefined;
     }
 
     return serializeClubMember(member);
   }
 
-  async listMembers(clubId) {
-    const members = await ClubMember.find({ clubId }).populate('roles').lean();
+  async function listMembers(clubId) {
+    const members = await clubRepository.listMembers(clubId);
     return members.map(serializeClubMember);
   }
 
-  async getUserPermissions(userId, clubId) {
+  async function getUserPermissions(userId, clubId) {
     if (!clubId || !userId) return [];
 
-    const member = await ClubMember.findOne({ clubId, userId })
-      .populate('roles')
-      .lean();
+    const member = await clubRepository.findMemberWithRoles(clubId, userId);
     if (!member || !member.roles || member.roles.length === 0) return [];
 
     const permissionsSet = new Set();
@@ -351,23 +308,18 @@ class ClubService {
     return Array.from(permissionsSet);
   }
 
-  // ==== ROLE MANAGEMENT ====
-
-  async listRoles(clubId) {
-    const roles = await Role.find({ clubId })
-      .sort({ hierarchyLevel: -1, createdAt: 1 })
-      .lean();
-    return roles;
+  async function listRoles(clubId) {
+    return clubRepository.listRoles(clubId);
   }
 
-  async createRole(clubId, payload, requesterUser) {
-    const context = await this._getRequesterContext(clubId, requesterUser);
+  async function createRole(clubId, payload, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
 
     const hierarchyLevel = payload.hierarchyLevel || 0;
-    this._assertHierarchy(hierarchyLevel, context, 'create');
-    this._assertPermissions(payload.permissions, context);
+    _assertHierarchy(hierarchyLevel, context, 'create');
+    _assertPermissions(payload.permissions, context);
 
-    const role = await Role.create({
+    const role = await clubRepository.createRole({
       clubId,
       name: payload.name,
       permissions: payload.permissions || [],
@@ -379,40 +331,36 @@ class ClubService {
     return role;
   }
 
-  async updateRole(clubId, roleId, payload, requesterUser) {
-    const context = await this._getRequesterContext(clubId, requesterUser);
+  async function updateRole(clubId, roleId, payload, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
 
-    const existingRole = await Role.findOne({ _id: roleId, clubId }).lean();
+    const existingRole = await clubRepository.findRoleById(clubId, roleId);
     if (!existingRole) return null;
 
-    this._assertHierarchy(existingRole.hierarchyLevel, context, 'modify');
+    _assertHierarchy(existingRole.hierarchyLevel, context, 'modify');
 
     if (payload.hierarchyLevel !== undefined) {
-      this._assertHierarchy(payload.hierarchyLevel, context, 'update to');
+      _assertHierarchy(payload.hierarchyLevel, context, 'update to');
     }
 
     if (payload.permissions !== undefined) {
       const newPerms = payload.permissions.filter(
         (p) => !existingRole.permissions.includes(p)
       );
-      this._assertPermissions(newPerms, context);
+      _assertPermissions(newPerms, context);
     }
 
-    const role = await Role.findOneAndUpdate(
-      { _id: roleId, clubId },
-      { $set: payload },
-      { new: true }
-    ).lean();
+    const role = await clubRepository.updateRole(clubId, roleId, payload);
     return role;
   }
 
-  async deleteRole(clubId, roleId, requesterUser) {
-    const context = await this._getRequesterContext(clubId, requesterUser);
+  async function deleteRole(clubId, roleId, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
 
-    const role = await Role.findOne({ _id: roleId, clubId }).lean();
+    const role = await clubRepository.findRoleById(clubId, roleId);
     if (!role) return null;
 
-    this._assertHierarchy(role.hierarchyLevel, context, 'delete');
+    _assertHierarchy(role.hierarchyLevel, context, 'delete');
 
     if (role.isTemplate) {
       const error = new Error('Cannot delete a template role');
@@ -420,22 +368,28 @@ class ClubService {
       throw error;
     }
 
-    const result = await Role.deleteOne({ _id: roleId, clubId });
-    if (result.deletedCount > 0) {
-      // Optional: remove role from all members
-      await ClubMember.updateMany(
-        { clubId, roles: roleId },
-        { $pull: { roles: roleId } }
-      );
+    const deleted = await clubRepository.deleteRole(clubId, roleId);
+    if (deleted) {
+      await clubRepository.removeRoleFromAllMembers(clubId, roleId);
     }
-    return result.deletedCount > 0;
+    return deleted;
   }
+
+  return {
+    createClub,
+    listClubs,
+    getClub,
+    updateClubStatus,
+    addMember,
+    removeMember,
+    assignRole,
+    listMembers,
+    getUserPermissions,
+    listRoles,
+    createRole,
+    updateRole,
+    deleteRole
+  };
 }
 
-const clubService = new ClubService();
-
-export function getClubService() {
-  return clubService;
-}
-
-export default getClubService;
+export default createClubService;

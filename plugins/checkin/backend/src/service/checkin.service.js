@@ -1,21 +1,17 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 /**
  * Check-in Service
  * Manages event attendance and QR code generation
  */
-
-export class CheckInService {
-  #storage = new Map();
-  #qrCodeIndex = new Map();
-
+export function createCheckInService(checkInRepository) {
   /**
    * Create a check-in record for an attendee
    * @param {string} eventId - Event ID
    * @param {string} userId - User ID
    * @returns {object} Created check-in record
    */
-  createCheckIn(eventId, userId) {
+  async function createCheckIn(eventId, userId) {
     if (!eventId || !userId) {
       return { success: false, error: 'eventId and userId are required' };
     }
@@ -35,9 +31,7 @@ export class CheckInService {
       updatedAt: now
     };
 
-    this.#storage.set(id, checkIn);
-    this.#qrCodeIndex.set(qrCode, id);
-
+    await checkInRepository.saveCheckIn(checkIn);
     return { success: true, checkIn };
   }
 
@@ -46,8 +40,8 @@ export class CheckInService {
    * @param {string} checkInId - Check-in ID
    * @returns {object|null} Check-in record
    */
-  getCheckInById(checkInId) {
-    return this.#storage.get(checkInId) || null;
+  async function getCheckInById(checkInId) {
+    return checkInRepository.getCheckInById(checkInId);
   }
 
   /**
@@ -55,9 +49,8 @@ export class CheckInService {
    * @param {string} qrCode - QR code string
    * @returns {object|null} Check-in record
    */
-  getCheckInByQRCode(qrCode) {
-    const checkInId = this.#qrCodeIndex.get(qrCode);
-    return checkInId ? this.#storage.get(checkInId) : null;
+  async function getCheckInByQRCode(qrCode) {
+    return checkInRepository.getCheckInByQRCode(qrCode);
   }
 
   /**
@@ -65,10 +58,8 @@ export class CheckInService {
    * @param {string} eventId - Event ID
    * @returns {array} Check-in records for event
    */
-  getCheckInsByEventId(eventId) {
-    return Array.from(this.#storage.values()).filter(
-      (checkIn) => checkIn.eventId === eventId
-    );
+  async function getCheckInsByEventId(eventId) {
+    return checkInRepository.getCheckInsByEventId(eventId);
   }
 
   /**
@@ -77,12 +68,8 @@ export class CheckInService {
    * @param {string} userId - User ID
    * @returns {object|null} Check-in record or null if not found
    */
-  getUserCheckInStatus(eventId, userId) {
-    return (
-      Array.from(this.#storage.values()).find(
-        (checkIn) => checkIn.eventId === eventId && checkIn.userId === userId
-      ) || null
-    );
+  async function getUserCheckInStatus(eventId, userId) {
+    return checkInRepository.getUserCheckInStatus(eventId, userId);
   }
 
   /**
@@ -90,8 +77,8 @@ export class CheckInService {
    * @param {string} qrCode - QR code string
    * @returns {object} Result with success status and check-in or error
    */
-  markAsCheckedInByQRCode(qrCode) {
-    const checkIn = this.getCheckInByQRCode(qrCode);
+  async function markAsCheckedInByQRCode(qrCode) {
+    const checkIn = await checkInRepository.getCheckInByQRCode(qrCode);
     if (!checkIn) {
       return { success: false, error: 'Invalid QR code' };
     }
@@ -104,6 +91,7 @@ export class CheckInService {
     checkIn.checkedInAt = new Date();
     checkIn.updatedAt = new Date();
 
+    await checkInRepository.saveCheckIn(checkIn);
     return { success: true, checkIn };
   }
 
@@ -112,8 +100,8 @@ export class CheckInService {
    * @param {string} eventId - Event ID
    * @returns {object} Attendance stats
    */
-  getAttendanceStats(eventId) {
-    const checkIns = this.getCheckInsByEventId(eventId);
+  async function getAttendanceStats(eventId) {
+    const checkIns = await checkInRepository.getCheckInsByEventId(eventId);
     const totalRegistered = checkIns.length;
     const checkedIn = checkIns.filter((c) => c.status === 'checked-in').length;
     const pending = totalRegistered - checkedIn;
@@ -134,9 +122,20 @@ export class CheckInService {
    * List all check-ins (admin only)
    * @returns {array} All check-in records
    */
-  listAllCheckIns() {
-    return Array.from(this.#storage.values());
+  async function listAllCheckIns() {
+    return checkInRepository.listAllCheckIns();
   }
+
+  return {
+    createCheckIn,
+    getCheckInById,
+    getCheckInByQRCode,
+    getCheckInsByEventId,
+    getUserCheckInStatus,
+    markAsCheckedInByQRCode,
+    getAttendanceStats,
+    listAllCheckIns
+  };
 }
 
-export default CheckInService;
+export default createCheckInService;

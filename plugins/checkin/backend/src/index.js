@@ -4,6 +4,9 @@
  */
 
 import { registerCheckInRoutes } from './routes/checkin.routes.js';
+import { createCheckInController } from './controller/checkin.controller.js';
+import { createCheckInService } from './service/checkin.service.js';
+import { createCheckInRepository } from './repository/checkin.repository.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -12,7 +15,11 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  registerCheckInRoutes(app, requirePermissions);
+  const checkInRepository = createCheckInRepository();
+  const checkInService = createCheckInService(checkInRepository);
+  const checkInController = createCheckInController(checkInService);
+
+  registerCheckInRoutes(app, checkInController, requirePermissions);
 
   registry.registerModule('checkin', {
     routes: [

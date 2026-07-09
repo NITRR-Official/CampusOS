@@ -1,9 +1,7 @@
 import crypto from 'node:crypto';
 
-const eventsById = new Map();
-
-class EventService {
-  createEvent(payload) {
+export function createEventService(eventRepository) {
+  async function createEvent(payload) {
     const event = {
       id: crypto.randomUUID(),
       title: payload.title,
@@ -21,27 +19,28 @@ class EventService {
       updatedAt: new Date().toISOString()
     };
 
-    eventsById.set(event.id, event);
+    await eventRepository.saveEvent(event);
     return event;
   }
 
-  updateEvent(eventId, updates) {
-    const event = eventsById.get(eventId);
+  async function updateEvent(eventId, updates) {
+    const event = await eventRepository.getEventById(eventId);
 
     if (!event) {
       return null;
     }
 
     Object.assign(event, updates, { updatedAt: new Date().toISOString() });
+    await eventRepository.saveEvent(event);
     return event;
   }
 
-  getEvent(eventId) {
-    return eventsById.get(eventId) || null;
+  async function getEvent(eventId) {
+    return eventRepository.getEventById(eventId);
   }
 
-  setStatus(eventId, status) {
-    const event = eventsById.get(eventId);
+  async function setStatus(eventId, status) {
+    const event = await eventRepository.getEventById(eventId);
 
     if (!event) {
       return null;
@@ -49,15 +48,16 @@ class EventService {
 
     event.status = status;
     event.updatedAt = new Date().toISOString();
+    await eventRepository.saveEvent(event);
     return event;
   }
 
-  listEvents() {
-    return Array.from(eventsById.values());
+  async function listEvents() {
+    return eventRepository.listEvents();
   }
 
-  registerForEvent(eventId, registrationPayload) {
-    const event = eventsById.get(eventId);
+  async function registerForEvent(eventId, registrationPayload) {
+    const event = await eventRepository.getEventById(eventId);
 
     if (!event) {
       return { type: 'EVENT_NOT_FOUND' };
@@ -88,6 +88,8 @@ class EventService {
 
     event.registrations.push(registration);
     event.updatedAt = new Date().toISOString();
+    
+    await eventRepository.saveEvent(event);
 
     return {
       type: 'REGISTERED',
@@ -95,12 +97,15 @@ class EventService {
       totalRegistrations: event.registrations.length
     };
   }
+
+  return {
+    createEvent,
+    updateEvent,
+    getEvent,
+    setStatus,
+    listEvents,
+    registerForEvent
+  };
 }
 
-const eventService = new EventService();
-
-export function getEventService() {
-  return eventService;
-}
-
-export default getEventService;
+export default createEventService;

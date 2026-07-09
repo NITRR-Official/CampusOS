@@ -3,9 +3,7 @@
  * Registers check-in endpoints with Express
  */
 
-import checkInController from '../controller/checkin.controller.js';
-
-export function registerCheckInRoutes(app, requirePermissions) {
+export function registerCheckInRoutes(app, checkInController, requirePermissions) {
   // List check-ins for event (admin/coordinator only)
   app.get(
     '/api/v1/events/:eventId/checkins',

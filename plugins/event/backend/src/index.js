@@ -1,5 +1,7 @@
 import { createEventController } from './controller/event.controller.js';
 import { registerEventRoutes } from './routes/event.routes.js';
+import { createEventService } from './service/event.service.js';
+import { createEventRepository } from './repository/event.repository.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -8,7 +10,9 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  const eventController = createEventController();
+  const eventRepository = createEventRepository();
+  const eventService = createEventService(eventRepository);
+  const eventController = createEventController(eventService);
   registerEventRoutes(app, eventController, requirePermissions);
 
   registry.registerModule('event', {

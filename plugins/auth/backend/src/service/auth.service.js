@@ -1,17 +1,6 @@
 import crypto from 'node:crypto';
 import { promisify } from 'node:util';
 
-let User;
-
-export function initAuthService(registry) {
-  const models = registry.getService('core:models');
-  if (models && models.User) {
-    User = models.User;
-  } else {
-    throw new Error('core:models service not found in registry');
-  }
-}
-
 const scryptAsync = promisify(crypto.scrypt);
 
 async function createPasswordHash(password) {
@@ -50,11 +39,11 @@ function toPublicUser(user) {
   };
 }
 
-class AuthService {
-  async createUser({ name, email, password }) {
+export function createAuthService(authRepository) {
+  async function createUser({ name, email, password }) {
     const normalizedEmail = email.toLowerCase();
 
-    const existingUser = await User.findOne({ email: normalizedEmail }).lean();
+    const existingUser = await authRepository.findUserByEmail(normalizedEmail);
     if (existingUser) {
       const error = new Error('Email is already registered');
       error.code = 'EMAIL_ALREADY_EXISTS';
@@ -62,32 +51,22 @@ class AuthService {
     }
 
     const passwordHash = await createPasswordHash(password);
-    const hasUsers = await User.exists({});
+    const hasUsers = await authRepository.userExists();
     const isSuperAdmin = !hasUsers;
 
-    try {
-      const user = await User.create({
-        name,
-        email: normalizedEmail,
-        passwordHash,
-        isSuperAdmin
-      });
+    const user = await authRepository.createUser({
+      name,
+      email: normalizedEmail,
+      passwordHash,
+      isSuperAdmin
+    });
 
-      return toPublicUser(user);
-    } catch (error) {
-      if (error?.code === 11000) {
-        const duplicateError = new Error('Email is already registered');
-        duplicateError.code = 'EMAIL_ALREADY_EXISTS';
-        throw duplicateError;
-      }
-
-      throw error;
-    }
+    return toPublicUser(user);
   }
 
-  async authenticateUser({ email, password }) {
+  async function authenticateUser({ email, password }) {
     const normalizedEmail = email.toLowerCase();
-    const user = await User.findOne({ email: normalizedEmail }).lean();
+    const user = await authRepository.findUserByEmail(normalizedEmail);
 
     if (!user) {
       return null;
@@ -100,12 +79,11 @@ class AuthService {
 
     return toPublicUser(user);
   }
+
+  return {
+    createUser,
+    authenticateUser
+  };
 }
 
-const authService = new AuthService();
-
-export function getAuthService() {
-  return authService;
-}
-
-export default getAuthService;
+export default createAuthService;

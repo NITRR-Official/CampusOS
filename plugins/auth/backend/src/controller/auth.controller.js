@@ -2,7 +2,6 @@ import {
   validateSignupPayload,
   validateLoginPayload
 } from '../schema/auth.schema.js';
-import { getAuthService } from '../service/auth.service.js';
 
 function createHttpError(status, message, code, details) {
   const error = new Error(message);
@@ -19,8 +18,7 @@ function createHttpError(status, message, code, details) {
   return error;
 }
 
-export function createAuthController({ registry }) {
-  const authService = getAuthService();
+export function createAuthController({ registry, authService }) {
   const jwtAuthenticator = registry.getAuthenticator('jwt');
 
   if (!jwtAuthenticator) {

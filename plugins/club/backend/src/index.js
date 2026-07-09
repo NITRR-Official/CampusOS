@@ -1,10 +1,20 @@
 import { createClubController } from './controller/club.controller.js';
 import { registerClubRoutes } from './routes/club.routes.js';
-import { initClubService } from './service/club.service.js';
+import { createClubService } from './service/club.service.js';
+import { createClubRepository } from './repository/club.repository.js';
+import { Club } from './schema/club.model.js';
+import { ClubMember } from './schema/clubMember.model.js';
+import { ClubRole } from './schema/role.model.js';
 
 export async function init(app, registry, eventBus) {
-  initClubService(registry);
-  const clubController = createClubController();
+  const models = registry.getService('core:models');
+  if (!models || !models.User) {
+    throw new Error('core:models service not found in registry');
+  }
+
+  const clubRepository = createClubRepository(Club, ClubMember, ClubRole, models.User);
+  const clubService = createClubService(clubRepository);
+  const clubController = createClubController(clubService);
   const requirePermissions = registry.getService('requirePermissions');
 
   if (typeof requirePermissions !== 'function') {
