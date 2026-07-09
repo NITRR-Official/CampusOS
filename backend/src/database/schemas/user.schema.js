@@ -27,10 +27,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    role: {
-      type: String,
-      enum: ['admin', 'coordinator', 'volunteer', 'user'],
-      default: 'volunteer'
+    isSuperAdmin: {
+      type: Boolean,
+      default: false
     },
     isActive: {
       type: Boolean,
@@ -43,6 +42,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ role: 1 });
+userSchema.index({ email: 1 });
 
 export const User = mongoose.model('User', userSchema);

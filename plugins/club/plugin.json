@@ -1,0 +1,8 @@
+{
+  "name": "club",
+  "version": "1.0.0",
+  "description": "Club Management and RBAC Module",
+  "dependencies": {
+    "auth": "^1.0.0"
+  }
+}

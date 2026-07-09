@@ -1,0 +1,8 @@
+{
+  "name": "task",
+  "version": "1.0.0",
+  "description": "Task Management Module",
+  "dependencies": {
+    "club": "^1.0.0"
+  }
+}

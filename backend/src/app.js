@@ -7,15 +7,19 @@ import express from 'express';
 import cors from 'cors';
 import { loggerMiddleware } from './middleware/logger.js';
 import { authMiddleware } from './middleware/auth.js';
-import { requireRoles } from './middleware/permissions.js';
+import { requirePermissions } from './middleware/permissions.js';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.js';
 import { registerJwtAuthenticator } from './auth/jwt-authenticator.js';
 import { loadPlugins } from './plugin-loader.js';
+import { User, Plugin } from './database/schemas/index.js';
 
 export async function createApp(registry) {
   const app = express();
   app.disable('x-powered-by');
   app.locals.registry = registry;
+
+  // Register Core Models so plugins can use them
+  registry.registerService('core:models', { User, Plugin });
 
   // Environment config
   const isDev = process.env.NODE_ENV !== 'production';
@@ -91,17 +95,19 @@ export async function createApp(registry) {
 
   // 5. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);
-  registry.registerService('requireRoles', requireRoles);
+  registry.registerService('requirePermissions', requirePermissions);
   app.use(authMiddleware);
 
   // ============== PLUGIN LOADING ==============
   // Load all modules from /apps/ and let them register routes
+  app.get('/test-before', (req, res) => res.send('before'));
   try {
     await loadPlugins(app, registry);
   } catch (error) {
     console.error('Plugin loading failed:', error.message);
     if (!isDev) throw error; // Fail hard in production
   }
+  app.get('/test-after', (req, res) => res.send('after'));
 
   // ============== GLOBAL ERROR HANDLING ==============
   // 404 handler - for routes that don't exist

@@ -27,7 +27,8 @@
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "joi": "^18.1.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "semver": "^7.8.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

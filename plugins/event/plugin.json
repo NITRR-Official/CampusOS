@@ -1,0 +1,8 @@
+{
+  "name": "event",
+  "version": "1.0.0",
+  "description": "Event Management Module",
+  "dependencies": {
+    "club": "^1.0.0"
+  }
+}

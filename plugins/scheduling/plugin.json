@@ -1,0 +1,9 @@
+{
+  "name": "scheduling",
+  "version": "1.0.0",
+  "description": "Scheduling and Timelines Module",
+  "dependencies": {
+    "event": "^1.0.0",
+    "task": "^1.0.0"
+  }
+}

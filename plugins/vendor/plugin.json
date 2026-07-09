@@ -1,0 +1,8 @@
+{
+  "name": "vendor",
+  "version": "1.0.0",
+  "description": "Vendor Management Module",
+  "dependencies": {
+    "club": "^1.0.0"
+  }
+}

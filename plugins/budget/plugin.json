@@ -1,0 +1,8 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "description": "Budget and Finance Module",
+  "dependencies": {
+    "club": "^1.0.0"
+  }
+}

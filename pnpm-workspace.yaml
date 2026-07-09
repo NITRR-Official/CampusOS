@@ -1,7 +1,7 @@
 packages:
   - backend
   - frontend
-  - apps/*
+  - plugins/*
   - shared
 
 ignoredBuiltDependencies:

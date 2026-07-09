@@ -1,0 +1,8 @@
+{
+  "name": "checkin",
+  "version": "1.0.0",
+  "description": "Event Check-in and Attendance Module",
+  "dependencies": {
+    "event": "^1.0.0"
+  }
+}

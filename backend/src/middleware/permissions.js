@@ -1,34 +1,94 @@
-const VALID_ROLES = new Set(['admin', 'coordinator', 'volunteer']);
+import registry from '../utils/registry.js';
+import { User } from '../database/schemas/user.schema.js';
 
-export function isValidRole(role) {
-  return VALID_ROLES.has(role);
-}
+export function requirePermissions(...allowedPermissions) {
+  const allowed = new Set(allowedPermissions);
 
-export function requireRoles(...allowedRoles) {
-  const allowed = new Set(allowedRoles);
-
-  return function roleGuard(req, res, next) {
-    //store user role
-    const userRole = req.user?.role;
-    // check if user exists
-    if (!userRole) {
+  return async function permissionGuard(req, res, next) {
+    // 1. Ensure user is authenticated
+    if (!req.user || !req.user.id) {
       return res.status(401).json({
         success: false,
         error: 'Unauthorized',
         message: 'User context missing'
       });
     }
-    // check if user has required role or not
-    if (!allowed.has(userRole)) {
+
+    try {
+      // 2. Check for Super Admin global bypass
+      const userDoc = await User.findById(req.user.id)
+        .select('isSuperAdmin')
+        .lean();
+      if (userDoc?.isSuperAdmin) {
+        return next();
+      }
+
+      // 3. Resolve Club Context (Basic strategy for now)
+      // Look for clubId in params or body
+      let clubId = req.params?.clubId || req.body?.clubId;
+
+      // Note: For routes like /events/:eventId, the controller or a custom param-resolver
+      // should ideally attach req.resolvedClubId before reaching this middleware,
+      // or we accept that personal context applies if no clubId is found.
+      if (!clubId && req.resolvedClubId) {
+        clubId = req.resolvedClubId;
+      }
+
+      // 4. If we have a club context, check club-specific permissions
+      if (clubId) {
+        const clubService = registry.getService('clubService');
+        if (!clubService) {
+          console.warn(
+            'ClubService not found in registry during permission check'
+          );
+          return res
+            .status(500)
+            .json({ success: false, error: 'Internal Server Error' });
+        }
+
+        const userPerms = await clubService.getUserPermissions(
+          req.user.id,
+          clubId
+        );
+        const userPermsSet = new Set(userPerms);
+
+        if (userPermsSet.has('administrator')) {
+          return next();
+        }
+
+        const hasPermission = allowedPermissions.some((perm) =>
+          userPermsSet.has(perm)
+        );
+        if (hasPermission) {
+          return next();
+        }
+      }
+
+      // 5. Personal Context / No Club Context
+      // If no clubId is found, or if club perms didn't match, we assume they must be the owner
+      // or explicitly whitelisted. Since this middleware only checks atomic permissions against roles,
+      // personal resource ownership is usually checked in the controller itself.
+      // So if we reach here and it's a club resource, we deny. If it's personal, they might fail here
+      // unless we define a global "user" permission, or the controller handles it.
+      // For now, if allowedPermissions is empty, we just pass through.
+      if (allowedPermissions.length === 0) {
+        return next();
+      }
+
       return res.status(403).json({
         success: false,
         error: 'Forbidden',
         message: 'Insufficient permissions'
       });
+    } catch (err) {
+      console.error('Permission Guard Error:', err);
+      return res.status(500).json({
+        success: false,
+        error: 'Internal Server Error',
+        message: 'Error verifying permissions'
+      });
     }
-
-    next();
   };
 }
 
-export default requireRoles;
+export default requirePermissions;
