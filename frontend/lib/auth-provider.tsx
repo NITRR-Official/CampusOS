@@ -23,12 +23,6 @@ interface AuthContextValue {
   logout: () => void;
 }
 
-const VALID_ROLES: UserRole[] = ['admin', 'coordinator', 'volunteer'];
-
-function isValidRole(role: string | null | undefined): role is UserRole {
-  return !!role && VALID_ROLES.includes(role as UserRole);
-}
-
 function decodeBase64(value: string) {
   try {
     const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
@@ -72,10 +66,6 @@ function normalizeSession(session: AuthResponseData | null) {
   }
 
   if (isTokenExpired(session.accessToken)) {
-    return null;
-  }
-
-  if (!isValidRole(session.user.role)) {
     return null;
   }
 
@@ -124,10 +114,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const user = session?.user ?? null;
     const accessToken = session?.accessToken ?? null;
     const role = user?.role ?? null;
+    const isSuperAdmin = user?.isSuperAdmin ?? false;
     const isAuthenticated =
       status === 'authenticated' && !!accessToken && !!user;
 
     const hasRole = (...roles: UserRole[]) => {
+      if (isSuperAdmin) {
+        return true;
+      }
       if (!role) {
         return false;
       }

@@ -1,13 +1,14 @@
 import { apiClient } from './api/client';
 export { ApiError } from './api/errors';
 
-export type UserRole = 'admin' | 'coordinator' | 'volunteer';
+export type UserRole = 'admin' | 'coordinator' | 'volunteer' | string;
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  isSuperAdmin?: boolean;
+  role?: UserRole;
   createdAt?: string;
 }
 
