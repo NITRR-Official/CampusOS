@@ -17,7 +17,7 @@ trigger: model_decision
 Mongoose models live in two places depending on the module:
 
 - **Operations modules** (vendor, resource, scheduling, budget): `backend/src/database/schemas/`
-- **Other modules**: `apps/<module>/src/schema/`
+- **Other modules**: `plugins/<module>/src/schema/`
 
 ## Schema Design Patterns
 

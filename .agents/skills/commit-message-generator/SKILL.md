@@ -50,8 +50,8 @@ Identify the scope based on which part of the codebase was changed:
 
 | Scope        | When to Use                                 |
 | ------------ | ------------------------------------------- |
-| `(frontend)` | Changes in `apps/frontend/` or `frontend/`  |
-| `(backend)`  | Changes in `apps/backend/` or `backend/`    |
+| `(frontend)` | Changes in `plugins/frontend/` or `frontend/`  |
+| `(backend)`  | Changes in `plugins/backend/` or `backend/`    |
 | `(api)`      | API endpoints, routes, controllers          |
 | `(auth)`     | Authentication, authorization               |
 | `(db)`       | Database schemas, models, migrations        |

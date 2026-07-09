@@ -11,7 +11,7 @@ trigger: model_decision
 1. **Trigger** — On PR/push to `main`
 2. **Install** — `pnpm install --frozen-lockfile`
 3. **Lint** — `pnpm lint`
-4. **Test** — `pnpm -C apps/<module> test -- --run`
+4. **Test** — `pnpm -C plugins/<module> test -- --run`
 5. **Build** — `pnpm build`
 6. **Stage** — Deploy to staging (on `develop`)
 7. **Production** — Manual approval + deploy (on `main`)

@@ -7,7 +7,7 @@ trigger: model_decision
 
 ## Module Independence
 
-- Every feature lives in `/apps/<module>/` — backend core (`backend/src/`) only handles middleware, plugin loading, and the service registry
+- Every feature lives in `/plugins/<module>/` — backend core (`backend/src/`) only handles middleware, plugin loading, and the service registry
 - **No direct imports between modules** — modules communicate through the service registry or shared database collections
 - Each module owns its data models and business logic
 
@@ -16,7 +16,7 @@ trigger: model_decision
 Every module must export `init(app, registry)` from either `plugin.js` or `src/index.js`:
 
 ```javascript
-// apps/my-module/src/index.js
+// plugins/my-module/src/index.js
 export async function init(app, registry) {
   const requireRoles = registry.getService('requireRoles');
   registerRoutes(app, requireRoles);
@@ -27,7 +27,7 @@ export async function init(app, registry) {
 ## Module Directory Layout
 
 ```
-apps/<module>/src/
+plugins/<module>/src/
 ├── index.js              # Plugin entry (exports init)
 ├── controller/           # HTTP handlers (thin)
 ├── routes/               # Express route definitions

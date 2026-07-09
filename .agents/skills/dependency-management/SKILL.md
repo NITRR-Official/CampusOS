@@ -47,7 +47,7 @@ pnpm install --frozen-lockfile     # CI-safe install
 ```bash
 pnpm install --frozen-lockfile
 pnpm lint
-pnpm -C apps/vendor test -- --run
+pnpm -C plugins/vendor test -- --run
 pnpm build
 ```
 
@@ -67,7 +67,7 @@ Use overrides in `package.json` if needed:
 ## Important
 
 - **pnpm only** — never use npm or yarn
-- Module-specific installs: `pnpm -C apps/<module> add <package>`
+- Module-specific installs: `pnpm -C plugins/<module> add <package>`
 - Dev dependencies: `pnpm add -D <package>`
 - Commit updates separately: `chore: update dependencies`
 

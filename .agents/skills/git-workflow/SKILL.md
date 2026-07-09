@@ -53,7 +53,7 @@ gh pr create --title "feat: add enrollment" --body "Closes #123"
 
 # PR Checklist:
 # - [ ] pnpm lint passes
-# - [ ] pnpm -C apps/<module> test -- --run passes
+# - [ ] pnpm -C plugins/<module> test -- --run passes
 # - [ ] pnpm build succeeds
 # - [ ] Docs updated if needed
 ```

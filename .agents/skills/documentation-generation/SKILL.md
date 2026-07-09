@@ -56,7 +56,7 @@ docs/
 Use Mermaid for diagrams. Document actual flows:
 - Startup: `index.js → connectDB → createApp → startServer`
 - Request: `Body parsing → CORS → Logger → Auth → Routes → Error handler`
-- Plugin: `scan /apps/ → import entry → call init(app, registry)`
+- Plugin: `scan /plugins/ → import entry → call init(app, registry)`
 
 ## Quick Reference
 

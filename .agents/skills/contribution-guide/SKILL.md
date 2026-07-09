@@ -29,7 +29,7 @@ description: "Issues, labels, contributor workflow, pull request process for Cam
 4. Run checks locally:
    ```bash
    pnpm lint
-   pnpm -C apps/<module> test -- --run
+   pnpm -C plugins/<module> test -- --run
    pnpm build
    ```
 5. Commit with Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`

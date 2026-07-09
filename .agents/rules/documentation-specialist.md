@@ -47,7 +47,7 @@ Follow the patterns documented in `docs/guides/API_STANDARDS.md`:
 All code examples must use:
 - ES Modules (`import`/`export`) — never CommonJS
 - `async`/`await` — never `.then()` chains
-- Correct project paths (`apps/<module>/src/`)
+- Correct project paths (`plugins/<module>/src/`)
 - Correct ports (backend: 4000, frontend: 3000)
 - pnpm commands — never npm or yarn
 

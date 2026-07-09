@@ -40,10 +40,10 @@ steps:
 
 ```yaml
   - run: pnpm lint
-  - run: pnpm -C apps/vendor test -- --run
-  - run: pnpm -C apps/resource test -- --run
-  - run: pnpm -C apps/scheduling test -- --run
-  - run: pnpm -C apps/budget test -- --run
+  - run: pnpm -C plugins/vendor test -- --run
+  - run: pnpm -C plugins/resource test -- --run
+  - run: pnpm -C plugins/scheduling test -- --run
+  - run: pnpm -C plugins/budget test -- --run
 ```
 
 Note: CampusOS uses **Vitest** (not Jest). Each module has its own `vitest.config.js`.
@@ -67,7 +67,7 @@ Note: CampusOS uses **Vitest** (not Jest). Each module has its own `vitest.confi
 # Run the same checks CI runs
 pnpm install --frozen-lockfile
 pnpm lint
-pnpm -C apps/vendor test -- --run
+pnpm -C plugins/vendor test -- --run
 pnpm build
 
 # Validate workflow syntax locally

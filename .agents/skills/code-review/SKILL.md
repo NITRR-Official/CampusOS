@@ -16,7 +16,7 @@ description: "Comprehensive code review for architecture, security, quality, and
 
 ### Phase 1: Architecture Review
 
-- ✅ All code in `/apps/<module>/` — nothing in backend core except middleware/registry
+- ✅ All code in `/plugins/<module>/` — nothing in backend core except middleware/registry
 - ✅ No direct module-to-module imports — only via registry or shared DB
 - ✅ Plugin entry exports `init(app, registry)`
 - ✅ Controllers thin — business logic in services
@@ -58,7 +58,7 @@ description: "Comprehensive code review for architecture, security, quality, and
 
 ```bash
 pnpm lint                          # Code quality
-pnpm -C apps/vendor test -- --run  # Tests
+pnpm -C plugins/vendor test -- --run  # Tests
 pnpm audit                         # Security
 pnpm build                         # Build verification
 ```

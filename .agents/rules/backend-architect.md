@@ -26,7 +26,7 @@ Request → Body parsing → CORS → Logger → Health check → Auth → Plugi
 - CORS: Allows origins from `FRONTEND_URLS` env var
 - Logger: Assigns `req.id`, logs method/path/status/duration
 - Auth: Skips public routes, verifies JWT, sets `req.user`
-- Plugin routes: Loaded dynamically from `/apps/`
+- Plugin routes: Loaded dynamically from `/plugins/`
 - Error handler: Catches all thrown/async errors
 
 ## Service Registry
@@ -44,9 +44,9 @@ Accessed via `app.locals.registry` in any middleware or route handler.
 
 ## Plugin Loader
 
-`plugin-loader.js` scans `/apps/` and loads each module:
+`plugin-loader.js` scans `/plugins/` and loads each module:
 
-1. Reads all directories in `/apps/`
+1. Reads all directories in `/plugins/`
 2. Looks for entry point: `plugin.js` first, then `src/index.js`
 3. Dynamically imports the entry file
 4. Calls `init(app, registry)`
