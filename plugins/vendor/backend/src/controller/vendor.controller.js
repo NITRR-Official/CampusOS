@@ -1,4 +1,11 @@
 import VendorService from '../service/vendor.service.js';
+import {
+  createVendorSchema,
+  updateVendorSchema,
+  assignVendorSchema,
+  updateVendorAssignmentStatusSchema,
+  rateVendorSchema
+} from '../schema/vendor.schema.js';
 
 const vendorService = new VendorService();
 
@@ -14,25 +21,9 @@ export const vendorController = {
    */
   async createVendor(req, res, next) {
     try {
-      const {
-        name,
-        category,
-        contactPerson,
-        email,
-        phone,
-        address,
-        bankDetails
-      } = req.body;
+      const value = createVendorSchema.parse(req.body);
 
-      const result = await vendorService.createVendor({
-        name,
-        category,
-        contactPerson,
-        email,
-        phone,
-        address,
-        bankDetails
-      });
+      const result = await vendorService.createVendor(value);
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });
@@ -98,7 +89,7 @@ export const vendorController = {
   async updateVendor(req, res, next) {
     try {
       const { vendorId } = req.params;
-      const updateData = req.body;
+      const updateData = updateVendorSchema.parse(req.body);
 
       if (!vendorId) {
         return res.status(400).json({ error: 'vendorId is required' });
@@ -147,7 +138,7 @@ export const vendorController = {
   async assignVendorToEvent(req, res, next) {
     try {
       const { eventId, vendorId } = req.params;
-      const { amount, notes } = req.body;
+      const value = assignVendorSchema.parse(req.body);
 
       if (!eventId || !vendorId) {
         return res
@@ -158,7 +149,7 @@ export const vendorController = {
       const result = await vendorService.assignVendorToEvent(
         eventId,
         vendorId,
-        { amount, notes }
+        value
       );
 
       if (!result.success) {
@@ -226,14 +217,10 @@ export const vendorController = {
   async updateAssignmentStatus(req, res, next) {
     try {
       const { assignmentId } = req.params;
-      const { status } = req.body;
+      const { status } = updateVendorAssignmentStatusSchema.parse(req.body);
 
       if (!assignmentId) {
         return res.status(400).json({ error: 'assignmentId is required' });
-      }
-
-      if (!status) {
-        return res.status(400).json({ error: 'status is required' });
       }
 
       const result = await vendorService.updateAssignmentStatus(
@@ -258,14 +245,10 @@ export const vendorController = {
   async rateVendor(req, res, next) {
     try {
       const { vendorId } = req.params;
-      const { rating } = req.body;
+      const { rating } = rateVendorSchema.parse(req.body);
 
       if (!vendorId) {
         return res.status(400).json({ error: 'vendorId is required' });
-      }
-
-      if (rating === undefined || rating === null) {
-        return res.status(400).json({ error: 'rating is required' });
       }
 
       const result = await vendorService.rateVendor(vendorId, rating);

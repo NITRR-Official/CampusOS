@@ -1,9 +1,9 @@
 import {
-  validateAddMemberPayload,
-  validateAssignRolePayload,
-  validateCreateClubPayload,
-  validateCreateRolePayload,
-  validateUpdateRolePayload
+  addMemberSchema,
+  assignRoleSchema,
+  createClubSchema,
+  createRoleSchema,
+  updateRoleSchema
 } from '../schema/club.schema.js';
 import { verificationService } from '../service/verification.service.js';
 
@@ -24,21 +24,8 @@ function createHttpError(status, message, code, details) {
 
 export function createClubController(clubService) {
   async function create(req, res, next) {
-    const { errors, value } = validateCreateClubPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = createClubSchema.parse(req.body);
       const club = await clubService.createClub({
         ...value,
         createdBy: req.user?.id || 'unknown'
@@ -86,21 +73,9 @@ export function createClubController(clubService) {
 
   async function addMember(req, res, next) {
     const { clubId } = req.params;
-    const { errors, value } = validateAddMemberPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = addMemberSchema.parse(req.body);
       const member = await clubService.addMember(clubId, value);
 
       if (!member) {
@@ -147,21 +122,9 @@ export function createClubController(clubService) {
 
   async function assignRole(req, res, next) {
     const { clubId, memberUserId } = req.params;
-    const { errors, value } = validateAssignRolePayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = assignRoleSchema.parse(req.body);
       const updatedMember = await clubService.assignRole(
         clubId,
         memberUserId,
@@ -285,21 +248,9 @@ export function createClubController(clubService) {
 
   async function createRole(req, res, next) {
     const { clubId } = req.params;
-    const { errors, value } = validateCreateRolePayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = createRoleSchema.parse(req.body);
       const role = await clubService.createRole(clubId, value, req.user);
       res.status(201).json({ success: true, data: role });
     } catch (err) {
@@ -309,21 +260,9 @@ export function createClubController(clubService) {
 
   async function updateRole(req, res, next) {
     const { clubId, roleId } = req.params;
-    const { errors, value } = validateUpdateRolePayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = updateRoleSchema.parse(req.body);
       const role = await clubService.updateRole(
         clubId,
         roleId,

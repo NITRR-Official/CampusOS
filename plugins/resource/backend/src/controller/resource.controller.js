@@ -1,4 +1,11 @@
 import ResourceService from '../service/resource.service.js';
+import {
+  createResourceSchema,
+  updateResourceSchema,
+  allocateResourceSchema,
+  updateAllocationStatusSchema,
+  updateMaintenanceSchema
+} from '../schema/resource.schema.js';
 
 const resourceService = new ResourceService();
 
@@ -14,18 +21,9 @@ export const resourceController = {
    */
   async createResource(req, res, next) {
     try {
-      const { name, type, quantity, description, location, owner, cost } =
-        req.body;
+      const value = createResourceSchema.parse(req.body);
 
-      const result = await resourceService.createResource({
-        name,
-        type,
-        quantity,
-        description,
-        location,
-        owner,
-        cost
-      });
+      const result = await resourceService.createResource(value);
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });
@@ -116,7 +114,7 @@ export const resourceController = {
   async updateResource(req, res, next) {
     try {
       const { resourceId } = req.params;
-      const updateData = req.body;
+      const updateData = updateResourceSchema.parse(req.body);
 
       if (!resourceId) {
         return res.status(400).json({ error: 'resourceId is required' });
@@ -168,7 +166,7 @@ export const resourceController = {
   async allocateResourceToEvent(req, res, next) {
     try {
       const { eventId, resourceId } = req.params;
-      const { allocatedQuantity, startDate, endDate, notes } = req.body;
+      const value = allocateResourceSchema.parse(req.body);
 
       if (!eventId || !resourceId) {
         return res
@@ -179,12 +177,7 @@ export const resourceController = {
       const result = await resourceService.allocateResourceToEvent(
         eventId,
         resourceId,
-        {
-          allocatedQuantity,
-          startDate,
-          endDate,
-          notes
-        }
+        value
       );
 
       if (!result.success) {
@@ -255,14 +248,10 @@ export const resourceController = {
   async updateAllocationStatus(req, res, next) {
     try {
       const { allocationId } = req.params;
-      const { status } = req.body;
+      const { status } = updateAllocationStatusSchema.parse(req.body);
 
       if (!allocationId) {
         return res.status(400).json({ error: 'allocationId is required' });
-      }
-
-      if (!status) {
-        return res.status(400).json({ error: 'status is required' });
       }
 
       const result = await resourceService.updateAllocationStatus(
@@ -287,14 +276,10 @@ export const resourceController = {
   async updateMaintenance(req, res, next) {
     try {
       const { resourceId } = req.params;
-      const { maintenanceDate } = req.body;
+      const { maintenanceDate } = updateMaintenanceSchema.parse(req.body);
 
       if (!resourceId) {
         return res.status(400).json({ error: 'resourceId is required' });
-      }
-
-      if (!maintenanceDate) {
-        return res.status(400).json({ error: 'maintenanceDate is required' });
       }
 
       const result = await resourceService.updateMaintenance(

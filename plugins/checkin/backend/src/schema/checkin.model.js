@@ -37,6 +37,5 @@ const checkInSchema = new mongoose.Schema(
 
 // Indexes
 checkInSchema.index({ eventId: 1, userId: 1 }, { unique: true }); // A user can only register/check-in once per event
-checkInSchema.index({ qrCode: 1 });
 
 export const CheckIn = mongoose.model('CheckIn', checkInSchema);

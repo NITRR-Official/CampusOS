@@ -1,4 +1,4 @@
-import Vendor from '../schema/vendor.schema.js';
+import Vendor from '../schema/vendor.model.js';
 
 export class VendorRepository {
   async create(data) {

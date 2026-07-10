@@ -6,6 +6,8 @@
  * MUST be placed last in middleware chain
  */
 
+import { ZodError } from 'zod';
+
 export function errorMiddleware(err, req, res, next) {
   if (res.headersSent) {
     return next(err);
@@ -17,13 +19,54 @@ export function errorMiddleware(err, req, res, next) {
   const message = err.message || 'Internal Server Error';
   const requestId = req.id || 'UNKNOWN';
 
-  // Validation errors (e.g., from Joi)
+  // Validation errors (Zod)
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      success: false,
+      error: 'Validation Error',
+      message: 'Request validation failed',
+      details: err.errors.map((e) => ({
+        field: e.path.join('.'),
+        message: e.message
+      })),
+      requestId
+    });
+  }
+
+  // Legacy Validation errors (e.g., from Joi or manual)
   if (err.details) {
     return res.status(400).json({
       success: false,
       error: 'Validation Error',
       message: 'Request validation failed',
       details: err.details,
+      requestId
+    });
+  }
+
+  // Custom Domain errors (from services)
+  if (err.code && typeof err.code === 'string') {
+    let statusCode = 400; // Default to Bad Request for domain errors
+
+    if (err.code.includes('NOT_FOUND')) statusCode = 404;
+    else if (
+      err.code.includes('EXISTS') ||
+      err.code.includes('CONFLICT') ||
+      err.code === 'ALREADY_REGISTERED' ||
+      err.code === 'EVENT_CAPACITY_REACHED'
+    )
+      statusCode = 409;
+    else if (err.code.includes('UNAUTHORIZED')) statusCode = 401;
+    else if (err.code.includes('FORBIDDEN') || err.code.includes('ESCALATION'))
+      statusCode = 403;
+
+    // Use err.status if specifically provided
+    if (err.status) statusCode = err.status;
+
+    return res.status(statusCode).json({
+      success: false,
+      error: err.code,
+      message,
       requestId
     });
   }

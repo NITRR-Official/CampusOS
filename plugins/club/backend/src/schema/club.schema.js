@@ -1,186 +1,87 @@
+import { z } from 'zod';
 import { PERMISSIONS } from './role.model.js';
 
-function normalizeText(value) {
-  return typeof value === 'string' ? value.trim() : '';
-}
+const VALID_PERMISSIONS = Object.values(PERMISSIONS);
 
-function normalizeEmail(value) {
-  return normalizeText(value).toLowerCase();
-}
+export const createClubSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(3, 'Name must be between 3 and 120 characters')
+      .max(120, 'Name must be between 3 and 120 characters'),
+    instituteId: z.string().trim().min(1, 'Institute ID is required'),
+    description: z
+      .string()
+      .trim()
+      .max(1000, 'Description must be 1000 characters or fewer')
+      .optional()
+      .default(''),
+    category: z.string().trim().min(1, 'Category is required'),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email('Valid official club email is required')
+  })
+  .strict()
+  .transform((data) => ({ ...data, status: 'pending_verification' }));
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const VALID_PERMISSIONS = new Set(Object.values(PERMISSIONS));
+export const addMemberSchema = z
+  .object({
+    userId: z.string().trim().min(1, 'User ID is required'),
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Name must be between 2 and 80 characters')
+      .max(80, 'Name must be between 2 and 80 characters'),
+    email: z.string().trim().toLowerCase().email('Valid email is required'),
+    role: z.string().trim().min(1, 'Role is required').default('volunteer')
+  })
+  .strict();
 
-export function validateCreateClubPayload(payload = {}) {
-  const name = normalizeText(payload.name);
-  const instituteId = normalizeText(payload.instituteId);
-  const description = normalizeText(payload.description);
-  const category = normalizeText(payload.category);
-  const email = normalizeEmail(payload.email);
-  const errors = [];
+export const assignRoleSchema = z
+  .object({
+    role: z.string().trim().min(1, 'Role is required')
+  })
+  .strict();
 
-  if (name.length < 3 || name.length > 120) {
-    errors.push({
-      field: 'name',
-      message: 'Name must be between 3 and 120 characters'
-    });
-  }
+export const createRoleSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Role name must be between 2 and 50 characters')
+      .max(50, 'Role name must be between 2 and 50 characters'),
+    permissions: z
+      .array(
+        z.enum(VALID_PERMISSIONS, {
+          errorMap: () => ({ message: 'Invalid permission' })
+        })
+      )
+      .default([]),
+    hierarchyLevel: z.number().int().default(0),
+    roleType: z.enum(['team', 'role']).default('role'),
+    color: z.string().trim().max(30).nullable().default(null)
+  })
+  .strict();
 
-  if (!instituteId) {
-    errors.push({ field: 'instituteId', message: 'Institute ID is required' });
-  }
-
-  if (description.length > 500) {
-    errors.push({
-      field: 'description',
-      message: 'Description must be 500 characters or fewer'
-    });
-  }
-
-  if (!category) {
-    errors.push({ field: 'category', message: 'Category is required' });
-  }
-
-  if (!EMAIL_PATTERN.test(email)) {
-    errors.push({
-      field: 'email',
-      message: 'Valid official club email is required'
-    });
-  }
-
-  return {
-    errors,
-    value: {
-      name,
-      instituteId,
-      description,
-      category,
-      email,
-      status: 'pending_verification'
-    }
-  };
-}
-
-export function validateAddMemberPayload(payload = {}) {
-  const userId = normalizeText(payload.userId);
-  const name = normalizeText(payload.name);
-  const email = normalizeEmail(payload.email);
-  const role = normalizeText(payload.role) || 'volunteer';
-  const errors = [];
-
-  if (!userId) {
-    errors.push({ field: 'userId', message: 'User ID is required' });
-  }
-
-  if (name.length < 2 || name.length > 80) {
-    errors.push({
-      field: 'name',
-      message: 'Name must be between 2 and 80 characters'
-    });
-  }
-
-  if (!EMAIL_PATTERN.test(email)) {
-    errors.push({ field: 'email', message: 'Valid email is required' });
-  }
-
-  if (!role) {
-    errors.push({ field: 'role', message: 'Role is required' });
-  }
-
-  return {
-    errors,
-    value: { userId, name, email, role }
-  };
-}
-
-export function validateAssignRolePayload(payload = {}) {
-  const role = normalizeText(payload.role);
-  const errors = [];
-
-  if (!role) {
-    errors.push({ field: 'role', message: 'Role is required' });
-  }
-
-  return { errors, value: { role } };
-}
-
-export function validateCreateRolePayload(payload = {}) {
-  const name = normalizeText(payload.name);
-  const permissions = Array.isArray(payload.permissions)
-    ? payload.permissions
-    : [];
-  const hierarchyLevel =
-    typeof payload.hierarchyLevel === 'number' ? payload.hierarchyLevel : 0;
-  const roleType = normalizeText(payload.roleType) === 'team' ? 'team' : 'role';
-  const color = normalizeText(payload.color) || null;
-  const errors = [];
-
-  if (name.length < 2 || name.length > 50) {
-    errors.push({
-      field: 'name',
-      message: 'Role name must be between 2 and 50 characters'
-    });
-  }
-
-  for (const perm of permissions) {
-    if (!VALID_PERMISSIONS.has(perm)) {
-      errors.push({
-        field: 'permissions',
-        message: `Invalid permission: ${perm}`
-      });
-    }
-  }
-
-  return {
-    errors,
-    value: { name, permissions, hierarchyLevel, roleType, color }
-  };
-}
-
-export function validateUpdateRolePayload(payload = {}) {
-  const value = {};
-  const errors = [];
-
-  if (payload.name !== undefined) {
-    const name = normalizeText(payload.name);
-    if (name.length < 2 || name.length > 50) {
-      errors.push({
-        field: 'name',
-        message: 'Role name must be between 2 and 50 characters'
-      });
-    }
-    value.name = name;
-  }
-
-  if (payload.permissions !== undefined) {
-    const permissions = Array.isArray(payload.permissions)
-      ? payload.permissions
-      : [];
-    for (const perm of permissions) {
-      if (!VALID_PERMISSIONS.has(perm)) {
-        errors.push({
-          field: 'permissions',
-          message: `Invalid permission: ${perm}`
-        });
-      }
-    }
-    value.permissions = permissions;
-  }
-
-  if (payload.hierarchyLevel !== undefined) {
-    if (typeof payload.hierarchyLevel !== 'number') {
-      errors.push({
-        field: 'hierarchyLevel',
-        message: 'hierarchyLevel must be a number'
-      });
-    } else {
-      value.hierarchyLevel = payload.hierarchyLevel;
-    }
-  }
-
-  if (payload.color !== undefined) {
-    value.color = normalizeText(payload.color) || null;
-  }
-
-  return { errors, value };
-}
+export const updateRoleSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Role name must be between 2 and 50 characters')
+      .max(50, 'Role name must be between 2 and 50 characters')
+      .optional(),
+    permissions: z
+      .array(
+        z.enum(VALID_PERMISSIONS, {
+          errorMap: () => ({ message: 'Invalid permission' })
+        })
+      )
+      .optional(),
+    hierarchyLevel: z.number().int().optional(),
+    color: z.string().trim().max(30).nullable().optional()
+  })
+  .strict();

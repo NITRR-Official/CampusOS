@@ -1,51 +1,17 @@
-/**
- * Check-in Schema
- * Tracks event attendance with QR codes
- */
+import { z } from 'zod';
 
-export const CheckInSchema = {
-  id: {
-    type: 'string',
-    required: true,
-    description: 'Unique identifier (UUID)'
-  },
-  eventId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to Event'
-  },
-  userId: {
-    type: 'string',
-    required: true,
-    description: 'Reference to attendee User'
-  },
-  qrCode: {
-    type: 'string',
-    required: true,
-    unique: true,
-    description: 'Unique QR code identifier'
-  },
-  status: {
-    type: 'string',
-    enum: ['pending', 'checked-in'],
-    default: 'pending',
-    description: 'Attendance status'
-  },
-  checkedInAt: {
-    type: 'date',
-    nullable: true,
-    description: 'Timestamp when attendee checked in'
-  },
-  createdAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  },
-  updatedAt: {
-    type: 'date',
-    required: true,
-    default: () => new Date()
-  }
-};
+export const createCheckInSchema = z
+  .object({
+    userId: z.string().trim().min(1, 'userId is required')
+  })
+  .strict();
 
-export default CheckInSchema;
+export const scanQRCodeSchema = z
+  .object({
+    qrCode: z
+      .string()
+      .trim()
+      .min(1, 'qrCode is required')
+      .max(200, 'qrCode cannot exceed 200 characters')
+  })
+  .strict();

@@ -1,115 +1,92 @@
-/**
- * Resource Schema
- * Mongoose schema for resource/equipment data persistence
- */
+import { z } from 'zod';
 
-import mongoose from 'mongoose';
-
-const resourceSchema = new mongoose.Schema(
-  {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    type: {
-      type: String,
-      required: true,
-      enum: ['equipment', 'furniture', 'technology', 'consumable', 'other'],
-      trim: true
-    },
-    description: {
-      type: String,
-      trim: true
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1
-    },
-    availableQuantity: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-    unit: {
-      type: String,
-      default: 'pieces',
-      trim: true
-    },
-    location: {
-      type: String,
-      trim: true
-    },
-    owner: {
-      type: String,
-      trim: true
-    },
-    condition: {
-      type: String,
-      enum: ['excellent', 'good', 'fair', 'poor'],
-      default: 'good'
-    },
-    status: {
-      type: String,
-      default: 'available'
-    },
-    purchaseDate: Date,
-    lastMaintenanceDate: Date,
-    nextMaintenanceDate: Date,
-    maintenanceDate: Date,
-    maintenanceNotes: String,
-    cost: {
-      type: Number,
-      default: 0
-    },
-    allocations: [
+export const createResourceSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Name must be at least 2 characters')
+      .max(100, 'Name must be 100 characters or fewer'),
+    type: z.enum(
+      ['equipment', 'furniture', 'technology', 'consumable', 'other'],
       {
-        allocationId: String,
-        eventId: String,
-        allocatedQuantity: Number,
-        startDate: Date,
-        endDate: Date,
-        status: {
-          type: String,
-          enum: ['pending', 'allocated', 'in-use', 'returned', 'damaged'],
-          default: 'pending'
-        },
-        notes: String,
-        allocatedAt: {
-          type: Date,
-          default: Date.now
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now
-        },
-        updatedAt: {
-          type: Date,
-          default: Date.now
-        }
+        errorMap: () => ({ message: 'Invalid resource type' })
       }
-    ],
-    isActive: {
-      type: Boolean,
-      default: true
+    ),
+    quantity: z.number().int().min(1, 'Quantity must be at least 1'),
+    description: z
+      .string()
+      .trim()
+      .max(500, 'Description must be 500 characters or fewer')
+      .optional()
+      .default(''),
+    location: z
+      .string()
+      .trim()
+      .max(120, 'Location must be 120 characters or fewer')
+      .optional()
+      .default(''),
+    owner: z
+      .string()
+      .trim()
+      .max(100, 'Owner must be 100 characters or fewer')
+      .optional()
+      .default(''),
+    cost: z
+      .number()
+      .nonnegative('Cost must be a non-negative number')
+      .optional()
+      .default(0)
+  })
+  .strict();
+
+export const updateResourceSchema = createResourceSchema.partial().strict();
+
+export const allocateResourceSchema = z
+  .object({
+    allocatedQuantity: z
+      .number()
+      .int()
+      .min(1, 'Allocated quantity must be at least 1'),
+    startDate: z
+      .string()
+      .datetime('startDate must be a valid ISO date-time string'),
+    endDate: z
+      .string()
+      .datetime('endDate must be a valid ISO date-time string'),
+    notes: z
+      .string()
+      .trim()
+      .max(500, 'Notes must be 500 characters or fewer')
+      .optional()
+      .default('')
+  })
+  .strict()
+  .refine(
+    (data) => {
+      if (data.startDate && data.endDate) {
+        return new Date(data.endDate) >= new Date(data.startDate);
+      }
+      return true;
+    },
+    {
+      message: 'endDate cannot be before startDate',
+      path: ['endDate']
     }
-  },
-  {
-    timestamps: true,
-    collection: 'resources'
-  }
-);
+  );
 
-// Indexes
-resourceSchema.index({ type: 1 });
-resourceSchema.index({ 'allocations.eventId': 1 });
-resourceSchema.index({ condition: 1 });
+export const updateAllocationStatusSchema = z
+  .object({
+    status: z.enum(['pending', 'allocated', 'in-use', 'returned', 'damaged'], {
+      errorMap: () => ({ message: 'Invalid allocation status' })
+    })
+  })
+  .strict();
 
-export const Resource = mongoose.model('Resource', resourceSchema);
-
-export default Resource;
+export const updateMaintenanceSchema = z
+  .object({
+    maintenanceDate: z
+      .string()
+      .datetime('maintenanceDate must be a valid ISO date-time string')
+  })
+  .strict();

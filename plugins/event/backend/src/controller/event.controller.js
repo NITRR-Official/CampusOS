@@ -1,8 +1,8 @@
 import {
-  validateCreateEventPayload,
-  validateRegistrationPayload,
+  createEventSchema,
+  registrationSchema,
   validateStatus,
-  validateUpdateEventPayload
+  updateEventSchema
 } from '../schema/event.schema.js';
 
 function createHttpError(status, message, code, details) {
@@ -22,21 +22,8 @@ function createHttpError(status, message, code, details) {
 
 export function createEventController(eventService) {
   async function create(req, res, next) {
-    const { errors, value } = validateCreateEventPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = createEventSchema.parse(req.body);
       const event = await eventService.createEvent({
         ...value,
         createdBy: req.user?.id || 'unknown'
@@ -53,21 +40,9 @@ export function createEventController(eventService) {
 
   async function update(req, res, next) {
     const { eventId } = req.params;
-    const { errors, value } = validateUpdateEventPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = updateEventSchema.parse(req.body);
       const event = await eventService.updateEvent(eventId, value);
 
       if (!event) {
@@ -162,21 +137,9 @@ export function createEventController(eventService) {
 
   async function register(req, res, next) {
     const { eventId } = req.params;
-    const { errors, value } = validateRegistrationPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = registrationSchema.parse(req.body);
       const registrationResult = await eventService.registerForEvent(
         eventId,
         value

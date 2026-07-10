@@ -1,6 +1,6 @@
 import {
-  validateCreateCalendarEventPayload,
-  validateQueryCalendarEventsPayload
+  createCalendarEventSchema,
+  queryCalendarEventsSchema
 } from '../schema/calendar.schema.js';
 import { getCalendarService } from '../service/calendar.service.js';
 
@@ -24,21 +24,8 @@ export function createCalendarController() {
   const calendarService = getCalendarService();
 
   async function create(req, res, next) {
-    const { errors, value } = validateCreateCalendarEventPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = createCalendarEventSchema.parse(req.body);
       const event = await calendarService.createEvent({
         ...value,
         createdBy: req.user?.id || 'unknown'
@@ -66,21 +53,8 @@ export function createCalendarController() {
   }
 
   async function queryByRange(req, res, next) {
-    const { errors, value } = validateQueryCalendarEventsPayload(req.query);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = queryCalendarEventsSchema.parse(req.query);
       const events = await calendarService.getEventsBetween(
         value.startDate,
         value.endDate

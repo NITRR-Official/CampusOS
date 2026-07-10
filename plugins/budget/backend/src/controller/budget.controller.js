@@ -3,6 +3,15 @@
  * HTTP request handlers for budget operations
  */
 
+import {
+  createBudgetSchema,
+  updateBudgetSchema,
+  approveBudgetSchema,
+  logExpenseSchema,
+  updateExpenseSchema,
+  markExpensePaidSchema
+} from '../schema/budget.schema.js';
+
 export function createBudgetController(budgetService) {
   return {
     /**
@@ -12,7 +21,7 @@ export function createBudgetController(budgetService) {
     async createBudget(req, res, next) {
       try {
         const { eventId } = req.params;
-        const { totalAllocation, budgetBreakdown, currency, notes } = req.body;
+        const value = createBudgetSchema.parse(req.body);
 
         if (!eventId) {
           return res.status(400).json({ error: 'eventId is required' });
@@ -20,10 +29,7 @@ export function createBudgetController(budgetService) {
 
         const result = await budgetService.createBudget({
           eventId,
-          totalAllocation,
-          budgetBreakdown,
-          currency,
-          notes
+          ...value
         });
 
         if (!result.success) {
@@ -93,7 +99,7 @@ export function createBudgetController(budgetService) {
     async updateBudget(req, res, next) {
       try {
         const { budgetId } = req.params;
-        const updateData = req.body;
+        const updateData = updateBudgetSchema.parse(req.body);
 
         if (!budgetId) {
           return res.status(400).json({ error: 'budgetId is required' });
@@ -118,12 +124,10 @@ export function createBudgetController(budgetService) {
     async approveBudget(req, res, next) {
       try {
         const { budgetId } = req.params;
-        const { userId } = req.body;
+        const { userId } = approveBudgetSchema.parse(req.body);
 
-        if (!budgetId || !userId) {
-          return res
-            .status(400)
-            .json({ error: 'budgetId and userId are required' });
+        if (!budgetId) {
+          return res.status(400).json({ error: 'budgetId is required' });
         }
 
         const result = await budgetService.approveBudget(budgetId, userId);
@@ -169,29 +173,13 @@ export function createBudgetController(budgetService) {
     async logExpense(req, res, next) {
       try {
         const { budgetId } = req.params;
-        const {
-          category,
-          description,
-          amount,
-          vendor,
-          paymentMethod,
-          receipt,
-          notes
-        } = req.body;
+        const value = logExpenseSchema.parse(req.body);
 
         if (!budgetId) {
           return res.status(400).json({ error: 'budgetId is required' });
         }
 
-        const result = await budgetService.logExpense(budgetId, {
-          category,
-          description,
-          amount,
-          vendor,
-          paymentMethod,
-          receipt,
-          notes
-        });
+        const result = await budgetService.logExpense(budgetId, value);
 
         if (!result.success) {
           return res.status(400).json({ error: result.error });
@@ -258,7 +246,7 @@ export function createBudgetController(budgetService) {
     async updateExpense(req, res, next) {
       try {
         const { expenseId } = req.params;
-        const updateData = req.body;
+        const updateData = updateExpenseSchema.parse(req.body);
 
         if (!expenseId) {
           return res.status(400).json({ error: 'expenseId is required' });
@@ -283,7 +271,7 @@ export function createBudgetController(budgetService) {
     async markExpenseAsPaid(req, res, next) {
       try {
         const { expenseId } = req.params;
-        const { paymentMethod } = req.body;
+        const { paymentMethod } = markExpensePaidSchema.parse(req.body);
 
         if (!expenseId) {
           return res.status(400).json({ error: 'expenseId is required' });

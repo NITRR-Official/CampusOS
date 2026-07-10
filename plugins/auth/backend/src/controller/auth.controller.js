@@ -1,7 +1,4 @@
-import {
-  validateSignupPayload,
-  validateLoginPayload
-} from '../schema/auth.schema.js';
+import { signupSchema, loginSchema } from '../schema/auth.schema.js';
 
 function createHttpError(status, message, code, details) {
   const error = new Error(message);
@@ -38,21 +35,8 @@ export function createAuthController({ registry, authService }) {
   }
 
   async function signup(req, res, next) {
-    const { errors, value } = validateSignupPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = signupSchema.parse(req.body);
       const user = await authService.createUser(value);
       const accessToken = signAccessToken(user);
 
@@ -81,21 +65,8 @@ export function createAuthController({ registry, authService }) {
   }
 
   async function login(req, res, next) {
-    const { errors, value } = validateLoginPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = loginSchema.parse(req.body);
       const user = await authService.authenticateUser(value);
 
       if (!user) {

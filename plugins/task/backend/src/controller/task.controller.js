@@ -1,8 +1,8 @@
 import {
-  validateAssignTaskPayload,
-  validateCreateTaskPayload,
-  validatePriorityPayload,
-  validateStatusPayload
+  assignTaskSchema,
+  createTaskSchema,
+  updateTaskPrioritySchema,
+  updateTaskStatusSchema
 } from '../schema/task.schema.js';
 import { getTaskService } from '../service/task.service.js';
 
@@ -25,21 +25,8 @@ export function createTaskController() {
   const taskService = getTaskService();
 
   async function create(req, res, next) {
-    const { errors, value } = validateCreateTaskPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = createTaskSchema.parse(req.body);
       const task = await taskService.createTask({
         ...value,
         createdBy: req.user?.id || 'unknown'
@@ -87,21 +74,9 @@ export function createTaskController() {
 
   async function assign(req, res, next) {
     const { taskId } = req.params;
-    const { errors, value } = validateAssignTaskPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = assignTaskSchema.parse(req.body);
       const task = await taskService.assignTask(taskId, value);
 
       if (!task) {
@@ -120,21 +95,9 @@ export function createTaskController() {
 
   async function updateStatus(req, res, next) {
     const { taskId } = req.params;
-    const { errors, value } = validateStatusPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = updateTaskStatusSchema.parse(req.body);
       const task = await taskService.updateStatus(taskId, value.status);
 
       if (!task) {
@@ -153,21 +116,9 @@ export function createTaskController() {
 
   async function updatePriority(req, res, next) {
     const { taskId } = req.params;
-    const { errors, value } = validatePriorityPayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
 
     try {
+      const value = updateTaskPrioritySchema.parse(req.body);
       const task = await taskService.updatePriority(taskId, value.priority);
 
       if (!task) {

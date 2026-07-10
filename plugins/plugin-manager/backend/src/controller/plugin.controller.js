@@ -1,4 +1,5 @@
 import { PluginService } from '../service/plugin.service.js';
+import { togglePluginSchema } from '../schema/plugin.schema.js';
 
 const service = new PluginService();
 
@@ -17,11 +18,7 @@ export async function getPlugins(req, res, next) {
 export async function togglePlugin(req, res, next) {
   try {
     const { name } = req.params;
-    const { enabled } = req.body;
-
-    if (typeof enabled !== 'boolean') {
-      return res.status(400).json({ error: 'enabled must be a boolean' });
-    }
+    const { enabled } = togglePluginSchema.parse(req.body);
 
     const result = await service.togglePlugin(name, enabled);
     if (!result.success) {

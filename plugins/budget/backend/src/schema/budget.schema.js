@@ -1,104 +1,94 @@
-/**
- * Budget Schema
- * Mongoose schema for budget and expense tracking
- */
+import { z } from 'zod';
 
-import mongoose from 'mongoose';
+export const createBudgetSchema = z
+  .object({
+    totalAllocation: z
+      .number()
+      .nonnegative('Total allocation must be a non-negative number'),
+    budgetBreakdown: z
+      .array(
+        z.object({
+          category: z
+            .string()
+            .trim()
+            .min(1, 'Category is required')
+            .max(100, 'Category cannot exceed 100 characters'),
+          amount: z
+            .number()
+            .nonnegative('Amount must be a non-negative number'),
+          description: z
+            .string()
+            .trim()
+            .max(500, 'Description cannot exceed 500 characters')
+            .optional()
+        })
+      )
+      .optional()
+      .default([]),
+    currency: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .length(3, 'Currency must be a 3-letter code')
+      .optional()
+      .default('INR'),
+    notes: z
+      .string()
+      .trim()
+      .max(1000, 'Notes cannot exceed 1000 characters')
+      .optional()
+  })
+  .strict();
 
-const budgetSchema = new mongoose.Schema(
-  {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
-    eventId: {
-      type: String,
-      required: true,
-      unique: true
-    },
-    totalAllocation: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-    budgetBreakdown: [
-      {
-        category: String,
-        amount: Number,
-        description: String
-      }
-    ],
-    currency: {
-      type: String,
-      default: 'INR'
-    },
-    approvalStatus: {
-      type: String,
-      enum: ['draft', 'approved', 'rejected'],
-      default: 'draft'
-    },
-    approvedBy: String,
-    approvedDate: Date,
-    notes: String
-  },
-  {
-    timestamps: true,
-    collection: 'budgets'
-  }
-);
+export const updateBudgetSchema = createBudgetSchema.partial().strict();
 
-const expenseSchema = new mongoose.Schema(
-  {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
-    budgetId: {
-      type: String,
-      required: true,
-      index: true
-    },
-    category: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
-    amount: {
-      type: Number,
-      required: true,
-      min: 0
-    },
-    vendor: String,
-    paymentMethod: {
-      type: String,
-      default: 'pending'
-    },
-    paymentStatus: {
-      type: String,
-      enum: ['pending', 'paid', 'refunded'],
-      default: 'pending'
-    },
-    paidDate: Date,
-    receipt: String,
-    approvedBy: String,
-    notes: String
-  },
-  {
-    timestamps: true,
-    collection: 'expenses'
-  }
-);
+export const approveBudgetSchema = z
+  .object({
+    userId: z.string().trim().min(1, 'userId is required')
+  })
+  .strict();
 
-// Indexes
-budgetSchema.index({ approvalStatus: 1 });
+export const logExpenseSchema = z
+  .object({
+    category: z
+      .string()
+      .trim()
+      .min(1, 'Category is required')
+      .max(100, 'Category cannot exceed 100 characters'),
+    description: z
+      .string()
+      .trim()
+      .min(1, 'Description is required')
+      .max(500, 'Description cannot exceed 500 characters'),
+    amount: z.number().nonnegative('Amount must be a non-negative number'),
+    vendor: z
+      .string()
+      .trim()
+      .max(150, 'Vendor cannot exceed 150 characters')
+      .optional(),
+    paymentMethod: z
+      .string()
+      .trim()
+      .max(50, 'Payment method cannot exceed 50 characters')
+      .optional()
+      .default('pending'),
+    receipt: z.string().trim().url('Receipt must be a valid URL').optional(),
+    notes: z
+      .string()
+      .trim()
+      .max(1000, 'Notes cannot exceed 1000 characters')
+      .optional()
+  })
+  .strict();
 
-expenseSchema.index({ category: 1 });
-expenseSchema.index({ paymentStatus: 1 });
+export const updateExpenseSchema = logExpenseSchema.partial().strict();
 
-export const Budget = mongoose.model('Budget', budgetSchema);
-export const Expense = mongoose.model('Expense', expenseSchema);
-
-export default { Budget, Expense };
+export const markExpensePaidSchema = z
+  .object({
+    paymentMethod: z
+      .string()
+      .trim()
+      .min(1, 'Payment method is required')
+      .max(50, 'Payment method cannot exceed 50 characters')
+  })
+  .strict();

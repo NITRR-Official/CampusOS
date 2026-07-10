@@ -64,7 +64,8 @@
     "adm-zip": "^0.5.17",
     "mongoose": "^9.6.1",
     "next": "16.2.2",
-    "react": "19.2.4"
+    "react": "19.2.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",

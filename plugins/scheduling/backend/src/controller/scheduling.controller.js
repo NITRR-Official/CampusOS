@@ -1,4 +1,9 @@
 import SchedulingService from '../service/scheduling.service.js';
+import {
+  createTimeSlotSchema,
+  updateTimeSlotSchema,
+  resolveConflictSchema
+} from '../schema/scheduling.schema.js';
 
 const schedulingService = new SchedulingService();
 
@@ -15,8 +20,7 @@ export const schedulingController = {
   async createTimeSlot(req, res, next) {
     try {
       const { eventId } = req.params;
-      const { venue, startTime, endTime, capacity, allocatedResources, notes } =
-        req.body;
+      const value = createTimeSlotSchema.parse(req.body);
 
       if (!eventId) {
         return res.status(400).json({ error: 'eventId is required' });
@@ -24,12 +28,7 @@ export const schedulingController = {
 
       const result = await schedulingService.createTimeSlot({
         eventId,
-        venue,
-        startTime,
-        endTime,
-        capacity,
-        allocatedResources,
-        notes
+        ...value
       });
 
       if (!result.success) {
@@ -97,7 +96,7 @@ export const schedulingController = {
   async updateTimeSlot(req, res, next) {
     try {
       const { slotId } = req.params;
-      const updateData = req.body;
+      const updateData = updateTimeSlotSchema.parse(req.body);
 
       if (!slotId) {
         return res.status(400).json({ error: 'slotId is required' });
@@ -197,15 +196,7 @@ export const schedulingController = {
   async resolveConflict(req, res, next) {
     try {
       const { conflictId } = req.params;
-      const { resolution } = req.body;
-
-      if (!conflictId) {
-        return res.status(400).json({ error: 'conflictId is required' });
-      }
-
-      if (!resolution) {
-        return res.status(400).json({ error: 'resolution is required' });
-      }
+      const { resolution } = resolveConflictSchema.parse(req.body);
 
       const result = await schedulingService.resolveConflict(
         conflictId,

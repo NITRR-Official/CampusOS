@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Resource } from '../schema/resource.schema.js';
+import { Resource } from '../schema/resource.model.js';
 
 /**
  * Resource Service

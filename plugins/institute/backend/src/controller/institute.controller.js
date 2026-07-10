@@ -1,4 +1,4 @@
-import { validateCreateInstitutePayload } from '../schema/institute.schema.js';
+import { createInstituteSchema } from '../schema/institute.schema.js';
 import { getInstituteService } from '../service/institute.service.js';
 
 function createHttpError(status, message, code, details) {
@@ -20,21 +20,8 @@ export function createInstituteController() {
   const instituteService = getInstituteService();
 
   async function create(req, res, next) {
-    const { errors, value } = validateCreateInstitutePayload(req.body);
-
-    if (errors.length > 0) {
-      next(
-        createHttpError(
-          400,
-          'Request validation failed',
-          'VALIDATION_ERROR',
-          errors
-        )
-      );
-      return;
-    }
-
     try {
+      const value = createInstituteSchema.parse(req.body);
       const institute = await instituteService.createInstitute({
         ...value,
         createdBy: req.user?.id || 'unknown'

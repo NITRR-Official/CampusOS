@@ -2,6 +2,11 @@
  * Check-in Controller Factory
  * HTTP request handlers for check-in operations
  */
+import {
+  createCheckInSchema,
+  scanQRCodeSchema
+} from '../schema/checkin.schema.js';
+
 export function createCheckInController(checkInService) {
   return {
     /**
@@ -33,12 +38,10 @@ export function createCheckInController(checkInService) {
      */
     async createCheckIn(req, res, next) {
       const { eventId } = req.params;
-      const { userId } = req.body;
+      const { userId } = createCheckInSchema.parse(req.body);
 
-      if (!eventId || !userId) {
-        return res
-          .status(400)
-          .json({ error: 'eventId and userId are required' });
+      if (!eventId) {
+        return res.status(400).json({ error: 'eventId is required' });
       }
 
       try {
@@ -86,13 +89,8 @@ export function createCheckInController(checkInService) {
      * Mark user as checked-in by scanning QR code (public/self)
      */
     async scanQRCode(req, res, next) {
-      const { qrCode } = req.body;
-
-      if (!qrCode) {
-        return res.status(400).json({ error: 'qrCode is required' });
-      }
-
       try {
+        const { qrCode } = scanQRCodeSchema.parse(req.body);
         const result = await checkInService.markAsCheckedInByQRCode(qrCode);
         if (!result.success) {
           return res.status(400).json({ error: result.error });
