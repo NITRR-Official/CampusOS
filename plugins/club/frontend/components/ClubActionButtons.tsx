@@ -9,14 +9,21 @@ interface ClubActionButtonsProps {
   clubSlug: string;
 }
 
-export function ClubActionButtons({ clubId, clubSlug }: ClubActionButtonsProps) {
+export function ClubActionButtons({
+  clubId,
+  clubSlug
+}: ClubActionButtonsProps) {
   const { isAuthenticated } = useAuth();
-  
-  const { data, isLoading } = useMyClubPermissions(isAuthenticated ? clubId : '');
-  
-  const canManage = data?.isSuperAdmin || 
-    data?.permissions.includes('club:manage') || 
-    data?.permissions.includes('administrator') || false;
+
+  const { data, isLoading } = useMyClubPermissions(
+    isAuthenticated ? clubId : ''
+  );
+
+  const canManage =
+    data?.isSuperAdmin ||
+    data?.permissions.includes('club:manage') ||
+    data?.permissions.includes('administrator') ||
+    false;
 
   if (isLoading && isAuthenticated) {
     return (

@@ -4,6 +4,7 @@
  */
 
 import { registerVendorRoutes } from './routes/vendor.routes.js';
+import VendorService from './service/vendor.service.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -35,6 +36,15 @@ export async function init(app, registry, eventBus) {
       module: 'vendor',
       label: 'Manage Vendors',
       description: 'Allows adding vendors, managing quotes, and invoices'
+    });
+  }
+
+  if (eventBus) {
+    const vendorService = new VendorService();
+    eventBus.on('event:deleted', async (payload) => {
+      if (payload && payload.eventId) {
+        await vendorService.deleteEventAssignments(payload.eventId);
+      }
     });
   }
 }

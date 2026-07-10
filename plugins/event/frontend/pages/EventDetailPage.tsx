@@ -24,9 +24,7 @@ function formatTime(isoDate: string) {
   });
 }
 
-export async function EventDetailPage({
-  params
-}: EventDetailPageProps) {
+export async function EventDetailPage({ params }: EventDetailPageProps) {
   const { eventId } = await params;
   const event = await fetchEventById(eventId);
 

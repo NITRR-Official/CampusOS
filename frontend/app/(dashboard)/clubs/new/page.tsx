@@ -60,8 +60,9 @@ export default function NewClubPage() {
           Check Your Email!
         </h1>
         <p className="text-muted-foreground text-lg mb-8">
-          We've sent a verification link to the official club email address you provided. 
-          Please click the link in the email to verify your address before the administration can review your proposal.
+          We've sent a verification link to the official club email address you
+          provided. Please click the link in the email to verify your address
+          before the administration can review your proposal.
         </p>
         <Button
           onClick={() => router.push('/clubs')}
@@ -196,4 +197,3 @@ export default function NewClubPage() {
     </div>
   );
 }
-

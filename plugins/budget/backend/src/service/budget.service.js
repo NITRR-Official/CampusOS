@@ -111,7 +111,25 @@ export class BudgetService {
       return null;
     }
   }
+  /**
+   * Delete budget for event
+   * @param {string} eventId - Event ID
+   * @returns {object} Deletion result
+   */
+  async deleteEventBudget(eventId) {
+    try {
+      const budget = await Budget.findOne({ eventId });
+      if (!budget) return { success: false, error: 'Budget not found' };
 
+      await Expense.deleteMany({ budgetId: budget._id });
+      await Budget.deleteOne({ _id: budget._id });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting event budget:', error);
+      return { success: false, error: error.message };
+    }
+  }
   /**
    * Update budget
    * @param {string} budgetId - Budget ID

@@ -5,7 +5,7 @@ export function useEventBudget(eventId: string) {
   return useQuery({
     queryKey: ['events', eventId, 'budget'],
     queryFn: () => budgetAPI.getEventBudget(eventId),
-    enabled: !!eventId,
+    enabled: !!eventId
   });
 }
 
@@ -13,6 +13,6 @@ export function useBudgetSummary(budgetId: string) {
   return useQuery({
     queryKey: ['budgets', budgetId, 'summary'],
     queryFn: () => budgetAPI.getBudgetSummary(budgetId),
-    enabled: !!budgetId,
+    enabled: !!budgetId
   });
 }

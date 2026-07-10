@@ -14,9 +14,7 @@ interface CreateTaskFormProps {
   accessToken: string;
 }
 
-export function CreateTaskForm({
-  accessToken
-}: CreateTaskFormProps) {
+export function CreateTaskForm({ accessToken }: CreateTaskFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assigneeName, setAssigneeName] = useState('');

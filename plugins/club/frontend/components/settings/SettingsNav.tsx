@@ -11,7 +11,7 @@ interface SettingsNavProps {
 
 export function SettingsNav({ clubSlug }: SettingsNavProps) {
   const pathname = usePathname();
-  
+
   const navItems = [
     {
       name: 'General',
@@ -51,7 +51,12 @@ export function SettingsNav({ clubSlug }: SettingsNavProps) {
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
-            <item.icon className={cn('size-4', isActive ? 'text-primary' : 'text-muted-foreground')} />
+            <item.icon
+              className={cn(
+                'size-4',
+                isActive ? 'text-primary' : 'text-muted-foreground'
+              )}
+            />
             {item.name}
           </Link>
         );

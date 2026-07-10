@@ -1,25 +1,21 @@
-import crypto from 'node:crypto';
-
-const institutesById = new Map();
+import { Institute } from '../schema/institute.model.js';
 
 class InstituteService {
-  createInstitute({ name, code, description, location, createdBy }) {
-    const institute = {
-      id: crypto.randomUUID(),
+  async createInstitute({ name, code, description, location, createdBy }) {
+    const institute = new Institute({
       name,
       code: code || null,
       description: description || null,
       location: location || null,
-      createdBy,
-      createdAt: new Date().toISOString()
-    };
+      createdBy
+    });
 
-    institutesById.set(institute.id, institute);
-    return institute;
+    await institute.save();
+    return institute.toObject();
   }
 
-  listInstitutes() {
-    return Array.from(institutesById.values());
+  async listInstitutes() {
+    return Institute.find().lean().exec();
   }
 }
 

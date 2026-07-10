@@ -26,10 +26,16 @@ export function createAuthRepository(User) {
     return User.find({}).select('-password').lean();
   }
 
+  async function deleteUser(userId) {
+    const result = await User.deleteOne({ _id: userId });
+    return result.deletedCount > 0;
+  }
+
   return {
     findUserByEmail,
     userExists,
     createUser,
-    listUsers
+    listUsers,
+    deleteUser
   };
 }

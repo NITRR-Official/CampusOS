@@ -4,6 +4,7 @@
  */
 
 import { registerSchedulingRoutes } from './routes/scheduling.routes.js';
+import SchedulingService from './service/scheduling.service.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -35,6 +36,15 @@ export async function init(app, registry, eventBus) {
       module: 'scheduling',
       label: 'Manage Schedules',
       description: 'Allows managing timelines, milestones, and project phases'
+    });
+  }
+
+  if (eventBus) {
+    const schedulingService = new SchedulingService();
+    eventBus.on('event:deleted', async (payload) => {
+      if (payload && payload.eventId) {
+        await schedulingService.deleteEventSchedule(payload.eventId);
+      }
     });
   }
 }

@@ -60,9 +60,12 @@ export async function ClubDetailPage(props: {
                 {club.name}
               </h1>
             </div>
-            <ClubActionButtons 
-              clubId={club.id || (club as unknown as Record<string, unknown>)._id as string} 
-              clubSlug={club.slug} 
+            <ClubActionButtons
+              clubId={
+                club.id ||
+                ((club as unknown as Record<string, unknown>)._id as string)
+              }
+              clubSlug={club.slug}
             />
           </div>
 

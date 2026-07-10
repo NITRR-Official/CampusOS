@@ -12,7 +12,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,18 +44,18 @@ export default function AdminClubsPage() {
         // Wait, depending on the endpoint structure. Assuming it returns the array directly based on typical REST or { success: true, data }
         // Let's handle both
         if (Array.isArray(response)) {
-           setClubs(response);
+          setClubs(response);
         } else if (response.data && Array.isArray(response.data)) {
-           setClubs(response.data);
+          setClubs(response.data);
         } else if (response.clubs && Array.isArray(response.clubs)) {
-           setClubs(response.clubs);
+          setClubs(response.clubs);
         }
       }
     } catch (err: any) {
       toast({
         title: 'Failed to load clubs',
         description: err.message || 'An error occurred',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
@@ -66,24 +66,30 @@ export default function AdminClubsPage() {
     loadPendingClubs();
   }, []);
 
-  async function handleStatusUpdate(clubId: string, status: 'approved' | 'rejected') {
+  async function handleStatusUpdate(
+    clubId: string,
+    status: 'approved' | 'rejected'
+  ) {
     setActionLoading(clubId);
     try {
       // Endpoint is /api/v1/clubs/:clubId/approve or /reject
-      const response = await apiClient.patch(`/clubs/${clubId}/${status === 'approved' ? 'approve' : 'reject'}`, {});
-      
+      const response = await apiClient.patch(
+        `/clubs/${clubId}/${status === 'approved' ? 'approve' : 'reject'}`,
+        {}
+      );
+
       toast({
         title: `Club ${status}`,
-        description: `The club has been successfully ${status}.`,
+        description: `The club has been successfully ${status}.`
       });
-      
+
       // Remove from list
-      setClubs(clubs.filter(c => c.id !== clubId));
+      setClubs(clubs.filter((c) => c.id !== clubId));
     } catch (err: any) {
       toast({
         title: 'Action failed',
         description: err.message || `Failed to ${status} the club.`,
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setActionLoading(null);
@@ -114,16 +120,29 @@ export default function AdminClubsPage() {
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-[120px] ml-auto" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[150px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[100px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[150px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[100px]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-8 w-[120px] ml-auto" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : clubs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="text-center py-12 text-muted-foreground"
+                >
                   <div className="flex flex-col items-center justify-center gap-2">
                     <CheckCircle2 className="size-8 text-green-500/50" />
                     <p>No pending club requests.</p>
@@ -133,14 +152,21 @@ export default function AdminClubsPage() {
               </TableRow>
             ) : (
               clubs.map((club) => (
-                <TableRow key={club.id} className="hover:bg-muted/30 transition-colors">
+                <TableRow
+                  key={club.id}
+                  className="hover:bg-muted/30 transition-colors"
+                >
                   <TableCell className="font-medium">{club.name}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{club.category}</Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{club.email}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {club.createdAt ? new Date(club.createdAt).toLocaleDateString() : 'Unknown'}
+                    {club.email}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {club.createdAt
+                      ? new Date(club.createdAt).toLocaleDateString()
+                      : 'Unknown'}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

@@ -54,14 +54,22 @@ export function createClubController(clubService) {
     try {
       const { token } = req.query;
       if (!token) {
-        return res.status(400).json({ success: false, error: 'Token is required' });
+        return res
+          .status(400)
+          .json({ success: false, error: 'Token is required' });
       }
 
       await verificationService.verifyEmail(token);
-      
+
       // In a real app we might redirect to a frontend success page.
       // For API purposes, return JSON success.
-      return res.status(200).json({ success: true, message: 'Email successfully verified. Club is now awaiting admin approval.' });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message:
+            'Email successfully verified. Club is now awaiting admin approval.'
+        });
     } catch (err) {
       next(err);
     }
@@ -245,15 +253,25 @@ export function createClubController(clubService) {
     const { clubId } = req.params;
     try {
       if (!req.user) {
-        return res.status(200).json({ success: true, data: { permissions: [], maxHierarchy: -1, isClubAdmin: false } });
+        return res
+          .status(200)
+          .json({
+            success: true,
+            data: { permissions: [], maxHierarchy: -1, isClubAdmin: false }
+          });
       }
-      
+
       const userId = req.user.id || req.user._id;
       // get context directly from service which includes maxHierarchy and isClubAdmin
       // Since it's not exported, we can just use getUserPermissions
       const permissions = await clubService.getUserPermissions(userId, clubId);
-      
-      res.status(200).json({ success: true, data: { permissions, isSuperAdmin: req.user.isSuperAdmin } });
+
+      res
+        .status(200)
+        .json({
+          success: true,
+          data: { permissions, isSuperAdmin: req.user.isSuperAdmin }
+        });
     } catch (err) {
       next(err);
     }

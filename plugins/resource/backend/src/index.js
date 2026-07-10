@@ -4,6 +4,7 @@
  */
 
 import { registerResourceRoutes } from './routes/resource.routes.js';
+import ResourceService from './service/resource.service.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -36,6 +37,15 @@ export async function init(app, registry, eventBus) {
       module: 'resource',
       label: 'Manage Resources',
       description: 'Allows allocating and tracking resources and inventory'
+    });
+  }
+
+  if (eventBus) {
+    const resourceService = new ResourceService();
+    eventBus.on('event:deleted', async (payload) => {
+      if (payload && payload.eventId) {
+        await resourceService.deleteEventAllocations(payload.eventId);
+      }
     });
   }
 }

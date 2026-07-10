@@ -10,7 +10,7 @@ export const TimeSlotSchema = z.object({
   startTime: z.string(),
   endTime: z.string(),
   venue: z.string().optional(),
-  status: z.enum(['scheduled', 'ongoing', 'completed', 'cancelled']),
+  status: z.enum(['scheduled', 'ongoing', 'completed', 'cancelled'])
 });
 
 export type TimeSlot = z.infer<typeof TimeSlotSchema>;
@@ -22,7 +22,7 @@ export const ConflictSchema = z.object({
   conflictType: z.enum(['venue', 'time', 'resource', 'personnel']),
   severity: z.enum(['low', 'medium', 'high', 'critical']),
   resolved: z.boolean(),
-  resolution: z.string().optional(),
+  resolution: z.string().optional()
 });
 
 export type Conflict = z.infer<typeof ConflictSchema>;
@@ -69,9 +69,12 @@ export const schedulingAPI = {
   },
 
   async resolveConflict(conflictId: string, resolution: string) {
-    const res = await apiClient.put(`/schedule/conflicts/${conflictId}/resolve`, {
-      resolution
-    });
+    const res = await apiClient.put(
+      `/schedule/conflicts/${conflictId}/resolve`,
+      {
+        resolution
+      }
+    );
     return ConflictSchema.parse(res);
   },
 
@@ -85,7 +88,9 @@ export const schedulingAPI = {
       endTime: new Date(endTime).toISOString()
     });
 
-    const res = await apiClient.get(`/schedule/venue/${venue}/available?${params}`);
+    const res = await apiClient.get(
+      `/schedule/venue/${venue}/available?${params}`
+    );
     return z.object({ available: z.boolean() }).parse(res);
   },
 

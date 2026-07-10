@@ -7,7 +7,10 @@ import express from 'express';
 import cors from 'cors';
 import { loggerMiddleware } from './middleware/logger.js';
 import { authMiddleware } from './middleware/auth.js';
-import { requirePermissions, requireSuperAdmin } from './middleware/permissions.js';
+import {
+  requirePermissions,
+  requireSuperAdmin
+} from './middleware/permissions.js';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.js';
 import { registerJwtAuthenticator } from './auth/jwt-authenticator.js';
 import { loadPlugins } from './plugin-loader.js';

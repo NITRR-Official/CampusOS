@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Role,
-  SystemPermissionGroup
-} from '@plugins/club/frontend/api';
+import { Role, SystemPermissionGroup } from '@plugins/club/frontend/api';
 import { useCreateRole, useUpdateRole } from '@plugins/club/frontend/hooks';
 import {
   Sheet,
@@ -39,7 +36,7 @@ export function RoleEditorSheet({
   const [color, setColor] = useState('#94a3b8');
   const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set());
   const { toast } = useToast();
-  
+
   const createRoleMutation = useCreateRole(clubId);
   const updateRoleMutation = useUpdateRole(clubId);
 
@@ -82,7 +79,10 @@ export function RoleEditorSheet({
         { roleId: (role.id || role._id) as string, payload },
         {
           onSuccess: () => {
-            toast({ title: 'Success', description: 'Role updated successfully' });
+            toast({
+              title: 'Success',
+              description: 'Role updated successfully'
+            });
             onSaveComplete();
           },
           onError: () => {
@@ -103,7 +103,10 @@ export function RoleEditorSheet({
         },
         {
           onSuccess: () => {
-            toast({ title: 'Success', description: 'Role created successfully' });
+            toast({
+              title: 'Success',
+              description: 'Role created successfully'
+            });
             onSaveComplete();
           },
           onError: () => {

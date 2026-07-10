@@ -6,7 +6,12 @@ export function ResourcesPage() {
   const { data: resources = [], isLoading, error } = useAllResources();
 
   if (isLoading) return <div className="p-4">Loading resources...</div>;
-  if (error) return <div className="p-4 text-red-600">Error: {error instanceof Error ? error.message : String(error)}</div>;
+  if (error)
+    return (
+      <div className="p-4 text-red-600">
+        Error: {error instanceof Error ? error.message : String(error)}
+      </div>
+    );
 
   return (
     <div className="p-6">

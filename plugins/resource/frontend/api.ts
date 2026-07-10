@@ -8,7 +8,7 @@ export const ResourceSchema = z.object({
   type: z.string(),
   status: z.enum(['available', 'allocated', 'maintenance', 'retired']),
   condition: z.string().optional(),
-  lastMaintenance: z.string().nullable(),
+  lastMaintenance: z.string().nullable()
 });
 
 export type Resource = z.infer<typeof ResourceSchema>;
@@ -19,7 +19,7 @@ export const AllocationSchema = z.object({
   eventId: z.string(),
   status: z.enum(['pending', 'approved', 'rejected', 'active', 'completed']),
   allocatedFrom: z.string(),
-  allocatedTo: z.string(),
+  allocatedTo: z.string()
 });
 
 export type Allocation = z.infer<typeof AllocationSchema>;
@@ -57,7 +57,10 @@ export const resourceAPI = {
     return ResourceSchema.parse(res);
   },
 
-  async updateResource(resourceId: string, updateData: Record<string, unknown>) {
+  async updateResource(
+    resourceId: string,
+    updateData: Record<string, unknown>
+  ) {
     const res = await apiClient.put(`/resources/${resourceId}`, updateData);
     return ResourceSchema.parse(res);
   },
@@ -90,9 +93,12 @@ export const resourceAPI = {
   },
 
   async updateAllocationStatus(allocationId: string, status: string) {
-    const res = await apiClient.put(`/resources/allocations/${allocationId}/status`, {
-      status
-    });
+    const res = await apiClient.put(
+      `/resources/allocations/${allocationId}/status`,
+      {
+        status
+      }
+    );
     return AllocationSchema.parse(res);
   },
 

@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchClubs, approveClub, rejectClub, Club } from '@plugins/club/frontend/api';
+import {
+  fetchClubs,
+  approveClub,
+  rejectClub,
+  Club
+} from '@plugins/club/frontend/api';
 import { ShieldCheck, Check, X, Clock, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -162,4 +167,3 @@ export default function ClubApprovalsPage() {
     </div>
   );
 }
-

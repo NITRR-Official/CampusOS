@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchClubs, 
-  fetchClubBySlug, 
-  fetchMyClubPermissions, 
-  fetchRoles, 
+import {
+  fetchClubs,
+  fetchClubBySlug,
+  fetchMyClubPermissions,
+  fetchRoles,
   fetchSystemPermissions,
   createRole,
   updateRole,
@@ -19,7 +19,7 @@ import type { Club, Role } from './api';
 export function useClubs(status?: 'approved' | 'pending' | 'rejected') {
   return useQuery({
     queryKey: ['clubs', { status }],
-    queryFn: () => fetchClubs(status),
+    queryFn: () => fetchClubs(status)
   });
 }
 
@@ -27,7 +27,7 @@ export function useClub(slug: string) {
   return useQuery({
     queryKey: ['clubs', slug],
     queryFn: () => fetchClubBySlug(slug),
-    enabled: !!slug,
+    enabled: !!slug
   });
 }
 
@@ -35,7 +35,7 @@ export function useMyClubPermissions(clubId: string) {
   return useQuery({
     queryKey: ['clubs', clubId, 'my-permissions'],
     queryFn: () => fetchMyClubPermissions(clubId),
-    enabled: !!clubId,
+    enabled: !!clubId
   });
 }
 
@@ -43,14 +43,14 @@ export function useClubRoles(clubId: string) {
   return useQuery({
     queryKey: ['clubs', clubId, 'roles'],
     queryFn: () => fetchRoles(clubId),
-    enabled: !!clubId,
+    enabled: !!clubId
   });
 }
 
 export function useSystemPermissions() {
   return useQuery({
     queryKey: ['system', 'permissions'],
-    queryFn: fetchSystemPermissions,
+    queryFn: fetchSystemPermissions
   });
 }
 
@@ -61,17 +61,23 @@ export function useCreateClub() {
     mutationFn: (payload: Partial<Club>) => createClub(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
-    },
+    }
   });
 }
 
 export function useUpdateClub() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ clubId, payload }: { clubId: string; payload: Partial<Club> }) => updateClub(clubId, payload),
+    mutationFn: ({
+      clubId,
+      payload
+    }: {
+      clubId: string;
+      payload: Partial<Club>;
+    }) => updateClub(clubId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
-    },
+    }
   });
 }
 
@@ -81,7 +87,7 @@ export function useApproveClub() {
     mutationFn: (id: string) => approveClub(id),
     onSuccess: (_, id: string) => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
-    },
+    }
   });
 }
 
@@ -91,7 +97,7 @@ export function useRejectClub() {
     mutationFn: (id: string) => rejectClub(id),
     onSuccess: (_, id: string) => {
       queryClient.invalidateQueries({ queryKey: ['clubs'] });
-    },
+    }
   });
 }
 
@@ -101,19 +107,27 @@ export function useCreateRole(clubId: string) {
     mutationFn: (payload: Partial<Role>) => createRole(clubId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'roles'] });
-    },
+    }
   });
 }
 
 export function useUpdateRole(clubId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ roleId, payload }: { roleId: string; payload: Partial<Role> }) => updateRole(clubId, roleId, payload),
+    mutationFn: ({
+      roleId,
+      payload
+    }: {
+      roleId: string;
+      payload: Partial<Role>;
+    }) => updateRole(clubId, roleId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'roles'] });
       // Invalidate permissions in case the updated role affected the current user
-      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'my-permissions'] });
-    },
+      queryClient.invalidateQueries({
+        queryKey: ['clubs', clubId, 'my-permissions']
+      });
+    }
   });
 }
 
@@ -123,6 +137,6 @@ export function useDeleteRole(clubId: string) {
     mutationFn: (roleId: string) => deleteRole(clubId, roleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'roles'] });
-    },
+    }
   });
 }

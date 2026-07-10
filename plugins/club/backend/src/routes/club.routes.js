@@ -1,4 +1,9 @@
-export function registerClubRoutes(app, clubController, requirePermissions, requireSuperAdmin) {
+export function registerClubRoutes(
+  app,
+  clubController,
+  requirePermissions,
+  requireSuperAdmin
+) {
   const manageClubRoles = requirePermissions('club:manage');
   const manageMembers = requirePermissions('member:manage');
   const manageRoles = requirePermissions('role:manage');
@@ -8,7 +13,7 @@ export function registerClubRoutes(app, clubController, requirePermissions, requ
   // Creating a club requests it; it goes to pending.
   // We can let any authenticated user request a club, or restrict it.
   app.post('/api/v1/clubs', requirePermissions(), clubController.create);
-  
+
   // Email verification route
   app.get('/api/v1/clubs/verify', clubController.verifyEmail);
 
@@ -18,17 +23,14 @@ export function registerClubRoutes(app, clubController, requirePermissions, requ
     requirePermissions('club:manage'),
     clubController.update
   );
-  
+
   app.post(
     '/api/v1/clubs/:clubId/archive',
     requirePermissions(), // Handled internally by controller/service
     clubController.archive
   );
-  
-  app.get(
-    '/api/v1/clubs/:clubId/my-permissions',
-    clubController.myPermissions
-  );
+
+  app.get('/api/v1/clubs/:clubId/my-permissions', clubController.myPermissions);
 
   // Approval Pipeline
   app.patch(

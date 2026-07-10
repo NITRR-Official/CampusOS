@@ -8,7 +8,7 @@ export function initFrontend() {
     url: '/events',
     icon: 'Ticket'
   });
-  
+
   registry.registerSidebarLink({
     pluginId: 'event',
     title: 'Participants',

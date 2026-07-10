@@ -20,9 +20,11 @@ export async function ClubSettingsPage(props: {
   };
 
   return (
-    <GeneralSettingsForm 
-      clubId={club.id || (club as unknown as Record<string, unknown>)._id as string} 
-      initialData={initialData} 
+    <GeneralSettingsForm
+      clubId={
+        club.id || ((club as unknown as Record<string, unknown>)._id as string)
+      }
+      initialData={initialData}
     />
   );
 }

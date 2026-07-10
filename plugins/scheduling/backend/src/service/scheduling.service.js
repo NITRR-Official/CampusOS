@@ -179,6 +179,29 @@ export class SchedulingService {
   }
 
   /**
+   * Delete schedule for event
+   * @param {string} eventId - Event ID
+   * @returns {object} Deletion result
+   */
+  async deleteEventSchedule(eventId) {
+    try {
+      const slots = await TimeSlot.find({ eventId }).lean();
+      const slotIds = slots.map((slot) => slot._id);
+
+      await Conflict.deleteMany({
+        $or: [{ slotId1: { $in: slotIds } }, { slotId2: { $in: slotIds } }]
+      });
+
+      await TimeSlot.deleteMany({ eventId });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting event schedule:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Detect conflicts for a time slot
    * @param {string} slotId - Time slot ID to check
    * @returns {array} Detected conflicts

@@ -29,15 +29,31 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  registerClubRoutes(app, clubController, requirePermissions, requireSuperAdmin);
+  registerClubRoutes(
+    app,
+    clubController,
+    requirePermissions,
+    requireSuperAdmin
+  );
 
   if (eventBus) {
     eventBus.on('club.proposed', async (club) => {
       try {
-        const token = await verificationService.generateTokenForClub(club.id || club._id);
+        const token = await verificationService.generateTokenForClub(
+          club.id || club._id
+        );
         await mailProvider.sendVerificationEmail(club.email, club.name, token);
       } catch (err) {
-        console.error('Failed to send verification email for club proposal:', err);
+        console.error(
+          'Failed to send verification email for club proposal:',
+          err
+        );
+      }
+    });
+
+    eventBus.on('user:deleted', async (payload) => {
+      if (payload && payload.userId) {
+        await clubService.removeAllUserMemberships(payload.userId);
       }
     });
   }

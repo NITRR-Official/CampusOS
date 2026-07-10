@@ -1,89 +1,57 @@
-import crypto from 'node:crypto';
-
-const tasksById = new Map();
-
-function createTaskRecord(payload) {
-  const now = new Date().toISOString();
-
-  return {
-    id: crypto.randomUUID(),
-    title: payload.title,
-    description: payload.description || null,
-    assigneeName: payload.assigneeName || null,
-    dueDate: payload.dueDate || null,
-    priority: payload.priority || 'medium',
-    status: 'todo',
-    dependsOn: [], // Array of task IDs this task depends on
-    createdBy: payload.createdBy,
-    assignedAt: payload.assigneeName ? now : null,
-    createdAt: now,
-    updatedAt: now
-  };
-}
+import { Task } from '../schema/task.model.js';
 
 class TaskService {
-  createTask(payload) {
-    const task = createTaskRecord(payload);
-
-    tasksById.set(task.id, task);
-    return task;
-  }
-
-  listTasks() {
-    return Array.from(tasksById.values()).sort((left, right) => {
-      return Date.parse(right.updatedAt) - Date.parse(left.updatedAt);
+  async createTask(payload) {
+    const task = new Task({
+      title: payload.title,
+      description: payload.description || null,
+      assigneeName: payload.assigneeName || null,
+      dueDate: payload.dueDate || null,
+      priority: payload.priority || 'medium',
+      status: 'todo',
+      dependsOn: [],
+      createdBy: payload.createdBy
     });
+
+    await task.save();
+    return task.toObject();
   }
 
-  getTask(taskId) {
-    return tasksById.get(taskId) || null;
+  async listTasks() {
+    return Task.find().sort({ updatedAt: -1 }).lean().exec();
   }
 
-  assignTask(taskId, payload) {
-    const task = tasksById.get(taskId);
-
-    if (!task) {
-      return null;
-    }
-
-    task.assigneeName = payload.assigneeName;
-    task.assignedAt = new Date().toISOString();
-    task.updatedAt = task.assignedAt;
-
-    return task;
+  async getTask(taskId) {
+    return Task.findById(taskId).lean().exec();
   }
 
-  updateStatus(taskId, status) {
-    const task = tasksById.get(taskId);
-
-    if (!task) {
-      return null;
-    }
-
-    task.status = status;
-    task.updatedAt = new Date().toISOString();
-
-    return task;
+  async assignTask(taskId, payload) {
+    return Task.findByIdAndUpdate(
+      taskId,
+      { assigneeName: payload.assigneeName },
+      { new: true }
+    )
+      .lean()
+      .exec();
   }
 
-  updatePriority(taskId, priority) {
-    const task = tasksById.get(taskId);
+  async updateStatus(taskId, status) {
+    return Task.findByIdAndUpdate(taskId, { status }, { new: true })
+      .lean()
+      .exec();
+  }
 
-    if (!task) {
-      return null;
-    }
-
-    task.priority = priority;
-    task.updatedAt = new Date().toISOString();
-
-    return task;
+  async updatePriority(taskId, priority) {
+    return Task.findByIdAndUpdate(taskId, { priority }, { new: true })
+      .lean()
+      .exec();
   }
 
   /**
    * Check if adding a dependency would create a circular reference
    * Uses DFS to detect cycles
    */
-  #detectCircularDependency(taskId, dependencyId, visited = new Set()) {
+  async #detectCircularDependency(taskId, dependencyId, visited = new Set()) {
     if (visited.has(dependencyId)) {
       return true; // Cycle detected
     }
@@ -94,30 +62,32 @@ class TaskService {
 
     visited.add(dependencyId);
 
-    const dependencyTask = tasksById.get(dependencyId);
+    const dependencyTask = await Task.findById(dependencyId).lean().exec();
     if (!dependencyTask) {
       return false; // Dependency doesn't exist, no cycle
     }
 
     // Check all dependencies of the dependency task
-    for (const subDependencyId of dependencyTask.dependsOn) {
-      if (
-        this.#detectCircularDependency(
-          taskId,
-          subDependencyId,
-          new Set(visited)
-        )
-      ) {
-        return true;
+    if (dependencyTask.dependsOn) {
+      for (const subDependencyId of dependencyTask.dependsOn) {
+        if (
+          await this.#detectCircularDependency(
+            taskId,
+            subDependencyId,
+            new Set(visited)
+          )
+        ) {
+          return true;
+        }
       }
     }
 
     return false;
   }
 
-  addDependency(taskId, dependencyId) {
-    const task = tasksById.get(taskId);
-    const dependency = tasksById.get(dependencyId);
+  async addDependency(taskId, dependencyId) {
+    const task = await Task.findById(taskId).lean().exec();
+    const dependency = await Task.findById(dependencyId).lean().exec();
 
     if (!task) {
       return { success: false, error: 'TASK_NOT_FOUND' };
@@ -131,36 +101,45 @@ class TaskService {
       return { success: false, error: 'SELF_REFERENCE' };
     }
 
-    if (task.dependsOn.includes(dependencyId)) {
+    if (task.dependsOn && task.dependsOn.includes(dependencyId)) {
       return { success: false, error: 'DEPENDENCY_EXISTS' };
     }
 
-    if (this.#detectCircularDependency(taskId, dependencyId)) {
+    if (await this.#detectCircularDependency(taskId, dependencyId)) {
       return { success: false, error: 'CIRCULAR_DEPENDENCY' };
     }
 
-    task.dependsOn.push(dependencyId);
-    task.updatedAt = new Date().toISOString();
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      { $push: { dependsOn: dependencyId } },
+      { new: true }
+    )
+      .lean()
+      .exec();
 
-    return { success: true, task };
+    return { success: true, task: updatedTask };
   }
 
-  removeDependency(taskId, dependencyId) {
-    const task = tasksById.get(taskId);
+  async removeDependency(taskId, dependencyId) {
+    const task = await Task.findById(taskId).lean().exec();
 
     if (!task) {
       return { success: false, error: 'TASK_NOT_FOUND' };
     }
 
-    const index = task.dependsOn.indexOf(dependencyId);
-    if (index === -1) {
+    if (!task.dependsOn || !task.dependsOn.includes(dependencyId)) {
       return { success: false, error: 'DEPENDENCY_NOT_FOUND' };
     }
 
-    task.dependsOn.splice(index, 1);
-    task.updatedAt = new Date().toISOString();
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      { $pull: { dependsOn: dependencyId } },
+      { new: true }
+    )
+      .lean()
+      .exec();
 
-    return { success: true, task };
+    return { success: true, task: updatedTask };
   }
 }
 

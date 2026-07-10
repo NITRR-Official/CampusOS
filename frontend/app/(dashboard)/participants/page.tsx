@@ -8,7 +8,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
-import { fetchEvents, EventItem, EventApiError } from '@plugins/event/frontend/api';
+import {
+  fetchEvents,
+  EventItem,
+  EventApiError
+} from '@plugins/event/frontend/api';
 import {
   getCheckInStatus,
   CheckInRecord,
@@ -43,10 +47,7 @@ export default function ParticipantDashboard() {
         const eventsWithCheckIn = await Promise.all(
           userEvents.map(async (event: EventItem) => {
             try {
-              const checkInStatus = await getCheckInStatus(
-                event.id,
-                ''
-              );
+              const checkInStatus = await getCheckInStatus(event.id, '');
               return { ...event, checkInStatus };
             } catch (err: any) {
               // No check-in yet is not an error for participants

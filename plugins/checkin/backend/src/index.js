@@ -7,6 +7,7 @@ import { registerCheckInRoutes } from './routes/checkin.routes.js';
 import { createCheckInController } from './controller/checkin.controller.js';
 import { createCheckInService } from './service/checkin.service.js';
 import { createCheckInRepository } from './repository/checkin.repository.js';
+import { CheckIn } from './schema/checkin.model.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -37,6 +38,14 @@ export async function init(app, registry, eventBus) {
       module: 'checkin',
       label: 'Manage Check-ins',
       description: 'Allows scanning QR codes and managing attendance'
+    });
+  }
+
+  if (eventBus) {
+    eventBus.on('event:deleted', async (payload) => {
+      if (payload && payload.eventId) {
+        await checkInService.deleteEventCheckIns(payload.eventId);
+      }
     });
   }
 }

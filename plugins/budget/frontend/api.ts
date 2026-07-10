@@ -8,7 +8,13 @@ export const BudgetSchema = z.object({
   id: z.string(),
   eventId: z.string(),
   totalAllocation: z.number(),
-  status: z.enum(['draft', 'pending_approval', 'approved', 'rejected', 'archived']),
+  status: z.enum([
+    'draft',
+    'pending_approval',
+    'approved',
+    'rejected',
+    'archived'
+  ])
 });
 
 export type Budget = z.infer<typeof BudgetSchema>;
@@ -19,7 +25,7 @@ export const ExpenseSchema = z.object({
   amount: z.number(),
   category: z.string(),
   status: z.enum(['pending', 'approved', 'paid', 'rejected']),
-  paymentMethod: z.string().optional(),
+  paymentMethod: z.string().optional()
 });
 
 export type Expense = z.infer<typeof ExpenseSchema>;
@@ -31,7 +37,7 @@ export const BudgetSummarySchema = z.object({
   utilisationPercent: z.number(),
   expensesByCategory: z.record(z.number()),
   paidExpenses: z.number(),
-  pendingExpenses: z.number(),
+  pendingExpenses: z.number()
 });
 
 export type BudgetSummary = z.infer<typeof BudgetSummarySchema>;
@@ -68,7 +74,10 @@ export const budgetAPI = {
   },
 
   async logExpense(budgetId: string, expenseData: Record<string, unknown>) {
-    const res = await apiClient.post(`/budget/${budgetId}/expense`, expenseData);
+    const res = await apiClient.post(
+      `/budget/${budgetId}/expense`,
+      expenseData
+    );
     return ExpenseSchema.parse(res);
   },
 

@@ -1,5 +1,6 @@
 import { createTaskController } from './controller/task.controller.js';
 import { registerTaskRoutes } from './routes/task.routes.js';
+import { Task } from './schema/task.model.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');

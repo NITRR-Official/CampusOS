@@ -1,38 +1,41 @@
-export function createCheckInRepository() {
-  const storage = new Map();
-  const qrCodeIndex = new Map();
+import { CheckIn } from '../schema/checkin.model.js';
 
-  async function saveCheckIn(checkIn) {
-    storage.set(checkIn.id, checkIn);
-    qrCodeIndex.set(checkIn.qrCode, checkIn.id);
-    return checkIn;
+export function createCheckInRepository() {
+  async function saveCheckIn(checkInData) {
+    if (checkInData.id) {
+      // Update existing
+      const { id, ...updateData } = checkInData;
+      return CheckIn.findByIdAndUpdate(id, updateData, { new: true }).lean().exec();
+    }
+    // Create new
+    const checkIn = new CheckIn(checkInData);
+    await checkIn.save();
+    return checkIn.toObject();
   }
 
   async function getCheckInById(checkInId) {
-    return storage.get(checkInId) || null;
+    return CheckIn.findById(checkInId).lean().exec();
   }
 
   async function getCheckInByQRCode(qrCode) {
-    const checkInId = qrCodeIndex.get(qrCode);
-    return checkInId ? storage.get(checkInId) : null;
+    return CheckIn.findOne({ qrCode }).lean().exec();
   }
 
   async function getCheckInsByEventId(eventId) {
-    return Array.from(storage.values()).filter(
-      (checkIn) => checkIn.eventId === eventId
-    );
+    return CheckIn.find({ eventId }).lean().exec();
   }
 
   async function getUserCheckInStatus(eventId, userId) {
-    return (
-      Array.from(storage.values()).find(
-        (checkIn) => checkIn.eventId === eventId && checkIn.userId === userId
-      ) || null
-    );
+    return CheckIn.findOne({ eventId, userId }).lean().exec();
   }
 
   async function listAllCheckIns() {
-    return Array.from(storage.values());
+    return CheckIn.find().lean().exec();
+  }
+
+  async function deleteEventCheckIns(eventId) {
+    const result = await CheckIn.deleteMany({ eventId });
+    return result.deletedCount;
   }
 
   return {
@@ -41,6 +44,7 @@ export function createCheckInRepository() {
     getCheckInByQRCode,
     getCheckInsByEventId,
     getUserCheckInStatus,
-    listAllCheckIns
+    listAllCheckIns,
+    deleteEventCheckIns
   };
 }

@@ -9,7 +9,7 @@ export function useLogin() {
     onSuccess: (data) => {
       // You could update some auth context state here or set query data
       queryClient.setQueryData(['currentUser'], data.user);
-    },
+    }
   });
 }
 
@@ -20,6 +20,6 @@ export function useSignup() {
     mutationFn: signup,
     onSuccess: (data) => {
       queryClient.setQueryData(['currentUser'], data.user);
-    },
+    }
   });
 }

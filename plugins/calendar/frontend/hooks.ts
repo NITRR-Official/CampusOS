@@ -10,7 +10,7 @@ import {
 export function useAllCalendarEvents() {
   return useQuery({
     queryKey: ['calendar', 'events'],
-    queryFn: fetchAllCalendarEvents,
+    queryFn: fetchAllCalendarEvents
   });
 }
 
@@ -18,7 +18,7 @@ export function useCalendarEventsByRange(startDate: string, endDate: string) {
   return useQuery({
     queryKey: ['calendar', 'events', 'range', startDate, endDate],
     queryFn: () => fetchCalendarEventsByRange(startDate, endDate),
-    enabled: !!startDate && !!endDate,
+    enabled: !!startDate && !!endDate
   });
 }
 
@@ -36,7 +36,7 @@ export function useCreateCalendarEvent() {
     }) => createCalendarEvent(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['calendar', 'events'] });
-    },
+    }
   });
 }
 
@@ -46,6 +46,6 @@ export function useDeleteCalendarEvent() {
     mutationFn: (eventId: string) => deleteCalendarEvent(eventId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['calendar', 'events'] });
-    },
+    }
   });
 }

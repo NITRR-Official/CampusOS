@@ -7,9 +7,9 @@ async function test() {
   try {
     await connectDB();
     const app = await createApp(registry);
-    console.log("Modules:", Array.from(registry.modules.keys()));
+    console.log('Modules:', Array.from(registry.modules.keys()));
   } catch (err) {
-    console.error("ERROR:", err);
+    console.error('ERROR:', err);
   } finally {
     mongoose.disconnect();
   }

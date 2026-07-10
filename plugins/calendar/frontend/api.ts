@@ -2,7 +2,11 @@ import { z } from 'zod';
 import { apiClient } from '@/lib/api/client';
 export { ApiError as CalendarApiError } from '@/lib/api/errors';
 
-export const CalendarEventTypeSchema = z.enum(['task-deadline', 'event', 'milestone']);
+export const CalendarEventTypeSchema = z.enum([
+  'task-deadline',
+  'event',
+  'milestone'
+]);
 export type CalendarEventType = z.infer<typeof CalendarEventTypeSchema>;
 
 export const CalendarEventSchema = z.object({
@@ -16,7 +20,7 @@ export const CalendarEventSchema = z.object({
   linkedEventId: z.string().nullable(),
   createdBy: z.string(),
   createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string()
 });
 
 export type CalendarEvent = z.infer<typeof CalendarEventSchema>;
@@ -38,17 +42,15 @@ export async function fetchCalendarEventsByRange(
   return z.array(CalendarEventSchema).parse(response);
 }
 
-export async function createCalendarEvent(
-  payload: {
-    title: string;
-    eventType: CalendarEventType;
-    startsAt: string;
-    endsAt?: string;
-    description?: string;
-    linkedTaskId?: string;
-    linkedEventId?: string;
-  }
-) {
+export async function createCalendarEvent(payload: {
+  title: string;
+  eventType: CalendarEventType;
+  startsAt: string;
+  endsAt?: string;
+  description?: string;
+  linkedTaskId?: string;
+  linkedEventId?: string;
+}) {
   const response = await apiClient.post('/calendar', payload);
   return CalendarEventSchema.parse(response);
 }

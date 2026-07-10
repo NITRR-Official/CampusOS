@@ -42,6 +42,14 @@ export async function init(app, registry, eventBus) {
       description: 'Allows allocating budgets, tracking expenses, and approvals'
     });
   }
+
+  if (eventBus) {
+    eventBus.on('event:deleted', async (payload) => {
+      if (payload && payload.eventId) {
+        await budgetService.deleteEventBudget(payload.eventId);
+      }
+    });
+  }
 }
 
 export default init;

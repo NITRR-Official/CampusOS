@@ -123,9 +123,9 @@ export class VendorService {
    */
   async getVendorByName(name) {
     try {
-      const vendor = await Vendor.findOne({
+      const vendor = await vendorRepository.findOne({
         nameLower: name.toLowerCase()
-      }).lean();
+      });
       return normalizeVendor(vendor);
     } catch (error) {
       console.error('Error fetching vendor by name:', error);
@@ -251,9 +251,9 @@ export class VendorService {
    */
   async getEventVendors(eventId) {
     try {
-      const vendors = await Vendor.find({
+      const vendors = await vendorRepository.find({
         'assignments.eventId': eventId
-      }).lean();
+      });
 
       return vendors.flatMap((vendor) =>
         (vendor.assignments || [])
@@ -272,6 +272,32 @@ export class VendorService {
     } catch (error) {
       console.error('Error fetching event vendors:', error);
       return [];
+    }
+  }
+
+  /**
+   * Delete all assignments for an event
+   * @param {string} eventId - Event ID
+   * @returns {object} Deletion result
+   */
+  async deleteEventAssignments(eventId) {
+    try {
+      const vendors = await vendorRepository.findDocuments({
+        'assignments.eventId': eventId
+      });
+
+      for (const vendor of vendors) {
+        vendor.assignments = vendor.assignments.filter(
+          (assignment) => assignment.eventId !== eventId
+        );
+        
+        await vendorRepository.saveDocument(vendor);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting event assignments:', error);
+      return { success: false, error: error.message };
     }
   }
 

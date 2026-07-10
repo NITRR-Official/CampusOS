@@ -53,7 +53,11 @@ function isPublicClubRoute(req) {
 }
 
 export function authMiddleware(req, res, next) {
-  if (PUBLIC_ROUTES.has(req.path) || isPublicEventRoute(req) || isPublicClubRoute(req)) {
+  if (
+    PUBLIC_ROUTES.has(req.path) ||
+    isPublicEventRoute(req) ||
+    isPublicClubRoute(req)
+  ) {
     return next();
   }
 

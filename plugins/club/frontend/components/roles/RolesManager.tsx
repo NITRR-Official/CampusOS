@@ -17,11 +17,11 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
 import { Role } from '@plugins/club/frontend/api';
-import { 
-  useClubRoles, 
-  useSystemPermissions, 
-  useDeleteRole, 
-  useUpdateRole 
+import {
+  useClubRoles,
+  useSystemPermissions,
+  useDeleteRole,
+  useUpdateRole
 } from '@plugins/club/frontend/hooks';
 import { RoleItem } from './RoleItem';
 import { RoleEditorSheet } from './RoleEditorSheet';
@@ -34,7 +34,7 @@ export function RolesManager({ clubId }: { clubId: string }) {
   const { data: permissions } = useSystemPermissions();
   const deleteRoleMutation = useDeleteRole(clubId);
   const updateRoleMutation = useUpdateRole(clubId);
-  
+
   const [localRoles, setLocalRoles] = useState<Role[]>([]);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -44,7 +44,9 @@ export function RolesManager({ clubId }: { clubId: string }) {
 
   useEffect(() => {
     if (rolesData) {
-      setLocalRoles([...rolesData].sort((a, b) => b.hierarchyLevel - a.hierarchyLevel));
+      setLocalRoles(
+        [...rolesData].sort((a, b) => b.hierarchyLevel - a.hierarchyLevel)
+      );
     }
   }, [rolesData]);
 
@@ -69,7 +71,10 @@ export function RolesManager({ clubId }: { clubId: string }) {
           const newLevel = (newArray.length - i) * 10;
           if (r.hierarchyLevel !== newLevel) {
             updateRoleMutation.mutate(
-              { roleId: (r.id || r._id) as string, payload: { hierarchyLevel: newLevel } },
+              {
+                roleId: (r.id || r._id) as string,
+                payload: { hierarchyLevel: newLevel }
+              },
               {
                 onError: () => {
                   toast({
@@ -103,7 +108,7 @@ export function RolesManager({ clubId }: { clubId: string }) {
       });
       return;
     }
-    
+
     deleteRoleMutation.mutate((role.id || role._id) as string, {
       onSuccess: () => {
         toast({ title: 'Deleted', description: 'Role deleted successfully' });

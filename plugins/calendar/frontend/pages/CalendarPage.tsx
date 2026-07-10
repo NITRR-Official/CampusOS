@@ -170,7 +170,11 @@ export function CalendarPage() {
     0
   );
 
-  const { data: events = [], isLoading, error } = useCalendarEventsByRange(
+  const {
+    data: events = [],
+    isLoading,
+    error
+  } = useCalendarEventsByRange(
     monthStart.toISOString(),
     monthEnd.toISOString()
   );
@@ -385,7 +389,9 @@ export function CalendarPage() {
               disabled={createEventMutation.isPending}
               className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {createEventMutation.isPending ? 'Adding to calendar...' : 'Add to calendar'}
+              {createEventMutation.isPending
+                ? 'Adding to calendar...'
+                : 'Add to calendar'}
             </button>
           </div>
         </form>

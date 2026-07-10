@@ -39,7 +39,7 @@ function toPublicUser(user) {
   };
 }
 
-export function createAuthService(authRepository) {
+export function createAuthService(authRepository, eventBus) {
   async function createUser({ name, email, password }) {
     const normalizedEmail = email.toLowerCase();
 
@@ -85,10 +85,19 @@ export function createAuthService(authRepository) {
     return users.map(toPublicUser);
   }
 
+  async function deleteUser(userId) {
+    const deleted = await authRepository.deleteUser(userId);
+    if (deleted && eventBus) {
+      eventBus.emit('user:deleted', { userId });
+    }
+    return deleted;
+  }
+
   return {
     createUser,
     authenticateUser,
-    listUsers
+    listUsers,
+    deleteUser
   };
 }
 

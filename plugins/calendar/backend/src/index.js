@@ -1,5 +1,6 @@
 import { createCalendarController } from './controller/calendar.controller.js';
 import { registerCalendarRoutes } from './routes/calendar.routes.js';
+import { CalendarEvent } from './schema/calendar.model.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');

@@ -39,10 +39,8 @@ export default async function ClubSettingsLayout(props: {
         <aside className="w-full md:w-64 shrink-0">
           <SettingsNav clubSlug={club.slug} />
         </aside>
-        
-        <main className="flex-1">
-          {props.children}
-        </main>
+
+        <main className="flex-1">{props.children}</main>
       </div>
     </div>
   );

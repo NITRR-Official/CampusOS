@@ -53,7 +53,10 @@ export function createClubService(clubRepository, eventBus) {
     category,
     createdBy
   }) {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
     const club = await clubRepository.createClub({
       name,
       slug,
@@ -64,11 +67,11 @@ export function createClubService(clubRepository, eventBus) {
       status: 'pending_verification',
       createdBy
     });
-    
+
     if (eventBus) {
       eventBus.emit('club.proposed', club);
     }
-    
+
     return serializeClub(club);
   }
 
@@ -107,7 +110,8 @@ export function createClubService(clubRepository, eventBus) {
     // Only allow updating safe fields
     const updateData = {};
     if (payload.name !== undefined) updateData.name = payload.name;
-    if (payload.description !== undefined) updateData.description = payload.description;
+    if (payload.description !== undefined)
+      updateData.description = payload.description;
     if (payload.category !== undefined) updateData.category = payload.category;
     if (payload.email !== undefined) updateData.email = payload.email;
 
@@ -117,16 +121,45 @@ export function createClubService(clubRepository, eventBus) {
 
   async function archiveClub(clubId, requesterUser) {
     const context = await _getRequesterContext(clubId, requesterUser);
-    
+
     // Only the 'owner' (hierarchy >= 1000) or superadmin can archive
-    if (!context.isClubAdmin || (context.maxHierarchy < 1000 && !requesterUser.isSuperAdmin)) {
+    if (
+      !context.isClubAdmin ||
+      (context.maxHierarchy < 1000 && !requesterUser.isSuperAdmin)
+    ) {
       const error = new Error('Only the club owner can archive the club');
       error.code = 'OWNER_REQUIRED';
       throw error;
     }
 
     const club = await clubRepository.updateClubStatus(clubId, 'archived');
+    
+    if (eventBus && club) {
+      eventBus.emit('club:archived', { clubId });
+    }
+    
     return serializeClub(club);
+  }
+
+  async function deleteClub(clubId, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
+
+    if (
+      !context.isClubAdmin ||
+      (context.maxHierarchy < 1000 && !requesterUser.isSuperAdmin)
+    ) {
+      const error = new Error('Only the club owner can delete the club');
+      error.code = 'OWNER_REQUIRED';
+      throw error;
+    }
+
+    const deleted = await clubRepository.deleteClub(clubId);
+    
+    if (deleted && eventBus) {
+      eventBus.emit('club:deleted', { clubId });
+    }
+    
+    return deleted;
   }
 
   async function _provisionDefaultRoles(clubId) {
@@ -339,6 +372,10 @@ export function createClubService(clubRepository, eventBus) {
     return members.map(serializeClubMember);
   }
 
+  async function removeAllUserMemberships(userId) {
+    return clubRepository.removeAllUserMemberships(userId);
+  }
+
   async function getUserPermissions(userId, clubId) {
     if (!clubId || !userId) return [];
 
@@ -431,8 +468,10 @@ export function createClubService(clubRepository, eventBus) {
     updateClubStatus,
     updateClub,
     archiveClub,
+    deleteClub,
     addMember,
     removeMember,
+    removeAllUserMemberships,
     assignRole,
     listMembers,
     getUserPermissions,

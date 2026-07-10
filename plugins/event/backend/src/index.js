@@ -2,6 +2,7 @@ import { createEventController } from './controller/event.controller.js';
 import { registerEventRoutes } from './routes/event.routes.js';
 import { createEventService } from './service/event.service.js';
 import { createEventRepository } from './repository/event.repository.js';
+import { Event } from './schema/event.model.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -11,7 +12,7 @@ export async function init(app, registry, eventBus) {
   }
 
   const eventRepository = createEventRepository();
-  const eventService = createEventService(eventRepository);
+  const eventService = createEventService(eventRepository, eventBus);
   const eventController = createEventController(eventService);
   registerEventRoutes(app, eventController, requirePermissions);
 
@@ -38,6 +39,14 @@ export async function init(app, registry, eventBus) {
       module: 'event',
       label: 'Manage Events',
       description: 'Allows editing, publishing, and deleting events'
+    });
+  }
+
+  if (eventBus) {
+    eventBus.on('club:deleted', async (payload) => {
+      if (payload && payload.clubId) {
+        await eventService.deleteEventsByClub(payload.clubId);
+      }
     });
   }
 }

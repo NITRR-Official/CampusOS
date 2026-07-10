@@ -35,7 +35,7 @@ export function RegisterForm({ eventId }: RegisterFormProps) {
           } else {
             setError('Unable to register right now. Please try again.');
           }
-        },
+        }
       }
     );
   }

@@ -1,22 +1,39 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useEventBudget, useBudgetSummary } from '@plugins/budget/frontend/hooks';
+import {
+  useEventBudget,
+  useBudgetSummary
+} from '@plugins/budget/frontend/hooks';
 
 export default function BudgetPage() {
   const params = useParams();
   const eventId = params.eventId as string;
 
-  const { data: budget, isLoading: isLoadingBudget, error: budgetError } = useEventBudget(eventId);
-  
-  const { data: summary, isLoading: isLoadingSummary, error: summaryError } = useBudgetSummary(budget?.id || '');
+  const {
+    data: budget,
+    isLoading: isLoadingBudget,
+    error: budgetError
+  } = useEventBudget(eventId);
+
+  const {
+    data: summary,
+    isLoading: isLoadingSummary,
+    error: summaryError
+  } = useBudgetSummary(budget?.id || '');
 
   const loading = isLoadingBudget || (budget && isLoadingSummary);
   const error = budgetError || summaryError;
 
   if (loading) return <div className="p-4">Loading budget...</div>;
-  if (error) return <div className="p-4 text-red-600">Error: {error instanceof Error ? error.message : String(error)}</div>;
-  if (!budget) return <div className="p-4">No budget found for this event.</div>;
+  if (error)
+    return (
+      <div className="p-4 text-red-600">
+        Error: {error instanceof Error ? error.message : String(error)}
+      </div>
+    );
+  if (!budget)
+    return <div className="p-4">No budget found for this event.</div>;
 
   return (
     <div className="p-6">

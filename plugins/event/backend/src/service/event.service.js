@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-export function createEventService(eventRepository) {
+export function createEventService(eventRepository, eventBus) {
   async function createEvent(payload) {
     const event = {
       id: crypto.randomUUID(),
@@ -98,13 +98,35 @@ export function createEventService(eventRepository) {
     };
   }
 
+  async function deleteEvent(eventId) {
+    const deleted = await eventRepository.deleteEvent(eventId);
+    if (deleted && eventBus) {
+      eventBus.emit('event:deleted', { eventId });
+    }
+    return deleted;
+  }
+
+  async function deleteEventsByClub(clubId) {
+    const events = await eventRepository.getEventsByClub(clubId);
+    let count = 0;
+    
+    for (const event of events) {
+      const deleted = await deleteEvent(event._id || event.id);
+      if (deleted) count++;
+    }
+    
+    return count;
+  }
+
   return {
     createEvent,
     updateEvent,
     getEvent,
     setStatus,
     listEvents,
-    registerForEvent
+    registerForEvent,
+    deleteEvent,
+    deleteEventsByClub
   };
 }
 

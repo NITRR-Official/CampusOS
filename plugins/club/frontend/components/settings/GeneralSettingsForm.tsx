@@ -20,7 +20,10 @@ interface GeneralSettingsFormProps {
   };
 }
 
-export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsFormProps) {
+export function GeneralSettingsForm({
+  clubId,
+  initialData
+}: GeneralSettingsFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,7 +37,7 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
       const response = await fetch(`/api/v1/clubs/${clubId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData)
       });
 
       if (!response.ok) {
@@ -43,14 +46,14 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
 
       toast({
         title: 'Settings updated',
-        description: 'Club profile has been successfully updated.',
+        description: 'Club profile has been successfully updated.'
       });
       router.refresh();
     } catch (error: any) {
       toast({
         title: 'Error',
         description: 'Could not update club settings.',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     } finally {
       setIsSubmitting(false);
@@ -59,11 +62,16 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
 
   const handleArchive = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!confirm('Are you absolutely sure you want to archive this club? This action cannot be easily undone.')) return;
+    if (
+      !confirm(
+        'Are you absolutely sure you want to archive this club? This action cannot be easily undone.'
+      )
+    )
+      return;
 
     try {
       const response = await fetch(`/api/v1/clubs/${clubId}/archive`, {
-        method: 'POST',
+        method: 'POST'
       });
 
       if (!response.ok) {
@@ -72,14 +80,15 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
 
       toast({
         title: 'Club archived',
-        description: 'The club has been moved to an inactive state.',
+        description: 'The club has been moved to an inactive state.'
       });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Could not archive club. You might not have the Owner permission.',
-        variant: 'destructive',
+        description:
+          'Could not archive club. You might not have the Owner permission.',
+        variant: 'destructive'
       });
     }
   };
@@ -100,20 +109,27 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
           <div className="grid gap-6 bg-card border border-border p-6 rounded-2xl shadow-sm">
             <div className="grid gap-2">
               <Label htmlFor="name">Club Name</Label>
-              <Input 
-                id="name" 
+              <Input
+                id="name"
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
                 required
               />
             </div>
 
             <div className="grid gap-2">
               <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
+              <Textarea
+                id="description"
                 value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value
+                  }))
+                }
                 rows={4}
               />
             </div>
@@ -121,19 +137,26 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="category">Category</Label>
-                <Input 
-                  id="category" 
+                <Input
+                  id="category"
                   value={formData.category}
-                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: e.target.value
+                    }))
+                  }
                 />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Contact Email</Label>
-                <Input 
-                  id="email" 
+                <Input
+                  id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
                   required
                 />
               </div>
@@ -204,12 +227,17 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
         <div className="border border-destructive/20 rounded-2xl overflow-hidden shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 gap-4 bg-destructive/5 border-b border-destructive/20">
             <div>
-              <h3 className="font-semibold text-foreground">Transfer Ownership</h3>
+              <h3 className="font-semibold text-foreground">
+                Transfer Ownership
+              </h3>
               <p className="text-sm text-muted-foreground">
                 Give Admin access to another member of the club.
               </p>
             </div>
-            <Button variant="outline" className="shrink-0 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground">
+            <Button
+              variant="outline"
+              className="shrink-0 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
               Transfer Ownership
             </Button>
           </div>
@@ -218,11 +246,12 @@ export function GeneralSettingsForm({ clubId, initialData }: GeneralSettingsForm
             <div>
               <h3 className="font-semibold text-foreground">Archive Club</h3>
               <p className="text-sm text-muted-foreground">
-                Mark this club as inactive. Only the Owner can perform this action.
+                Mark this club as inactive. Only the Owner can perform this
+                action.
               </p>
             </div>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               className="shrink-0"
               onClick={handleArchive}
             >

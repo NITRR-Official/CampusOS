@@ -16,9 +16,17 @@ export const ClubSchema = z.object({
   logoUrl: z.string().optional().nullable(),
   bannerUrl: z.string().optional().nullable(),
   memberCount: z.number().optional().default(0),
-  status: z.enum(['active', 'inactive', 'pending', 'rejected', 'approved', 'archived', 'pending_verification']),
+  status: z.enum([
+    'active',
+    'inactive',
+    'pending',
+    'rejected',
+    'approved',
+    'archived',
+    'pending_verification'
+  ]),
   createdAt: z.string(),
-  updatedAt: z.string().optional().nullable(),
+  updatedAt: z.string().optional().nullable()
 });
 
 export type Club = z.infer<typeof ClubSchema>;
@@ -32,7 +40,7 @@ export const RoleSchema = z.object({
   hierarchyLevel: z.number(),
   roleType: z.enum(['role', 'team']).default('role'),
   color: z.string().nullable().optional(),
-  isTemplate: z.boolean().default(false),
+  isTemplate: z.boolean().default(false)
 });
 
 export type Role = z.infer<typeof RoleSchema>;
@@ -41,7 +49,7 @@ export const SystemPermissionSchema = z.object({
   id: z.string(),
   module: z.string(),
   label: z.string(),
-  description: z.string(),
+  description: z.string()
 });
 
 export type SystemPermission = z.infer<typeof SystemPermissionSchema>;
@@ -53,7 +61,7 @@ export interface SystemPermissionGroup {
 
 export const MyPermissionsSchema = z.object({
   permissions: z.array(z.string()),
-  isSuperAdmin: z.boolean(),
+  isSuperAdmin: z.boolean()
 });
 
 export async function fetchClubs(
@@ -68,9 +76,8 @@ export async function fetchClubBySlug(slug: string): Promise<Club | null> {
   try {
     const clubs = await fetchClubs();
     return (
-      clubs.find(
-        (c) => c.slug === slug || c.id === slug || c._id === slug
-      ) || null
+      clubs.find((c) => c.slug === slug || c.id === slug || c._id === slug) ||
+      null
     );
   } catch {
     return null;
@@ -82,7 +89,10 @@ export async function createClub(payload: Partial<Club>): Promise<Club> {
   return ClubSchema.parse(response);
 }
 
-export async function updateClub(clubId: string, payload: Partial<Club>): Promise<Club> {
+export async function updateClub(
+  clubId: string,
+  payload: Partial<Club>
+): Promise<Club> {
   const response = await apiClient.patch(`/clubs/${clubId}`, payload);
   return ClubSchema.parse(response);
 }
@@ -106,10 +116,7 @@ export async function createRole(
   clubId: string,
   payload: Partial<Role>
 ): Promise<Role> {
-  const response = await apiClient.post(
-    `/clubs/${clubId}/roles`,
-    payload
-  );
+  const response = await apiClient.post(`/clubs/${clubId}/roles`, payload);
   return RoleSchema.parse(response);
 }
 
@@ -142,14 +149,16 @@ export async function fetchSystemPermissions(): Promise<
     success: boolean;
     permissions: Record<string, any[]>;
   }>('/system/permissions');
-  
+
   return Object.entries(response.permissions || {}).map(([module, perms]) => ({
     module,
     permissions: z.array(SystemPermissionSchema).parse(perms)
   }));
 }
 
-export async function fetchMyClubPermissions(clubId: string): Promise<{ permissions: string[], isSuperAdmin: boolean }> {
+export async function fetchMyClubPermissions(
+  clubId: string
+): Promise<{ permissions: string[]; isSuperAdmin: boolean }> {
   try {
     const response = await apiClient.get(
       `/clubs/${clubId}/my-permissions?t=${Date.now()}`

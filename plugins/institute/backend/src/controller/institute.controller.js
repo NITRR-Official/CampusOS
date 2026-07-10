@@ -19,7 +19,7 @@ function createHttpError(status, message, code, details) {
 export function createInstituteController() {
   const instituteService = getInstituteService();
 
-  function create(req, res, next) {
+  async function create(req, res, next) {
     const { errors, value } = validateCreateInstitutePayload(req.body);
 
     if (errors.length > 0) {
@@ -34,24 +34,32 @@ export function createInstituteController() {
       return;
     }
 
-    const institute = instituteService.createInstitute({
-      ...value,
-      createdBy: req.user?.id || 'unknown'
-    });
+    try {
+      const institute = await instituteService.createInstitute({
+        ...value,
+        createdBy: req.user?.id || 'unknown'
+      });
 
-    res.status(201).json({
-      success: true,
-      data: institute
-    });
+      res.status(201).json({
+        success: true,
+        data: institute
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  function list(req, res) {
-    const institutes = instituteService.listInstitutes();
+  async function list(req, res, next) {
+    try {
+      const institutes = await instituteService.listInstitutes();
 
-    res.status(200).json({
-      success: true,
-      data: institutes
-    });
+      res.status(200).json({
+        success: true,
+        data: institutes
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 
   return {

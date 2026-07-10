@@ -17,6 +17,10 @@ export class VendorRepository {
     return await Vendor.find(query).lean();
   }
 
+  async findDocuments(query) {
+    return await Vendor.find(query);
+  }
+
   async updateById(id, updates) {
     return await Vendor.findByIdAndUpdate(id, updates, {
       new: true,

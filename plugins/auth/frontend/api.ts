@@ -11,13 +11,13 @@ export const AuthUserSchema = z.object({
   email: z.string().email(),
   isSuperAdmin: z.boolean().optional(),
   role: UserRoleSchema.optional(),
-  createdAt: z.string().optional(),
+  createdAt: z.string().optional()
 });
 
 export const AuthResponseSchema = z.object({
   user: AuthUserSchema,
   accessToken: z.string(),
-  tokenType: z.literal('Bearer'),
+  tokenType: z.literal('Bearer')
 });
 
 // 2. Inferred Types
@@ -32,12 +32,12 @@ export function signup(payload: {
   password: string;
 }) {
   return apiClient.post<AuthResponseData>('/auth/signup', payload, {
-    schema: AuthResponseSchema,
+    schema: AuthResponseSchema
   });
 }
 
 export function login(payload: { email: string; password: string }) {
   return apiClient.post<AuthResponseData>('/auth/login', payload, {
-    schema: AuthResponseSchema,
+    schema: AuthResponseSchema
   });
 }

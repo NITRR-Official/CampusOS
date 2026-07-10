@@ -23,12 +23,15 @@ Following ADR-007, the frontend architecture was designed to support build-time 
 ## Consequences
 
 ### Positive
+
 - A highly modular, scalable frontend codebase.
 - Eliminated all residual `any` types and runtime data mismatches in the API layer.
 - Open-source contributors can now build fully self-contained plugins with their own pages and strict schemas.
 
 ### Negative
+
 - Increased boilerplate for defining Zod schemas for every API endpoint.
 
 ## Related ADRs
+
 - ADR-007: Frontend Plugin Architecture (Build-Time Integration)

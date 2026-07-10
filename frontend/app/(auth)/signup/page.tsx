@@ -58,23 +58,26 @@ export default function SignupPage() {
   function onSubmit(data: SignupFormData) {
     setError('');
 
-    signupMutation.mutate({
-      name: data.name,
-      email: data.email,
-      password: data.password
-    }, {
-      onSuccess: (authData) => {
-        storeAuthSession(authData);
-        router.replace(redirectTo);
+    signupMutation.mutate(
+      {
+        name: data.name,
+        email: data.email,
+        password: data.password
       },
-      onError: (err: any) => {
-        if (err instanceof ApiError) {
-          setError(err.message);
-        } else {
-          setError('Unable to create account right now. Please try again.');
+      {
+        onSuccess: (authData) => {
+          storeAuthSession(authData);
+          router.replace(redirectTo);
+        },
+        onError: (err: any) => {
+          if (err instanceof ApiError) {
+            setError(err.message);
+          } else {
+            setError('Unable to create account right now. Please try again.');
+          }
         }
       }
-    });
+    );
   }
 
   const isLoading = signupMutation.isPending;

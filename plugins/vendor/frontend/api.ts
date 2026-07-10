@@ -10,7 +10,7 @@ export const VendorSchema = z.object({
   contactEmail: z.string().optional(),
   contactPhone: z.string().optional(),
   status: z.enum(['active', 'inactive', 'blacklisted']),
-  rating: z.number().optional(),
+  rating: z.number().optional()
 });
 
 export type Vendor = z.infer<typeof VendorSchema>;
@@ -21,7 +21,7 @@ export const VendorAssignmentSchema = z.object({
   eventId: z.string(),
   status: z.enum(['pending', 'approved', 'rejected', 'completed', 'cancelled']),
   assignedServices: z.array(z.string()),
-  cost: z.number().optional(),
+  cost: z.number().optional()
 });
 
 export type VendorAssignment = z.infer<typeof VendorAssignmentSchema>;
@@ -79,9 +79,12 @@ export const vendorAPI = {
   },
 
   async updateAssignmentStatus(assignmentId: string, status: string) {
-    const res = await apiClient.put(`/vendors/assignments/${assignmentId}/status`, {
-      status
-    });
+    const res = await apiClient.put(
+      `/vendors/assignments/${assignmentId}/status`,
+      {
+        status
+      }
+    );
     return VendorAssignmentSchema.parse(res);
   },
 

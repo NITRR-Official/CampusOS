@@ -8,12 +8,12 @@ import { Club } from '../schema/club.model.js';
 class VerificationService {
   /**
    * Generates a new secure token for a club.
-   * @param {string} clubId 
+   * @param {string} clubId
    * @returns {Promise<string>} The raw token string
    */
   async generateTokenForClub(clubId) {
     const rawToken = crypto.randomBytes(32).toString('hex');
-    
+
     // Create token expiring in 24 hours
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
@@ -29,13 +29,15 @@ class VerificationService {
 
   /**
    * Validates a token and approves the email verification.
-   * @param {string} token 
+   * @param {string} token
    * @returns {Promise<Object>} The updated club document
    * @throws {Error} If token is invalid or expired
    */
   async verifyEmail(token) {
-    const verificationRecord = await VerificationToken.findOne({ token }).populate('clubId');
-    
+    const verificationRecord = await VerificationToken.findOne({
+      token
+    }).populate('clubId');
+
     if (!verificationRecord) {
       const error = new Error('Invalid or expired verification token');
       error.status = 400; // Bad request

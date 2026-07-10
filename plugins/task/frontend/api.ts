@@ -17,7 +17,7 @@ export const TaskItemSchema = z.object({
   createdBy: z.string(),
   assignedAt: z.string().nullable(),
   createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string()
 });
 
 export type TaskStatus = z.infer<typeof TaskStatusSchema>;
@@ -25,7 +25,7 @@ export type TaskPriority = z.infer<typeof TaskPrioritySchema>;
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 
 export function fetchTasks(accessToken?: string) {
-  return apiClient.get<TaskItem[]>('/tasks', { 
+  return apiClient.get<TaskItem[]>('/tasks', {
     accessToken,
     schema: z.array(TaskItemSchema)
   });
@@ -41,7 +41,7 @@ export function createTask(
     priority: TaskPriority;
   }
 ) {
-  return apiClient.post<TaskItem>('/tasks', payload, { 
+  return apiClient.post<TaskItem>('/tasks', payload, {
     accessToken,
     schema: TaskItemSchema
   });

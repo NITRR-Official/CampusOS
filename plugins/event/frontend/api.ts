@@ -6,7 +6,7 @@ export const EventRegistrationSchema = z.object({
   id: z.string(),
   attendeeName: z.string(),
   attendeeEmail: z.string().email(),
-  createdAt: z.string(),
+  createdAt: z.string()
 });
 
 export const EventItemSchema = z.object({
@@ -23,7 +23,7 @@ export const EventItemSchema = z.object({
   registrations: z.array(EventRegistrationSchema),
   createdBy: z.string(),
   createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string()
 });
 
 export type EventRegistration = z.infer<typeof EventRegistrationSchema>;
@@ -31,13 +31,13 @@ export type EventItem = z.infer<typeof EventItemSchema>;
 
 export function fetchEvents() {
   return apiClient.get<EventItem[]>('/events', {
-    schema: z.array(EventItemSchema),
+    schema: z.array(EventItemSchema)
   });
 }
 
 export function fetchEventById(eventId: string) {
   return apiClient.get<EventItem>(`/events/${eventId}`, {
-    schema: EventItemSchema,
+    schema: EventItemSchema
   });
 }
 

@@ -5,7 +5,7 @@ import {
   TaskApiError,
   type TaskItem,
   type TaskPriority,
-  type TaskStatus,
+  type TaskStatus
 } from '@plugins/task/frontend/api';
 import {
   useAssignTask,
@@ -32,11 +32,7 @@ export interface TaskCardProps {
   accessToken: string;
 }
 
-export function TaskCard({
-  task,
-  allTasks,
-  accessToken
-}: TaskCardProps) {
+export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
   const [assigneeName, setAssigneeName] = useState(task.assigneeName || '');
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
@@ -48,12 +44,12 @@ export function TaskCard({
   const updatePriorityMutation = useUpdateTaskPriority();
   const addDependencyMutation = useAddTaskDependency();
   const removeDependencyMutation = useRemoveTaskDependency();
-  
-  const isSaving = 
-    assignTaskMutation.isPending || 
-    updateStatusMutation.isPending || 
-    updatePriorityMutation.isPending || 
-    addDependencyMutation.isPending || 
+
+  const isSaving =
+    assignTaskMutation.isPending ||
+    updateStatusMutation.isPending ||
+    updatePriorityMutation.isPending ||
+    addDependencyMutation.isPending ||
     removeDependencyMutation.isPending;
 
   useEffect(() => {

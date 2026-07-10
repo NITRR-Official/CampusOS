@@ -12,7 +12,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -52,7 +52,9 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold tracking-tight">Registered Users</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          Registered Users
+        </h2>
         <p className="text-sm text-muted-foreground">
           View all members registered on CampusOS.
         </p>
@@ -78,32 +80,55 @@ export default function AdminUsersPage() {
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-[200px]" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[150px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[200px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[100px]" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={4}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No users found.
                 </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id} className="hover:bg-muted/30 transition-colors">
+                <TableRow
+                  key={user.id}
+                  className="hover:bg-muted/30 transition-colors"
+                >
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     {user.isSuperAdmin ? (
-                      <Badge variant="default" className="bg-primary/20 text-primary hover:bg-primary/30 border-none">Super Admin</Badge>
+                      <Badge
+                        variant="default"
+                        className="bg-primary/20 text-primary hover:bg-primary/30 border-none"
+                      >
+                        Super Admin
+                      </Badge>
                     ) : (
-                      <Badge variant="secondary" className="font-normal">User</Badge>
+                      <Badge variant="secondary" className="font-normal">
+                        User
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'Unknown'}
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString()
+                      : 'Unknown'}
                   </TableCell>
                 </TableRow>
               ))

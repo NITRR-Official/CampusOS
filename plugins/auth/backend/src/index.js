@@ -10,7 +10,7 @@ export async function init(app, registry, eventBus) {
   }
 
   const authRepository = createAuthRepository(models.User);
-  const authService = createAuthService(authRepository);
+  const authService = createAuthService(authRepository, eventBus);
   const authController = createAuthController({ registry, authService });
 
   const requireSuperAdmin = registry.getService('requireSuperAdmin');
@@ -18,7 +18,12 @@ export async function init(app, registry, eventBus) {
   registerAuthRoutes(app, authController, requireSuperAdmin);
 
   registry.registerModule('auth', {
-    routes: ['/api/v1/auth/signup', '/api/v1/auth/login', '/api/v1/auth/me', '/api/v1/users']
+    routes: [
+      '/api/v1/auth/signup',
+      '/api/v1/auth/login',
+      '/api/v1/auth/me',
+      '/api/v1/users'
+    ]
   });
 }
 

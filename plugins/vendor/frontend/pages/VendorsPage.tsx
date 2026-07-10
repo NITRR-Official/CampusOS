@@ -7,7 +7,12 @@ export function VendorsPage() {
   const { data: vendors = [], isLoading, error } = useAllVendors();
 
   if (isLoading) return <div className="p-4">Loading vendors...</div>;
-  if (error) return <div className="p-4 text-red-600">Error: {error instanceof Error ? error.message : String(error)}</div>;
+  if (error)
+    return (
+      <div className="p-4 text-red-600">
+        Error: {error instanceof Error ? error.message : String(error)}
+      </div>
+    );
 
   return (
     <div className="p-6">

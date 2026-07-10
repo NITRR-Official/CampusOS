@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
-const STATUS_VALUES = ['pending_verification', 'pending', 'approved', 'rejected'];
+const STATUS_VALUES = [
+  'pending_verification',
+  'pending',
+  'approved',
+  'rejected'
+];
 
 const clubSchema = new mongoose.Schema(
   {
@@ -55,6 +60,11 @@ const clubSchema = new mongoose.Schema(
     collection: 'clubs'
   }
 );
+
+// Indexes
+clubSchema.index({ instituteId: 1 });
+clubSchema.index({ createdBy: 1 });
+clubSchema.index({ status: 1 });
 
 export const Club = mongoose.model('Club', clubSchema);
 export default Club;
