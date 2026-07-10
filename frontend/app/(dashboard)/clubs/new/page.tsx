@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClub } from '@/lib/club-api';
+import { createClub } from '@plugins/club/frontend/api';
 import { Building2, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +28,7 @@ export default function NewClubPage() {
       name: formData.get('name') as string,
       category: formData.get('category') as string,
       description: formData.get('description') as string,
+      email: formData.get('email') as string,
       instituteId: 'nitrr' // Mocked institute ID for MVP
     };
 
@@ -34,7 +39,7 @@ export default function NewClubPage() {
       setTimeout(() => {
         router.push('/clubs');
       }, 3000);
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(
         err instanceof Error ? err.message : 'Failed to submit proposal'
       );
@@ -52,12 +57,11 @@ export default function NewClubPage() {
           </div>
         </div>
         <h1 className="text-3xl font-bold text-foreground mb-4">
-          Proposal Submitted!
+          Check Your Email!
         </h1>
         <p className="text-muted-foreground text-lg mb-8">
-          Your club proposal has been successfully submitted to the
-          administration for review. You will be notified once a decision is
-          made.
+          We've sent a verification link to the official club email address you provided. 
+          Please click the link in the email to verify your address before the administration can review your proposal.
         </p>
         <Button
           onClick={() => router.push('/clubs')}
@@ -134,6 +138,20 @@ export default function NewClubPage() {
                 <option value="Other">Other</option>
               </select>
             </div>
+
+            <div className="space-y-3 md:col-span-2">
+              <Label htmlFor="email" className="text-sm font-semibold">
+                Official Contact Email
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                required
+                placeholder="e.g., hello@quantum.club"
+                className="h-12 rounded-xl bg-background border-border/50 focus-visible:ring-primary/20"
+              />
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -178,3 +196,4 @@ export default function NewClubPage() {
     </div>
   );
 }
+

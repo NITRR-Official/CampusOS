@@ -21,6 +21,7 @@ function serializeClub(doc) {
   return {
     id: doc._id,
     name: doc.name,
+    slug: doc.slug,
     email: doc.email,
     instituteId: doc.instituteId,
     description: doc.description,
@@ -43,7 +44,7 @@ function serializeClubMember(doc) {
   };
 }
 
-export function createClubService(clubRepository) {
+export function createClubService(clubRepository, eventBus) {
   async function createClub({
     name,
     email,
@@ -52,15 +53,22 @@ export function createClubService(clubRepository) {
     category,
     createdBy
   }) {
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const club = await clubRepository.createClub({
       name,
+      slug,
       email,
       instituteId,
       description: description || null,
       category: category || 'General',
-      status: 'pending',
+      status: 'pending_verification',
       createdBy
     });
+    
+    if (eventBus) {
+      eventBus.emit('club.proposed', club);
+    }
+    
     return serializeClub(club);
   }
 
@@ -84,16 +92,53 @@ export function createClubService(clubRepository) {
     if (status === 'approved') {
       const existingRolesCount = await clubRepository.countRoles(clubId);
       if (existingRolesCount === 0) {
-        const adminRole = await _provisionDefaultRoles(clubId);
-        await _provisionOwnerAccount(club, adminRole._id);
+        await _provisionDefaultRoles(clubId);
+        await _provisionOwnerAccount(club);
       }
     }
 
     return serializeClub(club);
   }
 
+  async function updateClub(clubId, payload, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
+    _assertPermissions([PERMISSIONS.CLUB_MANAGE], context);
+
+    // Only allow updating safe fields
+    const updateData = {};
+    if (payload.name !== undefined) updateData.name = payload.name;
+    if (payload.description !== undefined) updateData.description = payload.description;
+    if (payload.category !== undefined) updateData.category = payload.category;
+    if (payload.email !== undefined) updateData.email = payload.email;
+
+    const club = await clubRepository.updateClub(clubId, updateData);
+    return serializeClub(club);
+  }
+
+  async function archiveClub(clubId, requesterUser) {
+    const context = await _getRequesterContext(clubId, requesterUser);
+    
+    // Only the 'owner' (hierarchy >= 1000) or superadmin can archive
+    if (!context.isClubAdmin || (context.maxHierarchy < 1000 && !requesterUser.isSuperAdmin)) {
+      const error = new Error('Only the club owner can archive the club');
+      error.code = 'OWNER_REQUIRED';
+      throw error;
+    }
+
+    const club = await clubRepository.updateClubStatus(clubId, 'archived');
+    return serializeClub(club);
+  }
+
   async function _provisionDefaultRoles(clubId) {
     const roles = await clubRepository.createRoles([
+      {
+        clubId,
+        name: 'owner',
+        permissions: [PERMISSIONS.ADMINISTRATOR],
+        hierarchyLevel: 1000,
+        isTemplate: true,
+        color: '#ff4d4f'
+      },
       {
         clubId,
         name: 'admin',
@@ -120,10 +165,10 @@ export function createClubService(clubRepository) {
         isTemplate: true
       }
     ]);
-    return roles.find((r) => r.name === 'admin');
+    return roles.filter((r) => r.name === 'admin' || r.name === 'owner');
   }
 
-  async function _provisionOwnerAccount(club, adminRoleId) {
+  async function _provisionOwnerAccount(club) {
     let ownerUser = await clubRepository.findUserByEmail(club.email);
 
     if (!ownerUser) {
@@ -137,14 +182,15 @@ export function createClubService(clubRepository) {
       });
     }
 
-    await assignRole(club._id, ownerUser._id || ownerUser.id, adminRoleId, {
+    await assignRole(club._id, ownerUser._id || ownerUser.id, 'owner', {
       isSuperAdmin: true
     });
 
     if (club.createdBy && club.createdBy !== 'unknown') {
       const creator = await clubRepository.findUserById(club.createdBy);
       if (creator) {
-        await assignRole(club._id, creator._id || creator.id, adminRoleId, {
+        // Creator gets Admin role (Hierarchy 100) instead of Owner (Hierarchy 1000)
+        await assignRole(club._id, creator._id || creator.id, 'admin', {
           isSuperAdmin: true
         });
       }
@@ -383,6 +429,8 @@ export function createClubService(clubRepository) {
     listClubs,
     getClub,
     updateClubStatus,
+    updateClub,
+    archiveClub,
     addMember,
     removeMember,
     assignRole,

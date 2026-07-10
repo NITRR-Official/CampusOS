@@ -1,0 +1,10 @@
+{
+  "name": "@plugins/admin",
+  "version": "1.0.0",
+  "private": true,
+  "main": "backend/index.ts",
+  "peerDependencies": {
+    "lucide-react": "^0.474.0"
+  },
+  "type": "module"
+}

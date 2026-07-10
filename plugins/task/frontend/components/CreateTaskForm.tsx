@@ -2,63 +2,62 @@
 
 import { FormEvent, useState } from 'react';
 import {
-  createTask,
   TaskApiError,
   type TaskPriority,
   type TaskItem
-} from '@/lib/task-api';
+} from '@plugins/task/frontend/api';
+import { useCreateTask } from '../hooks/useTasks';
 
 const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high'];
 
 interface CreateTaskFormProps {
   accessToken: string;
-  onTaskCreated: (task: TaskItem) => void;
-  onError: (error: string) => void;
 }
 
 export function CreateTaskForm({
-  accessToken,
-  onTaskCreated,
-  onError
+  accessToken
 }: CreateTaskFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assigneeName, setAssigneeName] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('medium');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [localError, setLocalError] = useState('');
 
-  async function handleCreateTask(event: FormEvent<HTMLFormElement>) {
+  const createTaskMutation = useCreateTask();
+
+  function handleCreateTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setLocalError('');
 
-    setIsSubmitting(true);
-    onError('');
-
-    try {
-      const task = await createTask(accessToken, {
+    createTaskMutation.mutate(
+      {
         title,
         description,
         assigneeName,
         dueDate,
         priority
-      });
-
-      onTaskCreated(task);
-      setTitle('');
-      setDescription('');
-      setAssigneeName('');
-      setDueDate('');
-      setPriority('medium');
-    } catch (exception) {
-      onError(
-        exception instanceof TaskApiError
-          ? exception.message
-          : 'Unable to create task right now.'
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+      },
+      {
+        onSuccess: (task) => {
+          setTitle('');
+          setDescription('');
+          setAssigneeName('');
+          setDueDate('');
+          setPriority('medium');
+        },
+        onError: (exception: any) => {
+          setLocalError(
+            exception instanceof TaskApiError
+              ? exception.message
+              : 'Unable to create task right now.'
+          );
+        }
+      }
+    );
   }
+
+  const isSubmitting = createTaskMutation.isPending;
 
   return (
     <form
@@ -75,6 +74,12 @@ export function CreateTaskForm({
           </h2>
         </div>
       </div>
+
+      {localError && (
+        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {localError}
+        </div>
+      )}
 
       <div className="mt-6 space-y-4">
         <label className="block">

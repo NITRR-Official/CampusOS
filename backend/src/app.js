@@ -7,7 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import { loggerMiddleware } from './middleware/logger.js';
 import { authMiddleware } from './middleware/auth.js';
-import { requirePermissions } from './middleware/permissions.js';
+import { requirePermissions, requireSuperAdmin } from './middleware/permissions.js';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.js';
 import { registerJwtAuthenticator } from './auth/jwt-authenticator.js';
 import { loadPlugins } from './plugin-loader.js';
@@ -96,6 +96,7 @@ export async function createApp(registry) {
   // 5. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);
   registry.registerService('requirePermissions', requirePermissions);
+  registry.registerService('requireSuperAdmin', requireSuperAdmin);
   app.use(authMiddleware);
 
   // ============== PLUGIN LOADING ==============

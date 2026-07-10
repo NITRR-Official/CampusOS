@@ -35,8 +35,25 @@ function isPublicEventRoute(req) {
   return false;
 }
 
+/**
+ * Checks whether a club route is public or not
+ * @param {*} req
+ * @returns {boolean}
+ */
+function isPublicClubRoute(req) {
+  // club listing route
+  if (req.method === 'GET' && req.path === '/api/v1/clubs') {
+    return true;
+  }
+  // club email verification route
+  if (req.method === 'GET' && req.path === '/api/v1/clubs/verify') {
+    return true;
+  }
+  return false;
+}
+
 export function authMiddleware(req, res, next) {
-  if (PUBLIC_ROUTES.has(req.path) || isPublicEventRoute(req)) {
+  if (PUBLIC_ROUTES.has(req.path) || isPublicEventRoute(req) || isPublicClubRoute(req)) {
     return next();
   }
 

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const STATUS_VALUES = ['pending', 'approved', 'rejected'];
+const STATUS_VALUES = ['pending_verification', 'pending', 'approved', 'rejected'];
 
 const clubSchema = new mongoose.Schema(
   {
@@ -11,6 +11,12 @@ const clubSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
       trim: true
     },
     email: {
@@ -37,7 +43,7 @@ const clubSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: STATUS_VALUES,
-      default: 'pending'
+      default: 'pending_verification'
     },
     createdBy: {
       type: String,

@@ -8,6 +8,13 @@ export function initFrontend() {
     url: '/events',
     icon: 'Ticket'
   });
+  
+  registry.registerSidebarLink({
+    pluginId: 'event',
+    title: 'Participants',
+    url: '/participants',
+    icon: 'Users'
+  });
 
   // Register Dashboard Widgets
   registry.registerWidget('dashboard-stats', 'event', EventStatsWidget);

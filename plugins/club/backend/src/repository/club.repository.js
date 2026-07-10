@@ -16,6 +16,10 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return Club.findByIdAndUpdate(clubId, { status }, { new: true }).lean();
   }
 
+  async function updateClub(clubId, updateData) {
+    return Club.findByIdAndUpdate(clubId, { $set: updateData }, { new: true }).lean();
+  }
+
   // ==== Member Methods ====
   async function createClubMember(memberData) {
     return ClubMember.create(memberData);
@@ -37,8 +41,11 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
   async function addRoleToMember(clubId, userId, roleId) {
     return ClubMember.findOneAndUpdate(
       { clubId, userId },
-      { $addToSet: { roles: roleId } },
-      { new: true }
+      { 
+        $addToSet: { roles: roleId },
+        $setOnInsert: { joinedAt: new Date(), status: 'active' }
+      },
+      { new: true, upsert: true }
     ).lean();
   }
 
@@ -67,9 +74,14 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
   }
 
   async function findRole(clubId, roleIdentifier) {
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(roleIdentifier));
+    const filter = isObjectId 
+      ? { $or: [{ _id: roleIdentifier }, { name: roleIdentifier }] }
+      : { name: roleIdentifier };
+
     return ClubRole.findOne({
       clubId,
-      $or: [{ _id: roleIdentifier }, { name: roleIdentifier }]
+      ...filter
     }).lean();
   }
 
@@ -114,6 +126,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     listClubs,
     getClubById,
     updateClubStatus,
+    updateClub,
     createClubMember,
     findMember,
     findMemberWithRoles,

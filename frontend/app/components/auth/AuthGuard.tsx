@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import type { UserRole } from '@/lib/auth-api';
+import type { UserRole } from '@plugins/auth/frontend/api';
 import { useAuth } from '@/lib/auth-provider';
 
 interface RequireAuthProps {

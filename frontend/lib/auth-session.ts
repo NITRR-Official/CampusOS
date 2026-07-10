@@ -1,4 +1,4 @@
-import type { AuthResponseData } from './auth-api';
+import type { AuthResponseData } from '@plugins/auth/frontend/api';
 
 const AUTH_STORAGE_KEY = 'campusos.auth-session';
 const AUTH_SESSION_EVENT = 'campusos.auth-session-change';

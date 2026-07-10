@@ -1,85 +1,123 @@
-import { useEffect, useState, useMemo } from 'react';
-import { clearAuthSession, readAccessToken } from '@/lib/auth-session';
-import {
-  fetchTasks,
-  TaskApiError,
-  type TaskItem,
-  type TaskPriority
-} from '@/lib/task-api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  fetchTasks, 
+  createTask,
+  assignTask,
+  updateTaskStatus,
+  updateTaskPriority,
+  addTaskDependency,
+  removeTaskDependency,
+  TaskApiError, 
+  type TaskItem 
+} from '@plugins/task/frontend/api';
+import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
 
 export function useTasks() {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<TaskItem[]>([]);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const accessToken = readAccessToken();
 
-  useEffect(() => {
-    setAccessToken(readAccessToken());
-  }, []);
-
-  useEffect(() => {
-    async function loadTasks(currentToken: string) {
-      setIsLoading(true);
-      setError('');
-
+  const query = useQuery({
+    queryKey: ['tasks', accessToken],
+    queryFn: async () => {
+      if (!accessToken) return [];
       try {
-        const items = await fetchTasks(currentToken);
-        setTasks(items);
-      } catch (exception) {
+        return await fetchTasks(accessToken);
+      } catch (exception: any) {
         if (exception instanceof TaskApiError && exception.status === 401) {
           clearAuthSession();
-          setAccessToken(null);
-          setError('Your session expired. Please log in again.');
-          return;
         }
-
-        setError(
-          exception instanceof TaskApiError
-            ? exception.message
-            : 'Unable to load tasks right now.'
-        );
-      } finally {
-        setIsLoading(false);
+        throw exception;
       }
-    }
+    },
+    enabled: !!accessToken,
+  });
 
-    if (accessToken) {
-      void loadTasks(accessToken);
-    } else {
-      setIsLoading(false);
-    }
-  }, [accessToken]);
-
-  const taskCounts = useMemo(() => {
-    return {
-      total: tasks.length,
-      todo: tasks.filter((task) => task.status === 'todo').length,
-      active: tasks.filter((task) => task.status === 'in-progress').length,
-      done: tasks.filter((task) => task.status === 'done').length
-    };
-  }, [tasks]);
-
-  function handleTaskChange(updatedTask: TaskItem) {
-    setTasks((currentTasks) =>
-      currentTasks.map((task) =>
-        task.id === updatedTask.id ? updatedTask : task
-      )
-    );
-  }
-
-  function handleTaskError(message: string) {
-    setError(message);
-  }
+  const tasks = query.data || [];
+  
+  const taskCounts = {
+    total: tasks.length,
+    todo: tasks.filter((task) => task.status === 'todo').length,
+    active: tasks.filter((task) => task.status === 'in-progress').length,
+    done: tasks.filter((task) => task.status === 'done').length
+  };
 
   return {
     accessToken,
     tasks,
-    setTasks,
-    error,
-    setError,
-    isLoading,
+    error: query.error ? (query.error as Error).message : '',
+    isLoading: query.isLoading,
     taskCounts,
-    handleTaskChange,
-    handleTaskError
+    refetch: query.refetch
   };
+}
+
+export function useCreateTask() {
+  const queryClient = useQueryClient();
+  const accessToken = readAccessToken();
+
+  return useMutation({
+    mutationFn: (payload: Parameters<typeof createTask>[1]) => createTask(accessToken || undefined, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
+
+export function useAssignTask() {
+  const queryClient = useQueryClient();
+  const accessToken = readAccessToken();
+
+  return useMutation({
+    mutationFn: ({ taskId, assigneeName }: { taskId: string, assigneeName: string }) => assignTask(accessToken || undefined, taskId, assigneeName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
+
+export function useUpdateTaskStatus() {
+  const queryClient = useQueryClient();
+  const accessToken = readAccessToken();
+
+  return useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string, status: any }) => updateTaskStatus(accessToken || undefined, taskId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
+
+export function useUpdateTaskPriority() {
+  const queryClient = useQueryClient();
+  const accessToken = readAccessToken();
+
+  return useMutation({
+    mutationFn: ({ taskId, priority }: { taskId: string, priority: any }) => updateTaskPriority(accessToken || undefined, taskId, priority),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
+
+export function useAddTaskDependency() {
+  const queryClient = useQueryClient();
+  const accessToken = readAccessToken();
+
+  return useMutation({
+    mutationFn: ({ taskId, dependencyId }: { taskId: string, dependencyId: string }) => addTaskDependency(accessToken || undefined, taskId, dependencyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+}
+
+export function useRemoveTaskDependency() {
+  const queryClient = useQueryClient();
+  const accessToken = readAccessToken();
+
+  return useMutation({
+    mutationFn: ({ taskId, dependencyId }: { taskId: string, dependencyId: string }) => removeTaskDependency(accessToken || undefined, taskId, dependencyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 }

@@ -4,7 +4,9 @@ import { createClubService } from './service/club.service.js';
 import { createClubRepository } from './repository/club.repository.js';
 import { Club } from './schema/club.model.js';
 import { ClubMember } from './schema/clubMember.model.js';
-import { ClubRole } from './schema/role.model.js';
+import { Role as ClubRole } from './schema/role.model.js';
+import { verificationService } from './service/verification.service.js';
+import { mailProvider } from './service/mail.provider.js';
 
 export async function init(app, registry, eventBus) {
   const models = registry.getService('core:models');
@@ -18,15 +20,27 @@ export async function init(app, registry, eventBus) {
     ClubRole,
     models.User
   );
-  const clubService = createClubService(clubRepository);
+  const clubService = createClubService(clubRepository, eventBus);
   const clubController = createClubController(clubService);
   const requirePermissions = registry.getService('requirePermissions');
+  const requireSuperAdmin = registry.getService('requireSuperAdmin');
 
   if (typeof requirePermissions !== 'function') {
     throw new Error('Permission middleware service is not configured');
   }
 
-  registerClubRoutes(app, clubController, requirePermissions);
+  registerClubRoutes(app, clubController, requirePermissions, requireSuperAdmin);
+
+  if (eventBus) {
+    eventBus.on('club.proposed', async (club) => {
+      try {
+        const token = await verificationService.generateTokenForClub(club.id || club._id);
+        await mailProvider.sendVerificationEmail(club.email, club.name, token);
+      } catch (err) {
+        console.error('Failed to send verification email for club proposal:', err);
+      }
+    });
+  }
 
   registry.registerModule('club', {
     routes: [

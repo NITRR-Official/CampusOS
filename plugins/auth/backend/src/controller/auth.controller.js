@@ -124,9 +124,22 @@ export function createAuthController({ registry, authService }) {
     }
   }
 
+  async function listUsers(req, res, next) {
+    try {
+      const users = await authService.listUsers();
+      res.status(200).json({
+        success: true,
+        data: users
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   return {
     signup,
-    login
+    login,
+    listUsers
   };
 }
 

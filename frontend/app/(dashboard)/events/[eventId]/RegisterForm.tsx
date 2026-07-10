@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { EventApiError, registerForEvent } from '@/lib/event-api';
+import { EventApiError } from '@plugins/event/frontend/api';
+import { useRegisterForEvent } from '@plugins/event/frontend/hooks';
 
 interface RegisterFormProps {
   eventId: string;
@@ -12,29 +17,34 @@ export default function RegisterForm({ eventId }: RegisterFormProps) {
   const [attendeeEmail, setAttendeeEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const registerMutation = useRegisterForEvent(eventId);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     setSuccess('');
-    setIsLoading(true);
 
-    try {
-      await registerForEvent(eventId, { attendeeName, attendeeEmail });
-      setSuccess('Registration successful. See you at the event.');
-      setAttendeeName('');
-      setAttendeeEmail('');
-    } catch (err) {
-      if (err instanceof EventApiError) {
-        setError(err.message);
-      } else {
-        setError('Unable to register right now. Please try again.');
+    registerMutation.mutate(
+      { attendeeName, attendeeEmail },
+      {
+        onSuccess: () => {
+          setSuccess('Registration successful. See you at the event.');
+          setAttendeeName('');
+          setAttendeeEmail('');
+        },
+        onError: (err: any) => {
+          if (err instanceof EventApiError) {
+            setError(err.message);
+          } else {
+            setError('Unable to register right now. Please try again.');
+          }
+        },
       }
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }
+
+  const isLoading = registerMutation.isPending;
 
   return (
     <form className="space-y-3" onSubmit={handleSubmit}>

@@ -80,9 +80,15 @@ export function createAuthService(authRepository) {
     return toPublicUser(user);
   }
 
+  async function listUsers() {
+    const users = await authRepository.listUsers();
+    return users.map(toPublicUser);
+  }
+
   return {
     createUser,
-    authenticateUser
+    authenticateUser,
+    listUsers
   };
 }
 

@@ -1,4 +1,4 @@
-export function registerAuthRoutes(app, authController) {
+export function registerAuthRoutes(app, authController, requireSuperAdmin) {
   app.post('/api/v1/auth/signup', authController.signup);
   app.post('/api/v1/auth/login', authController.login);
 
@@ -10,6 +10,10 @@ export function registerAuthRoutes(app, authController) {
       }
     });
   });
+
+  if (typeof requireSuperAdmin === 'function') {
+    app.get('/api/v1/users', requireSuperAdmin, authController.listUsers);
+  }
 }
 
 export default registerAuthRoutes;

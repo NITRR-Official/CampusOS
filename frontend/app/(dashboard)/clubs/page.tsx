@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { fetchClubs } from '@/lib/club-api';
+import { fetchClubs } from '@plugins/club/frontend/api';
 import { Users, Building2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ClubsPage() {
-  const clubs = await fetchClubs('active');
+  const clubs = await fetchClubs('approved');
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
@@ -22,10 +22,17 @@ export default async function ClubsPage() {
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground mb-4">
             Discover Your Community
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-muted-foreground mb-8">
             Explore university clubs, join communities that share your passion,
             and take your campus experience to the next level.
           </p>
+          <Link
+            href="/clubs/new"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-95"
+          >
+            <Building2 className="size-4" />
+            Propose a New Club
+          </Link>
         </div>
       </div>
 
@@ -69,7 +76,7 @@ export default async function ClubsPage() {
                   </div>
                   <div className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
                     <span
-                      className={`size-2 rounded-full ${club.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                      className={`size-2 rounded-full ${club.status === 'approved' ? 'bg-emerald-500' : 'bg-amber-500'}`}
                     />
                     <span className="capitalize">{club.status}</span>
                   </div>
@@ -82,3 +89,4 @@ export default async function ClubsPage() {
     </div>
   );
 }
+

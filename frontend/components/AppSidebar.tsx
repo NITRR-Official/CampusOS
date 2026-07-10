@@ -11,7 +11,8 @@ import {
   Ticket,
   CheckSquare,
   Settings,
-  LogOut
+  LogOut,
+  ShieldAlert
 } from 'lucide-react';
 import {
   Sidebar,
@@ -44,7 +45,7 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   // Map string icons back to Lucide components
   const iconMap: Record<string, React.ElementType> = {
@@ -53,7 +54,8 @@ export function AppSidebar({
     Calendar,
     Users,
     Settings,
-    Home
+    Home,
+    ShieldAlert
   };
 
   // Combine core navigation with plugin navigation
@@ -67,6 +69,14 @@ export function AppSidebar({
     }));
 
   const allNavigation = [...navigation, ...pluginLinks];
+
+  if (user?.isSuperAdmin) {
+    allNavigation.push({
+      name: 'Admin Panel',
+      href: '/admin',
+      icon: ShieldAlert
+    });
+  }
 
   return (
     <Sidebar

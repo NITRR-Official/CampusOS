@@ -2,9 +2,14 @@
   "name": "@campus-os/plugin-manager",
   "version": "0.0.1",
   "description": "Super Admin module to manage plugins dynamically",
-  "type": "module",
   "main": "src/index.js",
   "dependencies": {
-    "express": "^5.2.1"
-  }
+    "@tanstack/react-query": "^5.101.2",
+    "express": "^5.2.1",
+    "zod": "^3.25.76"
+  },
+  "peerDependencies": {
+    "lucide-react": "^0.263.1"
+  },
+  "type": "module"
 }

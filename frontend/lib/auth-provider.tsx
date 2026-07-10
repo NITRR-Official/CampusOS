@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import type { AuthResponseData, UserRole } from './auth-api';
+import type { AuthResponseData, UserRole } from '@plugins/auth/frontend/api';
 import {
   clearAuthSession,
   readAuthSession,

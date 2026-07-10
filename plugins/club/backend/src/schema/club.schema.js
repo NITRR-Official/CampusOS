@@ -56,7 +56,7 @@ export function validateCreateClubPayload(payload = {}) {
       description,
       category,
       email,
-      status: 'pending'
+      status: 'pending_verification'
     }
   };
 }

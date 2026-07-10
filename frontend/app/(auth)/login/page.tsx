@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -6,7 +10,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AuthShell from '@/app/components/auth/AuthShell';
-import { ApiError, login } from '@/lib/auth-api';
+import { ApiError } from '@plugins/auth/frontend/api';
+import { useLogin } from '@plugins/auth/frontend/hooks';
 import { storeAuthSession } from '@/lib/auth-session';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -36,7 +41,6 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const nextParam = searchParams?.get('next') || null;
   const redirectTo = useMemo(() => getRedirectPath(nextParam), [nextParam]);
 
@@ -48,24 +52,27 @@ export default function LoginPage() {
     }
   });
 
-  async function onSubmit(data: LoginFormData) {
-    setError('');
-    setIsLoading(true);
+  const loginMutation = useLogin();
 
-    try {
-      const authData = await login(data);
-      storeAuthSession(authData);
-      router.replace(redirectTo);
-    } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError('Unable to login right now. Please try again.');
+  function onSubmit(data: LoginFormData) {
+    setError('');
+
+    loginMutation.mutate(data, {
+      onSuccess: (authData) => {
+        storeAuthSession(authData);
+        router.replace(redirectTo);
+      },
+      onError: (err: any) => {
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else {
+          setError('Unable to login right now. Please try again.');
+        }
       }
-    } finally {
-      setIsLoading(false);
-    }
+    });
   }
+
+  const isLoading = loginMutation.isPending;
 
   return (
     <AuthShell

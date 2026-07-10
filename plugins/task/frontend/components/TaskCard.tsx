@@ -2,16 +2,18 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import {
-  addTaskDependency,
-  assignTask,
-  removeTaskDependency,
   TaskApiError,
   type TaskItem,
   type TaskPriority,
   type TaskStatus,
-  updateTaskPriority,
-  updateTaskStatus
-} from '@/lib/task-api';
+} from '@plugins/task/frontend/api';
+import {
+  useAssignTask,
+  useUpdateTaskStatus,
+  useUpdateTaskPriority,
+  useAddTaskDependency,
+  useRemoveTaskDependency
+} from '../hooks/useTasks';
 
 const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high'];
 const STATUS_OPTIONS: TaskStatus[] = ['todo', 'in-progress', 'done'];
@@ -28,22 +30,31 @@ export interface TaskCardProps {
   task: TaskItem;
   allTasks: TaskItem[];
   accessToken: string;
-  onTaskChange: (task: TaskItem) => void;
-  onTaskError: (message: string) => void;
 }
 
 export function TaskCard({
   task,
   allTasks,
-  accessToken,
-  onTaskChange,
-  onTaskError
+  accessToken
 }: TaskCardProps) {
   const [assigneeName, setAssigneeName] = useState(task.assigneeName || '');
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
   const [selectedDependency, setSelectedDependency] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
+  const [localError, setLocalError] = useState('');
+
+  const assignTaskMutation = useAssignTask();
+  const updateStatusMutation = useUpdateTaskStatus();
+  const updatePriorityMutation = useUpdateTaskPriority();
+  const addDependencyMutation = useAddTaskDependency();
+  const removeDependencyMutation = useRemoveTaskDependency();
+  
+  const isSaving = 
+    assignTaskMutation.isPending || 
+    updateStatusMutation.isPending || 
+    updatePriorityMutation.isPending || 
+    addDependencyMutation.isPending || 
+    removeDependencyMutation.isPending;
 
   useEffect(() => {
     setAssigneeName(task.assigneeName || '');
@@ -57,104 +68,95 @@ export function TaskCard({
 
   const dependencyTasks = allTasks.filter((t) => task.dependsOn.includes(t.id));
 
-  async function handleAssign(event: FormEvent<HTMLFormElement>) {
+  function handleAssign(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setIsSaving(true);
-
-    try {
-      const updatedTask = await assignTask(accessToken, task.id, assigneeName);
-      onTaskChange(updatedTask);
-    } catch (error) {
-      onTaskError(
-        error instanceof TaskApiError
-          ? error.message
-          : 'Unable to reassign task right now.'
-      );
-    } finally {
-      setIsSaving(false);
-    }
+    setLocalError('');
+    assignTaskMutation.mutate(
+      { taskId: task.id, assigneeName },
+      {
+        onError: (error: any) => {
+          setLocalError(
+            error instanceof TaskApiError
+              ? error.message
+              : 'Unable to reassign task right now.'
+          );
+        }
+      }
+    );
   }
 
-  async function handleStatusChange(nextStatus: TaskStatus) {
+  function handleStatusChange(nextStatus: TaskStatus) {
     setStatus(nextStatus);
-
-    try {
-      const updatedTask = await updateTaskStatus(
-        accessToken,
-        task.id,
-        nextStatus
-      );
-      onTaskChange(updatedTask);
-    } catch (error) {
-      setStatus(task.status);
-      onTaskError(
-        error instanceof TaskApiError
-          ? error.message
-          : 'Unable to update status right now.'
-      );
-    }
+    setLocalError('');
+    updateStatusMutation.mutate(
+      { taskId: task.id, status: nextStatus },
+      {
+        onError: (error: any) => {
+          setStatus(task.status);
+          setLocalError(
+            error instanceof TaskApiError
+              ? error.message
+              : 'Unable to update status right now.'
+          );
+        }
+      }
+    );
   }
 
-  async function handlePriorityChange(nextPriority: TaskPriority) {
+  function handlePriorityChange(nextPriority: TaskPriority) {
     setPriority(nextPriority);
-
-    try {
-      const updatedTask = await updateTaskPriority(
-        accessToken,
-        task.id,
-        nextPriority
-      );
-      onTaskChange(updatedTask);
-    } catch (error) {
-      setPriority(task.priority);
-      onTaskError(
-        error instanceof TaskApiError
-          ? error.message
-          : 'Unable to update priority right now.'
-      );
-    }
+    setLocalError('');
+    updatePriorityMutation.mutate(
+      { taskId: task.id, priority: nextPriority },
+      {
+        onError: (error: any) => {
+          setPriority(task.priority);
+          setLocalError(
+            error instanceof TaskApiError
+              ? error.message
+              : 'Unable to update priority right now.'
+          );
+        }
+      }
+    );
   }
 
-  async function handleAddDependency(event: FormEvent<HTMLFormElement>) {
+  function handleAddDependency(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedDependency) return;
 
-    setIsSaving(true);
-
-    try {
-      const updatedTask = await addTaskDependency(
-        accessToken,
-        task.id,
-        selectedDependency
-      );
-      onTaskChange(updatedTask);
-      setSelectedDependency('');
-    } catch (error) {
-      onTaskError(
-        error instanceof TaskApiError
-          ? error.message
-          : 'Unable to add dependency right now.'
-      );
-    } finally {
-      setIsSaving(false);
-    }
+    setLocalError('');
+    addDependencyMutation.mutate(
+      { taskId: task.id, dependencyId: selectedDependency },
+      {
+        onSuccess: () => {
+          setSelectedDependency('');
+        },
+        onError: (error: any) => {
+          setLocalError(
+            error instanceof TaskApiError
+              ? error.message
+              : 'Unable to add dependency right now.'
+          );
+        }
+      }
+    );
   }
 
-  async function handleRemoveDependency(dependencyId: string) {
-    try {
-      const updatedTask = await removeTaskDependency(
-        accessToken,
-        task.id,
-        dependencyId
-      );
-      onTaskChange(updatedTask);
-    } catch (error) {
-      onTaskError(
-        error instanceof TaskApiError
-          ? error.message
-          : 'Unable to remove dependency right now.'
-      );
-    }
+  function handleRemoveDependency(dependencyId: string) {
+    setLocalError('');
+    removeDependencyMutation.mutate(
+      { taskId: task.id, dependencyId },
+      {
+        onError: (error: any) => {
+          setLocalError(
+            error instanceof TaskApiError
+              ? error.message
+              : 'Unable to remove dependency right now.'
+          );
+        }
+      }
+    );
   }
 
   return (
@@ -183,6 +185,12 @@ export function TaskCard({
           {task.description}
         </p>
       ) : null}
+
+      {localError && (
+        <p className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {localError}
+        </p>
+      )}
 
       <dl className="mt-5 grid grid-cols-1 gap-3 text-sm text-muted-foreground sm:grid-cols-2">
         <div>

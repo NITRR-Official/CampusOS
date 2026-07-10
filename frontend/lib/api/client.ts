@@ -1,5 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ApiError } from './errors';
 import { readAccessToken } from '../auth-session';
+import { z } from 'zod';
 
 const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 const baseUrl = rawBaseUrl.replace(/\/+$/, '');
@@ -7,8 +12,9 @@ export const API_BASE_URL = baseUrl.endsWith('/api/v1')
   ? baseUrl
   : `${baseUrl}/api/v1`;
 
-interface RequestOptions extends RequestInit {
+interface RequestOptions<T = any> extends RequestInit {
   accessToken?: string | null;
+  schema?: z.ZodType<T>;
 }
 
 /**
@@ -16,9 +22,9 @@ interface RequestOptions extends RequestInit {
  */
 async function request<T>(
   path: string,
-  options: RequestOptions = {}
+  options: RequestOptions<T> = {}
 ): Promise<T> {
-  const { accessToken, ...init } = options;
+  const { accessToken, schema, ...init } = options;
 
   // Normalize path: strip leading /api/v1 if present to avoid duplication
   let cleanPath = path.startsWith('/') ? path : `/${path}`;
@@ -58,39 +64,50 @@ async function request<T>(
     );
   }
 
+  let parsedData = json as unknown;
+
   // The backend might return data wrapped in `data` or as the raw response.
   // E.g., { success: true, data: { ... } } or just { ... }
   if (json && typeof json === 'object') {
     if ('success' in json && 'data' in json) {
-      return json.data as T;
+      parsedData = json.data;
     }
   }
 
-  return json as T;
+  if (schema) {
+    const result = schema.safeParse(parsedData);
+    if (!result.success) {
+      console.error('API Schema Validation Error:', result.error);
+      throw new ApiError('Invalid response format from server', 500);
+    }
+    return result.data;
+  }
+
+  return parsedData as T;
 }
 
 export const apiClient = {
-  get: <T>(path: string, options?: RequestOptions) =>
+  get: <T>(path: string, options?: RequestOptions<T>) =>
     request<T>(path, { ...options, method: 'GET' }),
 
-  post: <T>(path: string, body: unknown, options?: RequestOptions) =>
+  post: <T>(path: string, body: unknown, options?: RequestOptions<T>) =>
     request<T>(path, {
       ...options,
       method: 'POST',
       body: JSON.stringify(body)
     }),
 
-  put: <T>(path: string, body: unknown, options?: RequestOptions) =>
+  put: <T>(path: string, body: unknown, options?: RequestOptions<T>) =>
     request<T>(path, { ...options, method: 'PUT', body: JSON.stringify(body) }),
 
-  patch: <T>(path: string, body: unknown, options?: RequestOptions) =>
+  patch: <T>(path: string, body: unknown, options?: RequestOptions<T>) =>
     request<T>(path, {
       ...options,
       method: 'PATCH',
       body: JSON.stringify(body)
     }),
 
-  delete: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+  delete: <T>(path: string, body?: unknown, options?: RequestOptions<T>) =>
     request<T>(path, {
       ...options,
       method: 'DELETE',

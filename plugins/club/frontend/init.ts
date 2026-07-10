@@ -9,8 +9,8 @@ import {
 export function initFrontend() {
   registry.registerSidebarLink({
     pluginId: 'club',
-    title: 'Participants',
-    url: '/participants',
+    title: 'Clubs',
+    url: '/clubs',
     icon: 'Users'
   });
 

@@ -1,49 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import budgetAPI from '@/lib/budget-api';
-
-interface BudgetSummary {
-  totalAllocation: number;
-  totalExpenses: number;
-  remaining: number;
-  utilisationPercent: number;
-  expensesByCategory: Record<string, number>;
-  paidExpenses: number;
-  pendingExpenses: number;
-}
+import { useEventBudget, useBudgetSummary } from '@plugins/budget/frontend/hooks';
 
 export default function BudgetPage() {
   const params = useParams();
   const eventId = params.eventId as string;
-  const [summary, setSummary] = useState<BudgetSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadBudget() {
-      try {
-        setLoading(true);
-        const budget = (await budgetAPI.getEventBudget(eventId)) as {
-          id: string;
-        };
-        const budgetSummary = (await budgetAPI.getBudgetSummary(
-          budget.id
-        )) as BudgetSummary;
-        setSummary(budgetSummary);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    }
+  const { data: budget, isLoading: isLoadingBudget, error: budgetError } = useEventBudget(eventId);
+  
+  const { data: summary, isLoading: isLoadingSummary, error: summaryError } = useBudgetSummary(budget?.id || '');
 
-    loadBudget();
-  }, [eventId]);
+  const loading = isLoadingBudget || (budget && isLoadingSummary);
+  const error = budgetError || summaryError;
 
   if (loading) return <div className="p-4">Loading budget...</div>;
-  if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
+  if (error) return <div className="p-4 text-red-600">Error: {error instanceof Error ? error.message : String(error)}</div>;
+  if (!budget) return <div className="p-4">No budget found for this event.</div>;
 
   return (
     <div className="p-6">
@@ -84,14 +57,14 @@ export default function BudgetPage() {
           <div className="mb-6">
             <h2 className="text-xl font-bold mb-4">Expenses by Category</h2>
             <div className="space-y-2">
-              {Object.entries(summary.expensesByCategory).map(
+              {Object.entries(summary.expensesByCategory || {}).map(
                 ([category, amount]) => (
                   <div
                     key={category}
                     className="flex justify-between border p-2 rounded"
                   >
                     <span className="capitalize">{category}</span>
-                    <span className="font-semibold">₹{amount}</span>
+                    <span className="font-semibold">₹{amount as number}</span>
                   </div>
                 )
               )}

@@ -22,9 +22,14 @@ export function createAuthRepository(User) {
     }
   }
 
+  async function listUsers() {
+    return User.find({}).select('-password').lean();
+  }
+
   return {
     findUserByEmail,
     userExists,
-    createUser
+    createUser,
+    listUsers
   };
 }

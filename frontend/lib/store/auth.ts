@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 // Assuming AuthResponseData and UserRole shapes based on auth-api.ts
-import type { AuthResponseData, UserRole } from '@/lib/auth-api';
+import type { AuthResponseData, UserRole } from '@plugins/auth/frontend/api';
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 

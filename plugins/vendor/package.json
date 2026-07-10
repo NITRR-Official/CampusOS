@@ -2,7 +2,6 @@
   "name": "@campus-os/vendor",
   "version": "0.0.1",
   "description": "Vendor module for CampusOS - Event vendor and supplier management",
-  "type": "module",
   "main": "src/index.js",
   "scripts": {
     "test": "vitest run --passWithNoTests"
@@ -17,5 +16,13 @@
   "license": "MIT",
   "devDependencies": {
     "vitest": "^1.0.0"
-  }
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.101.2",
+    "zod": "^3.25.76"
+  },
+  "peerDependencies": {
+    "lucide-react": "^0.263.1"
+  },
+  "type": "module"
 }

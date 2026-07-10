@@ -5,6 +5,7 @@ import {
   validateCreateRolePayload,
   validateUpdateRolePayload
 } from '../schema/club.schema.js';
+import { verificationService } from '../service/verification.service.js';
 
 function createHttpError(status, message, code, details) {
   const error = new Error(message);
@@ -49,11 +50,29 @@ export function createClubController(clubService) {
     }
   }
 
+  async function verifyEmail(req, res, next) {
+    try {
+      const { token } = req.query;
+      if (!token) {
+        return res.status(400).json({ success: false, error: 'Token is required' });
+      }
+
+      await verificationService.verifyEmail(token);
+      
+      // In a real app we might redirect to a frontend success page.
+      // For API purposes, return JSON success.
+      return res.status(200).json({ success: true, message: 'Email successfully verified. Club is now awaiting admin approval.' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async function list(req, res, next) {
     try {
+      const status = req.query.status;
       res
         .status(200)
-        .json({ success: true, data: await clubService.listClubs() });
+        .json({ success: true, data: await clubService.listClubs(status) });
     } catch (err) {
       next(err);
     }
@@ -196,6 +215,50 @@ export function createClubController(clubService) {
     }
   }
 
+  async function update(req, res, next) {
+    const { clubId } = req.params;
+    try {
+      const club = await clubService.updateClub(clubId, req.body, req.user);
+      res.status(200).json({ success: true, data: club });
+    } catch (err) {
+      if (err.code === 'PERMISSION_ESCALATION') {
+        return next(createHttpError(403, err.message, err.code));
+      }
+      next(err);
+    }
+  }
+
+  async function archive(req, res, next) {
+    const { clubId } = req.params;
+    try {
+      const club = await clubService.archiveClub(clubId, req.user);
+      res.status(200).json({ success: true, data: club });
+    } catch (err) {
+      if (err.code === 'OWNER_REQUIRED') {
+        return next(createHttpError(403, err.message, err.code));
+      }
+      next(err);
+    }
+  }
+
+  async function myPermissions(req, res, next) {
+    const { clubId } = req.params;
+    try {
+      if (!req.user) {
+        return res.status(200).json({ success: true, data: { permissions: [], maxHierarchy: -1, isClubAdmin: false } });
+      }
+      
+      const userId = req.user.id || req.user._id;
+      // get context directly from service which includes maxHierarchy and isClubAdmin
+      // Since it's not exported, we can just use getUserPermissions
+      const permissions = await clubService.getUserPermissions(userId, clubId);
+      
+      res.status(200).json({ success: true, data: { permissions, isSuperAdmin: req.user.isSuperAdmin } });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   // ==== ROLE MANAGEMENT ====
 
   async function listRoles(req, res, next) {
@@ -285,7 +348,11 @@ export function createClubController(clubService) {
 
   return {
     create,
+    verifyEmail,
     list,
+    update,
+    archive,
+    myPermissions,
     addMember,
     removeMember,
     assignRole,

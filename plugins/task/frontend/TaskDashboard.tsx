@@ -4,23 +4,19 @@ import Link from 'next/link';
 import { TaskCard } from './components/TaskCard';
 import { CreateTaskForm } from './components/CreateTaskForm';
 import { useTasks } from './hooks/useTasks';
-import type { TaskItem } from '@/lib/task-api';
+import type { TaskItem } from '@plugins/task/frontend/api';
 
 export function TaskDashboard() {
   const {
     accessToken,
     tasks,
-    setTasks,
-    error,
-    setError,
     isLoading,
     taskCounts,
-    handleTaskChange,
-    handleTaskError
   } = useTasks();
 
-  function handleTaskCreated(task: TaskItem) {
-    setTasks((currentTasks) => [task, ...currentTasks]);
+  function handleTaskCreated() {
+    // With React Query, the mutation already invalidates 'tasks'.
+    // We don't need to manually update local state anymore.
   }
 
   return (
@@ -98,14 +94,7 @@ export function TaskDashboard() {
         <div className="flex flex-col gap-4">
           <CreateTaskForm
             accessToken={accessToken || ''}
-            onTaskCreated={handleTaskCreated}
-            onError={setError}
           />
-          {error ? (
-            <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              {error}
-            </p>
-          ) : null}
         </div>
 
         <section className="space-y-4">
@@ -134,8 +123,6 @@ export function TaskDashboard() {
                     task={task}
                     allTasks={tasks}
                     accessToken={accessToken || ''}
-                    onTaskChange={handleTaskChange}
-                    onTaskError={handleTaskError}
                   />
                 ))
               ) : (

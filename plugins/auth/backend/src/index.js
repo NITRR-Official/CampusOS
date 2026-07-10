@@ -13,10 +13,12 @@ export async function init(app, registry, eventBus) {
   const authService = createAuthService(authRepository);
   const authController = createAuthController({ registry, authService });
 
-  registerAuthRoutes(app, authController);
+  const requireSuperAdmin = registry.getService('requireSuperAdmin');
+
+  registerAuthRoutes(app, authController, requireSuperAdmin);
 
   registry.registerModule('auth', {
-    routes: ['/api/v1/auth/signup', '/api/v1/auth/login', '/api/v1/auth/me']
+    routes: ['/api/v1/auth/signup', '/api/v1/auth/login', '/api/v1/auth/me', '/api/v1/users']
   });
 }
 

@@ -90,5 +90,37 @@ export function requirePermissions(...allowedPermissions) {
     }
   };
 }
+export async function requireSuperAdmin(req, res, next) {
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized',
+      message: 'User context missing'
+    });
+  }
+
+  try {
+    const userDoc = await User.findById(req.user.id)
+      .select('isSuperAdmin')
+      .lean();
+    console.log('SuperAdmin Check:', { userId: req.user.id, userDoc });
+    if (userDoc?.isSuperAdmin) {
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      error: 'Forbidden',
+      message: 'Requires Super Admin privileges'
+    });
+  } catch (err) {
+    console.error('Super Admin Guard Error:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+      message: 'Error verifying permissions'
+    });
+  }
+}
 
 export default requirePermissions;
