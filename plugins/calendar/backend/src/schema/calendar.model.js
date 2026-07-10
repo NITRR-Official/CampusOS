@@ -50,4 +50,7 @@ calendarEventSchema.index({ linkedTaskId: 1 });
 calendarEventSchema.index({ linkedEventId: 1 });
 calendarEventSchema.index({ eventType: 1 });
 
-export const CalendarEvent = mongoose.model('CalendarEvent', calendarEventSchema);
+export const CalendarEvent = mongoose.model(
+  'CalendarEvent',
+  calendarEventSchema
+);

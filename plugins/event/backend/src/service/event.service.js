@@ -109,12 +109,12 @@ export function createEventService(eventRepository, eventBus) {
   async function deleteEventsByClub(clubId) {
     const events = await eventRepository.getEventsByClub(clubId);
     let count = 0;
-    
+
     for (const event of events) {
       const deleted = await deleteEvent(event._id || event.id);
       if (deleted) count++;
     }
-    
+
     return count;
   }
 

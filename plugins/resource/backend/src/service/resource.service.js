@@ -371,22 +371,23 @@ export class ResourceService {
       for (const resource of resources) {
         // Find which allocations will be removed to restore availableQuantity
         const removedAllocations = resource.allocations.filter(
-          (allocation) => allocation.eventId === eventId && allocation.status !== 'returned'
+          (allocation) =>
+            allocation.eventId === eventId && allocation.status !== 'returned'
         );
 
         // Restore available quantity for allocations that weren't returned
         const quantityToRestore = removedAllocations.reduce(
-          (total, allocation) => total + allocation.allocatedQuantity, 
+          (total, allocation) => total + allocation.allocatedQuantity,
           0
         );
-        
+
         resource.availableQuantity += quantityToRestore;
 
         // Remove the allocations
         resource.allocations = resource.allocations.filter(
           (allocation) => allocation.eventId !== eventId
         );
-        
+
         await resource.save();
       }
 

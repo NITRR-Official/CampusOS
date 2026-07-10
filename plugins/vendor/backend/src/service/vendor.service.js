@@ -290,7 +290,7 @@ export class VendorService {
         vendor.assignments = vendor.assignments.filter(
           (assignment) => assignment.eventId !== eventId
         );
-        
+
         await vendorRepository.saveDocument(vendor);
       }
 

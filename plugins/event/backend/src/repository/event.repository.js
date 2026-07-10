@@ -5,7 +5,9 @@ export function createEventRepository() {
     if (eventData.id) {
       // Update existing
       const { id, ...updateData } = eventData;
-      return Event.findByIdAndUpdate(id, updateData, { new: true }).lean().exec();
+      return Event.findByIdAndUpdate(id, updateData, { new: true })
+        .lean()
+        .exec();
     }
     // Create new
     const event = new Event(eventData);

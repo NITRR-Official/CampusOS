@@ -133,11 +133,11 @@ export function createClubService(clubRepository, eventBus) {
     }
 
     const club = await clubRepository.updateClubStatus(clubId, 'archived');
-    
+
     if (eventBus && club) {
       eventBus.emit('club:archived', { clubId });
     }
-    
+
     return serializeClub(club);
   }
 
@@ -154,11 +154,11 @@ export function createClubService(clubRepository, eventBus) {
     }
 
     const deleted = await clubRepository.deleteClub(clubId);
-    
+
     if (deleted && eventBus) {
       eventBus.emit('club:deleted', { clubId });
     }
-    
+
     return deleted;
   }
 
