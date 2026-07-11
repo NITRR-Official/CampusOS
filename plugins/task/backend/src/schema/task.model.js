@@ -38,7 +38,13 @@ const taskSchema = new mongoose.Schema(
     createdBy: {
       type: String,
       required: true
-    }
+    },
+    dependsOn: [
+      {
+        type: String,
+        ref: 'Task'
+      }
+    ]
   },
   {
     timestamps: true,

@@ -16,12 +16,10 @@ export function createCheckInService(checkInRepository) {
       return { success: false, error: 'eventId and userId are required' };
     }
 
-    const id = crypto.randomUUID();
     const qrCode = crypto.randomBytes(16).toString('hex');
     const now = new Date();
 
     const checkIn = {
-      id,
       eventId,
       userId,
       qrCode,
@@ -31,8 +29,8 @@ export function createCheckInService(checkInRepository) {
       updatedAt: now
     };
 
-    await checkInRepository.saveCheckIn(checkIn);
-    return { success: true, checkIn };
+    const savedCheckIn = await checkInRepository.saveCheckIn(checkIn);
+    return { success: true, checkIn: savedCheckIn };
   }
 
   /**
@@ -91,8 +89,8 @@ export function createCheckInService(checkInRepository) {
     checkIn.checkedInAt = new Date();
     checkIn.updatedAt = new Date();
 
-    await checkInRepository.saveCheckIn(checkIn);
-    return { success: true, checkIn };
+    const updatedCheckIn = await checkInRepository.saveCheckIn(checkIn);
+    return { success: true, checkIn: updatedCheckIn };
   }
 
   /**

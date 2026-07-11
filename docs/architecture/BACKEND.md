@@ -172,6 +172,15 @@ Default URI: `mongodb://localhost:27017/campusos`
 
 Exports: `connectDB()`, `disconnectDB()`, `healthCheck()`, `isDBConnected()`
 
+## Testing Strategy
+
+Testing in the CampusOS backend is executed using **Vitest** paired with **MongoDB Memory Server**.
+
+1. **In-Memory Database**: Tests instantiate a fresh MongoDB Memory Server instance. This eliminates the need for Docker or external databases for testing, and ensures accurate execution of Mongoose models, validation hooks, and compound indexes.
+2. **Isolation**: Tests are isolated per-plugin. Each test suite typically handles its own `connectDB` and `disconnectDB` lifecycle using the memory server URI.
+3. **Mongoose Best Practices**: The tests enforce modern Mongoose standards, heavily relying on `{ returnDocument: 'after' }` in `findOneAndUpdate` calls rather than the deprecated `{ new: true }` option.
+4. **Execution**: To run tests across all backend plugins, run `pnpm test` from the workspace root or `pnpm -C plugins/<name> test` to test a specific plugin.
+
 ---
 
 **See Also**: [Plugin System](./PLUGIN_SYSTEM.md) · [Architecture Overview](./OVERVIEW.md) · [Database Setup](../getting-started/DATABASE_SETUP.md)

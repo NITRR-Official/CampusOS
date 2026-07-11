@@ -17,7 +17,11 @@ export const createTimeSlotSchemaBase = z
     allocatedResources: z
       .array(
         z.object({
-          resourceId: z.string().trim().min(1, 'Resource ID is required'),
+          resourceId: z
+            .string()
+            .trim()
+            .min(1, 'Resource ID is required')
+            .max(50, 'Resource ID must be 50 characters or fewer'),
           quantity: z.number().int().min(1, 'Quantity must be at least 1')
         })
       )

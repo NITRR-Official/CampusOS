@@ -7,7 +7,12 @@ export const signupSchema = z
       .trim()
       .min(2, 'Name must be between 2 and 80 characters')
       .max(80, 'Name must be between 2 and 80 characters'),
-    email: z.string().trim().toLowerCase().email('Email must be valid'),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(255, 'Email must be 255 characters or fewer')
+      .email('Email must be valid'),
     password: z
       .string()
       .min(8, 'Password must be between 8 and 128 characters')
@@ -17,7 +22,12 @@ export const signupSchema = z
 
 export const loginSchema = z
   .object({
-    email: z.string().trim().toLowerCase().email('Email must be valid'),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .max(255, 'Email must be 255 characters or fewer')
+      .email('Email must be valid'),
     password: z.string().min(1, 'Password is required')
   })
   .strict();

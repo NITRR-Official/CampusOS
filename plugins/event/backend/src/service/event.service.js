@@ -3,7 +3,6 @@ import crypto from 'node:crypto';
 export function createEventService(eventRepository, eventBus) {
   async function createEvent(payload) {
     const event = {
-      id: crypto.randomUUID(),
       title: payload.title,
       description: payload.description || null,
       instituteId: payload.instituteId,
@@ -19,8 +18,8 @@ export function createEventService(eventRepository, eventBus) {
       updatedAt: new Date().toISOString()
     };
 
-    await eventRepository.saveEvent(event);
-    return event;
+    const savedEvent = await eventRepository.saveEvent(event);
+    return savedEvent;
   }
 
   async function updateEvent(eventId, updates) {
@@ -63,13 +62,6 @@ export function createEventService(eventRepository, eventBus) {
       return { type: 'EVENT_NOT_FOUND' };
     }
 
-    if (
-      event.capacity !== null &&
-      event.registrations.length >= event.capacity
-    ) {
-      return { type: 'EVENT_CAPACITY_REACHED' };
-    }
-
     const existing = event.registrations.find(
       (registration) =>
         registration.attendeeEmail === registrationPayload.attendeeEmail
@@ -77,6 +69,13 @@ export function createEventService(eventRepository, eventBus) {
 
     if (existing) {
       return { type: 'ALREADY_REGISTERED' };
+    }
+
+    if (
+      event.capacity !== null &&
+      event.registrations.length >= event.capacity
+    ) {
+      return { type: 'EVENT_CAPACITY_REACHED' };
     }
 
     const registration = {

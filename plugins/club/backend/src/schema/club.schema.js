@@ -10,39 +10,66 @@ export const createClubSchema = z
       .trim()
       .min(3, 'Name must be between 3 and 120 characters')
       .max(120, 'Name must be between 3 and 120 characters'),
-    instituteId: z.string().trim().min(1, 'Institute ID is required'),
+    instituteId: z
+      .string()
+      .trim()
+      .min(1, 'Institute ID is required')
+      .max(50, 'Institute ID must be 50 characters or fewer'),
     description: z
       .string()
       .trim()
       .max(1000, 'Description must be 1000 characters or fewer')
       .optional()
       .default(''),
-    category: z.string().trim().min(1, 'Category is required'),
+    category: z
+      .string()
+      .trim()
+      .min(1, 'Category is required')
+      .max(100, 'Category must be 100 characters or fewer'),
     email: z
       .string()
       .trim()
       .toLowerCase()
       .email('Valid official club email is required')
+      .max(255, 'Email must be 255 characters or fewer')
   })
   .strict()
   .transform((data) => ({ ...data, status: 'pending_verification' }));
 
 export const addMemberSchema = z
   .object({
-    userId: z.string().trim().min(1, 'User ID is required'),
+    userId: z
+      .string()
+      .trim()
+      .min(1, 'User ID is required')
+      .max(50, 'User ID must be 50 characters or fewer'),
     name: z
       .string()
       .trim()
       .min(2, 'Name must be between 2 and 80 characters')
       .max(80, 'Name must be between 2 and 80 characters'),
-    email: z.string().trim().toLowerCase().email('Valid email is required'),
-    role: z.string().trim().min(1, 'Role is required').default('volunteer')
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email('Valid email is required')
+      .max(255, 'Email must be 255 characters or fewer'),
+    role: z
+      .string()
+      .trim()
+      .min(1, 'Role is required')
+      .max(50, 'Role must be 50 characters or fewer')
+      .default('volunteer')
   })
   .strict();
 
 export const assignRoleSchema = z
   .object({
-    role: z.string().trim().min(1, 'Role is required')
+    role: z
+      .string()
+      .trim()
+      .min(1, 'Role is required')
+      .max(50, 'Role must be 50 characters or fewer')
   })
   .strict();
 

@@ -4,12 +4,15 @@
   "description": "Super Admin module to manage plugins dynamically",
   "main": "src/index.js",
   "dependencies": {
-    "@tanstack/react-query": "^5.101.2",
     "express": "^5.2.1",
     "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "lucide-react": "^0.263.1"
+    "lucide-react": "*",
+    "@tanstack/react-query": "^5.101.2"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  }
 }

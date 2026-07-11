@@ -29,20 +29,28 @@ class TaskService {
     return Task.findByIdAndUpdate(
       taskId,
       { assigneeName: payload.assigneeName },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .lean()
       .exec();
   }
 
   async updateStatus(taskId, status) {
-    return Task.findByIdAndUpdate(taskId, { status }, { new: true })
+    return Task.findByIdAndUpdate(
+      taskId,
+      { status },
+      { returnDocument: 'after' }
+    )
       .lean()
       .exec();
   }
 
   async updatePriority(taskId, priority) {
-    return Task.findByIdAndUpdate(taskId, { priority }, { new: true })
+    return Task.findByIdAndUpdate(
+      taskId,
+      { priority },
+      { returnDocument: 'after' }
+    )
       .lean()
       .exec();
   }
@@ -112,7 +120,7 @@ class TaskService {
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       { $push: { dependsOn: dependencyId } },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .lean()
       .exec();
@@ -134,7 +142,7 @@ class TaskService {
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       { $pull: { dependsOn: dependencyId } },
-      { new: true }
+      { returnDocument: 'after' }
     )
       .lean()
       .exec();

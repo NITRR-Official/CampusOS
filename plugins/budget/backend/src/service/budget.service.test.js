@@ -5,7 +5,7 @@ import {
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
 
-import { Budget, Expense } from '../schema/budget.schema.js';
+import { Budget, Expense } from '../schema/budget.model.js';
 import { BudgetService } from './budget.service.js';
 
 describe('BudgetService', () => {

@@ -4,7 +4,7 @@
   "private": true,
   "main": "backend/index.ts",
   "peerDependencies": {
-    "lucide-react": "^0.474.0"
+    "lucide-react": "*"
   },
   "type": "module"
 }

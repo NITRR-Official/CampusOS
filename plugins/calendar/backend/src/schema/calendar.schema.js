@@ -26,8 +26,18 @@ export const createCalendarEventSchema = z
       .max(1000, 'Description must be 1000 characters or fewer')
       .optional()
       .nullable(),
-    linkedTaskId: z.string().trim().optional().nullable(),
-    linkedEventId: z.string().trim().optional().nullable()
+    linkedTaskId: z
+      .string()
+      .trim()
+      .max(50, 'Linked Task ID must be 50 characters or fewer')
+      .optional()
+      .nullable(),
+    linkedEventId: z
+      .string()
+      .trim()
+      .max(50, 'Linked Event ID must be 50 characters or fewer')
+      .optional()
+      .nullable()
   })
   .strict()
   .refine(

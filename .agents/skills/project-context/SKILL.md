@@ -24,10 +24,13 @@ We are in the middle of a major migration from in-memory repositories to MongoDB
 - Enforced strict ServiceRegistry usage; removed cross-plugin file imports.
 - Re-added database compound indexes (especially on foreign keys like `instituteId`, `clubId`, `eventId`) for performance.
 - Implemented global cascade delete enforcement via EventBus (`club:deleted`, `event:deleted`, `user:deleted`).
+- Set up automated testing using Vitest and MongoDB Memory Server, completing backend testing for all plugins (Auth, Budget, Calendar, Checkin, Club, Event, Institute, Plugin-Manager, Resource, Scheduling, Task, Vendor).
+- Implemented global cascade delete enforcement via EventBus (`club:deleted`, `event:deleted`, `user:deleted`).
+- **Step 4: Standardized Error Handling & Security**: Audited and standardized all backend schemas to use strict Zod parsing with `.max()` bounds for security (e.g. emails, IDs, categories) to prevent payload attacks. Configured universal global error middleware to trap and return clean `ZodError` formats as `400 Bad Request`.
+- **Step 5: Frontend React Query Integration**: Fully integrated the frontend with React Query using standardized `apiClient` fetching and explicit Zod parsing of server responses. All legacy `useEffect` fetching logic has been eliminated across all frontend plugins in favor of `useQuery` and `useMutation`.
 
 ### Remaining (Next Steps):
-- **Step 4: Standardized Error Handling**: Audit and standardize `catch` blocks in controllers to use Zod error formatting and consistent HTTP status codes.
-- **Step 5: Frontend React Query Integration**: Fully integrate the frontend using React Query and standardize API client usage to consume the refactored endpoints.
+- **Feature Work**: The architectural migration (Mongoose + React Query + Strict Zod Validation) is fully complete. The project is now stable, and ready for whatever new features or plugins need to be developed!
 
 ## Documentation
 - **Architecture Decisions**: See `docs/architecture/decisions/` (ADRs) for historical and recent architectural decisions. ADR-009 details the frontend decoupling strategy.

@@ -3,7 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
-import { Conflict, TimeSlot } from '../schema/scheduling.schema.js';
+import { Conflict, TimeSlot } from '../schema/scheduling.model.js';
 import { SchedulingService } from './scheduling.service.js';
 
 describe('SchedulingService', () => {

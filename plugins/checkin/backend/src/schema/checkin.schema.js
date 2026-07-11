@@ -2,7 +2,11 @@ import { z } from 'zod';
 
 export const createCheckInSchema = z
   .object({
-    userId: z.string().trim().min(1, 'userId is required')
+    userId: z
+      .string()
+      .trim()
+      .min(1, 'userId is required')
+      .max(50, 'userId must be 50 characters or fewer')
   })
   .strict();
 

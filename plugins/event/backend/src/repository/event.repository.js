@@ -2,10 +2,14 @@ import { Event } from '../schema/event.model.js';
 
 export function createEventRepository() {
   async function saveEvent(eventData) {
-    if (eventData.id) {
+    const eventId = eventData.id || eventData._id;
+    if (eventId) {
       // Update existing
-      const { id, ...updateData } = eventData;
-      return Event.findByIdAndUpdate(id, updateData, { new: true })
+      const { id, _id, ...updateData } = eventData;
+      return Event.findByIdAndUpdate(eventId, updateData, {
+        new: true,
+        returnDocument: 'after'
+      })
         .lean()
         .exec();
     }

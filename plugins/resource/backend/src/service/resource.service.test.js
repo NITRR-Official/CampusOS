@@ -3,7 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
-import { Resource } from '../schema/resource.schema.js';
+import { Resource } from '../schema/resource.model.js';
 import { ResourceService } from './resource.service.js';
 
 describe('ResourceService', () => {

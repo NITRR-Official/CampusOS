@@ -3,7 +3,7 @@ import {
   connectDB,
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
-import { Vendor } from '../schema/vendor.schema.js';
+import { Vendor } from '../schema/vendor.model.js';
 import { VendorService } from './vendor.service.js';
 
 describe('VendorService', () => {

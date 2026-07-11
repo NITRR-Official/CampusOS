@@ -27,6 +27,10 @@ const instituteSchema = new mongoose.Schema(
       type: String,
       default: null,
       trim: true
+    },
+    createdBy: {
+      type: String,
+      required: true
     }
   },
   {

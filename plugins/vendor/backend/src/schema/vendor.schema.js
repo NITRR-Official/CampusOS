@@ -7,13 +7,22 @@ export const createVendorSchema = z
       .trim()
       .min(2, 'Name must be at least 2 characters')
       .max(150, 'Name must be 150 characters or fewer'),
-    category: z.string().trim().min(1, 'Category is required'),
+    category: z
+      .string()
+      .trim()
+      .min(1, 'Category is required')
+      .max(100, 'Category must be 100 characters or fewer'),
     contactPerson: z
       .string()
       .trim()
       .min(2, 'Contact person must be at least 2 characters')
       .max(100, 'Contact person must be 100 characters or fewer'),
-    email: z.string().trim().toLowerCase().email('Valid email is required'),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email('Valid email is required')
+      .max(255, 'Email must be 255 characters or fewer'),
     phone: z
       .string()
       .trim()

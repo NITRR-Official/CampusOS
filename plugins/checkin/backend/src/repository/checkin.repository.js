@@ -2,10 +2,14 @@ import { CheckIn } from '../schema/checkin.model.js';
 
 export function createCheckInRepository() {
   async function saveCheckIn(checkInData) {
-    if (checkInData.id) {
+    const checkInId = checkInData.id || checkInData._id;
+    if (checkInId) {
       // Update existing
-      const { id, ...updateData } = checkInData;
-      return CheckIn.findByIdAndUpdate(id, updateData, { new: true })
+      const { id, _id, ...updateData } = checkInData;
+      return CheckIn.findByIdAndUpdate(checkInId, updateData, {
+        new: true,
+        returnDocument: 'after'
+      })
         .lean()
         .exec();
     }

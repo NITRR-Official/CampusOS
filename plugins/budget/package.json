@@ -18,11 +18,11 @@
     "vitest": "^1.0.0"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.101.2",
     "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "lucide-react": "^0.263.1"
+    "lucide-react": "*",
+    "@tanstack/react-query": "^5.101.2"
   },
   "type": "module"
 }

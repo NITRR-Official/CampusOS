@@ -44,6 +44,10 @@ const eventSchema = new mongoose.Schema(
       type: String,
       enum: ['draft', 'published'],
       default: 'draft'
+    },
+    registrations: {
+      type: Array,
+      default: []
     }
   },
   {

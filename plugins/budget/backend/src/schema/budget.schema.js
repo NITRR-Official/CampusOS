@@ -44,7 +44,11 @@ export const updateBudgetSchema = createBudgetSchema.partial().strict();
 
 export const approveBudgetSchema = z
   .object({
-    userId: z.string().trim().min(1, 'userId is required')
+    userId: z
+      .string()
+      .trim()
+      .min(1, 'userId is required')
+      .max(50, 'userId must be 50 characters or fewer')
   })
   .strict();
 
@@ -72,7 +76,12 @@ export const logExpenseSchema = z
       .max(50, 'Payment method cannot exceed 50 characters')
       .optional()
       .default('pending'),
-    receipt: z.string().trim().url('Receipt must be a valid URL').optional(),
+    receipt: z
+      .string()
+      .trim()
+      .url('Receipt must be a valid URL')
+      .max(1000, 'Receipt URL must be 1000 characters or fewer')
+      .optional(),
     notes: z
       .string()
       .trim()

@@ -35,7 +35,7 @@ export class PluginService {
       const result = await Plugin.findOneAndUpdate(
         { name: pluginName },
         { enabled },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!result) {
