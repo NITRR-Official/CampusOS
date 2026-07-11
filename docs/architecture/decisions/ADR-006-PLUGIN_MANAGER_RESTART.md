@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-CampusOS is built on a highly modular plugin system where features (Auth, Vendor, Task, etc.) are separated into isolated directories under `/apps/`.
+CampusOS is built on a highly modular plugin system where features (Auth, Vendor, Task, etc.) are separated into isolated directories under `/plugins/`.
 
 As the platform evolves, there is a desire to introduce a "Super Admin Dashboard" capable of installing, enabling, and disabling plugins dynamically. Initial discussions explored mimicking VS Code's "Extension Host" architecture (using Worker Threads for true runtime hot-swapping).
 

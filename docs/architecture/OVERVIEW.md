@@ -16,7 +16,7 @@ flowchart TD
         p2[CORS]
         p3[Logger]
         p4["Auth (JWT)"]
-        p5["Plugin Loader<br/><small>(Reads plugins.json)</small>"] -.-> scan["Scans /apps/<br/>and loads active modules"]
+        p5["Plugin Loader<br/><small>(Reads plugins.json)</small>"] -.-> scan["Scans /plugins/<br/>and loads active modules"]
         p6[404 handler]
         p7[Error handler]
     end
@@ -34,16 +34,16 @@ flowchart TD
         G["Sponsorship · Marketing"]
     end
     subgraph L4 ["4. Operations Layer"]
-        O["Vendor · Resource · Scheduling · Budget<br/>(apps/vendor, resource, scheduling, budget)"]
+        O["Vendor · Resource · Scheduling · Budget<br/>(plugins/vendor, resource, scheduling, budget)"]
     end
     subgraph L3 ["3. Execution Layer"]
-        E["Task · Calendar<br/>(apps/task, calendar)"]
+        E["Task · Calendar<br/>(plugins/task, calendar)"]
     end
     subgraph L2 ["2. Event Layer"]
-        Ev["Event · Check-in<br/>(apps/event, checkin)"]
+        Ev["Event · Check-in<br/>(plugins/event, checkin)"]
     end
     subgraph L1 ["1. Foundation Layer"]
-        F["Auth · Club · Institute<br/>(apps/auth, club, institute)"]
+        F["Auth · Club · Institute<br/>(plugins/auth, club, institute)"]
     end
 
     L5 --> L4
@@ -54,23 +54,23 @@ flowchart TD
 
 ### What's in each layer
 
-| Layer          | Modules                                      | What it handles                                                                | Storage   |
-| -------------- | -------------------------------------------- | ------------------------------------------------------------------------------ | --------- |
-| **Foundation** | `auth`, `club`, `institute`                  | User accounts, JWT auth, RBAC, org structure                                   | Mixed\*   |
-| **Event**      | `event`, `checkin`                           | Event CRUD, RSVP/registration, QR check-in                                     | In-memory |
-| **Execution**  | `task`, `calendar`                           | Task assignment, dependencies, deadlines                                       | In-memory |
-| **Operations** | `vendor`, `resource`, `scheduling`, `budget` | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB   |
-| **Growth**     | _(not yet built)_                            | Sponsorship, marketing, analytics                                              | —         |
+| Layer          | Modules                                      | What it handles                                                                | Storage |
+| -------------- | -------------------------------------------- | ------------------------------------------------------------------------------ | ------- |
+| **Foundation** | `auth`, `club`, `institute`                  | User accounts, JWT auth, RBAC, org structure                                   | MongoDB |
+| **Event**      | `event`, `checkin`                           | Event CRUD, RSVP/registration, QR check-in                                     | MongoDB |
+| **Execution**  | `task`, `calendar`                           | Task assignment, dependencies, deadlines                                       | MongoDB |
+| **Operations** | `vendor`, `resource`, `scheduling`, `budget` | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB |
+| **Growth**     | _(not yet built)_                            | Sponsorship, marketing, analytics                                              | —       |
 
-\* `auth` uses MongoDB (User schema), `club` and `institute` use in-memory storage.
+- `auth`, `club`, and `institute` all use MongoDB for storage.
 
-> **Important**: MongoDB is required to run the server — `connectDB()` runs at startup and the process exits if it fails. However, some modules (Event, Task, Calendar, Club, Institute) store their data in-memory using `Map` objects instead of MongoDB collections. This means data in those modules is lost on server restart. Operations layer modules (Vendor, Resource, Scheduling, Budget) use MongoDB with Mongoose.
+> **Important**: MongoDB is required to run the server - `connectDB()` runs at startup and the process exits if it fails. All modules (Auth, Event, Task, Calendar, Club, Institute, Vendor, Resource, Scheduling, Budget) are backed by MongoDB with Mongoose. The legacy in-memory Map storage has been completely deprecated.
 
 ## Core Principles
 
 ### 1. Every feature is a plugin
 
-All feature code lives in `/apps/<module>/`. The backend core (`backend/src/`) only handles:
+All feature code lives in `/plugins/<module>/`. The backend core (`backend/src/`) only handles:
 
 - Server lifecycle
 - Middleware pipeline
@@ -108,7 +108,7 @@ Don't build "all services first, then all controllers." This catches integration
 
 ## Non-Negotiable Rules
 
-1. **Feature code goes in `/apps/`** — Not in `backend/src/`
+1. **Feature code goes in `/plugins/`** — Not in `backend/src/`
 2. **No direct module imports** — Use the registry or database
 3. **Controllers are thin** — Business logic belongs in services
 4. **Every module exports `init(app, registry)`** — That's the plugin contract
@@ -118,7 +118,7 @@ Don't build "all services first, then all controllers." This catches integration
 
 Ask these questions:
 
-1. Can this be built as a self-contained module in `/apps/`? → If yes, do that.
+1. Can this be built as a self-contained module in `/plugins/`? → If yes, do that.
 2. Does this need to import another module directly? → If yes, use the registry instead.
 3. Is this business logic in a controller? → Move it to a service.
 4. Is this a cross-cutting concern (logging, auth, error handling)? → Put it in `backend/src/middleware/`.

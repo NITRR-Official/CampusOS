@@ -9,7 +9,7 @@ Foundational (applies to entire project)
 ### 1. Everything is Modular
 
 - Every feature is a module
-- Modules live in `/apps/`
+- Modules live in `/plugins/`
 - Modules are self-contained and independent
 - No module directly depends on another module
 

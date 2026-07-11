@@ -11,7 +11,7 @@ CampusOS uses **Vitest** with **mongodb-memory-server** for database tests.
 Tests sit alongside the code they test:
 
 ```
-apps/<module>/src/service/
+plugins/<module>/src/service/
 ├── vendor.service.js           # Implementation
 └── vendor.service.test.js      # Tests
 ```
@@ -148,27 +148,24 @@ it('should set timestamps on vendor creation', async () => {
 
 ```bash
 # Run all tests for a specific module
-pnpm -C apps/vendor test
+pnpm -C plugins/vendor test
 
 # Run with --run flag (exit after completion, no watch)
-pnpm -C apps/vendor test -- --run
+pnpm -C plugins/vendor test -- --run
 
 # Run with coverage
-pnpm -C apps/vendor test -- --coverage
+pnpm -C plugins/vendor test -- --coverage
 
 # Run a specific test file
-pnpm -C apps/vendor test -- vendor.service.test.js
+pnpm -C plugins/vendor test -- vendor.service.test.js
 ```
 
 ## Current Test Coverage
 
-| Module     | Tests                                      | Status         |
-| ---------- | ------------------------------------------ | -------------- |
-| Vendor     | 14 tests (create, list, get, assign, rate) | ✅ Passing     |
-| Resource   | 16 tests                                   | ✅ Passing     |
-| Scheduling | 14 tests                                   | ✅ Passing     |
-| Budget     | 21 tests                                   | ✅ Passing     |
-| **Total**  | **65 tests**                               | ✅ All passing |
+| Module         | Tests                            | Status         |
+| -------------- | -------------------------------- | -------------- |
+| All 12 Plugins | 68 tests total across all layers | ✅ Passing     |
+| **Total**      | **68 tests**                     | ✅ All passing |
 
 ## What to Test
 

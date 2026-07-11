@@ -124,7 +124,7 @@ See [Environment Variables](./ENVIRONMENT.md) for all options.
 | expenses   | Budget     | Tracked expenses        |
 
 > [!NOTE]
-> Some modules (Club, Institute, Event, Check-in, Task, Calendar) currently store data in-memory using `Map()` objects. Their data is lost on server restart. Operations modules (Vendor, Resource, Scheduling, Budget) and Auth use MongoDB.
+> All modules (Auth, Club, Institute, Event, Check-in, Task, Calendar, Vendor, Resource, Scheduling, Budget) are now backed by MongoDB. The legacy in-memory `Map()` storage has been fully deprecated.
 
 ## Backups
 

@@ -4,13 +4,13 @@ Code patterns and rules enforced in CampusOS, derived from the actual codebase.
 
 ## Module Rules
 
-### 1. All features go in `/apps/`
+### 1. All features go in `/plugins/`
 
 ```
-apps/auth/        apps/club/       apps/institute/
-apps/event/       apps/checkin/    apps/task/
-apps/calendar/    apps/vendor/     apps/resource/
-apps/scheduling/  apps/budget/
+plugins/auth/        plugins/club/       plugins/institute/
+plugins/event/       plugins/checkin/    plugins/task/
+plugins/calendar/    plugins/vendor/     plugins/resource/
+plugins/scheduling/  plugins/budget/
 ```
 
 Backend core (`backend/src/`) only handles middleware, plugin loading, and the service registry.
@@ -18,7 +18,7 @@ Backend core (`backend/src/`) only handles middleware, plugin loading, and the s
 ### 2. Every module exports `init(app, registry)`
 
 ```javascript
-// apps/my-module/src/index.js
+// plugins/my-module/src/index.js
 export async function init(app, registry) {
   const requireRoles = registry.getService('requireRoles');
   registerRoutes(app, requireRoles);
@@ -39,7 +39,7 @@ const requireRoles = registry.getService('requireRoles');
 ### 4. Module directory layout
 
 ```
-apps/<module>/src/
+plugins/<module>/src/
 ├── index.js              # Plugin entry (exports init)
 ├── controller/           # HTTP handlers (thin)
 ├── routes/               # Express route definitions
@@ -197,7 +197,7 @@ const loginSchema = z.object({
 
 - **pnpm only** — never use `npm` or `yarn`
 - Install from root: `pnpm install`
-- Module-specific: `pnpm -C apps/vendor add <package>`
+- Module-specific: `pnpm -C plugins/vendor add <package>`
 - Dev dependencies: `pnpm add -D <package>`
 
 ## Git Conventions

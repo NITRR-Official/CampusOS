@@ -1,34 +1,82 @@
 # API Client & State
 
-When writing frontend components inside `plugins/*/frontend`, you will often need to communicate with the Express routes you wrote in `plugins/*/backend`.
+CampusOS utilizes a strictly typed, schema-validated fetching pattern for the frontend.
 
-CampusOS uses standard fetch clients or library wrappers (like Axios) configured with interceptors.
+## The Global API Client
 
-## Making API Calls
+Do **not** use raw `fetch()` or `axios`. CampusOS provides a unified wrapper around native `fetch` located at `frontend/lib/api/client.ts`. This client handles:
 
-You can make API requests directly to your backend plugin's Express endpoints. Because everything is hosted under the same domain, relative paths work perfectly.
+- Base URL resolution
+- Authentication token injection (Bearer headers)
+- Standardized error handling and throwing
+- **Zod Schema Validation** (Type-safe responses)
+
+### Zod Validation
+
+Whenever you fetch data, you must provide a Zod schema to validate the response payload. This ensures that the frontend fails safely if the backend contract changes unexpectedly.
 
 ```typescript
-import { useEffect, useState } from 'react';
+import { z } from 'zod';
+import { apiClient } from '@/lib/api/client';
 
-export function ApplicationList({ clubId }: { clubId: string }) {
-  const [apps, setApps] = useState([]);
+const UserSchema = z.object({
+  id: z.string(),
+  name: z.string()
+});
 
-  useEffect(() => {
-    // This hits the Express route you defined in backend/src/index.js
-    fetch(`/api/v1/recruitment/clubs/${clubId}/applications`)
-      .then(res => res.json())
-      .then(data => setApps(data.applications));
-  }, [clubId]);
+// apiClient.get will parse the response against UserSchema
+export const fetchUsers = () =>
+  apiClient.get('/api/v1/users', { schema: z.array(UserSchema) });
+```
+
+## React Query & Hooks
+
+Frontend components should never manually manage loading states or `useEffect` for fetching. We use **React Query**.
+
+Every plugin exports its custom hooks from `plugins/<module>/frontend/hooks.ts`:
+
+```typescript
+// plugins/auth/frontend/hooks.ts
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { fetchUsers, loginUser } from './api';
+
+export function useUsers() {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers
+  });
+}
+
+export function useLogin() {
+  return useMutation({
+    mutationFn: loginUser
+  });
+}
+```
+
+Components simply consume these hooks:
+
+```tsx
+import { useUsers } from '../hooks';
+
+export function UserList() {
+  const { data: users, isLoading, error } = useUsers();
+
+  if (isLoading) return <Spinner />;
+  if (error) return <ErrorMessage error={error} />;
 
   return (
     <ul>
-      {apps.map(app => <li key={app.id}>{app.name}</li>)}
+      {users.map((user) => (
+        <li key={user.id}>{user.name}</li>
+      ))}
     </ul>
   );
 }
 ```
 
-## Styling
+## Styling & Transpilation
 
-CampusOS uses Tailwind CSS. You can use any standard Tailwind classes inside your components. The Next.js build system will automatically scan your `plugins/*/frontend` folders and compile the required CSS.
+CampusOS uses Tailwind CSS. Because plugins live outside the `frontend/` Next.js root, they must be explicitly transpiled.
+
+The `frontend/next.config.ts` dynamically scans the `plugins/` directory and injects every plugin into the `transpilePackages` array automatically. All you have to do is build your component and it will just work!

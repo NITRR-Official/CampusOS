@@ -2,12 +2,143 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import AdmZip from 'adm-zip';
+import { execSync } from 'child_process';
+import os from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PLUGINS_DIR = path.join(__dirname, '../plugins');
 const REGISTRY_FILE = path.join(__dirname, '../frontend/lib/plugins/init.ts');
+const FRONTEND_APP_DIR = path.join(__dirname, '../frontend/app/(dashboard)');
+
+function generateNextjsWrapper(pluginName) {
+  const pluginFrontendPagesDir = path.join(
+    PLUGINS_DIR,
+    pluginName,
+    'frontend',
+    'pages'
+  );
+  if (!fs.existsSync(pluginFrontendPagesDir)) {
+    return;
+  }
+
+  const files = fs.readdirSync(pluginFrontendPagesDir);
+  const mainPageFile = files.find(
+    (f) => f.endsWith('Page.tsx') || f === 'index.tsx' || f === 'page.tsx'
+  );
+
+  if (mainPageFile) {
+    const componentNameMatch = mainPageFile.match(/^([a-zA-Z0-9]+)\.tsx$/);
+    let componentName = componentNameMatch
+      ? componentNameMatch[1]
+      : 'PluginPage';
+    if (componentName === 'index' || componentName === 'page') {
+      componentName = 'PluginPage';
+    }
+    const importName = mainPageFile.replace('.tsx', '');
+    const routeDir = path.join(FRONTEND_APP_DIR, pluginName);
+
+    if (!fs.existsSync(routeDir)) {
+      fs.mkdirSync(routeDir, { recursive: true });
+    }
+
+    const wrapperContent = `import ${componentName} from '@plugins/${pluginName}/frontend/pages/${importName}';\n\nexport default function Page() {\n  return <${componentName} />;\n}\n`;
+
+    const wrapperFile = path.join(routeDir, 'page.tsx');
+    fs.writeFileSync(wrapperFile, wrapperContent, 'utf8');
+    console.log(`✅ Generated Next.js wrapper route at /${pluginName}`);
+  }
+}
+
+function removeNextjsWrapper(pluginName) {
+  const routeDir = path.join(FRONTEND_APP_DIR, pluginName);
+  if (fs.existsSync(routeDir)) {
+    fs.rmSync(routeDir, { recursive: true, force: true });
+    console.log(`🗑️  Removed Next.js wrapper route at /${pluginName}`);
+  }
+}
+
+function createPlugin(pluginName) {
+  if (!pluginName) {
+    console.error('❌ Error: Please provide a name for the new plugin.');
+    process.exit(1);
+  }
+
+  const targetDir = path.join(PLUGINS_DIR, pluginName);
+  if (fs.existsSync(targetDir)) {
+    console.error(`❌ Error: Plugin directory already exists at ${targetDir}.`);
+    process.exit(1);
+  }
+
+  console.log(`🚀 Scaffolding new plugin "${pluginName}"...`);
+
+  fs.mkdirSync(path.join(targetDir, 'backend', 'src', 'controller'), {
+    recursive: true
+  });
+  fs.mkdirSync(path.join(targetDir, 'backend', 'src', 'routes'), {
+    recursive: true
+  });
+  fs.mkdirSync(path.join(targetDir, 'backend', 'src', 'schema'), {
+    recursive: true
+  });
+  fs.mkdirSync(path.join(targetDir, 'backend', 'src', 'service'), {
+    recursive: true
+  });
+  fs.mkdirSync(path.join(targetDir, 'frontend', 'pages'), { recursive: true });
+
+  const pluginJson = {
+    name: pluginName,
+    version: '1.0.0',
+    description: `The ${pluginName} plugin.`,
+    dependencies: {}
+  };
+  fs.writeFileSync(
+    path.join(targetDir, 'plugin.json'),
+    JSON.stringify(pluginJson, null, 2)
+  );
+
+  const pkgJson = {
+    name: `@campus-os/${pluginName}`,
+    version: '1.0.0',
+    private: true,
+    main: 'backend/src/index.js',
+    scripts: {
+      test: 'vitest run'
+    },
+    peerDependencies: {
+      react: '^18.2.0 || ^19.0.0',
+      'react-dom': '^18.2.0 || ^19.0.0',
+      '@tanstack/react-query': '^5.0.0'
+    }
+  };
+  fs.writeFileSync(
+    path.join(targetDir, 'package.json'),
+    JSON.stringify(pkgJson, null, 2)
+  );
+
+  const backendIndex = `export function init(app, registry) {\n  console.log('✓ Loaded plugin: ${pluginName}');\n}\n`;
+  fs.writeFileSync(
+    path.join(targetDir, 'backend', 'src', 'index.js'),
+    backendIndex
+  );
+
+  const componentName =
+    pluginName.charAt(0).toUpperCase() + pluginName.slice(1) + 'Page';
+  const frontendPage = `import React from 'react';\n\nexport default function ${componentName}() {\n  return (\n    <div className="p-6">\n      <h1 className="text-2xl font-bold">${componentName}</h1>\n      <p>Welcome to the newly scaffolded ${pluginName} plugin!</p>\n    </div>\n  );\n}\n`;
+  fs.writeFileSync(
+    path.join(targetDir, 'frontend', 'pages', 'index.tsx'),
+    frontendPage
+  );
+
+  const frontendInit = `export function initFrontend() {\n  // Register widgets or sidebar links here\n}\n`;
+  fs.writeFileSync(path.join(targetDir, 'frontend', 'init.ts'), frontendInit);
+
+  console.log(`✅ Scaffolding complete for "${pluginName}".`);
+
+  generateRegistry();
+  generateNextjsWrapper(pluginName);
+}
 
 function generateRegistry() {
   console.log('🔄 Generating frontend plugin registry...');
@@ -75,113 +206,145 @@ ${initializers}
   );
 }
 
+function installFromDirectory(absoluteSource) {
+  console.log(`📦 Copying plugin directory: ${absoluteSource}...`);
+  const manifestPath = path.join(absoluteSource, 'plugin.json');
+  if (!fs.existsSync(manifestPath)) {
+    console.error('❌ Error: Invalid plugin directory. No plugin.json found.');
+    process.exit(1);
+  }
+
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const pluginName = manifest.name;
+
+  if (!pluginName) {
+    console.error('❌ Error: plugin.json must have a "name" field.');
+    process.exit(1);
+  }
+
+  const targetDir = path.join(PLUGINS_DIR, pluginName);
+  if (fs.existsSync(targetDir)) {
+    console.error(
+      `❌ Error: Plugin directory already exists at ${targetDir}. Please uninstall it first.`
+    );
+    process.exit(1);
+  }
+
+  fs.cpSync(absoluteSource, targetDir, { recursive: true });
+  return pluginName;
+}
+
 function installPlugin(sourcePath) {
   if (!sourcePath) {
-    console.error('❌ Error: Please provide a source path (.zip or folder).');
+    console.error(
+      '❌ Error: Please provide a source path (.zip, folder, or GitHub repo).'
+    );
     process.exit(1);
   }
-
-  const absoluteSource = path.resolve(sourcePath);
-  if (!fs.existsSync(absoluteSource)) {
-    console.error(`❌ Error: Source path not found: ${absoluteSource}`);
-    process.exit(1);
-  }
-
-  const stat = fs.statSync(absoluteSource);
-  let pluginName = '';
 
   if (!fs.existsSync(PLUGINS_DIR)) {
     fs.mkdirSync(PLUGINS_DIR, { recursive: true });
   }
 
-  if (stat.isFile() && absoluteSource.endsWith('.zip')) {
-    console.log(`📦 Extracting zip archive: ${sourcePath}...`);
-    const zip = new AdmZip(absoluteSource);
-    // Determine plugin name from zip structure or plugin.json inside zip
-    const zipEntries = zip.getEntries();
+  let pluginName = '';
 
-    let manifestEntry = zipEntries.find(
-      (e) =>
-        e.entryName === 'plugin.json' || e.entryName.endsWith('/plugin.json')
-    );
-    if (!manifestEntry) {
-      console.error(
-        '❌ Error: Invalid plugin. No plugin.json found in the zip archive.'
-      );
-      process.exit(1);
-    }
+  const isGithubUrl =
+    sourcePath.startsWith('https://github.com/') ||
+    /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/.test(sourcePath);
 
-    const manifestContent = zip.readAsText(manifestEntry);
+  if (isGithubUrl) {
+    const repoUrl = sourcePath.startsWith('http')
+      ? sourcePath
+      : `https://github.com/${sourcePath}.git`;
+    console.log(`🌐 Fetching plugin from GitHub: ${repoUrl}`);
+
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'campusos-plugin-'));
     try {
-      const manifest = JSON.parse(manifestContent);
-      pluginName = manifest.name;
-    } catch (e) {
-      console.error('❌ Error: plugin.json is invalid JSON.');
+      execSync(`git clone --depth 1 ${repoUrl} ${tempDir}`, {
+        stdio: 'inherit'
+      });
+      fs.rmSync(path.join(tempDir, '.git'), { recursive: true, force: true });
+
+      pluginName = installFromDirectory(tempDir);
+    } catch (error) {
+      console.error(`❌ Error cloning repository: ${error.message}`);
       process.exit(1);
-    }
-
-    if (!pluginName) {
-      console.error('❌ Error: plugin.json must have a "name" field.');
-      process.exit(1);
-    }
-
-    const targetDir = path.join(PLUGINS_DIR, pluginName);
-    if (fs.existsSync(targetDir)) {
-      console.error(
-        `❌ Error: Plugin directory already exists at ${targetDir}. Please uninstall it first.`
-      );
-      process.exit(1);
-    }
-
-    // Extract exactly the folder containing plugin.json to targetDir
-    // If zip is packaged like "myplugin/plugin.json", we extract the contents of "myplugin"
-    const basePath = manifestEntry.entryName.replace('plugin.json', '');
-
-    fs.mkdirSync(targetDir, { recursive: true });
-
-    zipEntries.forEach((entry) => {
-      if (entry.entryName.startsWith(basePath) && !entry.isDirectory) {
-        const relativePath = entry.entryName.substring(basePath.length);
-        const destPath = path.join(targetDir, relativePath);
-        fs.mkdirSync(path.dirname(destPath), { recursive: true });
-        fs.writeFileSync(destPath, entry.getData());
+    } finally {
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
       }
-    });
-  } else if (stat.isDirectory()) {
-    console.log(`📦 Copying plugin directory: ${sourcePath}...`);
-    const manifestPath = path.join(absoluteSource, 'plugin.json');
-    if (!fs.existsSync(manifestPath)) {
-      console.error(
-        '❌ Error: Invalid plugin directory. No plugin.json found.'
-      );
-      process.exit(1);
     }
-
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    pluginName = manifest.name;
-
-    if (!pluginName) {
-      console.error('❌ Error: plugin.json must have a "name" field.');
-      process.exit(1);
-    }
-
-    const targetDir = path.join(PLUGINS_DIR, pluginName);
-    if (fs.existsSync(targetDir)) {
-      console.error(
-        `❌ Error: Plugin directory already exists at ${targetDir}. Please uninstall it first.`
-      );
-      process.exit(1);
-    }
-
-    // Node.js fs.cpSync is available in v16.7+
-    fs.cpSync(absoluteSource, targetDir, { recursive: true });
   } else {
-    console.error('❌ Error: Source path must be a directory or a .zip file.');
-    process.exit(1);
+    const absoluteSource = path.resolve(sourcePath);
+    if (!fs.existsSync(absoluteSource)) {
+      console.error(`❌ Error: Source path not found: ${absoluteSource}`);
+      process.exit(1);
+    }
+
+    const stat = fs.statSync(absoluteSource);
+
+    if (stat.isFile() && absoluteSource.endsWith('.zip')) {
+      console.log(`📦 Extracting zip archive: ${sourcePath}...`);
+      const zip = new AdmZip(absoluteSource);
+      const zipEntries = zip.getEntries();
+
+      let manifestEntry = zipEntries.find(
+        (e) =>
+          e.entryName === 'plugin.json' || e.entryName.endsWith('/plugin.json')
+      );
+      if (!manifestEntry) {
+        console.error(
+          '❌ Error: Invalid plugin. No plugin.json found in the zip archive.'
+        );
+        process.exit(1);
+      }
+
+      const manifestContent = zip.readAsText(manifestEntry);
+      try {
+        const manifest = JSON.parse(manifestContent);
+        pluginName = manifest.name;
+      } catch (e) {
+        console.error('❌ Error: plugin.json is invalid JSON.');
+        process.exit(1);
+      }
+
+      if (!pluginName) {
+        console.error('❌ Error: plugin.json must have a "name" field.');
+        process.exit(1);
+      }
+
+      const targetDir = path.join(PLUGINS_DIR, pluginName);
+      if (fs.existsSync(targetDir)) {
+        console.error(
+          `❌ Error: Plugin directory already exists at ${targetDir}. Please uninstall it first.`
+        );
+        process.exit(1);
+      }
+
+      const basePath = manifestEntry.entryName.replace('plugin.json', '');
+      fs.mkdirSync(targetDir, { recursive: true });
+
+      zipEntries.forEach((entry) => {
+        if (entry.entryName.startsWith(basePath) && !entry.isDirectory) {
+          const relativePath = entry.entryName.substring(basePath.length);
+          const destPath = path.join(targetDir, relativePath);
+          fs.mkdirSync(path.dirname(destPath), { recursive: true });
+          fs.writeFileSync(destPath, entry.getData());
+        }
+      });
+    } else if (stat.isDirectory()) {
+      pluginName = installFromDirectory(absoluteSource);
+    } else {
+      console.error(
+        '❌ Error: Source path must be a directory or a .zip file.'
+      );
+      process.exit(1);
+    }
   }
 
   console.log(`✅ Plugin "${pluginName}" installed successfully!`);
   generateRegistry();
+  generateNextjsWrapper(pluginName);
 }
 
 function uninstallPlugin(pluginName) {
@@ -203,12 +366,16 @@ function uninstallPlugin(pluginName) {
 
   console.log(`✅ Plugin "${pluginName}" uninstalled successfully!`);
   generateRegistry();
+  removeNextjsWrapper(pluginName);
 }
 
 const args = process.argv.slice(2);
 const command = args[0];
 
 switch (command) {
+  case 'create':
+    createPlugin(args[1]);
+    break;
   case 'install':
     installPlugin(args[1]);
     break;
@@ -223,7 +390,8 @@ switch (command) {
 CampusOS Plugin CLI
 -------------------
 Usage:
-  node scripts/plugin.js install <path-to-folder-or-zip>
+  node scripts/plugin.js create <plugin-name>
+  node scripts/plugin.js install <path-to-folder-zip-or-github-repo>
   node scripts/plugin.js uninstall <plugin-name>
   node scripts/plugin.js generate-registry
 `);

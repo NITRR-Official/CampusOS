@@ -29,7 +29,7 @@ backend/src/
 ├── index.js                  # Entry point — calls connectDB → createApp → startServer
 ├── app.js                    # Creates Express app, loads middleware + plugins
 ├── server.js                 # HTTP server with graceful shutdown
-├── plugin-loader.js          # Scans /apps/ and calls init() on each module
+├── plugin-loader.js          # Scans /plugins/ and calls init() on each module
 │
 ├── auth/
 │   └── jwt-authenticator.js  # JWT sign/verify, registered as authenticator
@@ -59,7 +59,7 @@ flowchart TD
     M2 --> M3["3. Logger<br/><small>Assigns req.id, logs method/path/status/duration</small>"]
     M3 --> M4["4. Health check<br/><small>GET /health (returns early, no auth needed)</small>"]
     M4 --> M5["5. Auth<br/><small>Skips PUBLIC_ROUTES, verifies JWT, sets req.user</small>"]
-    M5 --> M6["6. Plugin routes<br/><small>Loaded dynamically from /apps/</small>"]
+    M5 --> M6["6. Plugin routes<br/><small>Loaded dynamically from /plugins/</small>"]
     M6 --> M7["7. 404 handler<br/><small>notFoundMiddleware — catches unmatched routes</small>"]
     M7 --> M8["8. Error handler<br/><small>errorMiddleware — catches all thrown errors</small>"]
 ```
@@ -86,6 +86,7 @@ registry.modules; // Map — loaded plugin metadata
 registry.services; // Map — shared service instances
 registry.authenticators; // Map — auth strategies (e.g., 'jwt')
 registry.resolvers; // Map — data resolvers
+registry.events; // EventBus — cross-plugin asynchronous event emitter
 ```
 
 It's attached to the Express app via `app.locals.registry`, so any middleware or route handler can access it:
@@ -93,21 +94,26 @@ It's attached to the Express app via `app.locals.registry`, so any middleware or
 ```javascript
 // In a plugin's init function — register something
 registry.registerService('requireRoles', requireRoles);
+registry.registerService('core:models', { ... }); // Mongoose models
 registry.registerAuthenticator('jwt', jwtAuthenticator);
 registry.registerModule('vendor', { routes: [...] });
 
 // In a controller — retrieve something
 const requireRoles = req.app.locals.registry.getService('requireRoles');
+const EventModel = req.app.locals.registry.getService('core:models').Event;
+
+// Trigger an event
+req.app.locals.registry.events.emit('club:deleted', { clubId });
 ```
 
 This is how modules communicate without importing each other.
 
 ## Plugin Loader
 
-`plugin-loader.js` scans the `/apps/` directory and loads each module:
+`plugin-loader.js` scans the `/plugins/` directory and loads each module:
 
 1. Connects to MongoDB via `connectDB()`
-2. Reads all directories in `/apps/`
+2. Reads all directories in `/plugins/`
 3. Queries the `Plugin` MongoDB collection to find which plugins are enabled
 4. For each directory, checks if it's marked `enabled: true` in the DB
 5. Looks for an entry point in this order:
@@ -152,7 +158,8 @@ const requireRoles = registry.getService('requireRoles');
 
 - **`notFoundMiddleware`** — Returns 404 with the attempted route path
 - **`errorMiddleware`** — Catches all errors:
-  - Validation errors (with `err.details`) → 400 with field-level details
+  - Zod validation errors (`ZodError` instances) → parsed into 400 Bad Request with formatted field-level details
+  - Custom validation errors (with `err.details`) → 400 with field-level details
   - All other errors → status from `err.status` or 500
   - In development mode, includes stack trace in response
   - Includes `requestId` from the logger for tracing

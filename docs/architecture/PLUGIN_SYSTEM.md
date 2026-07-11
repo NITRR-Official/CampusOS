@@ -1,6 +1,6 @@
 # Plugin System
 
-Every feature in CampusOS is a plugin module in `/apps/`. Modules are loaded dynamically at startup — the backend core never hardcodes which modules exist.
+Every feature in CampusOS is a plugin module in `/plugins/`. Modules are loaded dynamically at startup — the backend core never hardcodes which modules exist.
 
 ## How Plugin Loading Works
 
@@ -8,7 +8,7 @@ At startup, `plugin-loader.js` does this:
 
 ```mermaid
 flowchart TD
-    Scan["1. Scan /apps/ for directories"] --> ForEach["2. For each directory, look for entry file"]
+    Scan["1. Scan /plugins/ for directories"] --> ForEach["2. For each directory, look for entry file"]
     ForEach --> Check1{"Check: plugin.js exists?"}
     Check1 -- Yes --> Import["3. Dynamically import the entry file"]
     Check1 -- No --> Check2{"Check: src/index.js exists?"}
@@ -19,7 +19,7 @@ flowchart TD
     Init --> Log["5. Log success or failure per module"]
 ```
 
-> **Note (ADR-006):** Before loading a plugin, the loader checks the `Plugin` collection in MongoDB. If a plugin is marked as `enabled: false`, it is skipped. New, undiscovered plugins dropped into `/apps/` are automatically inserted into MongoDB and disabled by default for security.
+> **Note (ADR-006):** Before loading a plugin, the loader checks the `Plugin` collection in MongoDB. If a plugin is marked as `enabled: false`, it is skipped. New, undiscovered plugins dropped into `/plugins/` are automatically inserted into MongoDB and disabled by default for security.
 
 If a module fails to load:
 
@@ -38,7 +38,7 @@ When a plugin introduces UI components, CampusOS uses **Build-Time Integration**
 
 Here's what actual modules look like in the codebase:
 
-### Auth module (`apps/auth/src/index.js`)
+### Auth module (`plugins/auth/src/index.js`)
 
 ```javascript
 import { createAuthController } from './controller/auth.controller.js';
@@ -54,7 +54,7 @@ export async function init(app, registry) {
 }
 ```
 
-### Vendor module (`apps/vendor/src/index.js`)
+### Vendor module (`plugins/vendor/src/index.js`)
 
 ```javascript
 import { registerVendorRoutes } from './routes/vendor.routes.js';
@@ -91,7 +91,7 @@ export async function init(app, registry) {
 Every module follows this layout:
 
 ```
-apps/<module>/
+plugins/<module>/
 ├── package.json              # Module dependencies
 ├── vitest.config.js          # Test configuration (if tests exist)
 └── src/
@@ -109,21 +109,21 @@ apps/<module>/
 
 ## Current Modules
 
-These are the actual directories in `/apps/` right now:
+These are the actual directories in `/plugins/` right now:
 
-| Module     | Directory          | Layer      |
-| ---------- | ------------------ | ---------- |
-| Auth       | `apps/auth/`       | Foundation |
-| Club       | `apps/club/`       | Foundation |
-| Institute  | `apps/institute/`  | Foundation |
-| Event      | `apps/event/`      | Event      |
-| Check-in   | `apps/checkin/`    | Event      |
-| Task       | `apps/task/`       | Execution  |
-| Calendar   | `apps/calendar/`   | Execution  |
-| Vendor     | `apps/vendor/`     | Operations |
-| Resource   | `apps/resource/`   | Operations |
-| Scheduling | `apps/scheduling/` | Operations |
-| Budget     | `apps/budget/`     | Operations |
+| Module     | Directory             | Layer      |
+| ---------- | --------------------- | ---------- |
+| Auth       | `plugins/auth/`       | Foundation |
+| Club       | `plugins/club/`       | Foundation |
+| Institute  | `plugins/institute/`  | Foundation |
+| Event      | `plugins/event/`      | Event      |
+| Check-in   | `plugins/checkin/`    | Event      |
+| Task       | `plugins/task/`       | Execution  |
+| Calendar   | `plugins/calendar/`   | Execution  |
+| Vendor     | `plugins/vendor/`     | Operations |
+| Resource   | `plugins/resource/`   | Operations |
+| Scheduling | `plugins/scheduling/` | Operations |
+| Budget     | `plugins/budget/`     | Operations |
 
 ## Module Communication Rules
 
@@ -147,13 +147,13 @@ Modules communicate through:
 ### Step 1: Scaffold the directory
 
 ```bash
-mkdir -p apps/my-module/src/{controller,routes,schema,service}
+mkdir -p plugins/my-module/src/{controller,routes,schema,service}
 ```
 
 ### Step 2: Create the Mongoose schema
 
 ```javascript
-// apps/my-module/src/schema/my-module.schema.js
+// plugins/my-module/src/schema/my-module.schema.js
 import mongoose from 'mongoose';
 
 const myModuleSchema = new mongoose.Schema(
@@ -170,7 +170,7 @@ export const MyModel = mongoose.model('MyModel', myModuleSchema);
 ### Step 3: Create the service (business logic)
 
 ```javascript
-// apps/my-module/src/service/my-module.service.js
+// plugins/my-module/src/service/my-module.service.js
 import { MyModel } from '../schema/my-module.schema.js';
 
 export class MyModuleService {
@@ -190,7 +190,7 @@ export class MyModuleService {
 ### Step 4: Create the controller (thin HTTP layer)
 
 ```javascript
-// apps/my-module/src/controller/my-module.controller.js
+// plugins/my-module/src/controller/my-module.controller.js
 import { MyModuleService } from '../service/my-module.service.js';
 
 const service = new MyModuleService();
@@ -217,7 +217,7 @@ export async function getAll(req, res, next) {
 ### Step 5: Create the routes
 
 ```javascript
-// apps/my-module/src/routes/my-module.routes.js
+// plugins/my-module/src/routes/my-module.routes.js
 import { Router } from 'express';
 import * as controller from '../controller/my-module.controller.js';
 
@@ -234,7 +234,7 @@ export function registerMyModuleRoutes(app, requireRoles) {
 ### Step 6: Create the plugin entry
 
 ```javascript
-// apps/my-module/src/index.js
+// plugins/my-module/src/index.js
 import { registerMyModuleRoutes } from './routes/my-module.routes.js';
 
 export async function init(app, registry) {

@@ -18,7 +18,7 @@ Once you see this in your terminal, you're ready:
 
 ```
 CampusOS/
-├── apps/                   # Feature modules (plugins)
+├── plugins/                   # Feature modules (plugins)
 │   ├── auth/              #   User registration, login, JWT
 │   ├── club/              #   Club management
 │   ├── institute/         #   Institute management
@@ -35,7 +35,7 @@ CampusOS/
 │   ├── index.js           #   Entry point
 │   ├── app.js             #   Middleware + plugin loading
 │   ├── server.js          #   HTTP server
-│   ├── plugin-loader.js   #   Scans /apps/ at startup
+│   ├── plugin-loader.js   #   Scans /plugins/ at startup
 │   ├── auth/              #   JWT authenticator
 │   ├── middleware/         #   auth, error, logger, permissions
 │   ├── database/          #   MongoDB connection + schemas
@@ -68,7 +68,7 @@ git checkout -b feature/<issue-number>-<short-description>
 
 ### Make changes
 
-- **Backend feature?** → Add/modify a module in `apps/<module>/`
+- **Backend feature?** → Add/modify a module in `plugins/<module>/`
 - **Frontend page?** → Add pages in `frontend/app/`
 - **Both?** → Build vertically: schema → service → controller → routes → frontend
 
@@ -106,8 +106,8 @@ pnpm lint                    # Lint all packages
 pnpm build                   # Build all packages
 
 # Testing
-pnpm -C apps/vendor test     # Run vendor module tests
-pnpm -C apps/budget test     # Run budget module tests
+pnpm -C plugins/vendor test     # Run vendor module tests
+pnpm -C plugins/budget test     # Run budget module tests
 
 # MongoDB
 docker start mongodb         # Restart MongoDB
@@ -127,9 +127,9 @@ sequenceDiagram
     F->>B: fetch('/api/v1/vendors')<br/>Authorization: Bearer <token>
     B->>M: middleware/auth.js (Verifies JWT)
     M->>M: middleware/permissions (Checks role)
-    M->>R: apps/vendor/routes (Matches route)
-    R->>R: apps/vendor/controller (Extracts params, calls service)
-    R->>S: apps/vendor/service (Business logic → MongoDB)
+    M->>R: plugins/vendor/routes (Matches route)
+    R->>R: plugins/vendor/controller (Extracts params, calls service)
+    R->>S: plugins/vendor/service (Business logic → MongoDB)
     S-->>F: Returns response
 ```
 
@@ -140,7 +140,7 @@ sequenceDiagram
 | `ECONNREFUSED` on backend start    | MongoDB isn't running → `docker start mongodb`                      |
 | Port 3000/4000 already in use      | Kill the process or change `PORT` in `.env`                         |
 | `pnpm: command not found`          | `npm install -g pnpm`                                               |
-| Backend starts but no plugins load | Check `apps/` directory exists and modules have `src/index.js`      |
+| Backend starts but no plugins load | Check `plugins/` directory exists and modules have `src/index.js`   |
 | New plugin skipped / disabled      | Toggle it to enabled using the Plugin Manager API (updates MongoDB) |
 | Frontend builds but API calls fail | Backend must be running, check `NEXT_PUBLIC_API_URL`                |
 | MongoDB download timeout in tests  | Increase `beforeAll` timeout to `120000`                            |

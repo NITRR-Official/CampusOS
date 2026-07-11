@@ -8,10 +8,10 @@ This guide will walk you through creating a completely isolated CampusOS plugin.
 
 ## 1. Plugin Structure
 
-Every plugin must live in its own directory inside the `apps/` folder of the CampusOS backend. A typical plugin structure looks like this:
+Every plugin must live in its own directory inside the `plugins/` folder of the CampusOS backend. A typical plugin structure looks like this:
 
 ```text
-apps/
+plugins/
 └── recruitment/
     ├── plugin.json         # (Required) Metadata and dependencies
     ├── src/
@@ -226,3 +226,43 @@ beforeAll(async () => {
   await connectDB(mongoServer.getUri());
 });
 ```
+
+---
+
+## 8. Publishing & Distributing Plugins
+
+CampusOS makes it incredibly easy to share your plugins with other organizations or the open-source community. You don't need to publish to NPM; you can distribute your plugin directly via GitHub!
+
+### Repository Structure
+
+To make your plugin installable via GitHub, your repository must follow the exact structure of a generated plugin. **The `plugin.json` file must be at the root of the repository.**
+
+```text
+my-awesome-plugin/
+"""?"? plugin.json         # MUST be at the root
+"""?"? package.json
+"""?"? backend/
+",   """?"? src/
+"""?"? frontend/
+    """?"? pages/
+```
+
+### Installation
+
+Administrators can install your plugin directly from your GitHub repository using the CLI:
+
+```bash
+# Using shorthand (User/Repo)
+pnpm run plugin:install NITRR-Official/campus-os-recruitment
+
+# Using full URL
+pnpm run plugin:install https://github.com/NITRR-Official/campus-os-recruitment
+```
+
+The CLI will automatically:
+
+1. Clone your repository.
+2. Read the `plugin.json` to determine the plugin name.
+3. Install the files into the `plugins/` directory.
+4. Generate the necessary Next.js App Router wrappers for your frontend pages.
+5. Wire up the `PluginRegistry` so your widgets and routes are instantly available!

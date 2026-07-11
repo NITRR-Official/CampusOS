@@ -22,7 +22,7 @@ Build features vertically: backend + frontend + database together, not layer by 
    - Check discussions/ for related decisions
 
 3. **Build Module**
-   - Create module directory in `/apps/`
+   - Create module directory in `/plugins/`
    - Implement: routes → controller → service → schema
    - Create plugin.js entry file
    - Write tests
