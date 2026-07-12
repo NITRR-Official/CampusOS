@@ -145,6 +145,7 @@ export function RoleEditorSheet({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Content Creator"
+                  disabled={role?.name === 'owner'}
                 />
               </div>
 
@@ -194,6 +195,7 @@ export function RoleEditorSheet({
                           checked={selectedPerms.has(perm.id)}
                           onCheckedChange={() => togglePermission(perm.id)}
                           className="mt-1"
+                          disabled={role?.name === 'owner'}
                         />
                         <div className="space-y-1 leading-none">
                           <label

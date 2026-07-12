@@ -6,6 +6,7 @@
 import resourceController from '../controller/resource.controller.js';
 
 export function registerResourceRoutes(app, requirePermissions) {
+  const viewResource = requirePermissions('resource:view');
   // Create resource (admin/coordinator only)
   app.post(
     '/api/v1/resources',
@@ -14,16 +15,21 @@ export function registerResourceRoutes(app, requirePermissions) {
   );
 
   // List all resources
-  app.get('/api/v1/resources', resourceController.listResources);
+  app.get('/api/v1/resources', viewResource, resourceController.listResources);
 
   // Get available resources
   app.get(
     '/api/v1/resources/available',
+    viewResource,
     resourceController.getAvailableResources
   );
 
   // Get resource by ID
-  app.get('/api/v1/resources/:resourceId', resourceController.getResource);
+  app.get(
+    '/api/v1/resources/:resourceId',
+    viewResource,
+    resourceController.getResource
+  );
 
   // Update resource (admin/coordinator only)
   app.put(
@@ -49,12 +55,14 @@ export function registerResourceRoutes(app, requirePermissions) {
   // Get resources for event
   app.get(
     '/api/v1/events/:eventId/resources',
+    viewResource,
     resourceController.getEventResources
   );
 
   // Get allocations for resource
   app.get(
     '/api/v1/resources/:resourceId/allocations',
+    viewResource,
     resourceController.getResourceAllocations
   );
 

@@ -1,8 +1,9 @@
 export function registerTaskRoutes(app, taskController, requirePermissions) {
   const manageTasks = requirePermissions('task:manage');
+  const viewTasks = requirePermissions('task:view');
 
-  app.get('/api/v1/tasks', taskController.list);
-  app.get('/api/v1/tasks/:taskId', taskController.getById);
+  app.get('/api/v1/tasks', viewTasks, taskController.list);
+  app.get('/api/v1/tasks/:taskId', viewTasks, taskController.getById);
   app.post('/api/v1/tasks', manageTasks, taskController.create);
   app.patch('/api/v1/tasks/:taskId/assign', manageTasks, taskController.assign);
   app.patch(

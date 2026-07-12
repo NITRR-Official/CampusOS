@@ -80,7 +80,8 @@ export interface SystemPermissionGroup {
 export const MyPermissionsSchema = z.object({
   permissions: z.array(z.string()),
   isSuperAdmin: z.boolean(),
-  maxHierarchy: z.number().default(-1)
+  maxHierarchy: z.number().default(-1),
+  isMember: z.boolean().default(false)
 });
 
 export async function fetchClubs(
@@ -179,14 +180,24 @@ export async function fetchMyClubPermissions(clubId: string): Promise<{
   permissions: string[];
   isSuperAdmin: boolean;
   maxHierarchy: number;
+  isMember: boolean;
 }> {
   try {
     const response = await apiClient.get(
       `/clubs/${clubId}/my-permissions?t=${Date.now()}`
     );
-    return MyPermissionsSchema.parse(response);
-  } catch {
-    return { permissions: [], isSuperAdmin: false, maxHierarchy: -1 };
+    console.log('fetchMyClubPermissions response:', response);
+    const parsed = MyPermissionsSchema.parse(response);
+    console.log('fetchMyClubPermissions parsed:', parsed);
+    return parsed;
+  } catch (error) {
+    console.error('fetchMyClubPermissions error:', error);
+    return {
+      permissions: [],
+      isSuperAdmin: false,
+      maxHierarchy: -1,
+      isMember: false
+    };
   }
 }
 

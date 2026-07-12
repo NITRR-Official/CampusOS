@@ -4,8 +4,26 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return Club.create(clubData);
   }
 
-  async function listClubs(filter) {
-    return Club.find(filter).sort({ createdAt: -1 }).lean();
+  async function listClubs(filter = {}) {
+    const pipeline = [
+      { $match: filter },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: 'clubmembers',
+          localField: '_id',
+          foreignField: 'clubId',
+          as: 'members'
+        }
+      },
+      {
+        $addFields: {
+          memberCount: { $size: '$members' }
+        }
+      },
+      { $project: { members: 0 } }
+    ];
+    return Club.aggregate(pipeline);
   }
 
   async function getClubById(clubId) {
@@ -30,6 +48,10 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
   }
 
   // ==== Member Methods ====
+  async function countMembers(clubId) {
+    return ClubMember.countDocuments({ clubId });
+  }
+
   async function createClubMember(memberData) {
     return ClubMember.create(memberData);
   }
@@ -153,6 +175,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     updateClubStatus,
     updateClub,
     deleteClub,
+    countMembers,
     createClubMember,
     findMember,
     findMemberWithRoles,

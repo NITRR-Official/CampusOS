@@ -20,7 +20,10 @@ export function RoleItem({ role, onEdit, onDelete }: RoleItemProps) {
     transform,
     transition,
     isDragging
-  } = useSortable({ id: (role.id || role._id) as string });
+  } = useSortable({
+    id: (role.id || role._id) as string,
+    disabled: role.name === 'owner'
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -39,9 +42,13 @@ export function RoleItem({ role, onEdit, onDelete }: RoleItemProps) {
       }`}
     >
       <div
-        {...attributes}
-        {...listeners}
-        className="cursor-grab hover:bg-secondary p-1.5 rounded-lg active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors"
+        {...(role.name !== 'owner' ? attributes : {})}
+        {...(role.name !== 'owner' ? listeners : {})}
+        className={`p-1.5 rounded-lg transition-colors ${
+          role.name === 'owner'
+            ? 'opacity-30 cursor-not-allowed text-muted-foreground/50'
+            : 'cursor-grab hover:bg-secondary active:cursor-grabbing text-muted-foreground hover:text-foreground'
+        }`}
       >
         <GripVertical className="size-4" />
       </div>

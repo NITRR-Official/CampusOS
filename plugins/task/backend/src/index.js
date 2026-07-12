@@ -24,6 +24,12 @@ export async function init(app, registry, eventBus) {
 
   if (registry.permissions) {
     registry.permissions.register({
+      id: 'task:view',
+      module: 'task',
+      label: 'View Tasks',
+      description: 'Allows viewing tasks'
+    });
+    registry.permissions.register({
       id: 'task:manage',
       module: 'task',
       label: 'Manage Tasks',

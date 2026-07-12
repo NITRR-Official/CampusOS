@@ -77,13 +77,18 @@ export function createClubService(clubRepository, eventBus, registry) {
   async function listClubs(status) {
     const filter = status ? { status } : {};
     const clubs = await clubRepository.listClubs(filter);
-    return clubs.map(serializeClub);
+    return clubs.map((club) => ({
+      ...serializeClub(club),
+      memberCount: club.memberCount || 0
+    }));
   }
 
   async function getClub(clubId) {
     if (!clubId) return null;
     const club = await clubRepository.getClubById(clubId);
-    return serializeClub(club);
+    if (!club) return null;
+    const memberCount = await clubRepository.countMembers(clubId);
+    return { ...serializeClub(club), memberCount };
   }
 
   async function updateClubStatus(clubId, status) {
@@ -181,14 +186,23 @@ export function createClubService(clubRepository, eventBus, registry) {
       {
         clubId,
         name: 'coordinator',
-        permissions: ['event:create', 'event:manage', 'member:manage'],
+        permissions: [
+          'event:create',
+          'event:manage',
+          'member:manage',
+          'event:view',
+          'task:view',
+          'budget:view',
+          'resource:view',
+          'vendor:view'
+        ],
         hierarchyLevel: 50,
         isTemplate: true
       },
       {
         clubId,
         name: 'volunteer',
-        permissions: [],
+        permissions: ['event:view', 'task:view', 'resource:view'],
         hierarchyLevel: 10,
         isTemplate: true
       }
@@ -227,13 +241,19 @@ export function createClubService(clubRepository, eventBus, registry) {
 
   async function _getRequesterContext(clubId, user) {
     if (!user) {
-      return { maxHierarchy: -1, permissions: new Set(), isClubAdmin: false };
+      return {
+        maxHierarchy: -1,
+        permissions: new Set(),
+        isClubAdmin: false,
+        isMember: false
+      };
     }
     if (user.isSuperAdmin) {
       return {
-        maxHierarchy: Infinity,
+        maxHierarchy: 999999,
         permissions: new Set(),
-        isClubAdmin: true
+        isClubAdmin: true,
+        isMember: true
       };
     }
 
@@ -241,8 +261,22 @@ export function createClubService(clubRepository, eventBus, registry) {
       clubId,
       user.id || user._id
     );
-    if (!member || !member.roles || member.roles.length === 0) {
-      return { maxHierarchy: -1, permissions: new Set(), isClubAdmin: false };
+    if (!member) {
+      return {
+        maxHierarchy: -1,
+        permissions: new Set(),
+        isClubAdmin: false,
+        isMember: false
+      };
+    }
+
+    if (!member.roles || member.roles.length === 0) {
+      return {
+        maxHierarchy: -1,
+        permissions: new Set(),
+        isClubAdmin: false,
+        isMember: true
+      };
     }
 
     let maxHierarchy = -1;
@@ -264,10 +298,10 @@ export function createClubService(clubRepository, eventBus, registry) {
     }
 
     if (isClubAdmin) {
-      maxHierarchy = Infinity;
+      maxHierarchy = 999999;
     }
 
-    return { maxHierarchy, permissions, isClubAdmin };
+    return { maxHierarchy, permissions, isClubAdmin, isMember: true };
   }
 
   function _assertPermissions(requestedPerms, context) {
@@ -444,8 +478,8 @@ export function createClubService(clubRepository, eventBus, registry) {
     return Array.from(permissionsSet);
   }
 
-  async function getUserContext(clubId, userId) {
-    return _getRequesterContext(clubId, { id: userId });
+  async function getUserContext(clubId, user) {
+    return _getRequesterContext(clubId, user);
   }
 
   async function listRoles(clubId) {
@@ -498,6 +532,24 @@ export function createClubService(clubRepository, eventBus, registry) {
 
     const existingRole = await clubRepository.findRoleById(clubId, roleId);
     if (!existingRole) return null;
+
+    if (existingRole.name === 'owner') {
+      if (
+        payload.hierarchyLevel !== undefined &&
+        payload.hierarchyLevel !== existingRole.hierarchyLevel
+      ) {
+        const error = new Error(
+          'Cannot modify hierarchy level of the owner role'
+        );
+        error.code = 'OWNER_ROLE_PROTECTED';
+        throw error;
+      }
+      if (payload.name !== undefined && payload.name !== 'owner') {
+        const error = new Error('Cannot rename the owner role');
+        error.code = 'OWNER_ROLE_PROTECTED';
+        throw error;
+      }
+    }
 
     _assertHierarchy(existingRole.hierarchyLevel, context, 'modify');
 

@@ -29,6 +29,12 @@ export async function init(app, registry, eventBus) {
   // Register atomic permissions for RBAC
   if (registry.permissions) {
     registry.permissions.register({
+      id: 'event:view',
+      module: 'event',
+      label: 'View Events',
+      description: 'Allows viewing event details'
+    });
+    registry.permissions.register({
       id: 'event:create',
       module: 'event',
       label: 'Create Events',

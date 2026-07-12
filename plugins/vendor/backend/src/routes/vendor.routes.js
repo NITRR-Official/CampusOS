@@ -6,6 +6,7 @@
 import vendorController from '../controller/vendor.controller.js';
 
 export function registerVendorRoutes(app, requirePermissions) {
+  const viewVendor = requirePermissions('vendor:view');
   // Create vendor (admin/coordinator only)
   app.post(
     '/api/v1/vendors',
@@ -14,10 +15,10 @@ export function registerVendorRoutes(app, requirePermissions) {
   );
 
   // List all vendors
-  app.get('/api/v1/vendors', vendorController.listVendors);
+  app.get('/api/v1/vendors', viewVendor, vendorController.listVendors);
 
   // Get vendor by ID
-  app.get('/api/v1/vendors/:vendorId', vendorController.getVendor);
+  app.get('/api/v1/vendors/:vendorId', viewVendor, vendorController.getVendor);
 
   // Update vendor (admin/coordinator only)
   app.put(
@@ -41,11 +42,16 @@ export function registerVendorRoutes(app, requirePermissions) {
   );
 
   // Get vendors for event
-  app.get('/api/v1/events/:eventId/vendors', vendorController.getEventVendors);
+  app.get(
+    '/api/v1/events/:eventId/vendors',
+    viewVendor,
+    vendorController.getEventVendors
+  );
 
   // Get assignments for vendor
   app.get(
     '/api/v1/vendors/:vendorId/assignments',
+    viewVendor,
     vendorController.getVendorAssignments
   );
 

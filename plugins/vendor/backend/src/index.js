@@ -30,12 +30,20 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  registry.permissions.register({
-    id: 'vendor:manage',
-    module: 'vendor',
-    label: 'Manage Vendors',
-    description: 'Allows adding vendors, managing quotes, and invoices'
-  });
+  if (registry.permissions) {
+    registry.permissions.register({
+      id: 'vendor:view',
+      module: 'vendor',
+      label: 'View Vendors',
+      description: 'Allows viewing vendors'
+    });
+    registry.permissions.register({
+      id: 'vendor:manage',
+      module: 'vendor',
+      label: 'Manage Vendors',
+      description: 'Allows adding vendors, managing quotes, and invoices'
+    });
+  }
 
   registry.registerContextResolver('/api/v1/vendors', async (req) => {
     const vendorId = req.params?.vendorId || req.url.split('/')[4];

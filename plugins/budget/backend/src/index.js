@@ -34,12 +34,20 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  registry.permissions.register({
-    id: 'budget:manage',
-    module: 'budget',
-    label: 'Manage Budget',
-    description: 'Allows allocating budgets, tracking expenses, and approvals'
-  });
+  if (registry.permissions) {
+    registry.permissions.register({
+      id: 'budget:view',
+      module: 'budget',
+      label: 'View Budgets',
+      description: 'Allows viewing budgets and transactions'
+    });
+    registry.permissions.register({
+      id: 'budget:manage',
+      module: 'budget',
+      label: 'Manage Budget',
+      description: 'Allows allocating budgets, tracking expenses, and approvals'
+    });
+  }
 
   registry.registerContextResolver('/api/v1/budget', async (req) => {
     let budgetId = req.params?.budgetId;

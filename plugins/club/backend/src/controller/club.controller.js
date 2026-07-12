@@ -251,8 +251,7 @@ export function createClubController(clubService) {
         });
       }
 
-      const userId = req.user.id || req.user._id;
-      const context = await clubService.getUserContext(clubId, userId);
+      const context = await clubService.getUserContext(clubId, req.user);
       const permissions = Array.from(context.permissions);
 
       res.status(200).json({
@@ -260,7 +259,8 @@ export function createClubController(clubService) {
         data: {
           permissions,
           maxHierarchy: context.maxHierarchy,
-          isSuperAdmin: req.user.isSuperAdmin
+          isSuperAdmin: !!req.user.isSuperAdmin,
+          isMember: context.isMember || context.maxHierarchy >= 0
         }
       });
     } catch (err) {

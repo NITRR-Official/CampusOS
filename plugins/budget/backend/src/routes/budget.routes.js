@@ -7,6 +7,7 @@ import { createBudgetController } from '../controller/budget.controller.js';
 
 export function registerBudgetRoutes(app, requirePermissions, budgetService) {
   const budgetController = createBudgetController(budgetService);
+  const viewBudget = requirePermissions('budget:view');
 
   // Create budget (admin/coordinator only)
   app.post(
@@ -16,10 +17,14 @@ export function registerBudgetRoutes(app, requirePermissions, budgetService) {
   );
 
   // Get budget for event
-  app.get('/api/v1/events/:eventId/budget', budgetController.getEventBudget);
+  app.get(
+    '/api/v1/events/:eventId/budget',
+    viewBudget,
+    budgetController.getEventBudget
+  );
 
   // Get budget by ID
-  app.get('/api/v1/budget/:budgetId', budgetController.getBudget);
+  app.get('/api/v1/budget/:budgetId', viewBudget, budgetController.getBudget);
 
   // Update budget (admin/coordinator only)
   app.put(
@@ -52,11 +57,16 @@ export function registerBudgetRoutes(app, requirePermissions, budgetService) {
   // Get expenses for budget
   app.get(
     '/api/v1/budget/:budgetId/expenses',
+    viewBudget,
     budgetController.getBudgetExpenses
   );
 
   // Get expense by ID
-  app.get('/api/v1/budget/expense/:expenseId', budgetController.getExpense);
+  app.get(
+    '/api/v1/budget/expense/:expenseId',
+    viewBudget,
+    budgetController.getExpense
+  );
 
   // Update expense (admin/coordinator only)
   app.put(
@@ -75,12 +85,14 @@ export function registerBudgetRoutes(app, requirePermissions, budgetService) {
   // Get budget summary
   app.get(
     '/api/v1/budget/:budgetId/summary',
+    viewBudget,
     budgetController.getBudgetSummary
   );
 
   // Get budget vs actual
   app.get(
     '/api/v1/budget/:budgetId/vs-actual',
+    viewBudget,
     budgetController.getBudgetVsActual
   );
 }

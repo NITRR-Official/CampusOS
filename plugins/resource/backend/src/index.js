@@ -31,12 +31,20 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  registry.permissions.register({
-    id: 'resource:manage',
-    module: 'resource',
-    label: 'Manage Resources',
-    description: 'Allows allocating and tracking resources and inventory'
-  });
+  if (registry.permissions) {
+    registry.permissions.register({
+      id: 'resource:view',
+      module: 'resource',
+      label: 'View Resources',
+      description: 'Allows viewing resource bookings'
+    });
+    registry.permissions.register({
+      id: 'resource:manage',
+      module: 'resource',
+      label: 'Manage Resources',
+      description: 'Allows allocating and tracking resources and inventory'
+    });
+  }
 
   registry.registerContextResolver('/api/v1/resources', async (req) => {
     const resourceId = req.params?.resourceId || req.url.split('/')[4];
