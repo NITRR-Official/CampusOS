@@ -175,9 +175,7 @@ export async function fetchSystemPermissions(): Promise<
   }));
 }
 
-export async function fetchMyClubPermissions(
-  clubId: string
-): Promise<{
+export async function fetchMyClubPermissions(clubId: string): Promise<{
   permissions: string[];
   isSuperAdmin: boolean;
   maxHierarchy: number;
