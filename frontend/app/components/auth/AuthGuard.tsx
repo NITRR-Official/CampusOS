@@ -27,7 +27,10 @@ export function RequireAuth({ children, allowedRoles }: RequireAuthProps) {
       return '/dashboard';
     }
 
-    const search = searchParams?.toString();
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.delete('next');
+    const search = params.toString();
+
     if (!search) {
       return pathname;
     }

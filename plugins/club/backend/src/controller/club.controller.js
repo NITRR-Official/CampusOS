@@ -76,7 +76,7 @@ export function createClubController(clubService) {
 
     try {
       const value = addMemberSchema.parse(req.body);
-      const member = await clubService.addMember(clubId, value);
+      const member = await clubService.addMember(clubId, value, req.user);
 
       if (!member) {
         next(createHttpError(404, 'Club not found', 'CLUB_NOT_FOUND'));
@@ -129,6 +129,37 @@ export function createClubController(clubService) {
         clubId,
         memberUserId,
         value.role,
+        req.user
+      );
+
+      if (updatedMember === null) {
+        next(createHttpError(404, 'Club not found', 'CLUB_NOT_FOUND'));
+        return;
+      }
+
+      if (updatedMember === undefined) {
+        next(createHttpError(404, 'Member not found', 'MEMBER_NOT_FOUND'));
+        return;
+      }
+
+      res.status(200).json({ success: true, data: updatedMember });
+    } catch (err) {
+      if (err.code === 'ROLE_NOT_FOUND') {
+        next(createHttpError(404, 'Role not found', 'ROLE_NOT_FOUND'));
+        return;
+      }
+      next(err);
+    }
+  }
+
+  async function revokeRole(req, res, next) {
+    const { clubId, memberUserId, roleName } = req.params;
+
+    try {
+      const updatedMember = await clubService.removeRoleFromMember(
+        clubId,
+        memberUserId,
+        roleName,
         req.user
       );
 
@@ -216,19 +247,32 @@ export function createClubController(clubService) {
       if (!req.user) {
         return res.status(200).json({
           success: true,
-          data: { permissions: [], maxHierarchy: -1, isClubAdmin: false }
+          data: { permissions: [], maxHierarchy: -1, isSuperAdmin: false }
         });
       }
 
       const userId = req.user.id || req.user._id;
-      // get context directly from service which includes maxHierarchy and isClubAdmin
-      // Since it's not exported, we can just use getUserPermissions
-      const permissions = await clubService.getUserPermissions(userId, clubId);
+      const context = await clubService.getUserContext(clubId, userId);
+      const permissions = Array.from(context.permissions);
 
       res.status(200).json({
         success: true,
-        data: { permissions, isSuperAdmin: req.user.isSuperAdmin }
+        data: {
+          permissions,
+          maxHierarchy: context.maxHierarchy,
+          isSuperAdmin: req.user.isSuperAdmin
+        }
       });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async function listMembers(req, res, next) {
+    const { clubId } = req.params;
+    try {
+      const members = await clubService.listMembers(clubId);
+      res.status(200).json({ success: true, data: members });
     } catch (err) {
       next(err);
     }
@@ -307,6 +351,8 @@ export function createClubController(clubService) {
     addMember,
     removeMember,
     assignRole,
+    revokeRole,
+    listMembers,
     approveClub,
     rejectClub,
     listRoles,

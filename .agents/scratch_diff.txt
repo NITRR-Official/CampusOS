@@ -1,0 +1,611 @@
+﻿diff --git a/backend/src/middleware/auth.js b/backend/src/middleware/auth.js
+index 4939247..8a5bdb1 100644
+--- a/backend/src/middleware/auth.js
++++ b/backend/src/middleware/auth.js
+@@ -89,7 +89,8 @@ export function authMiddleware(req, res, next) {
+     req.user = {
+       id: decoded.sub || decoded.id || null, // both sub and id for wider compatibility
+       email: decoded.email || null,
+-      role: decoded.role || 'user'
++      role: decoded.role || 'user',
++      isSuperAdmin: !!decoded.isSuperAdmin
+     };
+ 
+     next();
+diff --git a/frontend/app/globals.css b/frontend/app/globals.css
+index a075e47..aaa1fc4 100644
+--- a/frontend/app/globals.css
++++ b/frontend/app/globals.css
+@@ -1,5 +1,6 @@
+ @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Manrope:wght@200..800&family=Sora:wght@100..800&display=swap');
+ @import "tailwindcss";
++@source "../../plugins";
+ @import "tw-animate-css";
+ @import "shadcn/tailwind.css";
+ 
+diff --git a/frontend/components/Header.tsx b/frontend/components/Header.tsx
+index ce06351..8830b12 100644
+--- a/frontend/components/Header.tsx
++++ b/frontend/components/Header.tsx
+@@ -62,7 +62,14 @@ export function Header() {
+   const breadcrumbs = getBreadcrumbs();
+   const displayName = user?.name || 'Campus User';
+   const displayEmail = user?.email || 'No email on file';
+-  const displayRole = role ? `${role[0].toUpperCase()}${role.slice(1)}` : '';
++  
++  let displayRole = '';
++  if (user?.isSuperAdmin) {
++    displayRole = 'Super Admin';
++  } else if (role) {
++    displayRole = `${role[0].toUpperCase()}${role.slice(1)}`;
++  }
++
+   const avatarFallback = getInitials(user?.name || user?.email || 'User');
+ 
+   function handleLogout() {
+diff --git a/frontend/lib/auth-provider.tsx b/frontend/lib/auth-provider.tsx
+index cd83d69..b12941a 100644
+--- a/frontend/lib/auth-provider.tsx
++++ b/frontend/lib/auth-provider.tsx
+@@ -99,9 +99,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
+ 
+   React.useEffect(() => {
+     refreshSession();
+-    return subscribeAuthSession(() => {
++    
++    const unsubscribe = subscribeAuthSession(() => {
+       refreshSession();
+     });
++
++    const handlePageShow = (event: PageTransitionEvent) => {
++      if (event.persisted) {
++        refreshSession();
++      }
++    };
++    window.addEventListener('pageshow', handlePageShow);
++
++    return () => {
++      unsubscribe();
++      window.removeEventListener('pageshow', handlePageShow);
++    };
+   }, [refreshSession]);
+ 
+   const logout = React.useCallback(() => {
+diff --git a/frontend/tailwind.config.ts b/frontend/tailwind.config.ts
+index b1209b0..a78698b 100644
+--- a/frontend/tailwind.config.ts
++++ b/frontend/tailwind.config.ts
+@@ -1,10 +1,12 @@
+ import type { Config } from 'tailwindcss';
++import path from 'path';
+ 
+ const config: Config = {
+   darkMode: ['class', '.dark'],
+   content: [
+     './app/**/*.{js,ts,jsx,tsx,mdx}',
+-    './components/**/*.{js,ts,jsx,tsx,mdx}'
++    './components/**/*.{js,ts,jsx,tsx,mdx}',
++    path.join(process.cwd(), '../plugins/**/frontend/**/*.{js,ts,jsx,tsx,mdx}').replace(/\\/g, '/')
+   ],
+   theme: {
+     fontFamily: {
+diff --git a/plugins/auth/backend/src/controller/auth.controller.js b/plugins/auth/backend/src/controller/auth.controller.js
+index ffc1437..1858fbb 100644
+--- a/plugins/auth/backend/src/controller/auth.controller.js
++++ b/plugins/auth/backend/src/controller/auth.controller.js
+@@ -30,7 +30,8 @@ export function createAuthController({ registry, authService }) {
+     return jwtAuthenticator.sign({
+       sub: user.id,
+       email: user.email,
+-      role: user.role
++      role: user.role,
++      isSuperAdmin: user.isSuperAdmin
+     });
+   }
+ 
+diff --git a/plugins/calendar/frontend/pages/CalendarPage.tsx b/plugins/calendar/frontend/pages/CalendarPage.tsx
+index 79ee1c9..753f98a 100644
+--- a/plugins/calendar/frontend/pages/CalendarPage.tsx
++++ b/plugins/calendar/frontend/pages/CalendarPage.tsx
+@@ -126,11 +126,11 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
+         {days.map((day, idx) => (
+           <div
+             key={idx}
+-            className={`aspect-square rounded-lg border ${
++            className={`min-h-24 rounded-lg border ${
+               day === null
+-                ? 'bg-muted border-slate-100'
++                ? 'bg-muted border-slate-100 dark:border-border/30'
+                 : 'border-border bg-card hover:bg-muted'
+-            } p-1`}
++            } p-2 transition-colors`}
+           >
+             {day !== null && (
+               <div className="flex flex-col h-full">
+@@ -254,9 +254,6 @@ export function CalendarPage() {
+       <section className="rounded-4xl border border-border p-8 shadow-sm shadow-sm bg-card text-card-foreground">
+         <div className="flex items-center justify-between gap-3">
+           <div>
+-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+-              Phase 3
+-            </p>
+             <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
+               Calendar & Planning
+             </h1>
+diff --git a/plugins/club/backend/src/controller/club.controller.js b/plugins/club/backend/src/controller/club.controller.js
+index 8ccedef..384bbc4 100644
+--- a/plugins/club/backend/src/controller/club.controller.js
++++ b/plugins/club/backend/src/controller/club.controller.js
+@@ -234,6 +234,16 @@ export function createClubController(clubService) {
+     }
+   }
+ 
++  async function listMembers(req, res, next) {
++    const { clubId } = req.params;
++    try {
++      const members = await clubService.listMembers(clubId);
++      res.status(200).json({ success: true, data: members });
++    } catch (err) {
++      next(err);
++    }
++  }
++
+   // ==== ROLE MANAGEMENT ====
+ 
+   async function listRoles(req, res, next) {
+@@ -307,6 +317,7 @@ export function createClubController(clubService) {
+     addMember,
+     removeMember,
+     assignRole,
++    listMembers,
+     approveClub,
+     rejectClub,
+     listRoles,
+diff --git a/plugins/club/backend/src/repository/club.repository.js b/plugins/club/backend/src/repository/club.repository.js
+index b70d1d6..67c05df 100644
+--- a/plugins/club/backend/src/repository/club.repository.js
++++ b/plugins/club/backend/src/repository/club.repository.js
+@@ -64,7 +64,10 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
+   }
+ 
+   async function listMembers(clubId) {
+-    return ClubMember.find({ clubId }).populate('roles').lean();
++    return ClubMember.find({ clubId })
++      .populate('roles')
++      .populate('userId', 'name email avatar')
++      .lean();
+   }
+ 
+   async function removeRoleFromAllMembers(clubId, roleId) {
+diff --git a/plugins/club/backend/src/routes/club.routes.js b/plugins/club/backend/src/routes/club.routes.js
+index bf7e93c..96f231b 100644
+--- a/plugins/club/backend/src/routes/club.routes.js
++++ b/plugins/club/backend/src/routes/club.routes.js
+@@ -45,6 +45,11 @@ export function registerClubRoutes(
+   );
+ 
+   // Member Management
++  app.get(
++    '/api/v1/clubs/:clubId/members',
++    requirePermissions('club:manage', 'member:manage'),
++    clubController.listMembers
++  );
+   app.post(
+     '/api/v1/clubs/:clubId/members',
+     manageMembers,
+diff --git a/plugins/club/backend/src/schema/club.schema.js b/plugins/club/backend/src/schema/club.schema.js
+index 8c02666..6e4dcd0 100644
+--- a/plugins/club/backend/src/schema/club.schema.js
++++ b/plugins/club/backend/src/schema/club.schema.js
+@@ -38,16 +38,6 @@ export const createClubSchema = z
+ 
+ export const addMemberSchema = z
+   .object({
+-    userId: z
+-      .string()
+-      .trim()
+-      .min(1, 'User ID is required')
+-      .max(50, 'User ID must be 50 characters or fewer'),
+-    name: z
+-      .string()
+-      .trim()
+-      .min(2, 'Name must be between 2 and 80 characters')
+-      .max(80, 'Name must be between 2 and 80 characters'),
+     email: z
+       .string()
+       .trim()
+diff --git a/plugins/club/backend/src/service/club.service.js b/plugins/club/backend/src/service/club.service.js
+index dadf9de..b633751 100644
+--- a/plugins/club/backend/src/service/club.service.js
++++ b/plugins/club/backend/src/service/club.service.js
+@@ -301,13 +301,22 @@ export function createClubService(clubRepository, eventBus) {
+     }
+   }
+ 
+-  async function addMember(clubId, member) {
++  async function addMember(clubId, memberData) {
+     const club = await clubRepository.getClubById(clubId);
+     if (!club) return null;
+ 
++    const user = await clubRepository.findUserByEmail(memberData.email);
++    if (!user) {
++      const error = new Error('User not found on the platform');
++      error.code = 'USER_NOT_FOUND';
++      throw error;
++    }
++
++    const userId = user._id || user.id;
++
+     const existingMember = await clubRepository.findMember(
+       clubId,
+-      member.userId
++      userId
+     );
+     if (existingMember) {
+       const error = new Error('Member already exists in this club');
+@@ -317,12 +326,12 @@ export function createClubService(clubRepository, eventBus) {
+ 
+     const assignedRole = await clubRepository.findRole(
+       clubId,
+-      member.role || 'volunteer'
++      memberData.role || 'volunteer'
+     );
+     const rolesArray = assignedRole ? [assignedRole._id] : [];
+ 
+     const clubMember = await clubRepository.createClubMember({
+-      userId: member.userId,
++      userId,
+       clubId,
+       roles: rolesArray
+     });
+diff --git a/plugins/club/backend/src/service/club.service.test.js b/plugins/club/backend/src/service/club.service.test.js
+index 04ccda2..45425b7 100644
+--- a/plugins/club/backend/src/service/club.service.test.js
++++ b/plugins/club/backend/src/service/club.service.test.js
+@@ -128,4 +128,40 @@ describe('ClubService', () => {
+       expect(fetched.name).toBe('Club 1');
+     });
+   });
++
++  describe('members management', () => {
++    it('should add a member and list members', async () => {
++      const club = await service.createClub({
++        name: 'Member Club',
++        email: 'member@test.com',
++        instituteId: 'inst_1',
++        createdBy: 'user_1'
++      });
++      await service.updateClubStatus(club.id, 'approved');
++
++      const ownerRole = await ClubRole.findOne({ clubId: club.id, name: 'owner' });
++
++      // Create a test user first
++      await User.create({
++        name: 'Test Member',
++        email: 'test_user2@example.com',
++        passwordHash: 'dummy'
++      });
++
++      // Add another member
++      await service.addMember(club.id, {
++        email: 'test_user2@example.com',
++        role: ownerRole._id.toString()
++      });
++
++      const members = await service.listMembers(club.id);
++      
++      expect(members.length).toBe(2); // One is the provisioned owner, one is the new member
++      
++      const newMember = members.find(m => m.userId.email === 'test_user2@example.com');
++      expect(newMember).toBeDefined();
++      expect(newMember.roles.some(r => r._id.toString() === ownerRole._id.toString())).toBeTruthy();
++    });
++  });
+ });
++
+diff --git a/plugins/club/frontend/api.ts b/plugins/club/frontend/api.ts
+index 4029c5e..9adbad0 100644
+--- a/plugins/club/frontend/api.ts
++++ b/plugins/club/frontend/api.ts
+@@ -45,6 +45,24 @@ export const RoleSchema = z.object({
+ 
+ export type Role = z.infer<typeof RoleSchema>;
+ 
++export const ClubMemberSchema = z.object({
++  id: z.string().optional(),
++  _id: z.string().optional(),
++  userId: z.union([
++    z.string(),
++    z.object({
++      _id: z.string(),
++      name: z.string(),
++      email: z.string()
++    })
++  ]),
++  clubId: z.string(),
++  roles: z.array(z.any()), // Either role objects or strings depending on backend population
++  joinedAt: z.string().optional().nullable()
++});
++
++export type ClubMember = z.infer<typeof ClubMemberSchema>;
++
+ export const SystemPermissionSchema = z.object({
+   id: z.string(),
+   module: z.string(),
+@@ -168,3 +186,38 @@ export async function fetchMyClubPermissions(
+     return { permissions: [], isSuperAdmin: false };
+   }
+ }
++
++export async function fetchClubMembers(clubId: string): Promise<ClubMember[]> {
++  const response = await apiClient.get(`/clubs/${clubId}/members`);
++  return z.array(ClubMemberSchema).parse(response);
++}
++
++export async function addClubMember(
++  clubId: string,
++  payload: { email: string; role: string }
++): Promise<ClubMember> {
++  const response = await apiClient.post(`/clubs/${clubId}/members`, payload);
++  return ClubMemberSchema.parse(response);
++}
++
++export async function removeClubMember(
++  clubId: string,
++  memberUserId: string
++): Promise<boolean> {
++  const response = await apiClient.delete<{ removed: boolean }>(
++    `/clubs/${clubId}/members/${memberUserId}`
++  );
++  return response.removed;
++}
++
++export async function assignClubMemberRole(
++  clubId: string,
++  memberUserId: string,
++  roleName: string
++): Promise<ClubMember> {
++  const response = await apiClient.patch(
++    `/clubs/${clubId}/members/${memberUserId}/role`,
++    { role: roleName }
++  );
++  return ClubMemberSchema.parse(response);
++}
+diff --git a/plugins/club/frontend/hooks.ts b/plugins/club/frontend/hooks.ts
+index b23aa7b..5b2af58 100644
+--- a/plugins/club/frontend/hooks.ts
++++ b/plugins/club/frontend/hooks.ts
+@@ -11,9 +11,13 @@ import {
+   createClub,
+   updateClub,
+   approveClub,
+-  rejectClub
++  rejectClub,
++  fetchClubMembers,
++  addClubMember,
++  removeClubMember,
++  assignClubMemberRole
+ } from './api';
+-import type { Club, Role } from './api';
++import type { Club, Role, ClubMember } from './api';
+ 
+ // Queries
+ export function useClubs(status?: 'approved' | 'pending' | 'rejected') {
+@@ -140,3 +144,48 @@ export function useDeleteRole(clubId: string) {
+     }
+   });
+ }
++
++export function useClubMembers(clubId: string) {
++  return useQuery({
++    queryKey: ['clubs', clubId, 'members'],
++    queryFn: () => fetchClubMembers(clubId),
++    enabled: !!clubId
++  });
++}
++
++export function useAddClubMember(clubId: string) {
++  const queryClient = useQueryClient();
++  return useMutation({
++    mutationFn: (payload: { email: string; role: string }) =>
++      addClubMember(clubId, payload),
++    onSuccess: () => {
++      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
++    }
++  });
++}
++
++export function useRemoveClubMember(clubId: string) {
++  const queryClient = useQueryClient();
++  return useMutation({
++    mutationFn: (memberUserId: string) => removeClubMember(clubId, memberUserId),
++    onSuccess: () => {
++      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
++    }
++  });
++}
++
++export function useAssignClubMemberRole(clubId: string) {
++  const queryClient = useQueryClient();
++  return useMutation({
++    mutationFn: ({
++      memberUserId,
++      roleName
++    }: {
++      memberUserId: string;
++      roleName: string;
++    }) => assignClubMemberRole(clubId, memberUserId, roleName),
++    onSuccess: () => {
++      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
++    }
++  });
++}
+diff --git a/plugins/task/frontend/TaskDashboard.tsx b/plugins/task/frontend/TaskDashboard.tsx
+index 80cba07..23be12c 100644
+--- a/plugins/task/frontend/TaskDashboard.tsx
++++ b/plugins/task/frontend/TaskDashboard.tsx
+@@ -19,9 +19,6 @@ export function TaskDashboard() {
+       <section className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm">
+         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+           <div className="max-w-3xl">
+-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
+-              Phase 3
+-            </p>
+             <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
+               Task dashboard
+             </h1>
+diff --git a/plugins/vendor/frontend/api.ts b/plugins/vendor/frontend/api.ts
+index 86a2cdd..47b455f 100644
+--- a/plugins/vendor/frontend/api.ts
++++ b/plugins/vendor/frontend/api.ts
+@@ -37,8 +37,8 @@ export const vendorAPI = {
+     if (filters.category) params.append('category', String(filters.category));
+     if (filters.status) params.append('status', String(filters.status));
+ 
+-    const res = await apiClient.get(`/vendors?${params}`);
+-    return z.array(VendorSchema).parse(res);
++    const res = await apiClient.get<{ vendors: unknown }>(`/vendors?${params}`);
++    return z.array(VendorSchema).parse(res.vendors);
+   },
+ 
+   async getVendorById(vendorId: string) {
+@@ -69,13 +69,13 @@ export const vendorAPI = {
+   },
+ 
+   async getEventVendors(eventId: string) {
+-    const res = await apiClient.get(`/events/${eventId}/vendors`);
+-    return z.array(VendorAssignmentSchema).parse(res);
++    const res = await apiClient.get<{ vendors: unknown }>(`/events/${eventId}/vendors`);
++    return z.array(VendorAssignmentSchema).parse(res.vendors);
+   },
+ 
+   async getVendorAssignments(vendorId: string) {
+-    const res = await apiClient.get(`/vendors/${vendorId}/assignments`);
+-    return z.array(VendorAssignmentSchema).parse(res);
++    const res = await apiClient.get<{ assignments: unknown }>(`/vendors/${vendorId}/assignments`);
++    return z.array(VendorAssignmentSchema).parse(res.assignments);
+   },
+ 
+   async updateAssignmentStatus(assignmentId: string, status: string) {
+diff --git a/plugins/vendor/frontend/pages/VendorsPage.tsx b/plugins/vendor/frontend/pages/VendorsPage.tsx
+index 4ee1fac..849c2e6 100644
+--- a/plugins/vendor/frontend/pages/VendorsPage.tsx
++++ b/plugins/vendor/frontend/pages/VendorsPage.tsx
+@@ -15,44 +15,83 @@ export function VendorsPage() {
+     );
+ 
+   return (
+-    <div className="p-6">
+-      <div className="flex justify-between items-center mb-6">
+-        <h1 className="text-3xl font-bold">Vendor Management</h1>
+-        <Link
+-          href="/vendors/new"
+-          className="bg-blue-600 text-white px-4 py-2 rounded"
+-        >
+-          Add Vendor
+-        </Link>
+-      </div>
++    <div className="mx-auto max-w-7xl space-y-8">
++      <section className="rounded-4xl border border-border p-8 shadow-sm bg-card text-card-foreground">
++        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
++          <div>
++            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
++              Vendor Management
++            </h1>
++            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
++              Manage external suppliers, agencies, and partners for your events.
++            </p>
++          </div>
++          <div className="flex flex-wrap gap-3">
++            <Link
++              href="/"
++              className="rounded-full border border-border/80 bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground transition hover:border-border hover:bg-muted"
++            >
++              Back to dashboard
++            </Link>
++            <Link
++              href="/vendors/new"
++              className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 shadow-sm"
++            >
++              Add vendor
++            </Link>
++          </div>
++        </div>
++      </section>
++
++      {vendors.length > 0 && (
++        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
++          {vendors.map((vendor) => (
++            <div
++              key={vendor.id}
++              className="rounded-3xl border border-border bg-card p-6 shadow-sm transition hover:border-primary/50"
++            >
++              <div className="flex items-start justify-between">
++                <div>
++                  <h3 className="text-xl font-semibold text-foreground line-clamp-1">
++                    {vendor.name}
++                  </h3>
++                  <span className="mt-3 inline-block rounded-full bg-muted/80 px-3 py-1 text-xs font-medium text-muted-foreground">
++                    {vendor.category}
++                  </span>
++                </div>
++              </div>
+ 
+-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+-        {vendors.map((vendor) => (
+-          <div
+-            key={vendor.id}
+-            className="border rounded-lg p-4 hover:shadow-lg"
+-          >
+-            <h3 className="font-bold text-lg">{vendor.name}</h3>
+-            <p className="text-sm text-gray-600">{vendor.category}</p>
+-            <p className="text-sm">Contact: {vendor.contactPerson}</p>
+-            <p className="text-sm">{vendor.contactPhone}</p>
+-            <div className="mt-3 flex gap-2">
+-              <Link
+-                href={`/vendors/${vendor.id}`}
+-                className="text-blue-600 text-sm"
+-              >
+-                View
+-              </Link>
+-              <button className="text-gray-600 text-sm">Edit</button>
++              <div className="mt-6 space-y-2 text-sm text-muted-foreground">
++                <p>
++                  <span className="font-medium text-foreground">Contact:</span>{' '}
++                  {vendor.contactPerson || 'N/A'}
++                </p>
++                <p>
++                  <span className="font-medium text-foreground">Phone:</span>{' '}
++                  {vendor.contactPhone || 'N/A'}
++                </p>
++              </div>
++
++              <div className="mt-6 flex gap-3">
++                <Link
++                  href={`/vendors/${vendor.id}`}
++                  className="flex-1 rounded-2xl border border-border/80 bg-muted px-4 py-2.5 text-center text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-card"
++                >
++                  View Details
++                </Link>
++              </div>
+             </div>
+-          </div>
+-        ))}
+-      </div>
++          ))}
++        </section>
++      )}
+ 
+       {vendors.length === 0 && (
+-        <div className="text-center py-12 text-gray-500">
+-          <p>No vendors yet. Create one to get started!</p>
+-        </div>
++        <section className="rounded-3xl border border-dashed border-border p-12 text-center bg-card">
++          <p className="text-lg font-medium text-foreground mb-2">No vendors yet</p>
++          <p className="text-sm text-muted-foreground">
++            Create your first vendor to start managing suppliers.
++          </p>
++        </section>
+       )}
+     </div>
+   );

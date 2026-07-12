@@ -19,9 +19,6 @@ export function TaskDashboard() {
       <section className="rounded-4xl border border-border bg-card text-card-foreground p-8 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">
-              Phase 3
-            </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
               Task dashboard
             </h1>

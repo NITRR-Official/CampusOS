@@ -34,14 +34,44 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  if (registry.permissions) {
-    registry.permissions.register({
-      id: 'budget:manage',
-      module: 'budget',
-      label: 'Manage Budget',
-      description: 'Allows allocating budgets, tracking expenses, and approvals'
-    });
-  }
+  registry.permissions.register({
+    id: 'budget:manage',
+    module: 'budget',
+    label: 'Manage Budget',
+    description: 'Allows allocating budgets, tracking expenses, and approvals'
+  });
+
+  registry.registerContextResolver('/api/v1/budget', async (req) => {
+    let budgetId = req.params?.budgetId;
+
+    // Handle expense routes where budgetId is not directly in the URL but expenseId is
+    if (req.path.includes('/expense/') && req.params.expenseId) {
+      try {
+        const ExpenseModel = (await import('./schema/expense.model.js'))
+          .Expense;
+        const exp = await ExpenseModel.findById(req.params.expenseId)
+          .select('budgetId')
+          .lean();
+        budgetId = exp?.budgetId;
+      } catch {
+        return null;
+      }
+    } else if (!budgetId) {
+      budgetId = req.url.split('/')[4];
+    }
+
+    if (!budgetId || budgetId === 'expense') return null;
+
+    try {
+      const BudgetModel = (await import('./schema/budget.model.js')).Budget;
+      const budgetDoc = await BudgetModel.findById(budgetId)
+        .select('clubId')
+        .lean();
+      return budgetDoc?.clubId || null;
+    } catch {
+      return null;
+    }
+  });
 
   if (eventBus) {
     eventBus.on('event:deleted', async (payload) => {

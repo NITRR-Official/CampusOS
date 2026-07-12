@@ -1,17 +1,5 @@
 import mongoose from 'mongoose';
 
-export const PERMISSIONS = {
-  ADMINISTRATOR: 'administrator',
-  CLUB_MANAGE: 'club:manage',
-  ROLE_MANAGE: 'role:manage',
-  MEMBER_MANAGE: 'member:manage',
-  EVENT_CREATE: 'event:create',
-  EVENT_MANAGE: 'event:manage',
-  BUDGET_VIEW: 'budget:view',
-  BUDGET_MANAGE: 'budget:manage',
-  TASK_MANAGE: 'task:manage'
-};
-
 const roleSchema = new mongoose.Schema(
   {
     _id: {
@@ -30,8 +18,7 @@ const roleSchema = new mongoose.Schema(
     },
     permissions: [
       {
-        type: String,
-        enum: Object.values(PERMISSIONS)
+        type: String
       }
     ],
     hierarchyLevel: {

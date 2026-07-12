@@ -30,14 +30,26 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  if (registry.permissions) {
-    registry.permissions.register({
-      id: 'vendor:manage',
-      module: 'vendor',
-      label: 'Manage Vendors',
-      description: 'Allows adding vendors, managing quotes, and invoices'
-    });
-  }
+  registry.permissions.register({
+    id: 'vendor:manage',
+    module: 'vendor',
+    label: 'Manage Vendors',
+    description: 'Allows adding vendors, managing quotes, and invoices'
+  });
+
+  registry.registerContextResolver('/api/v1/vendors', async (req) => {
+    const vendorId = req.params?.vendorId || req.url.split('/')[4];
+    if (!vendorId || vendorId === 'assignments') return null;
+    try {
+      const VendorModel = (await import('./schema/vendor.model.js')).Vendor;
+      const vendorDoc = await VendorModel.findById(vendorId)
+        .select('clubId')
+        .lean();
+      return vendorDoc?.clubId || null;
+    } catch {
+      return null;
+    }
+  });
 
   if (eventBus) {
     const vendorService = new VendorService();

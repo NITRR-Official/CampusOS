@@ -89,7 +89,8 @@ export function authMiddleware(req, res, next) {
     req.user = {
       id: decoded.sub || decoded.id || null, // both sub and id for wider compatibility
       email: decoded.email || null,
-      role: decoded.role || 'user'
+      role: decoded.role || 'user',
+      isSuperAdmin: !!decoded.isSuperAdmin
     };
 
     next();

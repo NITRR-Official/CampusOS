@@ -2,8 +2,6 @@ import registry from '../utils/registry.js';
 import { User } from '../database/schemas/user.schema.js';
 
 export function requirePermissions(...allowedPermissions) {
-  const allowed = new Set(allowedPermissions);
-
   return async function permissionGuard(req, res, next) {
     // 1. Ensure user is authenticated
     if (!req.user || !req.user.id) {
@@ -27,11 +25,15 @@ export function requirePermissions(...allowedPermissions) {
       // Look for clubId in params or body
       let clubId = req.params?.clubId || req.body?.clubId;
 
-      // Note: For routes like /events/:eventId, the controller or a custom param-resolver
-      // should ideally attach req.resolvedClubId before reaching this middleware,
-      // or we accept that personal context applies if no clubId is found.
-      if (!clubId && req.resolvedClubId) {
-        clubId = req.resolvedClubId;
+      // Dynamically resolve context if not directly provided
+      if (!clubId) {
+        if (req.resolvedClubId) {
+          clubId = req.resolvedClubId;
+        } else {
+          // Use registry context resolvers to dynamically lookup the club context
+          // based on other params (e.g., eventId -> clubId)
+          clubId = await registry.resolveContext(req);
+        }
       }
 
       // 4. If we have a club context, check club-specific permissions

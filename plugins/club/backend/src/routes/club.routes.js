@@ -45,6 +45,11 @@ export function registerClubRoutes(
   );
 
   // Member Management
+  app.get(
+    '/api/v1/clubs/:clubId/members',
+    requirePermissions('club:manage', 'member:manage'),
+    clubController.listMembers
+  );
   app.post(
     '/api/v1/clubs/:clubId/members',
     manageMembers,
@@ -57,8 +62,13 @@ export function registerClubRoutes(
   );
   app.patch(
     '/api/v1/clubs/:clubId/members/:memberUserId/role',
-    manageMembers,
+    manageRoles,
     clubController.assignRole
+  );
+  app.delete(
+    '/api/v1/clubs/:clubId/members/:memberUserId/roles/:roleName',
+    manageRoles,
+    clubController.revokeRole
   );
 
   // Role Management

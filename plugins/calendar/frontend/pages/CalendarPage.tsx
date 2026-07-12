@@ -126,11 +126,11 @@ function CalendarGrid({ currentDate, eventsMap }: CalendarGridProps) {
         {days.map((day, idx) => (
           <div
             key={idx}
-            className={`aspect-square rounded-lg border ${
+            className={`min-h-24 rounded-lg border ${
               day === null
-                ? 'bg-muted border-slate-100'
+                ? 'bg-muted border-slate-100 dark:border-border/30'
                 : 'border-border bg-card hover:bg-muted'
-            } p-1`}
+            } p-2 transition-colors`}
           >
             {day !== null && (
               <div className="flex flex-col h-full">
@@ -254,9 +254,6 @@ export function CalendarPage() {
       <section className="rounded-4xl border border-border p-8 shadow-sm shadow-sm bg-card text-card-foreground">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-              Phase 3
-            </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
               Calendar & Planning
             </h1>

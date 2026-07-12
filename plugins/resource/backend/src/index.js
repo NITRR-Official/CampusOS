@@ -31,14 +31,32 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  if (registry.permissions) {
-    registry.permissions.register({
-      id: 'resource:manage',
-      module: 'resource',
-      label: 'Manage Resources',
-      description: 'Allows allocating and tracking resources and inventory'
-    });
-  }
+  registry.permissions.register({
+    id: 'resource:manage',
+    module: 'resource',
+    label: 'Manage Resources',
+    description: 'Allows allocating and tracking resources and inventory'
+  });
+
+  registry.registerContextResolver('/api/v1/resources', async (req) => {
+    const resourceId = req.params?.resourceId || req.url.split('/')[4];
+    if (
+      !resourceId ||
+      resourceId === 'available' ||
+      resourceId === 'allocations'
+    )
+      return null;
+    try {
+      const ResourceModel = (await import('./schema/resource.model.js'))
+        .Resource;
+      const resDoc = await ResourceModel.findById(resourceId)
+        .select('clubId')
+        .lean();
+      return resDoc?.clubId || null;
+    } catch {
+      return null;
+    }
+  });
 
   if (eventBus) {
     const resourceService = new ResourceService();

@@ -128,4 +128,52 @@ describe('ClubService', () => {
       expect(fetched.name).toBe('Club 1');
     });
   });
+
+  describe('members management', () => {
+    it('should add a member and list members', async () => {
+      const club = await service.createClub({
+        name: 'Member Club',
+        email: 'member@test.com',
+        instituteId: 'inst_1',
+        createdBy: 'user_1'
+      });
+      await service.updateClubStatus(club.id, 'approved');
+
+      const ownerRole = await ClubRole.findOne({
+        clubId: club.id,
+        name: 'owner'
+      });
+
+      // Create a test user first
+      await User.create({
+        name: 'Test Member',
+        email: 'test_user2@example.com',
+        passwordHash: 'dummy'
+      });
+
+      // Add another member as super admin
+      await service.addMember(
+        club.id,
+        {
+          email: 'test_user2@example.com',
+          role: ownerRole._id.toString()
+        },
+        { isSuperAdmin: true }
+      );
+
+      const members = await service.listMembers(club.id);
+
+      expect(members.length).toBe(2); // One is the provisioned owner, one is the new member
+
+      const newMember = members.find(
+        (m) => m.userId.email === 'test_user2@example.com'
+      );
+      expect(newMember).toBeDefined();
+      expect(
+        newMember.roles.some(
+          (r) => r._id.toString() === ownerRole._id.toString()
+        )
+      ).toBeTruthy();
+    });
+  });
 });

@@ -12,6 +12,32 @@ class ModuleRegistry {
     this.authenticators = new Map();
     this.resolvers = new Map();
     this.permissions = new PermissionRegistry();
+    this.contextResolvers = new Map();
+  }
+
+  /**
+   * Register a context resolver for permission checks
+   * e.g. registry.registerContextResolver('/api/v1/events', async (req) => event.clubId)
+   */
+  registerContextResolver(routePrefix, resolverFunc) {
+    this.contextResolvers.set(routePrefix, resolverFunc);
+    console.log(`✓ Context Resolver registered for: ${routePrefix}`);
+  }
+
+  /**
+   * Resolve context (e.g. clubId) dynamically from the request using registered resolvers
+   */
+  async resolveContext(req) {
+    for (const [prefix, resolver] of this.contextResolvers.entries()) {
+      if (req.path.startsWith(prefix)) {
+        try {
+          return await resolver(req);
+        } catch (err) {
+          console.error(`Error resolving context for ${prefix}:`, err);
+        }
+      }
+    }
+    return null;
   }
 
   /**

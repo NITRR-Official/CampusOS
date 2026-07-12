@@ -40,6 +40,21 @@ export async function init(app, registry, eventBus) {
       label: 'Manage Events',
       description: 'Allows editing, publishing, and deleting events'
     });
+
+    registry.registerContextResolver('/api/v1/events', async (req) => {
+      const eventId = req.params?.eventId || req.url.split('/')[4];
+      // e.g. /api/v1/events/123/publish -> split gives ['', 'api', 'v1', 'events', '123']
+      if (!eventId) return null;
+      try {
+        const EventModel = (await import('./schema/event.model.js')).Event;
+        const eventDoc = await EventModel.findById(eventId)
+          .select('clubId')
+          .lean();
+        return eventDoc?.clubId || null;
+      } catch {
+        return null;
+      }
+    });
   }
 
   if (eventBus) {

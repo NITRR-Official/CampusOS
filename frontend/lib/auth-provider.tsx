@@ -85,9 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const normalized = normalizeSession(rawSession);
 
     if (!normalized) {
-      if (rawSession) {
-        clearAuthSession();
-      }
+      clearAuthSession();
       setSession(null);
       setStatus('unauthenticated');
       return;
@@ -99,9 +97,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     refreshSession();
-    return subscribeAuthSession(() => {
+
+    const unsubscribe = subscribeAuthSession(() => {
       refreshSession();
     });
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        refreshSession();
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('pageshow', handlePageShow);
+    };
   }, [refreshSession]);
 
   const logout = React.useCallback(() => {

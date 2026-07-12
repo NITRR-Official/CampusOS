@@ -11,9 +11,14 @@ import {
   createClub,
   updateClub,
   approveClub,
-  rejectClub
+  rejectClub,
+  fetchClubMembers,
+  addClubMember,
+  removeClubMember,
+  assignClubMemberRole,
+  revokeClubMemberRole
 } from './api';
-import type { Club, Role } from './api';
+import type { Club, Role, ClubMember } from './api';
 
 // Queries
 export function useClubs(status?: 'approved' | 'pending' | 'rejected') {
@@ -137,6 +142,68 @@ export function useDeleteRole(clubId: string) {
     mutationFn: (roleId: string) => deleteRole(clubId, roleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'roles'] });
+    }
+  });
+}
+
+export function useClubMembers(clubId: string) {
+  return useQuery({
+    queryKey: ['clubs', clubId, 'members'],
+    queryFn: () => fetchClubMembers(clubId),
+    enabled: !!clubId
+  });
+}
+
+export function useAddClubMember(clubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { email: string; role: string }) =>
+      addClubMember(clubId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
+    }
+  });
+}
+
+export function useRemoveClubMember(clubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (memberUserId: string) =>
+      removeClubMember(clubId, memberUserId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
+    }
+  });
+}
+
+export function useAssignClubMemberRole(clubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      memberUserId,
+      roleName
+    }: {
+      memberUserId: string;
+      roleName: string;
+    }) => assignClubMemberRole(clubId, memberUserId, roleName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
+    }
+  });
+}
+
+export function useRevokeClubMemberRole(clubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      memberUserId,
+      roleName
+    }: {
+      memberUserId: string;
+      roleName: string;
+    }) => revokeClubMemberRole(clubId, memberUserId, roleName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clubs', clubId, 'members'] });
     }
   });
 }

@@ -20,7 +20,7 @@ export async function init(app, registry, eventBus) {
     ClubRole,
     models.User
   );
-  const clubService = createClubService(clubRepository, eventBus);
+  const clubService = createClubService(clubRepository, eventBus, registry);
   const clubController = createClubController(clubService);
   const requirePermissions = registry.getService('requirePermissions');
   const requireSuperAdmin = registry.getService('requireSuperAdmin');

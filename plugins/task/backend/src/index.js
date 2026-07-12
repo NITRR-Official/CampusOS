@@ -29,6 +29,17 @@ export async function init(app, registry, eventBus) {
       label: 'Manage Tasks',
       description: 'Allows creating, assigning, and updating status of tasks'
     });
+
+    registry.registerContextResolver('/api/v1/tasks', async (req) => {
+      const taskId = req.params?.taskId || req.url.split('/')[4];
+      if (!taskId) return null;
+      try {
+        const taskDoc = await Task.findById(taskId).select('clubId').lean();
+        return taskDoc?.clubId || null;
+      } catch {
+        return null;
+      }
+    });
   }
 }
 

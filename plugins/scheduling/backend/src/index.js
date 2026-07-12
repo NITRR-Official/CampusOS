@@ -30,14 +30,25 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  if (registry.permissions) {
-    registry.permissions.register({
-      id: 'scheduling:manage',
-      module: 'scheduling',
-      label: 'Manage Schedules',
-      description: 'Allows managing timelines, milestones, and project phases'
-    });
-  }
+  registry.permissions.register({
+    id: 'scheduling:manage',
+    module: 'scheduling',
+    label: 'Manage Schedules',
+    description: 'Allows managing timelines, milestones, and project phases'
+  });
+
+  registry.registerContextResolver('/api/v1/schedule', async (req) => {
+    const slotId = req.params?.slotId || req.url.split('/')[4];
+    if (!slotId || slotId === 'conflicts' || slotId === 'venue') return null;
+    try {
+      const SlotModel = (await import('./schema/scheduleSlot.model.js'))
+        .ScheduleSlot;
+      const slotDoc = await SlotModel.findById(slotId).select('clubId').lean();
+      return slotDoc?.clubId || null;
+    } catch {
+      return null;
+    }
+  });
 
   if (eventBus) {
     const schedulingService = new SchedulingService();

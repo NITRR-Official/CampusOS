@@ -45,6 +45,24 @@ export const RoleSchema = z.object({
 
 export type Role = z.infer<typeof RoleSchema>;
 
+export const ClubMemberSchema = z.object({
+  id: z.string().optional(),
+  _id: z.string().optional(),
+  userId: z.union([
+    z.string(),
+    z.object({
+      _id: z.string(),
+      name: z.string(),
+      email: z.string()
+    })
+  ]),
+  clubId: z.string(),
+  roles: z.array(z.any()), // Either role objects or strings depending on backend population
+  joinedAt: z.string().optional().nullable()
+});
+
+export type ClubMember = z.infer<typeof ClubMemberSchema>;
+
 export const SystemPermissionSchema = z.object({
   id: z.string(),
   module: z.string(),
@@ -61,7 +79,8 @@ export interface SystemPermissionGroup {
 
 export const MyPermissionsSchema = z.object({
   permissions: z.array(z.string()),
-  isSuperAdmin: z.boolean()
+  isSuperAdmin: z.boolean(),
+  maxHierarchy: z.number().default(-1)
 });
 
 export async function fetchClubs(
@@ -158,13 +177,63 @@ export async function fetchSystemPermissions(): Promise<
 
 export async function fetchMyClubPermissions(
   clubId: string
-): Promise<{ permissions: string[]; isSuperAdmin: boolean }> {
+): Promise<{
+  permissions: string[];
+  isSuperAdmin: boolean;
+  maxHierarchy: number;
+}> {
   try {
     const response = await apiClient.get(
       `/clubs/${clubId}/my-permissions?t=${Date.now()}`
     );
     return MyPermissionsSchema.parse(response);
   } catch {
-    return { permissions: [], isSuperAdmin: false };
+    return { permissions: [], isSuperAdmin: false, maxHierarchy: -1 };
   }
+}
+
+export async function fetchClubMembers(clubId: string): Promise<ClubMember[]> {
+  const response = await apiClient.get(`/clubs/${clubId}/members`);
+  return z.array(ClubMemberSchema).parse(response);
+}
+
+export async function addClubMember(
+  clubId: string,
+  payload: { email: string; role: string }
+): Promise<ClubMember> {
+  const response = await apiClient.post(`/clubs/${clubId}/members`, payload);
+  return ClubMemberSchema.parse(response);
+}
+
+export async function removeClubMember(
+  clubId: string,
+  memberUserId: string
+): Promise<boolean> {
+  const response = await apiClient.delete<{ removed: boolean }>(
+    `/clubs/${clubId}/members/${memberUserId}`
+  );
+  return response.removed;
+}
+
+export async function assignClubMemberRole(
+  clubId: string,
+  memberUserId: string,
+  roleName: string
+): Promise<ClubMember> {
+  const response = await apiClient.patch(
+    `/clubs/${clubId}/members/${memberUserId}/role`,
+    { role: roleName }
+  );
+  return ClubMemberSchema.parse(response);
+}
+
+export async function revokeClubMemberRole(
+  clubId: string,
+  memberUserId: string,
+  roleName: string
+): Promise<ClubMember> {
+  const response = await apiClient.delete(
+    `/clubs/${clubId}/members/${memberUserId}/roles/${roleName}`
+  );
+  return ClubMemberSchema.parse(response);
 }

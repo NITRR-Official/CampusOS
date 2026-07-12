@@ -1,7 +1,4 @@
 import { z } from 'zod';
-import { PERMISSIONS } from './role.model.js';
-
-const VALID_PERMISSIONS = Object.values(PERMISSIONS);
 
 export const createClubSchema = z
   .object({
@@ -38,16 +35,6 @@ export const createClubSchema = z
 
 export const addMemberSchema = z
   .object({
-    userId: z
-      .string()
-      .trim()
-      .min(1, 'User ID is required')
-      .max(50, 'User ID must be 50 characters or fewer'),
-    name: z
-      .string()
-      .trim()
-      .min(2, 'Name must be between 2 and 80 characters')
-      .max(80, 'Name must be between 2 and 80 characters'),
     email: z
       .string()
       .trim()
@@ -80,13 +67,7 @@ export const createRoleSchema = z
       .trim()
       .min(2, 'Role name must be between 2 and 50 characters')
       .max(50, 'Role name must be between 2 and 50 characters'),
-    permissions: z
-      .array(
-        z.enum(VALID_PERMISSIONS, {
-          errorMap: () => ({ message: 'Invalid permission' })
-        })
-      )
-      .default([]),
+    permissions: z.array(z.string()).default([]),
     hierarchyLevel: z.number().int().default(0),
     roleType: z.enum(['team', 'role']).default('role'),
     color: z.string().trim().max(30).nullable().default(null)
@@ -101,13 +82,7 @@ export const updateRoleSchema = z
       .min(2, 'Role name must be between 2 and 50 characters')
       .max(50, 'Role name must be between 2 and 50 characters')
       .optional(),
-    permissions: z
-      .array(
-        z.enum(VALID_PERMISSIONS, {
-          errorMap: () => ({ message: 'Invalid permission' })
-        })
-      )
-      .optional(),
+    permissions: z.array(z.string()).optional(),
     hierarchyLevel: z.number().int().optional(),
     color: z.string().trim().max(30).nullable().optional()
   })

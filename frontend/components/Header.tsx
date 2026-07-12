@@ -62,7 +62,14 @@ export function Header() {
   const breadcrumbs = getBreadcrumbs();
   const displayName = user?.name || 'Campus User';
   const displayEmail = user?.email || 'No email on file';
-  const displayRole = role ? `${role[0].toUpperCase()}${role.slice(1)}` : '';
+
+  let displayRole = '';
+  if (user?.isSuperAdmin) {
+    displayRole = 'Super Admin';
+  } else if (role) {
+    displayRole = `${role[0].toUpperCase()}${role.slice(1)}`;
+  }
+
   const avatarFallback = getInitials(user?.name || user?.email || 'User');
 
   function handleLogout() {

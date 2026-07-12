@@ -15,44 +15,85 @@ export function VendorsPage() {
     );
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Vendor Management</h1>
-        <Link
-          href="/vendors/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Add Vendor
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {vendors.map((vendor) => (
-          <div
-            key={vendor.id}
-            className="border rounded-lg p-4 hover:shadow-lg"
-          >
-            <h3 className="font-bold text-lg">{vendor.name}</h3>
-            <p className="text-sm text-gray-600">{vendor.category}</p>
-            <p className="text-sm">Contact: {vendor.contactPerson}</p>
-            <p className="text-sm">{vendor.contactPhone}</p>
-            <div className="mt-3 flex gap-2">
-              <Link
-                href={`/vendors/${vendor.id}`}
-                className="text-blue-600 text-sm"
-              >
-                View
-              </Link>
-              <button className="text-gray-600 text-sm">Edit</button>
-            </div>
+    <div className="mx-auto max-w-7xl space-y-8">
+      <section className="rounded-4xl border border-border p-8 shadow-sm bg-card text-card-foreground">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
+              Vendor Management
+            </h1>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">
+              Manage external suppliers, agencies, and partners for your events.
+            </p>
           </div>
-        ))}
-      </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/"
+              className="rounded-full border border-border/80 bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground transition hover:border-border hover:bg-muted"
+            >
+              Back to dashboard
+            </Link>
+            <Link
+              href="/vendors/new"
+              className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 shadow-sm"
+            >
+              Add vendor
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {vendors.length > 0 && (
+        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {vendors.map((vendor) => (
+            <div
+              key={vendor.id}
+              className="rounded-3xl border border-border bg-card p-6 shadow-sm transition hover:border-primary/50"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-foreground line-clamp-1">
+                    {vendor.name}
+                  </h3>
+                  <span className="mt-3 inline-block rounded-full bg-muted/80 px-3 py-1 text-xs font-medium text-muted-foreground">
+                    {vendor.category}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+                <p>
+                  <span className="font-medium text-foreground">Contact:</span>{' '}
+                  {vendor.contactPerson || 'N/A'}
+                </p>
+                <p>
+                  <span className="font-medium text-foreground">Phone:</span>{' '}
+                  {vendor.contactPhone || 'N/A'}
+                </p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <Link
+                  href={`/vendors/${vendor.id}`}
+                  className="flex-1 rounded-2xl border border-border/80 bg-muted px-4 py-2.5 text-center text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-card"
+                >
+                  View Details
+                </Link>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       {vendors.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          <p>No vendors yet. Create one to get started!</p>
-        </div>
+        <section className="rounded-3xl border border-dashed border-border p-12 text-center bg-card">
+          <p className="text-lg font-medium text-foreground mb-2">
+            No vendors yet
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Create your first vendor to start managing suppliers.
+          </p>
+        </section>
       )}
     </div>
   );

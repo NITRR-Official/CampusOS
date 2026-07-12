@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Manrope:wght@200..800&family=Sora:wght@100..800&display=swap');
 @import "tailwindcss";
+@source "../../plugins";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 

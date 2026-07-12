@@ -24,6 +24,7 @@ export function proxy(request: NextRequest) {
   if (isAuthRoute && token) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
+    url.search = '';
     return NextResponse.redirect(url);
   }
 

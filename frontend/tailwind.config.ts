@@ -1,10 +1,14 @@
 import type { Config } from 'tailwindcss';
+import path from 'path';
 
 const config: Config = {
   darkMode: ['class', '.dark'],
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}'
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    path
+      .join(process.cwd(), '../plugins/**/frontend/**/*.{js,ts,jsx,tsx,mdx}')
+      .replace(/\\/g, '/')
   ],
   theme: {
     fontFamily: {

@@ -1,6 +1,5 @@
 import crypto from 'node:crypto';
 import { promisify } from 'node:util';
-import { PERMISSIONS } from '../schema/role.model.js';
 
 const scryptAsync = promisify(crypto.scrypt);
 
@@ -44,7 +43,7 @@ function serializeClubMember(doc) {
   };
 }
 
-export function createClubService(clubRepository, eventBus) {
+export function createClubService(clubRepository, eventBus, registry) {
   async function createClub({
     name,
     email,
@@ -105,7 +104,7 @@ export function createClubService(clubRepository, eventBus) {
 
   async function updateClub(clubId, payload, requesterUser) {
     const context = await _getRequesterContext(clubId, requesterUser);
-    _assertPermissions([PERMISSIONS.CLUB_MANAGE], context);
+    _assertPermissions(['club:manage'], context);
 
     // Only allow updating safe fields
     const updateData = {};
@@ -167,7 +166,7 @@ export function createClubService(clubRepository, eventBus) {
       {
         clubId,
         name: 'owner',
-        permissions: [PERMISSIONS.ADMINISTRATOR],
+        permissions: ['administrator'],
         hierarchyLevel: 1000,
         isTemplate: true,
         color: '#ff4d4f'
@@ -175,18 +174,14 @@ export function createClubService(clubRepository, eventBus) {
       {
         clubId,
         name: 'admin',
-        permissions: [PERMISSIONS.ADMINISTRATOR],
+        permissions: ['administrator'],
         hierarchyLevel: 100,
         isTemplate: true
       },
       {
         clubId,
         name: 'coordinator',
-        permissions: [
-          PERMISSIONS.EVENT_CREATE,
-          PERMISSIONS.EVENT_MANAGE,
-          PERMISSIONS.MEMBER_MANAGE
-        ],
+        permissions: ['event:create', 'event:manage', 'member:manage'],
         hierarchyLevel: 50,
         isTemplate: true
       },
@@ -261,7 +256,7 @@ export function createClubService(clubRepository, eventBus) {
       if (role.permissions) {
         for (const perm of role.permissions) {
           permissions.add(perm);
-          if (perm === PERMISSIONS.ADMINISTRATOR) {
+          if (perm === 'administrator') {
             isClubAdmin = true;
           }
         }
@@ -301,14 +296,22 @@ export function createClubService(clubRepository, eventBus) {
     }
   }
 
-  async function addMember(clubId, member) {
+  async function addMember(clubId, memberData, requesterUser) {
     const club = await clubRepository.getClubById(clubId);
     if (!club) return null;
 
-    const existingMember = await clubRepository.findMember(
-      clubId,
-      member.userId
-    );
+    const context = await _getRequesterContext(clubId, requesterUser);
+
+    const user = await clubRepository.findUserByEmail(memberData.email);
+    if (!user) {
+      const error = new Error('User not found on the platform');
+      error.code = 'USER_NOT_FOUND';
+      throw error;
+    }
+
+    const userId = user._id || user.id;
+
+    const existingMember = await clubRepository.findMember(clubId, userId);
     if (existingMember) {
       const error = new Error('Member already exists in this club');
       error.code = 'MEMBER_EXISTS';
@@ -317,12 +320,29 @@ export function createClubService(clubRepository, eventBus) {
 
     const assignedRole = await clubRepository.findRole(
       clubId,
-      member.role || 'volunteer'
+      memberData.role || 'volunteer'
     );
-    const rolesArray = assignedRole ? [assignedRole._id] : [];
+
+    if (!assignedRole) {
+      const error = new Error(
+        `Role '${memberData.role || 'volunteer'}' not found in club`
+      );
+      error.code = 'ROLE_NOT_FOUND';
+      throw error;
+    }
+
+    if (assignedRole) {
+      _assertHierarchy(
+        assignedRole.hierarchyLevel,
+        context,
+        'assign initial role to'
+      );
+    }
+
+    const rolesArray = [assignedRole._id];
 
     const clubMember = await clubRepository.createClubMember({
-      userId: member.userId,
+      userId,
       clubId,
       roles: rolesArray
     });
@@ -367,6 +387,36 @@ export function createClubService(clubRepository, eventBus) {
     return serializeClubMember(member);
   }
 
+  async function removeRoleFromMember(
+    clubId,
+    memberUserId,
+    roleName,
+    requesterUser
+  ) {
+    const context = await _getRequesterContext(clubId, requesterUser);
+
+    const role = await clubRepository.findRole(clubId, roleName);
+    if (!role) {
+      const error = new Error(`Role ${roleName} not found in club`);
+      error.code = 'ROLE_NOT_FOUND';
+      throw error;
+    }
+
+    _assertHierarchy(role.hierarchyLevel, context, 'revoke');
+
+    const member = await clubRepository.removeRoleFromMember(
+      clubId,
+      memberUserId,
+      role._id
+    );
+
+    if (!member) {
+      return undefined;
+    }
+
+    return serializeClubMember(member);
+  }
+
   async function listMembers(clubId) {
     const members = await clubRepository.listMembers(clubId);
     return members.map(serializeClubMember);
@@ -394,12 +444,27 @@ export function createClubService(clubRepository, eventBus) {
     return Array.from(permissionsSet);
   }
 
+  async function getUserContext(clubId, userId) {
+    return _getRequesterContext(clubId, { id: userId });
+  }
+
   async function listRoles(clubId) {
     return clubRepository.listRoles(clubId);
   }
 
   async function createRole(clubId, payload, requesterUser) {
     const context = await _getRequesterContext(clubId, requesterUser);
+    _assertPermissions(['role:manage'], context);
+
+    if (payload.permissions && registry && registry.permissions) {
+      for (const perm of payload.permissions) {
+        if (perm !== 'administrator' && !registry.permissions.has(perm)) {
+          const error = new Error(`Invalid permission: ${perm}`);
+          error.code = 'INVALID_PERMISSION';
+          throw error;
+        }
+      }
+    }
 
     const hierarchyLevel = payload.hierarchyLevel || 0;
     _assertHierarchy(hierarchyLevel, context, 'create');
@@ -419,6 +484,17 @@ export function createClubService(clubRepository, eventBus) {
 
   async function updateRole(clubId, roleId, payload, requesterUser) {
     const context = await _getRequesterContext(clubId, requesterUser);
+    _assertPermissions(['role:manage'], context);
+
+    if (payload.permissions && registry && registry.permissions) {
+      for (const perm of payload.permissions) {
+        if (perm !== 'administrator' && !registry.permissions.has(perm)) {
+          const error = new Error(`Invalid permission: ${perm}`);
+          error.code = 'INVALID_PERMISSION';
+          throw error;
+        }
+      }
+    }
 
     const existingRole = await clubRepository.findRoleById(clubId, roleId);
     if (!existingRole) return null;
@@ -473,8 +549,10 @@ export function createClubService(clubRepository, eventBus) {
     removeMember,
     removeAllUserMemberships,
     assignRole,
+    removeRoleFromMember,
     listMembers,
     getUserPermissions,
+    getUserContext,
     listRoles,
     createRole,
     updateRole,

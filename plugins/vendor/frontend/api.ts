@@ -37,8 +37,8 @@ export const vendorAPI = {
     if (filters.category) params.append('category', String(filters.category));
     if (filters.status) params.append('status', String(filters.status));
 
-    const res = await apiClient.get(`/vendors?${params}`);
-    return z.array(VendorSchema).parse(res);
+    const res = await apiClient.get<{ vendors: unknown }>(`/vendors?${params}`);
+    return z.array(VendorSchema).parse(res.vendors);
   },
 
   async getVendorById(vendorId: string) {
@@ -69,13 +69,17 @@ export const vendorAPI = {
   },
 
   async getEventVendors(eventId: string) {
-    const res = await apiClient.get(`/events/${eventId}/vendors`);
-    return z.array(VendorAssignmentSchema).parse(res);
+    const res = await apiClient.get<{ vendors: unknown }>(
+      `/events/${eventId}/vendors`
+    );
+    return z.array(VendorAssignmentSchema).parse(res.vendors);
   },
 
   async getVendorAssignments(vendorId: string) {
-    const res = await apiClient.get(`/vendors/${vendorId}/assignments`);
-    return z.array(VendorAssignmentSchema).parse(res);
+    const res = await apiClient.get<{ assignments: unknown }>(
+      `/vendors/${vendorId}/assignments`
+    );
+    return z.array(VendorAssignmentSchema).parse(res.assignments);
   },
 
   async updateAssignmentStatus(assignmentId: string, status: string) {

@@ -64,7 +64,10 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
   }
 
   async function listMembers(clubId) {
-    return ClubMember.find({ clubId }).populate('roles').lean();
+    return ClubMember.find({ clubId })
+      .populate('roles')
+      .populate('userId', 'name email avatar')
+      .lean();
   }
 
   async function removeRoleFromAllMembers(clubId, roleId) {
@@ -72,6 +75,14 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
       { clubId, roles: roleId },
       { $pull: { roles: roleId } }
     );
+  }
+
+  async function removeRoleFromMember(clubId, userId, roleId) {
+    return ClubMember.findOneAndUpdate(
+      { clubId, userId },
+      { $pull: { roles: roleId } },
+      { new: true }
+    ).lean();
   }
 
   // ==== Role Methods ====
@@ -150,6 +161,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     addRoleToMember,
     listMembers,
     removeRoleFromAllMembers,
+    removeRoleFromMember,
     countRoles,
     createRoles,
     createRole,
