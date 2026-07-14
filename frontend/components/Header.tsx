@@ -48,12 +48,35 @@ export function Header() {
     const crumbs = [];
     let currentPath = '';
 
-    for (const part of parts) {
-      currentPath += `/${part}`;
+    if (parts[0] === 'clubs' && parts.length > 1) {
       crumbs.push({
-        label: part.charAt(0).toUpperCase() + part.slice(1),
+        label: 'Club Workspace',
+        href: '/dashboard'
+      });
+      currentPath = `/clubs/${parts[1]}`;
+      const slug = parts[1];
+      crumbs.push({
+        label: slug
+          .split('-')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' '),
         href: currentPath
       });
+      for (let i = 2; i < parts.length; i++) {
+        currentPath += `/${parts[i]}`;
+        crumbs.push({
+          label: parts[i].charAt(0).toUpperCase() + parts[i].slice(1),
+          href: currentPath
+        });
+      }
+    } else {
+      for (const part of parts) {
+        currentPath += `/${part}`;
+        crumbs.push({
+          label: part.charAt(0).toUpperCase() + part.slice(1),
+          href: currentPath
+        });
+      }
     }
 
     return crumbs;

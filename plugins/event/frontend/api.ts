@@ -29,8 +29,8 @@ export const EventItemSchema = z.object({
 export type EventRegistration = z.infer<typeof EventRegistrationSchema>;
 export type EventItem = z.infer<typeof EventItemSchema>;
 
-export function fetchEvents() {
-  return apiClient.get<EventItem[]>('/events', {
+export function fetchEvents(clubId: string) {
+  return apiClient.get<EventItem[]>(`/events?clubId=${clubId}`, {
     schema: z.array(EventItemSchema)
   });
 }

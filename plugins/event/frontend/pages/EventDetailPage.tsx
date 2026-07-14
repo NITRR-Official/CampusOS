@@ -5,6 +5,7 @@ import { Calendar, MapPin, Users, ChevronLeft, Info } from 'lucide-react';
 
 interface EventDetailPageProps {
   params: Promise<{ eventId: string }>;
+  clubId: string;
 }
 
 function formatDate(isoDate: string) {
@@ -24,7 +25,10 @@ function formatTime(isoDate: string) {
   });
 }
 
-export async function EventDetailPage({ params }: EventDetailPageProps) {
+export async function EventDetailPage({
+  params,
+  clubId
+}: EventDetailPageProps) {
   const { eventId } = await params;
   const event = await fetchEventById(eventId);
 
@@ -32,7 +36,7 @@ export async function EventDetailPage({ params }: EventDetailPageProps) {
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Back Navigation */}
       <Link
-        href="/events"
+        href={`/clubs/${clubId}/events`}
         className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         <ChevronLeft className="size-4" />

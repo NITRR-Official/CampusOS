@@ -1,8 +1,23 @@
 import { Task } from '../schema/task.model.js';
 
+function serializeTask(task) {
+  if (!task) return null;
+  const { _id, ...rest } = task;
+  return {
+    ...rest,
+    id: _id,
+    clubId: task.clubId,
+    assignedAt: task.assignedAt || null,
+    dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
+    createdAt: task.createdAt ? new Date(task.createdAt).toISOString() : null,
+    updatedAt: task.updatedAt ? new Date(task.updatedAt).toISOString() : null
+  };
+}
+
 class TaskService {
   async createTask(payload) {
     const task = new Task({
+      clubId: payload.clubId,
       title: payload.title,
       description: payload.description || null,
       assigneeName: payload.assigneeName || null,
@@ -14,45 +29,53 @@ class TaskService {
     });
 
     await task.save();
-    return task.toObject();
+    return serializeTask(task.toObject());
   }
 
-  async listTasks() {
-    return Task.find().sort({ updatedAt: -1 }).lean().exec();
+  async listTasks(clubId) {
+    const tasks = await Task.find({ clubId })
+      .sort({ updatedAt: -1 })
+      .lean()
+      .exec();
+    return tasks.map(serializeTask);
   }
 
   async getTask(taskId) {
-    return Task.findById(taskId).lean().exec();
+    const task = await Task.findById(taskId).lean().exec();
+    return serializeTask(task);
   }
 
   async assignTask(taskId, payload) {
-    return Task.findByIdAndUpdate(
+    const task = await Task.findByIdAndUpdate(
       taskId,
-      { assigneeName: payload.assigneeName },
+      { assigneeName: payload.assigneeName, assignedAt: new Date() },
       { returnDocument: 'after' }
     )
       .lean()
       .exec();
+    return serializeTask(task);
   }
 
   async updateStatus(taskId, status) {
-    return Task.findByIdAndUpdate(
+    const task = await Task.findByIdAndUpdate(
       taskId,
       { status },
       { returnDocument: 'after' }
     )
       .lean()
       .exec();
+    return serializeTask(task);
   }
 
   async updatePriority(taskId, priority) {
-    return Task.findByIdAndUpdate(
+    const task = await Task.findByIdAndUpdate(
       taskId,
       { priority },
       { returnDocument: 'after' }
     )
       .lean()
       .exec();
+    return serializeTask(task);
   }
 
   /**
@@ -125,7 +148,7 @@ class TaskService {
       .lean()
       .exec();
 
-    return { success: true, task: updatedTask };
+    return { success: true, task: serializeTask(updatedTask) };
   }
 
   async removeDependency(taskId, dependencyId) {
@@ -147,7 +170,7 @@ class TaskService {
       .lean()
       .exec();
 
-    return { success: true, task: updatedTask };
+    return { success: true, task: serializeTask(updatedTask) };
   }
 }
 

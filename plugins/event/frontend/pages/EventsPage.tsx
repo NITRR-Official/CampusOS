@@ -18,8 +18,8 @@ function formatDate(isoDate: string) {
   });
 }
 
-export async function EventsPage() {
-  const events = await fetchEvents();
+export async function EventsPage({ clubId }: { clubId: string }) {
+  const events = await fetchEvents(clubId);
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
@@ -52,7 +52,7 @@ export async function EventsPage() {
           events.map((event) => (
             <Link
               key={event.id}
-              href={`/events/${event.id}`}
+              href={`/clubs/${clubId}/events/${event.id}`}
               className="group block"
             >
               <article className="flex flex-col h-full rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30">

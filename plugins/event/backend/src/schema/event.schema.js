@@ -21,9 +21,8 @@ export const createEventSchemaBase = z
     clubId: z
       .string()
       .trim()
-      .max(50, 'Club ID must be 50 characters or fewer')
-      .optional()
-      .nullable(),
+      .min(1, 'clubId is required')
+      .max(50, 'Club ID must be 50 characters or fewer'),
     venue: z
       .string()
       .trim()

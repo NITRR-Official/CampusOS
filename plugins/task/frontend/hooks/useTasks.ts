@@ -12,15 +12,15 @@ import {
 } from '@plugins/task/frontend/api';
 import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
 
-export function useTasks() {
+export function useTasks(clubId: string) {
   const accessToken = readAccessToken();
 
   const query = useQuery({
-    queryKey: ['tasks', accessToken],
+    queryKey: ['tasks', accessToken, clubId],
     queryFn: async () => {
-      if (!accessToken) return [];
+      if (!accessToken || !clubId) return [];
       try {
-        return await fetchTasks(accessToken);
+        return await fetchTasks(accessToken, clubId);
       } catch (exception: any) {
         if (exception instanceof TaskApiError && exception.status === 401) {
           clearAuthSession();
@@ -57,8 +57,10 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: (payload: Parameters<typeof createTask>[1]) =>
       createTask(accessToken || undefined, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', accessToken, variables.clubId]
+      });
     }
   });
 }
@@ -74,9 +76,12 @@ export function useAssignTask() {
     }: {
       taskId: string;
       assigneeName: string;
+      clubId: string;
     }) => assignTask(accessToken || undefined, taskId, assigneeName),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', accessToken, variables.clubId]
+      });
     }
   });
 }
@@ -86,10 +91,19 @@ export function useUpdateTaskStatus() {
   const accessToken = readAccessToken();
 
   return useMutation({
-    mutationFn: ({ taskId, status }: { taskId: string; status: any }) =>
-      updateTaskStatus(accessToken || undefined, taskId, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    mutationFn: ({
+      taskId,
+      status,
+      clubId
+    }: {
+      taskId: string;
+      status: any;
+      clubId: string;
+    }) => updateTaskStatus(accessToken || undefined, taskId, status),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', accessToken, variables.clubId]
+      });
     }
   });
 }
@@ -99,10 +113,19 @@ export function useUpdateTaskPriority() {
   const accessToken = readAccessToken();
 
   return useMutation({
-    mutationFn: ({ taskId, priority }: { taskId: string; priority: any }) =>
-      updateTaskPriority(accessToken || undefined, taskId, priority),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    mutationFn: ({
+      taskId,
+      priority,
+      clubId
+    }: {
+      taskId: string;
+      priority: any;
+      clubId: string;
+    }) => updateTaskPriority(accessToken || undefined, taskId, priority),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', accessToken, variables.clubId]
+      });
     }
   });
 }
@@ -118,9 +141,12 @@ export function useAddTaskDependency() {
     }: {
       taskId: string;
       dependencyId: string;
+      clubId: string;
     }) => addTaskDependency(accessToken || undefined, taskId, dependencyId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', accessToken, variables.clubId]
+      });
     }
   });
 }
@@ -136,9 +162,12 @@ export function useRemoveTaskDependency() {
     }: {
       taskId: string;
       dependencyId: string;
+      clubId: string;
     }) => removeTaskDependency(accessToken || undefined, taskId, dependencyId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tasks', accessToken, variables.clubId]
+      });
     }
   });
 }

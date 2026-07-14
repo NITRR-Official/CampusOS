@@ -7,6 +7,13 @@ import {
   rateVendorSchema
 } from '../schema/vendor.schema.js';
 
+function createHttpError(status, message, code) {
+  const error = new Error(message);
+  error.status = status;
+  if (code) error.code = code;
+  return error;
+}
+
 const vendorService = new VendorService();
 
 /**
@@ -41,8 +48,19 @@ export const vendorController = {
    */
   async listVendors(req, res, next) {
     try {
-      const { category, status } = req.query;
+      const { category, status, clubId } = req.query;
       const filters = {};
+
+      if (!clubId) {
+        return next(
+          createHttpError(
+            400,
+            'clubId is required to list vendors',
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+      filters.clubId = clubId;
 
       if (category) filters.category = category;
       if (status) filters.status = status;

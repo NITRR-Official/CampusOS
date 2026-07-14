@@ -51,8 +51,8 @@ export function createEventService(eventRepository, eventBus) {
     return event;
   }
 
-  async function listEvents() {
-    return eventRepository.listEvents();
+  async function listEvents(clubId) {
+    return eventRepository.listEvents(clubId);
   }
 
   async function registerForEvent(eventId, registrationPayload) {

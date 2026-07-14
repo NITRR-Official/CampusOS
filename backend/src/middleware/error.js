@@ -12,7 +12,13 @@ export function errorMiddleware(err, req, res, next) {
   if (res.headersSent) {
     return next(err);
   }
-  console.error('Error caught:', err);
+
+  // Safely log errors, as ZodError deep inspect can sometimes crash Node's util.inspect
+  if (err instanceof ZodError) {
+    console.error('Validation Error caught:', err.errors);
+  } else {
+    console.error('Error caught:', err);
+  }
 
   // Extract error details
   const status = err.status || err.statusCode || 500;

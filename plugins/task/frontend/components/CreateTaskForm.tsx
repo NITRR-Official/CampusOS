@@ -12,9 +12,10 @@ const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high'];
 
 interface CreateTaskFormProps {
   accessToken: string;
+  clubId: string;
 }
 
-export function CreateTaskForm({ accessToken }: CreateTaskFormProps) {
+export function CreateTaskForm({ accessToken, clubId }: CreateTaskFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assigneeName, setAssigneeName] = useState('');
@@ -30,10 +31,11 @@ export function CreateTaskForm({ accessToken }: CreateTaskFormProps) {
 
     createTaskMutation.mutate(
       {
+        clubId,
         title,
         description,
-        assigneeName,
-        dueDate,
+        assigneeName: assigneeName.trim() === '' ? undefined : assigneeName,
+        dueDate: dueDate === '' ? undefined : new Date(dueDate).toISOString(),
         priority
       },
       {

@@ -32,7 +32,10 @@ export function createEventRepository() {
     return Event.find({ clubId }).lean().exec();
   }
 
-  async function listEvents() {
+  async function listEvents(clubId) {
+    if (clubId) {
+      return Event.find({ clubId }).lean().exec();
+    }
     return Event.find().lean().exec();
   }
 

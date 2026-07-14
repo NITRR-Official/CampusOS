@@ -106,7 +106,17 @@ export function createEventController(eventService) {
 
   async function list(req, res, next) {
     try {
-      const events = await eventService.listEvents();
+      const { clubId } = req.query;
+      if (!clubId) {
+        return next(
+          createHttpError(
+            400,
+            'clubId is required for listing events',
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+      const events = await eventService.listEvents(clubId);
       res.status(200).json({
         success: true,
         data: events

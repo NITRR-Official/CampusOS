@@ -11,7 +11,8 @@ export function initFrontend() {
     pluginId: 'club',
     title: 'Clubs',
     url: '/clubs',
-    icon: 'Users'
+    icon: 'Users',
+    context: 'global'
   });
 
   // Register Dashboard Widgets

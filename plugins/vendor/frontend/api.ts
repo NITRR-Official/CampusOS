@@ -4,11 +4,12 @@ export { ApiError as VendorApiError } from '@/lib/api/errors';
 
 export const VendorSchema = z.object({
   id: z.string(),
+  clubId: z.string().optional(),
   name: z.string(),
   category: z.string(),
-  contactPerson: z.string().optional(),
-  contactEmail: z.string().optional(),
-  contactPhone: z.string().optional(),
+  contactPerson: z.string(),
+  email: z.string(),
+  phone: z.string(),
   status: z.enum(['active', 'inactive', 'blacklisted']),
   rating: z.number().optional()
 });
@@ -27,13 +28,14 @@ export const VendorAssignmentSchema = z.object({
 export type VendorAssignment = z.infer<typeof VendorAssignmentSchema>;
 
 export const vendorAPI = {
-  async createVendor(vendorData: Record<string, unknown>) {
-    const res = await apiClient.post('/vendors', vendorData);
+  async createVendor(clubId: string, vendorData: Record<string, unknown>) {
+    const res = await apiClient.post('/vendors', { ...vendorData, clubId });
     return VendorSchema.parse(res);
   },
 
-  async getAllVendors(filters: Record<string, unknown> = {}) {
+  async getAllVendors(clubId: string, filters: Record<string, unknown> = {}) {
     const params = new URLSearchParams();
+    params.append('clubId', clubId);
     if (filters.category) params.append('category', String(filters.category));
     if (filters.status) params.append('status', String(filters.status));
 

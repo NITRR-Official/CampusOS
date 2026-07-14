@@ -11,6 +11,10 @@ const vendorSchema = new mongoose.Schema(
       type: String,
       default: () => new mongoose.Types.ObjectId().toString()
     },
+    clubId: {
+      type: String,
+      required: true
+    },
     name: {
       type: String,
       required: true,
@@ -142,9 +146,10 @@ const vendorSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
-vendorSchema.index({ category: 1 });
-vendorSchema.index({ email: 1 });
-vendorSchema.index({ nameLower: 1 });
+vendorSchema.index({ clubId: 1 });
+vendorSchema.index({ clubId: 1, category: 1 });
+vendorSchema.index({ clubId: 1, email: 1 });
+vendorSchema.index({ clubId: 1, nameLower: 1 });
 vendorSchema.index({ 'assignments.eventId': 1 });
 vendorSchema.index({ 'assignments.assignmentId': 1 });
 

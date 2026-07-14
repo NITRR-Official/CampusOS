@@ -21,7 +21,7 @@ const eventSchema = new mongoose.Schema(
     },
     clubId: {
       type: String,
-      default: null
+      required: true
     },
     venue: {
       type: String,

@@ -5,6 +5,7 @@ export interface SidebarLink {
   title: string;
   url: string;
   icon?: string;
+  context?: 'global' | 'workspace';
 }
 
 export interface WidgetRegistration {

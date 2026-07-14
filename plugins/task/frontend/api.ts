@@ -7,6 +7,7 @@ export const TaskPrioritySchema = z.enum(['low', 'medium', 'high']);
 
 export const TaskItemSchema = z.object({
   id: z.string(),
+  clubId: z.string(),
   title: z.string(),
   description: z.string().nullable(),
   assigneeName: z.string().nullable(),
@@ -24,8 +25,8 @@ export type TaskStatus = z.infer<typeof TaskStatusSchema>;
 export type TaskPriority = z.infer<typeof TaskPrioritySchema>;
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 
-export function fetchTasks(accessToken?: string) {
-  return apiClient.get<TaskItem[]>('/tasks', {
+export function fetchTasks(accessToken: string | undefined, clubId: string) {
+  return apiClient.get<TaskItem[]>(`/tasks?clubId=${clubId}`, {
     accessToken,
     schema: z.array(TaskItemSchema)
   });
@@ -34,10 +35,11 @@ export function fetchTasks(accessToken?: string) {
 export function createTask(
   accessToken: string | undefined,
   payload: {
+    clubId: string;
     title: string;
-    description: string;
-    assigneeName: string;
-    dueDate: string;
+    description?: string;
+    assigneeName?: string;
+    dueDate?: string;
     priority: TaskPriority;
   }
 ) {

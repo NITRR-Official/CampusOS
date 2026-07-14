@@ -43,7 +43,17 @@ export function createTaskController() {
 
   async function list(req, res, next) {
     try {
-      const tasks = await taskService.listTasks();
+      const { clubId } = req.query;
+      if (!clubId) {
+        return next(
+          createHttpError(
+            400,
+            'clubId is required for listing tasks',
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+      const tasks = await taskService.listTasks(clubId);
       res.status(200).json({
         success: true,
         data: tasks

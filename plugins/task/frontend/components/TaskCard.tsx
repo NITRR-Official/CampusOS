@@ -30,9 +30,15 @@ export interface TaskCardProps {
   task: TaskItem;
   allTasks: TaskItem[];
   accessToken: string;
+  clubId: string;
 }
 
-export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
+export function TaskCard({
+  task,
+  allTasks,
+  accessToken,
+  clubId
+}: TaskCardProps) {
   const [assigneeName, setAssigneeName] = useState(task.assigneeName || '');
   const [status, setStatus] = useState<TaskStatus>(task.status);
   const [priority, setPriority] = useState<TaskPriority>(task.priority);
@@ -68,7 +74,7 @@ export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
     event.preventDefault();
     setLocalError('');
     assignTaskMutation.mutate(
-      { taskId: task.id, assigneeName },
+      { taskId: task.id, assigneeName, clubId },
       {
         onError: (error: any) => {
           setLocalError(
@@ -85,7 +91,7 @@ export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
     setStatus(nextStatus);
     setLocalError('');
     updateStatusMutation.mutate(
-      { taskId: task.id, status: nextStatus },
+      { taskId: task.id, status: nextStatus, clubId },
       {
         onError: (error: any) => {
           setStatus(task.status);
@@ -103,7 +109,7 @@ export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
     setPriority(nextPriority);
     setLocalError('');
     updatePriorityMutation.mutate(
-      { taskId: task.id, priority: nextPriority },
+      { taskId: task.id, priority: nextPriority, clubId },
       {
         onError: (error: any) => {
           setPriority(task.priority);
@@ -123,7 +129,7 @@ export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
 
     setLocalError('');
     addDependencyMutation.mutate(
-      { taskId: task.id, dependencyId: selectedDependency },
+      { taskId: task.id, dependencyId: selectedDependency, clubId },
       {
         onSuccess: () => {
           setSelectedDependency('');
@@ -142,7 +148,7 @@ export function TaskCard({ task, allTasks, accessToken }: TaskCardProps) {
   function handleRemoveDependency(dependencyId: string) {
     setLocalError('');
     removeDependencyMutation.mutate(
-      { taskId: task.id, dependencyId },
+      { taskId: task.id, dependencyId, clubId },
       {
         onError: (error: any) => {
           setLocalError(

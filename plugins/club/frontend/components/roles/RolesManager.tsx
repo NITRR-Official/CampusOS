@@ -62,12 +62,19 @@ export function RolesManager({ clubId }: { clubId: string }) {
 
     if (over && active.id !== over.id) {
       setLocalRoles((items) => {
-        const oldIndex = items.findIndex((r) => (r.id || r._id) === active.id);
-        const newIndex = items.findIndex((r) => (r.id || r._id) === over.id);
+        const ownerRole = items.find((r) => r.name === 'owner');
+        const sortableItems = items.filter((r) => r.name !== 'owner');
 
-        const newArray = arrayMove(items, oldIndex, newIndex);
+        const oldIndex = sortableItems.findIndex(
+          (r) => (r.id || r._id) === active.id
+        );
+        const newIndex = sortableItems.findIndex(
+          (r) => (r.id || r._id) === over.id
+        );
 
-        const updatedRoles = newArray.map((r: Role, i: number) => {
+        const newArray = arrayMove(sortableItems, oldIndex, newIndex);
+
+        const updatedSortableRoles = newArray.map((r: Role, i: number) => {
           const newLevel = (newArray.length - i) * 10;
           if (r.hierarchyLevel !== newLevel) {
             updateRoleMutation.mutate(
@@ -89,7 +96,9 @@ export function RolesManager({ clubId }: { clubId: string }) {
           return { ...r, hierarchyLevel: newLevel };
         });
 
-        return updatedRoles;
+        return ownerRole
+          ? [ownerRole, ...updatedSortableRoles]
+          : updatedSortableRoles;
       });
     }
   };
@@ -150,24 +159,41 @@ export function RolesManager({ clubId }: { clubId: string }) {
         </Button>
       </div>
 
+      <div className="space-y-2 mb-2">
+        {localRoles
+          .filter((r) => r.name === 'owner')
+          .map((role) => (
+            <RoleItem
+              key={(role.id || role._id) as string}
+              role={role}
+              onEdit={() => handleEdit(role)}
+              onDelete={() => handleDelete(role)}
+            />
+          ))}
+      </div>
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={localRoles.map((r) => (r.id || r._id) as string)}
+          items={localRoles
+            .filter((r) => r.name !== 'owner')
+            .map((r) => (r.id || r._id) as string)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-2">
-            {localRoles.map((role) => (
-              <RoleItem
-                key={(role.id || role._id) as string}
-                role={role}
-                onEdit={() => handleEdit(role)}
-                onDelete={() => handleDelete(role)}
-              />
-            ))}
+            {localRoles
+              .filter((r) => r.name !== 'owner')
+              .map((role) => (
+                <RoleItem
+                  key={(role.id || role._id) as string}
+                  role={role}
+                  onEdit={() => handleEdit(role)}
+                  onDelete={() => handleDelete(role)}
+                />
+              ))}
           </div>
         </SortableContext>
       </DndContext>

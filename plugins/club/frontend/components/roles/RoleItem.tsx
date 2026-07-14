@@ -96,7 +96,13 @@ export function RoleItem({ role, onEdit, onDelete }: RoleItemProps) {
       </div>
 
       <div className="flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity">
-        <Button variant="ghost" size="icon" className="size-8" onClick={onEdit}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={onEdit}
+          disabled={role.name === 'owner'}
+        >
           <Edit2 className="size-4" />
         </Button>
         <Button

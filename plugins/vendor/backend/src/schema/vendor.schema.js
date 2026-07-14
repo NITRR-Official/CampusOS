@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const createVendorSchema = z
   .object({
+    clubId: z.string().trim().min(1, 'clubId is required'),
     name: z
       .string()
       .trim()

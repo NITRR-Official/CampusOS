@@ -74,12 +74,6 @@ export default async function ClubsPage() {
                     <Users className="size-3.5" />
                     <span>{club.memberCount} Members</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-background/50 px-2 py-1 rounded-md border border-border/50">
-                    <span
-                      className={`size-2 rounded-full ${club.status === 'approved' ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                    />
-                    <span className="capitalize">{club.status}</span>
-                  </div>
                 </div>
               </article>
             </Link>

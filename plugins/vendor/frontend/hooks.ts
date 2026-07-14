@@ -1,10 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import vendorAPI from './api';
 
-export function useAllVendors(filters?: Record<string, unknown>) {
+export function useAllVendors(
+  clubId: string,
+  filters?: Record<string, unknown>
+) {
   return useQuery({
-    queryKey: ['vendors', filters],
-    queryFn: () => vendorAPI.getAllVendors(filters)
+    queryKey: ['vendors', clubId, filters],
+    queryFn: () => vendorAPI.getAllVendors(clubId, filters),
+    enabled: !!clubId
   });
 }
 
@@ -13,6 +17,17 @@ export function useVendor(vendorId: string) {
     queryKey: ['vendors', vendorId],
     queryFn: () => vendorAPI.getVendorById(vendorId),
     enabled: !!vendorId
+  });
+}
+
+export function useCreateVendor(clubId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: Record<string, unknown>) =>
+      vendorAPI.createVendor(clubId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendors', clubId] });
+    }
   });
 }
 

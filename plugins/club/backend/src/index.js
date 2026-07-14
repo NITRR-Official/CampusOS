@@ -7,6 +7,7 @@ import { ClubMember } from './schema/clubMember.model.js';
 import { Role as ClubRole } from './schema/role.model.js';
 import { verificationService } from './service/verification.service.js';
 import { mailProvider } from './service/mail.provider.js';
+import { createSlugResolver } from './middleware/slug-resolver.js';
 
 export async function init(app, registry, eventBus) {
   const models = registry.getService('core:models');
@@ -35,6 +36,10 @@ export async function init(app, registry, eventBus) {
     requirePermissions,
     requireSuperAdmin
   );
+
+  // Mount the slug resolver middleware globally for all downstream plugins under /api/v1
+  const slugResolver = createSlugResolver(Club);
+  app.use('/api/v1', slugResolver);
 
   if (eventBus) {
     eventBus.on('club.proposed', async (club) => {

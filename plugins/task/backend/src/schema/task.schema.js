@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const createTaskSchema = z
   .object({
+    clubId: z.string().trim().min(1, 'clubId is required'),
     title: z
       .string()
       .trim()

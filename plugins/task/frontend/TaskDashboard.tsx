@@ -6,8 +6,8 @@ import { CreateTaskForm } from './components/CreateTaskForm';
 import { useTasks } from './hooks/useTasks';
 import type { TaskItem } from '@plugins/task/frontend/api';
 
-export function TaskDashboard() {
-  const { accessToken, tasks, isLoading, taskCounts } = useTasks();
+export function TaskDashboard({ clubId }: { clubId: string }) {
+  const { accessToken, tasks, isLoading, taskCounts } = useTasks(clubId);
 
   function handleTaskCreated() {
     // With React Query, the mutation already invalidates 'tasks'.
@@ -84,7 +84,7 @@ export function TaskDashboard() {
 
       <section className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="flex flex-col gap-4">
-          <CreateTaskForm accessToken={accessToken || ''} />
+          <CreateTaskForm accessToken={accessToken || ''} clubId={clubId} />
         </div>
 
         <section className="space-y-4">
@@ -113,6 +113,7 @@ export function TaskDashboard() {
                     task={task}
                     allTasks={tasks}
                     accessToken={accessToken || ''}
+                    clubId={clubId}
                   />
                 ))
               ) : (

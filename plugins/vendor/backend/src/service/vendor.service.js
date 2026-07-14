@@ -43,6 +43,7 @@ function normalizeVendor(vendorDoc) {
   const vendorId = vendor.id || vendor._id;
 
   vendor.id = vendorId;
+  vendor.clubId = vendor.clubId || null;
   delete vendor._id;
   delete vendor.nameLower;
 
@@ -63,6 +64,7 @@ export class VendorService {
    */
   async createVendor(vendorData) {
     const {
+      clubId,
       name,
       category,
       contactPerson,
@@ -82,6 +84,7 @@ export class VendorService {
 
     try {
       const vendor = await vendorRepository.create({
+        clubId,
         name,
         nameLower: name.toLowerCase(),
         category,
@@ -140,7 +143,7 @@ export class VendorService {
    */
   async getAllVendors(filters = {}) {
     try {
-      const query = {};
+      const query = { clubId: filters.clubId };
 
       if (filters.category) {
         query.category = filters.category;

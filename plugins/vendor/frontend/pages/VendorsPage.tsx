@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useAllVendors } from '@plugins/vendor/frontend/hooks';
 
-export function VendorsPage() {
-  const { data: vendors = [], isLoading, error } = useAllVendors();
+export function VendorsPage({ clubId }: { clubId: string }) {
+  const { data: vendors = [], isLoading, error } = useAllVendors(clubId);
 
   if (isLoading) return <div className="p-4">Loading vendors...</div>;
   if (error)
@@ -28,13 +28,13 @@ export function VendorsPage() {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/"
+              href={`/clubs/${clubId}`}
               className="rounded-full border border-border/80 bg-card px-5 py-2.5 text-sm font-semibold text-muted-foreground transition hover:border-border hover:bg-muted"
             >
               Back to dashboard
             </Link>
             <Link
-              href="/vendors/new"
+              href={`/clubs/${clubId}/vendors/new`}
               className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 shadow-sm"
             >
               Add vendor
@@ -68,13 +68,13 @@ export function VendorsPage() {
                 </p>
                 <p>
                   <span className="font-medium text-foreground">Phone:</span>{' '}
-                  {vendor.contactPhone || 'N/A'}
+                  {vendor.phone || 'N/A'}
                 </p>
               </div>
 
               <div className="mt-6 flex gap-3">
                 <Link
-                  href={`/vendors/${vendor.id}`}
+                  href={`/clubs/${clubId}/vendors/${vendor.id}`}
                   className="flex-1 rounded-2xl border border-border/80 bg-muted px-4 py-2.5 text-center text-sm font-semibold text-foreground transition hover:border-primary/50 hover:bg-card"
                 >
                   View Details
