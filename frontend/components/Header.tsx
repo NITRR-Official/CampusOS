@@ -48,12 +48,12 @@ export function Header() {
     const crumbs = [];
     let currentPath = '';
 
-    if (parts[0] === 'clubs' && parts.length > 1) {
+    if (parts[0] === 'workspace' && parts.length > 1) {
       crumbs.push({
         label: 'Club Workspace',
         href: '/dashboard'
       });
-      currentPath = `/clubs/${parts[1]}`;
+      currentPath = `/workspace/${parts[1]}`;
       const slug = parts[1];
       crumbs.push({
         label: slug

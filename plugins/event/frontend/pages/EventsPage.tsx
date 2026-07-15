@@ -1,10 +1,14 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { fetchEvents } from '../api';
+import { Button } from '@/components/ui/button';
+import { fetchEvents, type EventItem } from '../api';
 import {
   Calendar as CalendarIcon,
   MapPin,
   Users,
-  Sparkles
+  Sparkles,
+  Plus
 } from 'lucide-react';
 
 function formatDate(isoDate: string) {
@@ -19,7 +23,28 @@ function formatDate(isoDate: string) {
 }
 
 export async function EventsPage({ clubId }: { clubId: string }) {
-  const events = await fetchEvents(clubId);
+  const cookieStore = await cookies();
+  const token = cookieStore.get('campusos_access_token')?.value;
+
+  if (!token) {
+    redirect('/login');
+  }
+
+  let events: EventItem[] = [];
+  try {
+    events = await fetchEvents(clubId, token);
+  } catch (error) {
+    console.error('Failed to fetch events:', error);
+    // If we get an error (e.g. 401 or 403), we can show an empty state or redirect
+    if (
+      error &&
+      typeof error === 'object' &&
+      'status' in error &&
+      error.status === 401
+    ) {
+      redirect('/login');
+    }
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-12">
@@ -40,6 +65,14 @@ export async function EventsPage({ clubId }: { clubId: string }) {
             Discover and register for the best events happening around campus.
             Do not miss out on workshops, fests, and meetups!
           </p>
+          <div className="flex flex-wrap gap-4 mt-6">
+            <Button size="lg" asChild className="gap-2">
+              <Link href={`/workspace/${clubId}/events/new`}>
+                <Plus className="size-4" />
+                Create New Event
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -51,8 +84,8 @@ export async function EventsPage({ clubId }: { clubId: string }) {
         ) : (
           events.map((event) => (
             <Link
-              key={event.id}
-              href={`/clubs/${clubId}/events/${event.id}`}
+              key={event.id || event._id}
+              href={`/workspace/${clubId}/events/${event.id || event._id}`}
               className="group block"
             >
               <article className="flex flex-col h-full rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/30">
@@ -99,8 +132,8 @@ export async function EventsPage({ clubId }: { clubId: string }) {
                     <div className="flex items-center justify-between text-xs font-medium text-muted-foreground pt-2">
                       <div className="flex items-center gap-1.5">
                         <Users className="size-4 text-primary/70" />
-                        {event.registrations.length} / {event.capacity || '∞'}{' '}
-                        Attending
+                        {event.registrations?.length || 0} /{' '}
+                        {event.capacity || '∞'} Attending
                       </div>
                       <div className="flex items-center gap-1 text-primary font-bold group-hover:translate-x-1 transition-transform">
                         Details <span aria-hidden="true">&rarr;</span>

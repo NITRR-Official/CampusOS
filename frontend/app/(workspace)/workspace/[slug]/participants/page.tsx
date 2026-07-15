@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
 import {
@@ -24,6 +24,8 @@ interface UserEventWithCheckIn extends EventItem {
 }
 
 export default function ParticipantDashboard() {
+  const params = useParams();
+  const clubId = params.slug as string;
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [events, setEvents] = useState<UserEventWithCheckIn[]>([]);
   const [error, setError] = useState('');
@@ -40,13 +42,16 @@ export default function ParticipantDashboard() {
 
       try {
         // Fetch registered events
-        const userEvents = await fetchEvents();
+        const userEvents = await fetchEvents(clubId, currentToken);
 
         // Fetch check-in status for each event
         const eventsWithCheckIn = await Promise.all(
           userEvents.map(async (event: EventItem) => {
             try {
-              const checkInStatus = await getCheckInStatus(event.id, '');
+              const checkInStatus = await getCheckInStatus(
+                event.id || (event as any)._id,
+                ''
+              );
               return { ...event, checkInStatus };
             } catch (err: any) {
               // No check-in yet is not an error for participants
@@ -82,7 +87,7 @@ export default function ParticipantDashboard() {
     } else {
       setIsLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken, clubId]);
 
   const upcomingEvents = events.filter(
     (e) => new Date(e.startsAt) > new Date()
@@ -175,7 +180,7 @@ export default function ParticipantDashboard() {
               <div className="space-y-3">
                 {upcomingEvents.map((event) => (
                   <div
-                    key={event.id}
+                    key={event.id || (event as any)._id}
                     className="rounded-2xl border border-border bg-card p-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -196,7 +201,7 @@ export default function ParticipantDashboard() {
                       </div>
                       <div className="flex flex-col gap-2">
                         <Link
-                          href={`/events/${event.id}`}
+                          href={`/events/${event.id || (event as any)._id}`}
                           className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-primary/90"
                         >
                           View Event
@@ -227,7 +232,7 @@ export default function ParticipantDashboard() {
               <div className="space-y-3">
                 {pastEvents.map((event) => (
                   <div
-                    key={event.id}
+                    key={event.id || (event as any)._id}
                     className="rounded-2xl border border-border bg-card/50 p-4 shadow-sm"
                   >
                     <div className="flex items-start justify-between gap-4">

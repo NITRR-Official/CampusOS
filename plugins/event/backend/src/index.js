@@ -48,6 +48,10 @@ export async function init(app, registry, eventBus) {
     });
 
     registry.registerContextResolver('/api/v1/events', async (req) => {
+      if (req.method === 'POST' && req.body?.clubId) {
+        return req.body.clubId;
+      }
+
       const eventId = req.params?.eventId || req.url.split('/')[4];
       // e.g. /api/v1/events/123/publish -> split gives ['', 'api', 'v1', 'events', '123']
       if (!eventId) return null;

@@ -16,12 +16,15 @@ const PUBLIC_ROUTES = new Set([
  * @returns {boolean}
  */
 function isPublicEventRoute(req) {
-  // event listing route
-  if (req.method === 'GET' && req.path === '/api/v1/events') {
+  // public event listing route
+  if (req.method === 'GET' && req.path === '/api/v1/events/public') {
     return true;
   }
   // public event route
-  if (req.method === 'GET' && /^\/api\/v1\/events\/[^/]+$/.test(req.path)) {
+  if (
+    req.method === 'GET' &&
+    /^\/api\/v1\/events\/[^/]+\/public$/.test(req.path)
+  ) {
     return true;
   }
   // registrations for that event

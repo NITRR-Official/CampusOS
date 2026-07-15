@@ -23,6 +23,10 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    createdBy: {
+      type: String,
+      required: true
+    },
     venue: {
       type: String,
       default: null,

@@ -116,10 +116,72 @@ export function createEventController(eventService) {
           )
         );
       }
-      const events = await eventService.listEvents(clubId);
+      let resolvedClubId = clubId;
+      if (!clubId.match(/^[0-9a-fA-F]{24}$/)) {
+        try {
+          const { Club } =
+            await import('../../../../club/backend/src/schema/club.model.js');
+          const clubDoc = await Club.findOne({ slug: clubId }).lean();
+          if (clubDoc) resolvedClubId = clubDoc._id.toString();
+        } catch (err) {
+          console.error('Could not resolve club slug in listEvents:', err);
+        }
+      }
+
+      const events = await eventService.listEvents(resolvedClubId);
       res.status(200).json({
         success: true,
         data: events
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async function listPublic(req, res, next) {
+    try {
+      const { clubId } = req.query;
+      if (!clubId) {
+        return next(
+          createHttpError(
+            400,
+            'clubId is required for listing events',
+            'VALIDATION_ERROR'
+          )
+        );
+      }
+      let resolvedClubId = clubId;
+      if (!clubId.match(/^[0-9a-fA-F]{24}$/)) {
+        try {
+          const { Club } =
+            await import('../../../../club/backend/src/schema/club.model.js');
+          const clubDoc = await Club.findOne({ slug: clubId }).lean();
+          if (clubDoc) resolvedClubId = clubDoc._id.toString();
+        } catch (err) {
+          console.error('Could not resolve club slug in listEvents:', err);
+        }
+      }
+
+      const events = await eventService.listEvents(resolvedClubId);
+
+      // Filter for published events and remove sensitive data
+      const publicEvents = events
+        .filter((event) => event.status === 'published')
+        .map((event) => ({
+          _id: event._id || event.id,
+          id: event.id || event._id,
+          title: event.title,
+          description: event.description,
+          startsAt: event.startsAt,
+          endsAt: event.endsAt,
+          venue: event.venue,
+          status: event.status,
+          clubId: event.clubId
+        }));
+
+      res.status(200).json({
+        success: true,
+        data: publicEvents
       });
     } catch (error) {
       next(error);
@@ -139,6 +201,45 @@ export function createEventController(eventService) {
       res.status(200).json({
         success: true,
         data: event
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async function getPublicById(req, res, next) {
+    const { eventId } = req.params;
+    try {
+      const event = await eventService.getEvent(eventId);
+
+      if (!event || event.status !== 'published') {
+        next(
+          createHttpError(
+            404,
+            'Event not found or not published',
+            'EVENT_NOT_FOUND'
+          )
+        );
+        return;
+      }
+
+      const publicEvent = {
+        _id: event._id || event.id,
+        id: event.id || event._id,
+        title: event.title,
+        description: event.description,
+        startsAt: event.startsAt,
+        endsAt: event.endsAt,
+        venue: event.venue,
+        status: event.status,
+        clubId: event.clubId,
+        capacity: event.capacity,
+        registrationsCount: event.registrations?.length || 0
+      };
+
+      res.status(200).json({
+        success: true,
+        data: publicEvent
       });
     } catch (error) {
       next(error);
@@ -220,7 +321,9 @@ export function createEventController(eventService) {
     publish,
     unpublish,
     list,
+    listPublic,
     getById,
+    getPublicById,
     register,
     listRegistrations
   };

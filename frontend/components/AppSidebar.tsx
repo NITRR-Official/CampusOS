@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-provider';
 import {
   Calendar,
@@ -56,8 +56,7 @@ export function AppSidebar({
   clubId?: string;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { isMobile } = useSidebar();
 
   const { data: clubs } = useClubs();
@@ -87,16 +86,20 @@ export function AppSidebar({
       name: link.title,
       href:
         clubId && link.context !== 'global'
-          ? `/clubs/${clubId}${link.url}`
+          ? `/workspace/${clubId}${link.url}`
           : link.url,
       icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : Settings
     }));
 
   const allNavigation = clubId
     ? [
-        { name: 'Dashboard', href: `/clubs/${clubId}`, icon: Home },
+        { name: 'Dashboard', href: `/workspace/${clubId}`, icon: Home },
         ...pluginLinks,
-        { name: 'Settings', href: `/clubs/${clubId}/settings`, icon: Settings }
+        {
+          name: 'Settings',
+          href: `/workspace/${clubId}/settings`,
+          icon: Settings
+        }
       ]
     : [...navigation, ...pluginLinks];
 
@@ -151,7 +154,7 @@ export function AppSidebar({
                 const isActive =
                   pathname === item.href ||
                   (item.href !== '/dashboard' &&
-                    item.href !== `/clubs/${clubId}` &&
+                    item.href !== `/workspace/${clubId}` &&
                     pathname?.startsWith(item.href + '/'));
                 return (
                   <SidebarMenuItem key={item.name}>
@@ -232,7 +235,7 @@ export function AppSidebar({
                     {clubs.map((club) => (
                       <DropdownMenuItem key={club.id || club._id} asChild>
                         <Link
-                          href={`/clubs/${club.slug}`}
+                          href={`/workspace/${club.slug}`}
                           className="flex items-center gap-2 cursor-pointer"
                         >
                           <div className="flex size-6 items-center justify-center rounded-sm border bg-primary/10">

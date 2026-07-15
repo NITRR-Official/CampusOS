@@ -2,9 +2,11 @@ export function registerEventRoutes(app, eventController, requirePermissions) {
   const manageEvents = requirePermissions('event:manage');
   const viewEvents = requirePermissions('event:view');
 
-  app.get('/api/v1/events', eventController.list);
-  app.get('/api/v1/events/:eventId', eventController.getById);
-  app.post('/api/v1/events', manageEvents, eventController.create);
+  app.get('/api/v1/events', viewEvents, eventController.list);
+  app.get('/api/v1/events/public', eventController.listPublic);
+  app.get('/api/v1/events/:eventId', viewEvents, eventController.getById);
+  app.get('/api/v1/events/:eventId/public', eventController.getPublicById);
+  app.post('/api/v1/events', eventController.create);
   app.patch('/api/v1/events/:eventId', manageEvents, eventController.update);
   app.post(
     '/api/v1/events/:eventId/publish',
