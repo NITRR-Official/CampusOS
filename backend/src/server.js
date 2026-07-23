@@ -4,6 +4,7 @@
  */
 
 import 'dotenv/config';
+import { disconnectDB } from './database/connection.js';
 
 export function startServer(app, port = 3000) {
   const server = app.listen(port, () => {
@@ -20,8 +21,9 @@ export function startServer(app, port = 3000) {
       `\n📍 Received ${signal} signal, starting graceful shutdown...`
     );
 
-    server.close(() => {
+    server.close(async () => {
       console.log('✓ HTTP server closed');
+      await disconnectDB(); // Cleanly close the database pool
       process.exit(0);
     });
 

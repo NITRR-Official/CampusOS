@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@campus-os/shared/*": ["../../shared/src/*"],
+      "@campusos/design-system": ["../../packages/design-system/src/index.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js"]
+}

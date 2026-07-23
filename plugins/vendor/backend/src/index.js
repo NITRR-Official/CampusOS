@@ -5,6 +5,7 @@
 
 import { registerVendorRoutes } from './routes/vendor.routes.js';
 import VendorService from './service/vendor.service.js';
+import { registerVendorHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -53,7 +54,9 @@ export async function init(app, registry, eventBus) {
       const vendorDoc = await VendorModel.findById(vendorId)
         .select('clubId')
         .lean();
-      return vendorDoc?.clubId || null;
+      return vendorDoc?.clubId
+        ? { type: 'clubService', id: vendorDoc.clubId.toString() }
+        : null;
     } catch {
       return null;
     }
@@ -61,11 +64,7 @@ export async function init(app, registry, eventBus) {
 
   if (eventBus) {
     const vendorService = new VendorService();
-    eventBus.on('event:deleted', async (payload) => {
-      if (payload && payload.eventId) {
-        await vendorService.deleteEventAssignments(payload.eventId);
-      }
-    });
+    registerVendorHandlers(eventBus, registry, vendorService);
   }
 }
 

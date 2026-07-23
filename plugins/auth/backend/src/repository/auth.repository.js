@@ -31,8 +31,18 @@ export function createAuthRepository(User) {
     return result.deletedCount > 0;
   }
 
+  async function findUserById(userId) {
+    return User.findById(userId).lean();
+  }
+
+  async function findUsersByIds(userIds) {
+    return User.find({ _id: { $in: userIds } }).lean();
+  }
+
   return {
     findUserByEmail,
+    findUserById,
+    findUsersByIds,
     userExists,
     createUser,
     listUsers,

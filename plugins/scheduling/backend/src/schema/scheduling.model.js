@@ -7,10 +7,6 @@ import mongoose from 'mongoose';
 
 const timeSlotSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     eventId: {
       type: String,
       required: true,
@@ -56,10 +52,6 @@ const timeSlotSchema = new mongoose.Schema(
 
 const conflictSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     slotId1: {
       type: String,
       required: true
@@ -107,6 +99,9 @@ timeSlotSchema.index({ startTime: 1, endTime: 1 });
 
 conflictSchema.index({ slotId1: 1, slotId2: 1 });
 conflictSchema.index({ resolved: 1 });
+
+timeSlotSchema.set('toJSON', { virtuals: true });
+timeSlotSchema.set('toObject', { virtuals: true });
 
 export const TimeSlot = mongoose.model('TimeSlot', timeSlotSchema);
 export const Conflict = mongoose.model('Conflict', conflictSchema);

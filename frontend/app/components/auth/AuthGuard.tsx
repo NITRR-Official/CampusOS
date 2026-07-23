@@ -4,8 +4,8 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import type { UserRole } from '@plugins/auth/frontend/api';
-import { useAuth } from '@/lib/auth-provider';
+import type { UserRole } from '@campus-os/shared/auth-types';
+import { useAuth } from '@campus-os/shared/auth-provider';
 
 interface RequireAuthProps {
   children: React.ReactNode;

@@ -4,5 +4,6 @@
   "description": "Admin Dashboard",
   "frontend": true,
   "backend": false,
-  "dependencies": []
+  "dependencies": [],
+  "defaultEnabled": true
 }

@@ -7,9 +7,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClub } from '@plugins/club/frontend/api';
 import { Building2, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@campusos/design-system';
+import { Input } from '@campusos/design-system';
+import { Label } from '@campusos/design-system';
 
 export default function NewClubPage() {
   const router = useRouter();

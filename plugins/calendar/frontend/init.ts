@@ -1,4 +1,4 @@
-import { registry } from '@/lib/plugins/registry';
+import { registry } from '@campus-os/shared/plugin-registry';
 
 export function initFrontend() {
   registry.registerSidebarLink({

@@ -50,7 +50,31 @@ router.get(
 );
 ```
 
-## 3. Hierarchy Guardrails
+## 3. Dynamic Context Resolvers
+
+By default, the `requirePermissions` middleware will look for `req.params.clubId` or `req.body.clubId` to determine the context of the request.
+
+However, if your plugin introduces a new type of context (e.g., `instituteId` or `eventId`), you must register a **Context Resolver** in your plugin's `init` block so the global middleware knows how to extract the ID and verify permissions.
+
+```javascript
+export async function init(app, registry, eventBus) {
+  // Tell the global middleware how to resolve the "institute" context
+  registry.registerContextResolver(
+    'instituteService', // The service that implements getUserPermissions()
+    (req) => {
+      // If the route has an :instituteId, return the context
+      if (req.params.instituteId) {
+        return { type: 'instituteService', id: req.params.instituteId };
+      }
+      return null;
+    }
+  );
+}
+```
+
+If you do this, your routes like `router.get('/institutes/:instituteId/settings', requirePermissions('institute:manage'))` will work perfectly!
+
+## 4. Hierarchy Guardrails
 
 CampusOS employs strict hierarchical guardrails to prevent privilege escalation. A user can never create, assign, or modify a role that has a higher `hierarchyLevel` than their own highest role.
 

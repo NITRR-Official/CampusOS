@@ -1,34 +1,66 @@
 import { createClubController } from './controller/club.controller.js';
 import { registerClubRoutes } from './routes/club.routes.js';
 import { createClubService } from './service/club.service.js';
+import { createRoleService } from './service/role.service.js';
+import { createMemberService } from './service/member.service.js';
+import { createProvisioningService } from './service/provisioning.service.js';
 import { createClubRepository } from './repository/club.repository.js';
 import { Club } from './schema/club.model.js';
 import { ClubMember } from './schema/clubMember.model.js';
 import { Role as ClubRole } from './schema/role.model.js';
-import { verificationService } from './service/verification.service.js';
-import { mailProvider } from './service/mail.provider.js';
+import { createVerificationRepository } from './repository/verification.repository.js';
+import { createVerificationService } from './service/verification.service.js';
+import { VerificationToken } from './schema/verification-token.model.js';
 import { createSlugResolver } from './middleware/slug-resolver.js';
+import { registerEventHandlers } from './listeners/index.js';
+import { registerClubPermissions } from './permissions/index.js';
+import { createClubRbacPolicy } from './policy/club-rbac.policy.js';
 
 export async function init(app, registry, eventBus) {
-  const models = registry.getService('core:models');
-  if (!models || !models.User) {
-    throw new Error('core:models service not found in registry');
-  }
+  const clubRepository = createClubRepository(Club, ClubMember, ClubRole);
 
-  const clubRepository = createClubRepository(
-    Club,
-    ClubMember,
-    ClubRole,
-    models.User
+  const authService = registry.getService('auth:service');
+  const clubRbacPolicy = createClubRbacPolicy(
+    clubRepository,
+    registry.permissions
   );
-  const clubService = createClubService(clubRepository, eventBus, registry);
-  const clubController = createClubController(clubService);
+
+  const roleService = createRoleService(clubRepository);
+  const memberService = createMemberService(clubRepository, authService);
+  const provisioningService = createProvisioningService(
+    clubRepository,
+    authService
+  );
+  const clubService = createClubService(
+    clubRepository,
+    eventBus,
+    provisioningService
+  );
+
+  const verificationRepository =
+    createVerificationRepository(VerificationToken);
+  const verificationService = createVerificationService(
+    verificationRepository,
+    clubService
+  );
+
+  const clubController = createClubController(
+    clubService,
+    roleService,
+    memberService,
+    verificationService,
+    clubRbacPolicy
+  );
+
   const requirePermissions = registry.getService('requirePermissions');
   const requireSuperAdmin = registry.getService('requireSuperAdmin');
 
   if (typeof requirePermissions !== 'function') {
     throw new Error('Permission middleware service is not configured');
   }
+
+  registry.registerPublicRoute(/^\/api\/v1\/clubs$/, 'GET');
+  registry.registerPublicRoute(/^\/api\/v1\/clubs\/verify$/, 'GET');
 
   registerClubRoutes(
     app,
@@ -42,26 +74,16 @@ export async function init(app, registry, eventBus) {
   app.use('/api/v1', slugResolver);
 
   if (eventBus) {
-    eventBus.on('club.proposed', async (club) => {
-      try {
-        const token = await verificationService.generateTokenForClub(
-          club.id || club._id
-        );
-        await mailProvider.sendVerificationEmail(club.email, club.name, token);
-      } catch (err) {
-        console.error(
-          'Failed to send verification email for club proposal:',
-          err
-        );
-      }
-    });
-
-    eventBus.on('user:deleted', async (payload) => {
-      if (payload && payload.userId) {
-        await clubService.removeAllUserMemberships(payload.userId);
-      }
+    registerEventHandlers(eventBus, {
+      memberService,
+      verificationService,
+      authService,
+      roleService
     });
   }
+
+  // Also register role:service for other plugins to use
+  registry.registerService('club:role_service', roleService);
 
   registry.registerModule('club', {
     routes: [
@@ -72,28 +94,7 @@ export async function init(app, registry, eventBus) {
     ]
   });
 
-  // Register atomic permissions for RBAC
-  if (registry.permissions) {
-    registry.permissions.register({
-      id: 'club:manage',
-      module: 'club',
-      label: 'Manage Club Settings',
-      description:
-        'Allows editing core club details like description and category'
-    });
-    registry.permissions.register({
-      id: 'member:manage',
-      module: 'club',
-      label: 'Manage Members',
-      description: 'Allows kicking members and assigning basic roles'
-    });
-    registry.permissions.register({
-      id: 'role:manage',
-      module: 'club',
-      label: 'Manage Roles',
-      description: 'Allows creating custom roles and editing the role hierarchy'
-    });
-  }
+  registerClubPermissions(registry);
 }
 
 export default init;

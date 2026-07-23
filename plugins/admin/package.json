@@ -6,5 +6,9 @@
   "peerDependencies": {
     "lucide-react": "*"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
+  }
 }

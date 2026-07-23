@@ -5,7 +5,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiClient } from '@/lib/api/client';
+import { apiClient } from '@campus-os/shared/api-client';
 import {
   Table,
   TableBody,
@@ -13,12 +13,12 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+} from '@campusos/design-system';
+import { Badge } from '@campusos/design-system';
+import { Button } from '@campusos/design-system';
+import { Skeleton } from '@campusos/design-system';
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@campusos/design-system';
 
 interface Club {
   id: string;

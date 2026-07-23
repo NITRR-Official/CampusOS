@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const roleSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     clubId: {
       type: String,
       ref: 'Club',
@@ -47,6 +43,9 @@ const roleSchema = new mongoose.Schema(
 
 // Index for quickly fetching roles of a club
 roleSchema.index({ clubId: 1 });
+
+roleSchema.set('toJSON', { virtuals: true });
+roleSchema.set('toObject', { virtuals: true });
 
 export const Role = mongoose.model('Role', roleSchema);
 export default Role;

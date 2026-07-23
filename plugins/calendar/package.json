@@ -10,7 +10,9 @@
     "@tanstack/react-query": "^5.101.2"
   },
   "dependencies": {
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
   },
   "type": "module",
   "scripts": {

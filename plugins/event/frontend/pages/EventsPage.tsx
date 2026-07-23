@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button } from '@campusos/design-system';
 import { fetchEvents, type EventItem } from '../api';
 import {
   Calendar as CalendarIcon,

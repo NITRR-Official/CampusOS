@@ -11,6 +11,7 @@ This file is the single source of truth for the Plugin Loader. It dictates the p
   "name": "recruitment",
   "version": "1.0.0",
   "description": "Handles club member applications and interviews",
+  "defaultEnabled": true,
   "dependencies": {
     "club": "^1.0.0",
     "auth": "^1.0.0"
@@ -20,12 +21,13 @@ This file is the single source of truth for the Plugin Loader. It dictates the p
 
 ### Fields
 
-| Field          | Type     | Description                                                                                                  |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `name`         | `string` | **Required.** The unique identifier for your plugin. Must be lowercase, URL-safe, and match the folder name. |
-| `version`      | `string` | **Required.** The semantic version of your plugin (e.g. `1.0.2`).                                            |
-| `description`  | `string` | Optional. A short description of what your plugin does.                                                      |
-| `dependencies` | `object` | Optional. A key-value map of other plugins your plugin relies on.                                            |
+| Field            | Type      | Description                                                                                                  |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `name`           | `string`  | **Required.** The unique identifier for your plugin. Must be lowercase, URL-safe, and match the folder name. |
+| `version`        | `string`  | **Required.** The semantic version of your plugin (e.g. `1.0.2`).                                            |
+| `description`    | `string`  | Optional. A short description of what your plugin does.                                                      |
+| `defaultEnabled` | `boolean` | Optional. If `true`, the plugin will be automatically enabled in the database on first boot.                 |
+| `dependencies`   | `object`  | Optional. A key-value map of other plugins your plugin relies on.                                            |
 
 ## Dependency Resolution & Topological Sorting
 

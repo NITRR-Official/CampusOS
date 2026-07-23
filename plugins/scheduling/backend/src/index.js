@@ -44,7 +44,9 @@ export async function init(app, registry, eventBus) {
       const SlotModel = (await import('./schema/scheduleSlot.model.js'))
         .ScheduleSlot;
       const slotDoc = await SlotModel.findById(slotId).select('clubId').lean();
-      return slotDoc?.clubId || null;
+      return slotDoc?.clubId
+        ? { type: 'clubService', id: slotDoc.clubId.toString() }
+        : null;
     } catch {
       return null;
     }

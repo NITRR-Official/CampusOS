@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const clubMemberSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     userId: {
       type: String,
       ref: 'User',
@@ -36,6 +32,9 @@ const clubMemberSchema = new mongoose.Schema(
 // Unique compound index so a user can only join a club once
 clubMemberSchema.index({ userId: 1, clubId: 1 }, { unique: true });
 clubMemberSchema.index({ clubId: 1 }); // For querying all members of a club
+
+clubMemberSchema.set('toJSON', { virtuals: true });
+clubMemberSchema.set('toObject', { virtuals: true });
 
 export const ClubMember = mongoose.model('ClubMember', clubMemberSchema);
 export default ClubMember;

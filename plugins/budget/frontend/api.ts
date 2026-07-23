@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { apiClient } from '@/lib/api/client';
-import { ApiError } from '@/lib/api/errors';
+import { apiClient } from '@campus-os/shared/api-client';
+import { ApiError } from '@campus-os/shared/api-errors';
 
 export { ApiError as BudgetApiError };
 

@@ -1,9 +1,4 @@
-function createHttpError(status, message, code) {
-  const error = new Error(message);
-  error.status = status;
-  if (code) error.code = code;
-  return error;
-}
+import { AppError } from '@campus-os/shared/errors';
 
 /**
  * Creates a middleware that automatically resolves a club slug to a MongoDB ObjectId
@@ -37,11 +32,7 @@ export function createSlugResolver(ClubModel) {
 
       if (!club) {
         return next(
-          createHttpError(
-            404,
-            `Club with slug '${clubId}' not found`,
-            'NOT_FOUND'
-          )
+          new AppError(`Club with slug '${clubId}' not found`, 404, 'NOT_FOUND')
         );
       }
 
@@ -54,6 +45,7 @@ export function createSlugResolver(ClubModel) {
 
       // Attach the context so downstream middleware (like RBAC) doesn't have to query it again
       req.clubContext = club;
+      req.resolvedContext = { type: 'clubService', id: realObjectId };
 
       next();
     } catch (error) {

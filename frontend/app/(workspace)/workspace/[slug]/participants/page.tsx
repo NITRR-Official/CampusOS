@@ -6,7 +6,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
-import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
+import {
+  readAccessToken,
+  clearAuthSession
+} from '@campus-os/shared/auth-session';
 import {
   fetchEvents,
   EventItem,

@@ -7,6 +7,19 @@ import mongoose from 'mongoose';
 
 let isConnected = false;
 
+// Suppress deprecation warnings and ensure consistent queries
+mongoose.set('strictQuery', true);
+
+// Listen to native driver events to prevent state drift
+mongoose.connection.on('disconnected', () => {
+  isConnected = false;
+  console.warn('⚠️ MongoDB lost connection!');
+});
+
+mongoose.connection.on('reconnected', () => {
+  isConnected = true;
+  console.log('✅ MongoDB reconnected');
+});
 /**
  * Connect to MongoDB
  * @param {string} uri - MongoDB connection URI

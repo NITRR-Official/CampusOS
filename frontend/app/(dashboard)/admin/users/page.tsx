@@ -3,7 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiClient } from '@/lib/api/client';
+import { apiClient } from '@campus-os/shared/api-client';
 import {
   Table,
   TableBody,
@@ -11,9 +11,9 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+} from '@campusos/design-system';
+import { Badge } from '@campusos/design-system';
+import { Skeleton } from '@campusos/design-system';
 
 interface User {
   id: string;

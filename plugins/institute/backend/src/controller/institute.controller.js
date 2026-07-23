@@ -1,21 +1,6 @@
 import { createInstituteSchema } from '../schema/institute.schema.js';
 import { getInstituteService } from '../service/institute.service.js';
 
-function createHttpError(status, message, code, details) {
-  const error = new Error(message);
-  error.status = status;
-
-  if (code) {
-    error.code = code;
-  }
-
-  if (details) {
-    error.details = details;
-  }
-
-  return error;
-}
-
 export function createInstituteController() {
   const instituteService = getInstituteService();
 

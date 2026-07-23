@@ -1,4 +1,4 @@
-import { registry } from '@/lib/plugins/registry';
+import { registry } from '@campus-os/shared/plugin-registry';
 import { EventStatsWidget, EventQuickActionWidget } from './dashboard';
 
 export function initFrontend() {

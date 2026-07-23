@@ -4,6 +4,8 @@
 import { initFrontend as initCalendar } from '@plugins/calendar/frontend/init';
 import { initFrontend as initClub } from '@plugins/club/frontend/init';
 import { initFrontend as initEvent } from '@plugins/event/frontend/init';
+import { initFrontend as initForms } from '@plugins/forms/frontend/init';
+import { initFrontend as initRecruitment } from '@plugins/recruitment/frontend/init';
 import { initFrontend as initTask } from '@plugins/task/frontend/init';
 import { initFrontend as initVendor } from '@plugins/vendor/frontend/init';
 
@@ -20,6 +22,8 @@ export function initializePlugins() {
   initCalendar();
   initClub();
   initEvent();
+  initForms();
+  initRecruitment();
   initTask();
   initVendor();
 }

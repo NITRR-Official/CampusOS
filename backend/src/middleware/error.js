@@ -50,29 +50,13 @@ export function errorMiddleware(err, req, res, next) {
     });
   }
 
-  // Custom Domain errors (from services)
+  // Generic Domain errors (using AppError or explicitly thrown HTTP errors)
   if (err.code && typeof err.code === 'string') {
-    let statusCode = 400; // Default to Bad Request for domain errors
-
-    if (err.code.includes('NOT_FOUND')) statusCode = 404;
-    else if (
-      err.code.includes('EXISTS') ||
-      err.code.includes('CONFLICT') ||
-      err.code === 'ALREADY_REGISTERED' ||
-      err.code === 'EVENT_CAPACITY_REACHED'
-    )
-      statusCode = 409;
-    else if (err.code.includes('UNAUTHORIZED')) statusCode = 401;
-    else if (err.code.includes('FORBIDDEN') || err.code.includes('ESCALATION'))
-      statusCode = 403;
-
-    // Use err.status if specifically provided
-    if (err.status) statusCode = err.status;
-
-    return res.status(statusCode).json({
+    return res.status(err.statusCode || err.status || 400).json({
       success: false,
       error: err.code,
-      message,
+      message: err.message,
+      details: err.details,
       requestId
     });
   }

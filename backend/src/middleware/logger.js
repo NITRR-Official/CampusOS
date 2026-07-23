@@ -10,23 +10,31 @@ export function loggerMiddleware(req, res, next) {
   // Attach request ID to request for tracing
   req.id = requestId;
 
-  // Hook into res.end to capture response details
-  const originalEnd = res.end;
-
-  res.end = function (...args) {
-    const duration = Date.now() - startTime;
+  res.on('finish', () => {
+    const durationMs = Date.now() - startTime;
     const status = res.statusCode;
     const method = req.method;
     const path = req.path;
+    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+    const userId = req.user?.id || 'anonymous';
 
-    // Log format: [TRACE_ID] METHOD PATH STATUS (duration)ms
-    const logLevel = status >= 500 ? 'ERROR' : status >= 400 ? 'WARN' : 'INFO';
-    console.log(
-      `[${requestId}] ${logLevel} | ${method} ${path} | ${status} | ${duration}ms`
-    );
+    const logLevel = status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
 
-    originalEnd.apply(res, args);
-  };
+    // Output structured JSON for production-grade logging aggregators
+    const logData = {
+      level: logLevel,
+      requestId,
+      method,
+      path,
+      status,
+      durationMs,
+      ip,
+      userId,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log(JSON.stringify(logData));
+  });
 
   next();
 }

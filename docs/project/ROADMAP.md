@@ -47,22 +47,16 @@ QR code generation, check-in API, attendance tracking, participant dashboard.
 
 ---
 
-## 🟢 Phase 6: Growth Layer — Next
+## 🟢 Phase 6: The V1 Launch (NIT Raipur)
 
-**Goal**: Enable sponsorship and marketing workflows.
+**Goal**: Make the existing Core and Domain plugins predictable, secure, and production-ready for the upcoming semester.
 
-- [ ] Sponsorship Module — Add sponsors, track deliverables, payment tracking
-- [ ] Marketing Module — Campaign management, creative tracking
-- [ ] Sponsor dashboard and marketing dashboard (frontend)
-
-## 🟢 Phase 7: System Maturity
-
-**Goal**: Production readiness and scalability.
-
-- [ ] In-app notifications and event reminders
-- [ ] Audit logs — Track user actions
-- [ ] File management — Upload posters, documents
-- [ ] Analytics — Event participation stats, budget insights, basic reporting
+- [ ] **Feature Completion:** Fix known logic regressions (e.g., Forms validation) and enforce dynamic entity-level RBAC across all endpoints.
+- [ ] **Manual Testing:** Dogfood the platform with 3-5 real clubs to find UX edge cases.
+- [ ] **Architecture Audit:** Run anti-pattern checks and ensure strict decoupling (Core vs Domain plugins).
+- [ ] **Security & Pentesting:** Conduct vulnerability assessments (IDOR, XSS, Privacy).
+- [ ] **Automated Testing:** Implement unit, integration, and E2E testing for critical lifecycles.
+- [ ] **Launch:** Deploy on free-tier infrastructure (Cloudflare R2, MongoDB Atlas) and open source the v1 release!
 
 ---
 
@@ -76,8 +70,8 @@ QR code generation, check-in API, attendance tracking, participant dashboard.
 | 4   | First Fest Ready 🎪    | ✅ Complete |
 | 5   | Full Ops System        | ✅ Complete |
 | 5.5 | Architecture Migration | ✅ Complete |
-| 6   | Growth Enabled         | 🚀 Next     |
-| 7   | Production Ready       | 🚀 Planned  |
+| 6   | The V1 Launch          | 🚀 Next     |
+| 7   | Enterprise Workflows   | 🚀 Planned  |
 
 ---
 

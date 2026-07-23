@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { ExtensionPoint } from '@/components/ExtensionPoint';
-import { API_BASE_URL } from '@/lib/api/client';
+import { ExtensionPoint } from '@campus-os/shared/extension-point';
+import { API_BASE_URL } from '@campus-os/shared/api-client';
 
 export default async function Dashboard() {
   let activePlugins: string[] = [];

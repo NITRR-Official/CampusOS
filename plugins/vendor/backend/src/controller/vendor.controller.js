@@ -1,3 +1,4 @@
+import { AppError } from '@campus-os/shared/errors';
 import VendorService from '../service/vendor.service.js';
 import {
   createVendorSchema,
@@ -6,13 +7,6 @@ import {
   updateVendorAssignmentStatusSchema,
   rateVendorSchema
 } from '../schema/vendor.schema.js';
-
-function createHttpError(status, message, code) {
-  const error = new Error(message);
-  error.status = status;
-  if (code) error.code = code;
-  return error;
-}
 
 const vendorService = new VendorService();
 
@@ -53,9 +47,9 @@ export const vendorController = {
 
       if (!clubId) {
         return next(
-          createHttpError(
-            400,
+          new AppError(
             'clubId is required to list vendors',
+            400,
             'VALIDATION_ERROR'
           )
         );

@@ -32,12 +32,28 @@ export function registerJwtAuthenticator(registry) {
     sign(payload, options = {}) {
       return jwt.sign(payload, secret, {
         algorithm: 'HS256',
-        expiresIn: options.expiresIn || defaultExpiresIn
+        expiresIn: options.expiresIn || defaultExpiresIn,
+        issuer: 'campus-os-core',
+        audience: 'campus-os-clients'
       });
     },
     //Verifying function
     verify(token) {
-      return jwt.verify(token, secret, { algorithms: ['HS256'] });
+      try {
+        return jwt.verify(token, secret, {
+          algorithms: ['HS256'],
+          issuer: 'campus-os-core',
+          audience: 'campus-os-clients'
+        });
+      } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+          throw new Error('Token has expired', { cause: error });
+        }
+        if (error.name === 'JsonWebTokenError') {
+          throw new Error('Invalid authentication token', { cause: error });
+        }
+        throw new Error('Authentication verification failed', { cause: error });
+      }
     }
   };
 

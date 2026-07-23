@@ -4,5 +4,6 @@
   "description": "Budget and Finance Module",
   "dependencies": {
     "club": "^1.0.0"
-  }
+  },
+  "defaultEnabled": true
 }

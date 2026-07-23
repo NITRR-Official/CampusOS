@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Settings, Shield, Users } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@campusos/design-system';
 
 interface SettingsNavProps {
   clubSlug: string;

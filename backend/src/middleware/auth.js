@@ -10,58 +10,20 @@ const PUBLIC_ROUTES = new Set([
   '/api/v1/auth/login'
 ]);
 
-/**
- * Checks whether an event route is public or not
- * @param {*} req
- * @returns {boolean}
- */
-function isPublicEventRoute(req) {
-  // public event listing route
-  if (req.method === 'GET' && req.path === '/api/v1/events/public') {
-    return true;
-  }
-  // public event route
-  if (
-    req.method === 'GET' &&
-    /^\/api\/v1\/events\/[^/]+\/public$/.test(req.path)
-  ) {
-    return true;
-  }
-  // registrations for that event
-  if (
-    req.method === 'POST' &&
-    /^\/api\/v1\/events\/[^/]+\/registrations$/.test(req.path)
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Checks whether a club route is public or not
- * @param {*} req
- * @returns {boolean}
- */
-function isPublicClubRoute(req) {
-  // club listing route
-  if (req.method === 'GET' && req.path === '/api/v1/clubs') {
-    return true;
-  }
-  // club email verification route
-  if (req.method === 'GET' && req.path === '/api/v1/clubs/verify') {
-    return true;
-  }
-  return false;
-}
-
 export function authMiddleware(req, res, next) {
-  if (
-    PUBLIC_ROUTES.has(req.path) ||
-    isPublicEventRoute(req) ||
-    isPublicClubRoute(req)
-  ) {
+  if (PUBLIC_ROUTES.has(req.path)) {
     return next();
+  }
+
+  const registry = req.app?.locals?.registry;
+  if (registry) {
+    const publicRoutes = registry.getPublicRoutes();
+    for (const route of publicRoutes) {
+      const methodMatches = !route.method || route.method === req.method;
+      if (methodMatches && route.regex.test(req.path)) {
+        return next();
+      }
+    }
   }
 
   const authHeader = req.headers.authorization;
@@ -75,7 +37,6 @@ export function authMiddleware(req, res, next) {
   }
 
   const token = authHeader.substring(7);
-  const registry = req.app?.locals?.registry; // optional chaining in case the properties are not present
   const jwtAuthenticator = registry?.getAuthenticator('jwt');
 
   if (!jwtAuthenticator) {

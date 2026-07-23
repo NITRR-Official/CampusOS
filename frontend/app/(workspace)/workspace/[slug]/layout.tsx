@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 import { RequireAuth } from '@/app/components/auth/AuthGuard';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { API_BASE_URL } from '@/lib/api/client';
+import { SidebarInset, SidebarProvider } from '@campusos/design-system';
+import { API_BASE_URL } from '@campus-os/shared/api-client';
 
 interface WorkspaceLayoutProps {
   children: ReactNode;
@@ -46,8 +46,10 @@ export default async function WorkspaceLayout({
         <AppSidebar activePlugins={activePlugins} clubId={clubId} />
         <SidebarInset>
           <Header />
-          <main className="relative flex-1 bg-background/50 overflow-hidden">
-            <div className="relative z-10 p-5 md:p-8 pb-20">{children}</div>
+          <main className="relative flex-1 bg-background/50 overflow-hidden min-w-0">
+            <div className="relative z-10 p-5 md:p-8 pb-20 w-full min-w-0">
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </RequireAuth>

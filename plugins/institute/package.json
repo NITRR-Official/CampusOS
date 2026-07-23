@@ -5,5 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
   }
 }

@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const eventSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     title: {
       type: String,
       required: true,
@@ -65,5 +61,8 @@ eventSchema.index({ instituteId: 1 });
 eventSchema.index({ clubId: 1 });
 eventSchema.index({ status: 1 });
 eventSchema.index({ startsAt: 1 });
+
+eventSchema.set('toJSON', { virtuals: true });
+eventSchema.set('toObject', { virtuals: true });
 
 export const Event = mongoose.model('Event', eventSchema);

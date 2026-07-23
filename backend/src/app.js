@@ -38,8 +38,8 @@ export async function createApp(registry) {
   // ============== MIDDLEWARE CHAIN (Order matters!) ==============
 
   // 1. Body parsing
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ limit: '10mb', extended: true }));
+  app.use(express.json({ limit: '2mb' }));
+  app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
   // 2. CORS - Allow cross-origin requests from frontend
   app.use(
@@ -60,7 +60,7 @@ export async function createApp(registry) {
         // In non-production, allow Vercel preview URLs (*.vercel.app)
         // This is safe because preview environments use separate databases
         if (isDev || process.env.ALLOW_PREVIEW_CORS === 'true') {
-          if (/^https:\/\/[\w-]+\.vercel\.app$/.test(origin)) {
+          if (/^https:\/\/campus-os-[\w-]+\.vercel\.app$/.test(origin)) {
             callback(null, true);
             return;
           }
@@ -86,7 +86,7 @@ export async function createApp(registry) {
 
   // Public endpoint for frontend to discover active modules (no auth required)
   app.get('/api/v1/system/modules', (req, res) => {
-    const activeModules = Array.from(registry.modules.keys());
+    const activeModules = registry.getAllModules();
     res.json({ success: true, modules: activeModules });
   });
 
@@ -104,14 +104,12 @@ export async function createApp(registry) {
 
   // ============== PLUGIN LOADING ==============
   // Load all modules from /apps/ and let them register routes
-  app.get('/test-before', (req, res) => res.send('before'));
   try {
     await loadPlugins(app, registry);
   } catch (error) {
     console.error('Plugin loading failed:', error.message);
     if (!isDev) throw error; // Fail hard in production
   }
-  app.get('/test-after', (req, res) => res.send('after'));
 
   // ============== GLOBAL ERROR HANDLING ==============
   // 404 handler - for routes that don't exist

@@ -61,6 +61,10 @@ export function createAuthService(authRepository, eventBus) {
       isSuperAdmin
     });
 
+    if (eventBus) {
+      eventBus.emit('user:created', { userId: user.id || user._id });
+    }
+
     return toPublicUser(user);
   }
 
@@ -93,11 +97,33 @@ export function createAuthService(authRepository, eventBus) {
     return deleted;
   }
 
+  async function getUserById(userId) {
+    if (!userId) return null;
+    const user = await authRepository.findUserById(userId);
+    return toPublicUser(user);
+  }
+
+  async function getUsersByIds(userIds) {
+    if (!userIds || !userIds.length) return [];
+    const users = await authRepository.findUsersByIds(userIds);
+    return users.map(toPublicUser);
+  }
+
+  async function getUserByEmail(email) {
+    if (!email) return null;
+    const normalizedEmail = email.toLowerCase();
+    const user = await authRepository.findUserByEmail(normalizedEmail);
+    return toPublicUser(user);
+  }
+
   return {
     createUser,
     authenticateUser,
     listUsers,
-    deleteUser
+    deleteUser,
+    getUserById,
+    getUsersByIds,
+    getUserByEmail
   };
 }
 

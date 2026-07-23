@@ -7,13 +7,13 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
+} from '@campusos/design-system';
+import { Button } from '@campusos/design-system';
+import { Input } from '@campusos/design-system';
+import { Label } from '@campusos/design-system';
+import { Checkbox } from '@campusos/design-system';
+import { ScrollArea } from '@campusos/design-system';
+import { useToast } from '@campusos/design-system';
 
 interface RoleEditorSheetProps {
   isOpen: boolean;

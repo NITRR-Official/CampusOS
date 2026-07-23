@@ -5,5 +5,6 @@
   "dependencies": {
     "event": "^1.0.0",
     "task": "^1.0.0"
-  }
+  },
+  "defaultEnabled": true
 }

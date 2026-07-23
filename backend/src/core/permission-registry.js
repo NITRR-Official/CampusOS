@@ -5,10 +5,9 @@
  */
 
 export class PermissionRegistry {
-  constructor() {
-    // Map<permissionId, { id, module, description, label }>
-    this.permissions = new Map();
-  }
+  #permissions = new Map();
+
+  constructor() {}
 
   /**
    * Register a new permission
@@ -23,18 +22,21 @@ export class PermissionRegistry {
       throw new Error('Permission must have an id and a module');
     }
 
-    if (this.permissions.has(permission.id)) {
-      console.warn(
-        `[PermissionRegistry] Overwriting existing permission: ${permission.id}`
+    if (this.#permissions.has(permission.id)) {
+      throw new Error(
+        `[PermissionRegistry] Permission '${permission.id}' is already registered.`
       );
     }
 
-    this.permissions.set(permission.id, {
-      id: permission.id,
-      module: permission.module,
-      description: permission.description || '',
-      label: permission.label || permission.id
-    });
+    this.#permissions.set(
+      permission.id,
+      Object.freeze({
+        id: permission.id,
+        module: permission.module,
+        description: permission.description || '',
+        label: permission.label || permission.id
+      })
+    );
   }
 
   /**
@@ -43,7 +45,7 @@ export class PermissionRegistry {
    */
   getAllGrouped() {
     const grouped = {};
-    for (const perm of this.permissions.values()) {
+    for (const perm of this.#permissions.values()) {
       if (!grouped[perm.module]) {
         grouped[perm.module] = [];
       }
@@ -57,7 +59,7 @@ export class PermissionRegistry {
    * @returns {Array} Array of all permissions
    */
   getAll() {
-    return Array.from(this.permissions.values());
+    return Array.from(this.#permissions.values());
   }
 
   /**
@@ -66,6 +68,6 @@ export class PermissionRegistry {
    * @returns {boolean}
    */
   has(id) {
-    return this.permissions.has(id);
+    return this.#permissions.has(id);
   }
 }

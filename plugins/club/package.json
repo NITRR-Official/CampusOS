@@ -19,7 +19,9 @@
     "lucide-react": "^1.16.0"
   },
   "dependencies": {
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
   },
   "type": "module",
   "scripts": {

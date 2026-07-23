@@ -9,10 +9,6 @@ const STATUS_VALUES = [
 
 const clubSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     name: {
       type: String,
       required: true,
@@ -29,11 +25,6 @@ const clubSchema = new mongoose.Schema(
       required: true,
       trim: true,
       lowercase: true
-    },
-    instituteId: {
-      type: String,
-      required: true,
-      trim: true
     },
     description: {
       type: String,
@@ -62,9 +53,11 @@ const clubSchema = new mongoose.Schema(
 );
 
 // Indexes
-clubSchema.index({ instituteId: 1 });
 clubSchema.index({ createdBy: 1 });
 clubSchema.index({ status: 1 });
+
+clubSchema.set('toJSON', { virtuals: true });
+clubSchema.set('toObject', { virtuals: true });
 
 export const Club = mongoose.model('Club', clubSchema);
 export default Club;

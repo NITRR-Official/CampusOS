@@ -1,7 +1,7 @@
-import { ExtensionPoint } from '@/components/ExtensionPoint';
+import { ExtensionPoint } from '@campus-os/shared/extension-point';
 import { UserCircle, Mail, ShieldCheck } from 'lucide-react';
 import { cookies } from 'next/headers';
-import { API_BASE_URL } from '@/lib/api/client';
+import { API_BASE_URL } from '@campus-os/shared/api-client';
 
 export const dynamic = 'force-dynamic';
 

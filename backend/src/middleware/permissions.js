@@ -1,5 +1,4 @@
 import registry from '../utils/registry.js';
-import { User } from '../database/schemas/user.schema.js';
 
 export function requirePermissions(...allowedPermissions) {
   return async function permissionGuard(req, res, next) {
@@ -14,43 +13,42 @@ export function requirePermissions(...allowedPermissions) {
 
     try {
       // 2. Check for Super Admin global bypass
-      const userDoc = await User.findById(req.user.id)
-        .select('isSuperAdmin')
-        .lean();
-      if (userDoc?.isSuperAdmin) {
+      if (req.user?.isSuperAdmin) {
         return next();
       }
 
-      // 3. Resolve Club Context (Basic strategy for now)
-      // Look for clubId in params or body
-      let clubId = req.params?.clubId || req.body?.clubId;
+      // 3. Resolve Dynamic Context (e.g., Club, Department, Hostel)
+      let context = null;
 
-      // Dynamically resolve context if not directly provided
-      if (!clubId) {
-        if (req.resolvedClubId) {
-          clubId = req.resolvedClubId;
-        } else {
-          // Use registry context resolvers to dynamically lookup the club context
-          // based on other params (e.g., eventId -> clubId)
-          clubId = await registry.resolveContext(req);
-        }
+      // Look for explicit context first
+      if (req.resolvedContext) {
+        context = req.resolvedContext;
+      } else if (req.params?.clubId || req.body?.clubId) {
+        // Fallback for legacy club context
+        context = {
+          type: 'clubService',
+          id: req.params?.clubId || req.body?.clubId
+        };
+      } else {
+        // Use registry context resolvers to dynamically lookup the context
+        context = await registry.resolveContext(req);
       }
 
-      // 4. If we have a club context, check club-specific permissions
-      if (clubId) {
-        const clubService = registry.getService('clubService');
-        if (!clubService) {
+      // 4. If we have a context, check context-specific permissions
+      if (context && context.type && context.id) {
+        const service = registry.getService(context.type);
+        if (!service) {
           console.warn(
-            'ClubService not found in registry during permission check'
+            `[Permissions] Context service '${context.type}' not found in registry.`
           );
           return res
             .status(500)
             .json({ success: false, error: 'Internal Server Error' });
         }
 
-        const userPerms = await clubService.getUserPermissions(
+        const userPerms = await service.getUserPermissions(
           req.user.id,
-          clubId
+          context.id
         );
         const userPermsSet = new Set(userPerms);
 
@@ -102,11 +100,7 @@ export async function requireSuperAdmin(req, res, next) {
   }
 
   try {
-    const userDoc = await User.findById(req.user.id)
-      .select('isSuperAdmin')
-      .lean();
-    console.log('SuperAdmin Check:', { userId: req.user.id, userDoc });
-    if (userDoc?.isSuperAdmin) {
+    if (req.user?.isSuperAdmin) {
       return next();
     }
 

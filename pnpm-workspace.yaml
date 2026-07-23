@@ -3,6 +3,7 @@ packages:
   - frontend
   - plugins/*
   - shared
+  - packages/*
 
 ignoredBuiltDependencies:
   - sharp

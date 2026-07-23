@@ -6,21 +6,30 @@
 import { PermissionRegistry } from '../core/permission-registry.js';
 
 class ModuleRegistry {
-  constructor() {
-    this.modules = new Map();
-    this.services = new Map();
-    this.authenticators = new Map();
-    this.resolvers = new Map();
-    this.permissions = new PermissionRegistry();
-    this.contextResolvers = new Map();
+  #modules = new Map();
+  #services = new Map();
+  #authenticators = new Map();
+  #resolvers = new Map();
+  #permissions = new PermissionRegistry();
+  #contextResolvers = new Map();
+  #publicRoutes = [];
+
+  constructor() {}
+
+  get permissions() {
+    return this.#permissions;
   }
 
   /**
    * Register a context resolver for permission checks
-   * e.g. registry.registerContextResolver('/api/v1/events', async (req) => event.clubId)
    */
   registerContextResolver(routePrefix, resolverFunc) {
-    this.contextResolvers.set(routePrefix, resolverFunc);
+    if (this.#contextResolvers.has(routePrefix)) {
+      throw new Error(
+        `Context resolver for '${routePrefix}' is already registered.`
+      );
+    }
+    this.#contextResolvers.set(routePrefix, resolverFunc);
     console.log(`✓ Context Resolver registered for: ${routePrefix}`);
   }
 
@@ -28,7 +37,7 @@ class ModuleRegistry {
    * Resolve context (e.g. clubId) dynamically from the request using registered resolvers
    */
   async resolveContext(req) {
-    for (const [prefix, resolver] of this.contextResolvers.entries()) {
+    for (const [prefix, resolver] of this.#contextResolvers.entries()) {
       if (req.path.startsWith(prefix)) {
         try {
           return await resolver(req);
@@ -44,74 +53,144 @@ class ModuleRegistry {
    * Register a module
    */
   registerModule(name, module) {
-    this.modules.set(name, module);
+    if (this.#modules.has(name)) {
+      throw new Error(`Module '${name}' is already registered.`);
+    }
+    this.#modules.set(name, Object.freeze(module));
     console.log(`✓ Module registered: ${name}`);
   }
 
   /**
    * Get a registered module
    */
-  getModule(name) {
-    return this.modules.get(name);
+  getModule(name, throwOnMissing = true) {
+    const module = this.#modules.get(name);
+    if (!module && throwOnMissing) {
+      throw new Error(`Module '${name}' is not registered or is disabled.`);
+    }
+    return module;
   }
 
   /**
    * Register a service
    */
   registerService(name, service) {
-    this.services.set(name, service);
+    if (this.#services.has(name)) {
+      throw new Error(`Service '${name}' is already registered.`);
+    }
+    this.#services.set(name, Object.freeze(service));
     console.log(`✓ Service registered: ${name}`);
   }
 
   /**
    * Get a service
    */
-  getService(name) {
-    return this.services.get(name);
+  getService(name, throwOnMissing = true) {
+    const service = this.#services.get(name);
+    if (!service && throwOnMissing) {
+      throw new Error(`Service '${name}' is not registered or is disabled.`);
+    }
+    return service;
   }
 
   /**
    * Register an authenticator (e.g., JWT, OAuth)
    */
   registerAuthenticator(name, authenticator) {
-    this.authenticators.set(name, authenticator);
+    if (this.#authenticators.has(name)) {
+      throw new Error(`Authenticator '${name}' is already registered.`);
+    }
+    this.#authenticators.set(name, Object.freeze(authenticator));
     console.log(`✓ Authenticator registered: ${name}`);
   }
 
   /**
    * Get an authenticator
    */
-  getAuthenticator(name) {
-    return this.authenticators.get(name);
+  getAuthenticator(name, throwOnMissing = true) {
+    const authenticator = this.#authenticators.get(name);
+    if (!authenticator && throwOnMissing) {
+      throw new Error(
+        `Authenticator '${name}' is not registered or is disabled.`
+      );
+    }
+    return authenticator;
   }
 
   /**
    * Register a resolver (GraphQL-style data fetcher)
    */
   registerResolver(name, resolver) {
-    this.resolvers.set(name, resolver);
+    if (this.#resolvers.has(name)) {
+      throw new Error(`Resolver '${name}' is already registered.`);
+    }
+    this.#resolvers.set(name, Object.freeze(resolver));
     console.log(`✓ Resolver registered: ${name}`);
   }
 
   /**
    * Get a resolver
    */
-  getResolver(name) {
-    return this.resolvers.get(name);
+  getResolver(name, throwOnMissing = true) {
+    const resolver = this.#resolvers.get(name);
+    if (!resolver && throwOnMissing) {
+      throw new Error(`Resolver '${name}' is not registered or is disabled.`);
+    }
+    return resolver;
   }
 
   /**
    * Get all registered modules
    */
   getAllModules() {
-    return Array.from(this.modules.keys());
+    return Array.from(this.#modules.keys());
   }
 
   /**
    * Get all registered services
    */
   getAllServices() {
-    return Array.from(this.services.keys());
+    return Array.from(this.#services.keys());
+  }
+
+  /**
+   * Register a public route regex that bypasses authentication
+   * @param {RegExp} regex - The regex matching the path
+   * @param {string} [method] - Optional HTTP method (e.g. 'GET', 'POST'). If omitted, matches all methods.
+   */
+  registerPublicRoute(regex, method = null) {
+    if (!(regex instanceof RegExp)) {
+      throw new Error('Public route must be a RegExp instance');
+    }
+    this.#publicRoutes.push({ regex, method });
+    console.log(
+      `✓ Public route registered: ${method ? method + ' ' : 'ANY '}${regex.toString()}`
+    );
+  }
+
+  /**
+   * Get all public route regexes
+   */
+  getPublicRoutes() {
+    return [...this.#publicRoutes];
+  }
+
+  /**
+   * Clear all registrations (useful for test teardowns)
+   */
+  reset() {
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error('registry.reset() is only allowed in test environments.');
+    }
+    this.#modules.clear();
+    this.#services.clear();
+    this.#authenticators.clear();
+    this.#resolvers.clear();
+    this.#contextResolvers.clear();
+    this.#publicRoutes = [];
+    // Assuming PermissionRegistry has a clear/reset method, or we can just replace it
+    this.#permissions = new PermissionRegistry();
+    console.log('✓ Module Registry reset');
   }
 }
 

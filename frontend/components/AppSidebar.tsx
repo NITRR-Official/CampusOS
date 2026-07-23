@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth-provider';
+import { useAuth } from '@campus-os/shared/auth-provider';
 import {
   Calendar,
   Home,
@@ -21,7 +21,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+} from '@campusos/design-system';
 import {
   Sidebar,
   SidebarContent,
@@ -34,14 +34,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar
-} from '@/components/ui/sidebar';
+} from '@campusos/design-system';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Settings', href: '/settings', icon: Settings }
 ];
 
-import { registry } from '@/lib/plugins/registry';
+import { registry } from '@campus-os/shared/plugin-registry';
 import { initializePlugins } from '@/lib/plugins/init';
 import { useClubs } from '@plugins/club/frontend/hooks';
 

@@ -4,13 +4,16 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return Club.create(clubData);
   }
 
-  async function listClubs(filter = {}) {
+  async function listClubs(filter = {}, { page = 1, limit = 50 } = {}) {
+    const skip = (page - 1) * limit;
     const pipeline = [
       { $match: filter },
       { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
       {
         $lookup: {
-          from: 'clubmembers',
+          from: ClubMember.collection.name,
           localField: '_id',
           foreignField: 'clubId',
           as: 'members'
@@ -30,8 +33,16 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return Club.findById(clubId).lean();
   }
 
-  async function updateClubStatus(clubId, status) {
-    return Club.findByIdAndUpdate(clubId, { status }, { new: true }).lean();
+  async function getClubBySlug(slug) {
+    return Club.findOne({ slug }).lean();
+  }
+
+  async function updateClubStatus(clubId, status, options = {}) {
+    return Club.findByIdAndUpdate(
+      clubId,
+      { status },
+      { new: true, ...options }
+    ).lean();
   }
 
   async function updateClub(clubId, updateData) {
@@ -74,21 +85,23 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return result.deletedCount;
   }
 
-  async function addRoleToMember(clubId, userId, roleId) {
+  async function addRoleToMember(clubId, userId, roleId, options = {}) {
     return ClubMember.findOneAndUpdate(
       { clubId, userId },
       {
         $addToSet: { roles: roleId },
         $setOnInsert: { joinedAt: new Date(), status: 'active' }
       },
-      { new: true, upsert: true }
+      { new: true, upsert: true, ...options }
     ).lean();
   }
 
-  async function listMembers(clubId) {
+  async function listMembers(clubId, { page = 1, limit = 50 } = {}) {
+    const skip = (page - 1) * limit;
     return ClubMember.find({ clubId })
+      .skip(skip)
+      .limit(limit)
       .populate('roles')
-      .populate('userId', 'name email avatar')
       .lean();
   }
 
@@ -112,24 +125,16 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return ClubRole.countDocuments({ clubId });
   }
 
-  async function createRoles(rolesData) {
-    return ClubRole.create(rolesData);
+  async function createRoles(rolesData, options = {}) {
+    return ClubRole.insertMany(rolesData, options);
   }
 
   async function createRole(roleData) {
     return ClubRole.create(roleData);
   }
 
-  async function findRole(clubId, roleIdentifier) {
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(roleIdentifier));
-    const filter = isObjectId
-      ? { $or: [{ _id: roleIdentifier }, { name: roleIdentifier }] }
-      : { name: roleIdentifier };
-
-    return ClubRole.findOne({
-      clubId,
-      ...filter
-    }).lean();
+  async function findRoleByName(clubId, roleName, options = {}) {
+    return ClubRole.findOne({ clubId, name: roleName }, null, options).lean();
   }
 
   async function findRoleById(clubId, roleId) {
@@ -150,28 +155,40 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     ).lean();
   }
 
+  async function addPermissionsToRole(clubId, roleId, permissions) {
+    return ClubRole.findOneAndUpdate(
+      { _id: roleId, clubId },
+      { $addToSet: { permissions: { $each: permissions } } },
+      { new: true }
+    ).lean();
+  }
+
   async function deleteRole(clubId, roleId) {
     const result = await ClubRole.deleteOne({ _id: roleId, clubId });
     return result.deletedCount > 0;
   }
 
-  // ==== User Methods ====
-  async function findUserByEmail(email) {
-    return User.findOne({ email }).lean();
-  }
-
-  async function findUserById(userId) {
-    return User.findById(userId).lean();
-  }
-
-  async function createUser(userData) {
-    return User.create(userData);
+  async function withTransaction(callback) {
+    const session = await Club.startSession();
+    session.startTransaction();
+    try {
+      const result = await callback(session);
+      await session.commitTransaction();
+      return result;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 
   return {
+    withTransaction,
     createClub,
     listClubs,
     getClubById,
+    getClubBySlug,
     updateClubStatus,
     updateClub,
     deleteClub,
@@ -188,13 +205,11 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     countRoles,
     createRoles,
     createRole,
-    findRole,
+    findRoleByName,
     findRoleById,
     listRoles,
     updateRole,
-    deleteRole,
-    findUserByEmail,
-    findUserById,
-    createUser
+    addPermissionsToRole,
+    deleteRole
   };
 }

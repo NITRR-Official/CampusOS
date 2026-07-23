@@ -1,27 +1,13 @@
 import { signupSchema, loginSchema } from '../schema/auth.schema.js';
 
-function createHttpError(status, message, code, details) {
-  const error = new Error(message);
-  error.status = status;
-
-  if (code) {
-    error.code = code;
-  }
-
-  if (details) {
-    error.details = details;
-  }
-
-  return error;
-}
-
+import { AppError } from '@campus-os/shared/errors';
 export function createAuthController({ registry, authService }) {
   const jwtAuthenticator = registry.getAuthenticator('jwt');
 
   if (!jwtAuthenticator) {
-    throw createHttpError(
-      500,
+    throw new AppError(
       'JWT authenticator is not configured',
+      500,
       'JWT_NOT_CONFIGURED'
     );
   }
@@ -52,9 +38,9 @@ export function createAuthController({ registry, authService }) {
     } catch (error) {
       if (error.code === 'EMAIL_ALREADY_EXISTS') {
         next(
-          createHttpError(
-            409,
+          new AppError(
             'Email is already registered',
+            409,
             'EMAIL_ALREADY_EXISTS'
           )
         );
@@ -72,11 +58,7 @@ export function createAuthController({ registry, authService }) {
 
       if (!user) {
         next(
-          createHttpError(
-            401,
-            'Invalid email or password',
-            'INVALID_CREDENTIALS'
-          )
+          new AppError('Invalid email or password', 401, 'INVALID_CREDENTIALS')
         );
         return;
       }
@@ -108,10 +90,20 @@ export function createAuthController({ registry, authService }) {
     }
   }
 
+  async function getMe(req, res, next) {
+    res.status(200).json({
+      success: true,
+      data: {
+        user: req.user
+      }
+    });
+  }
+
   return {
     signup,
     login,
-    listUsers
+    listUsers,
+    getMe
   };
 }
 

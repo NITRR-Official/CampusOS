@@ -1,0 +1,7 @@
+{
+  "name": "recruitment",
+  "version": "1.0.0",
+  "description": "The recruitment plugin.",
+  "dependencies": {},
+  "defaultEnabled": true
+}

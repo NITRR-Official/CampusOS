@@ -3,8 +3,8 @@ import { cookies } from 'next/headers';
 import { RequireAuth } from '@/app/components/auth/AuthGuard';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { API_BASE_URL } from '@/lib/api/client';
+import { SidebarInset, SidebarProvider } from '@campusos/design-system';
+import { API_BASE_URL } from '@campus-os/shared/api-client';
 
 interface DashboardLayoutProps {
   children: ReactNode;

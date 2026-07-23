@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ThemeProvider } from '@/lib/theme-provider';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { AuthProvider } from '@/lib/auth-provider';
+import { TooltipProvider, ThemeProvider } from '@campusos/design-system';
+import { AuthProvider } from '@campus-os/shared/auth-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 
 export const metadata: Metadata = {

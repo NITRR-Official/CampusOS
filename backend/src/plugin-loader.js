@@ -56,21 +56,7 @@ export async function loadPlugins(app, registry) {
 
       // Check if new plugin not in DB
       if (typeof pluginConfig[manifest.name] === 'undefined') {
-        const corePlugins = [
-          'auth',
-          'club',
-          'institute',
-          'event',
-          'checkin',
-          'task',
-          'calendar',
-          'vendor',
-          'resource',
-          'scheduling',
-          'budget',
-          'plugin-manager'
-        ];
-        const isEnabled = corePlugins.includes(manifest.name);
+        const isEnabled = manifest.defaultEnabled === true;
 
         console.log(
           `[Config] New plugin '${manifest.name}' discovered. Inserting to DB as ${isEnabled ? 'enabled' : 'disabled'}.`
@@ -221,6 +207,7 @@ export async function loadPlugins(app, registry) {
         `✗ Failed to initialize plugin ${plugin.name}:`,
         error.message
       );
+      throw error;
     }
   }
 

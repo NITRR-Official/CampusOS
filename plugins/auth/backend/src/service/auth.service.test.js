@@ -42,6 +42,22 @@ describe('AuthService', () => {
       expect(user).not.toHaveProperty('passwordHash');
     });
 
+    it('should emit user:created event on successful creation', async () => {
+      const mockEventBus = { emit: vi.fn() };
+      const repository = createAuthRepository(User);
+      const serviceWithEvents = createAuthService(repository, mockEventBus);
+
+      await serviceWithEvents.createUser({
+        name: 'Event User',
+        email: 'event@test.com',
+        password: 'Password123!'
+      });
+
+      expect(mockEventBus.emit).toHaveBeenCalledWith('user:created', {
+        userId: expect.any(String)
+      });
+    });
+
     it('should create subsequent users as normal users', async () => {
       await service.createUser({
         name: 'First User',

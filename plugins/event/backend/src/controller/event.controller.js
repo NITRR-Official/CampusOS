@@ -1,24 +1,10 @@
+import { AppError } from '@campus-os/shared/errors';
 import {
   createEventSchema,
   registrationSchema,
   validateStatus,
   updateEventSchema
 } from '../schema/event.schema.js';
-
-function createHttpError(status, message, code, details) {
-  const error = new Error(message);
-  error.status = status;
-
-  if (code) {
-    error.code = code;
-  }
-
-  if (details) {
-    error.details = details;
-  }
-
-  return error;
-}
 
 export function createEventController(eventService) {
   async function create(req, res, next) {
@@ -46,7 +32,7 @@ export function createEventController(eventService) {
       const event = await eventService.updateEvent(eventId, value);
 
       if (!event) {
-        next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
+        next(new AppError('Event not found', 404, 'EVENT_NOT_FOUND'));
         return;
       }
 
@@ -65,14 +51,12 @@ export function createEventController(eventService) {
       const event = await eventService.setStatus(eventId, 'published');
 
       if (!event) {
-        next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
+        next(new AppError('Event not found', 404, 'EVENT_NOT_FOUND'));
         return;
       }
 
       if (!validateStatus(event.status)) {
-        next(
-          createHttpError(500, 'Invalid event status', 'INVALID_EVENT_STATUS')
-        );
+        next(new AppError('Invalid event status', 500, 'INVALID_EVENT_STATUS'));
         return;
       }
 
@@ -91,7 +75,7 @@ export function createEventController(eventService) {
       const event = await eventService.setStatus(eventId, 'draft');
 
       if (!event) {
-        next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
+        next(new AppError('Event not found', 404, 'EVENT_NOT_FOUND'));
         return;
       }
 
@@ -109,9 +93,9 @@ export function createEventController(eventService) {
       const { clubId } = req.query;
       if (!clubId) {
         return next(
-          createHttpError(
-            400,
+          new AppError(
             'clubId is required for listing events',
+            400,
             'VALIDATION_ERROR'
           )
         );
@@ -143,9 +127,9 @@ export function createEventController(eventService) {
       const { clubId } = req.query;
       if (!clubId) {
         return next(
-          createHttpError(
-            400,
+          new AppError(
             'clubId is required for listing events',
+            400,
             'VALIDATION_ERROR'
           )
         );
@@ -194,7 +178,7 @@ export function createEventController(eventService) {
       const event = await eventService.getEvent(eventId);
 
       if (!event) {
-        next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
+        next(new AppError('Event not found', 404, 'EVENT_NOT_FOUND'));
         return;
       }
 
@@ -214,9 +198,9 @@ export function createEventController(eventService) {
 
       if (!event || event.status !== 'published') {
         next(
-          createHttpError(
-            404,
+          new AppError(
             'Event not found or not published',
+            404,
             'EVENT_NOT_FOUND'
           )
         );
@@ -257,26 +241,22 @@ export function createEventController(eventService) {
       );
 
       if (registrationResult.type === 'EVENT_NOT_FOUND') {
-        next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
+        next(new AppError('Event not found', 404, 'EVENT_NOT_FOUND'));
         return;
       }
 
       if (registrationResult.type === 'EVENT_CAPACITY_REACHED') {
         next(
-          createHttpError(
-            409,
-            'Event capacity reached',
-            'EVENT_CAPACITY_REACHED'
-          )
+          new AppError('Event capacity reached', 409, 'EVENT_CAPACITY_REACHED')
         );
         return;
       }
 
       if (registrationResult.type === 'ALREADY_REGISTERED') {
         next(
-          createHttpError(
-            409,
+          new AppError(
             'Already registered for this event',
+            409,
             'ALREADY_REGISTERED'
           )
         );
@@ -298,7 +278,7 @@ export function createEventController(eventService) {
       const event = await eventService.getEvent(eventId);
 
       if (!event) {
-        next(createHttpError(404, 'Event not found', 'EVENT_NOT_FOUND'));
+        next(new AppError('Event not found', 404, 'EVENT_NOT_FOUND'));
         return;
       }
 

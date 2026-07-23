@@ -3,8 +3,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Role } from '@plugins/club/frontend/api';
 import { GripVertical, Edit2, ShieldAlert, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@campusos/design-system';
+import { Badge } from '@campusos/design-system';
 
 interface RoleItemProps {
   role: Role;

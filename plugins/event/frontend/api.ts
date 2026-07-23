@@ -1,6 +1,6 @@
-import { apiClient } from '@/lib/api/client';
+import { apiClient } from '@campus-os/shared/api-client';
 import { z } from 'zod';
-export { ApiError as EventApiError } from '@/lib/api/errors';
+export { ApiError as EventApiError } from '@campus-os/shared/api-errors';
 
 export const EventRegistrationSchema = z.object({
   id: z.string(),

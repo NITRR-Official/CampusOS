@@ -5,6 +5,7 @@
 
 import { registerResourceRoutes } from './routes/resource.routes.js';
 import ResourceService from './service/resource.service.js';
+import { registerResourceHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -60,7 +61,9 @@ export async function init(app, registry, eventBus) {
       const resDoc = await ResourceModel.findById(resourceId)
         .select('clubId')
         .lean();
-      return resDoc?.clubId || null;
+      return resDoc?.clubId
+        ? { type: 'clubService', id: resDoc.clubId.toString() }
+        : null;
     } catch {
       return null;
     }
@@ -68,11 +71,7 @@ export async function init(app, registry, eventBus) {
 
   if (eventBus) {
     const resourceService = new ResourceService();
-    eventBus.on('event:deleted', async (payload) => {
-      if (payload && payload.eventId) {
-        await resourceService.deleteEventAllocations(payload.eventId);
-      }
-    });
+    registerResourceHandlers(eventBus, registry, resourceService);
   }
 }
 

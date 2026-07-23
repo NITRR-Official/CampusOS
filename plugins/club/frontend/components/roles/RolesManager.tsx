@@ -25,9 +25,9 @@ import {
 } from '@plugins/club/frontend/hooks';
 import { RoleItem } from './RoleItem';
 import { RoleEditorSheet } from './RoleEditorSheet';
-import { Button } from '@/components/ui/button';
+import { Button } from '@campusos/design-system';
 import { Plus } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@campusos/design-system';
 
 export function RolesManager({ clubId }: { clubId: string }) {
   const { data: rolesData, isLoading: rolesLoading } = useClubRoles(clubId);

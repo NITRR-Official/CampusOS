@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { apiClient } from '@/lib/api/client';
-export { ApiError as SchedulingApiError } from '@/lib/api/errors';
+import { apiClient } from '@campus-os/shared/api-client';
+export { ApiError as SchedulingApiError } from '@campus-os/shared/api-errors';
 
 export const TimeSlotSchema = z.object({
   id: z.string(),

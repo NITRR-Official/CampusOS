@@ -22,4 +22,7 @@ const pluginSchema = new mongoose.Schema(
   }
 );
 
+pluginSchema.set('toJSON', { virtuals: true });
+pluginSchema.set('toObject', { virtuals: true });
+
 export const Plugin = mongoose.model('Plugin', pluginSchema);

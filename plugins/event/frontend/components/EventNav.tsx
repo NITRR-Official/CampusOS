@@ -10,8 +10,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { cn } from '@campusos/design-system';
+import { Button } from '@campusos/design-system';
 
 interface EventNavProps {
   clubId: string;

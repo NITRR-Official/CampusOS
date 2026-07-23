@@ -7,10 +7,6 @@ import mongoose from 'mongoose';
 
 const vendorSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     clubId: {
       type: String,
       required: true
@@ -152,6 +148,9 @@ vendorSchema.index({ clubId: 1, email: 1 });
 vendorSchema.index({ clubId: 1, nameLower: 1 });
 vendorSchema.index({ 'assignments.eventId': 1 });
 vendorSchema.index({ 'assignments.assignmentId': 1 });
+
+vendorSchema.set('toJSON', { virtuals: true });
+vendorSchema.set('toObject', { virtuals: true });
 
 export const Vendor = mongoose.model('Vendor', vendorSchema);
 

@@ -5,6 +5,7 @@
 
 import { registerBudgetRoutes } from './routes/budget.routes.js';
 import BudgetService from './service/budget.service.js';
+import { registerBudgetHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -75,18 +76,16 @@ export async function init(app, registry, eventBus) {
       const budgetDoc = await BudgetModel.findById(budgetId)
         .select('clubId')
         .lean();
-      return budgetDoc?.clubId || null;
+      return budgetDoc?.clubId
+        ? { type: 'clubService', id: budgetDoc.clubId.toString() }
+        : null;
     } catch {
       return null;
     }
   });
 
   if (eventBus) {
-    eventBus.on('event:deleted', async (payload) => {
-      if (payload && payload.eventId) {
-        await budgetService.deleteEventBudget(payload.eventId);
-      }
-    });
+    registerBudgetHandlers(eventBus, registry, budgetService);
   }
 }
 

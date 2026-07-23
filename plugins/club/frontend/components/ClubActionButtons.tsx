@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMyClubPermissions } from '@plugins/club/frontend/hooks';
-import { useAuth } from '@/lib/auth-provider';
+import { useAuth } from '@campus-os/shared/auth-provider';
 
 interface ClubActionButtonsProps {
   clubId: string;

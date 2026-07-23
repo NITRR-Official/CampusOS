@@ -7,14 +7,14 @@ import {
   Sparkles,
   Users
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@campusos/design-system';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle
-} from '@/components/ui/card';
+} from '@campusos/design-system';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 const HIGHLIGHTS = [

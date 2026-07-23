@@ -8,7 +8,7 @@ import {
   Club
 } from '@plugins/club/frontend/api';
 import { ShieldCheck, Check, X, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@campusos/design-system';
 
 export default function ClubApprovalsPage() {
   const [pendingClubs, setPendingClubs] = useState<Club[]>([]);

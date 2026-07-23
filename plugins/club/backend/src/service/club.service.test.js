@@ -1,4 +1,4 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import {
   connectDB,
   disconnectDB
@@ -9,15 +9,20 @@ import { ClubMember } from '../schema/clubMember.model.js';
 import { Role as ClubRole } from '../schema/role.model.js';
 import { createClubRepository } from '../repository/club.repository.js';
 import { createClubService } from './club.service.js';
+import { createRoleService } from './role.service.js';
+import { createMemberService } from './member.service.js';
+import { createProvisioningService } from './provisioning.service.js';
 
-describe('ClubService', () => {
-  let service;
+describe('ClubService Refactored', () => {
+  let clubService;
+  let memberService;
+  let roleService;
   let mongoServer;
   let repository;
   let eventBus;
 
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
+    mongoServer = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
     await connectDB(mongoServer.getUri());
   }, 120000);
 
@@ -32,9 +37,31 @@ describe('ClubService', () => {
     await ClubMember.deleteMany({});
     await ClubRole.deleteMany({});
 
+    await User.createCollection();
+    await Club.createCollection();
+    await ClubMember.createCollection();
+    await ClubRole.createCollection();
+
     repository = createClubRepository(Club, ClubMember, ClubRole, User);
     eventBus = { emit: vi.fn() };
-    service = createClubService(repository, eventBus);
+
+    const authService = {
+      getUserByEmail: vi.fn(async (email) => User.findOne({ email })),
+      createUser: vi.fn(async (data) =>
+        User.create({ ...data, passwordHash: data.password || 'hashed' })
+      ),
+      getUserById: vi.fn(async (id) => User.findById(id)),
+      getUsersByIds: vi.fn(async (ids) => User.find({ _id: { $in: ids } }))
+    };
+
+    roleService = createRoleService(repository);
+    memberService = createMemberService(repository, authService);
+    const provisioningService = createProvisioningService(
+      repository,
+      authService
+    );
+
+    clubService = createClubService(repository, eventBus, provisioningService);
   });
 
   describe('createClub', () => {
@@ -42,39 +69,50 @@ describe('ClubService', () => {
       const payload = {
         name: 'Coding Club',
         email: 'coding@test.com',
-        instituteId: 'inst_1',
         description: 'A club for coding',
         category: 'Technical',
-        createdBy: 'user_1'
+        createdBy: '507f1f77bcf86cd799439011'
       };
 
-      const club = await service.createClub(payload);
+      const club = await clubService.createClub(payload);
 
       expect(club).toBeDefined();
       expect(club.name).toBe('Coding Club');
       expect(club.slug).toBe('coding-club'); // auto generated
       expect(club.status).toBe('pending_verification');
       expect(eventBus.emit).toHaveBeenCalledWith(
-        'club.proposed',
+        'club:proposed',
         expect.any(Object)
       );
     });
+
+    it('should generate a unique slug on duplicate names', async () => {
+      const payload = {
+        name: 'Coding Club',
+        email: 'coding@test.com',
+        createdBy: '507f1f77bcf86cd799439011'
+      };
+
+      await clubService.createClub(payload);
+      const secondClub = await clubService.createClub(payload);
+
+      expect(secondClub.slug).toBe('coding-club-1');
+    });
   });
 
-  describe('updateClubStatus', () => {
+  describe('approveClub', () => {
     it('should approve club and provision roles and owner account', async () => {
       const payload = {
         name: 'Robotics Club',
         email: 'robotics@test.com',
-        instituteId: 'inst_1',
         description: 'Robotics',
         category: 'Technical',
-        createdBy: 'user_1'
+        createdBy: '507f1f77bcf86cd799439011'
       };
 
-      const club = await service.createClub(payload);
+      const club = await clubService.createClub(payload);
 
-      const approvedClub = await service.updateClubStatus(club.id, 'approved');
+      const approvedClub = await clubService.approveClub(club.id);
 
       expect(approvedClub.status).toBe('approved');
 
@@ -95,35 +133,33 @@ describe('ClubService', () => {
         userId: ownerUser._id
       });
       expect(member).toBeDefined();
-      expect(member.roles).toContainEqual(ownerRole._id);
+      expect(member.roles.map(String)).toContainEqual(ownerRole._id.toString());
     });
   });
 
   describe('listClubs & getClub', () => {
     it('should fetch club details correctly', async () => {
-      const club1 = await service.createClub({
+      const club1 = await clubService.createClub({
         name: 'Club 1',
         email: 'c1@test.com',
-        instituteId: 'inst_1',
-        createdBy: 'user_1'
+        createdBy: '507f1f77bcf86cd799439011'
       });
-      const club2 = await service.createClub({
+      const club2 = await clubService.createClub({
         name: 'Club 2',
         email: 'c2@test.com',
-        instituteId: 'inst_1',
-        createdBy: 'user_1'
+        createdBy: '507f1f77bcf86cd799439011'
       });
 
-      await service.updateClubStatus(club1.id, 'approved');
+      await clubService.approveClub(club1.id);
 
-      const allClubs = await service.listClubs();
+      const allClubs = await clubService.listClubs();
       expect(allClubs).toHaveLength(2);
 
-      const approvedClubs = await service.listClubs('approved');
+      const approvedClubs = await clubService.listClubs('approved');
       expect(approvedClubs).toHaveLength(1);
       expect(approvedClubs[0].id.toString()).toBe(club1.id.toString());
 
-      const fetched = await service.getClub(club1.id);
+      const fetched = await clubService.getClub(club1.id);
       expect(fetched).toBeDefined();
       expect(fetched.name).toBe('Club 1');
     });
@@ -131,13 +167,12 @@ describe('ClubService', () => {
 
   describe('members management', () => {
     it('should add a member and list members', async () => {
-      const club = await service.createClub({
+      const club = await clubService.createClub({
         name: 'Member Club',
         email: 'member@test.com',
-        instituteId: 'inst_1',
-        createdBy: 'user_1'
+        createdBy: '507f1f77bcf86cd799439011'
       });
-      await service.updateClubStatus(club.id, 'approved');
+      await clubService.approveClub(club.id);
 
       const ownerRole = await ClubRole.findOne({
         clubId: club.id,
@@ -151,22 +186,19 @@ describe('ClubService', () => {
         passwordHash: 'dummy'
       });
 
-      // Add another member as super admin
-      await service.addMember(
+      // Add member using memberService
+      await memberService.addMember(
         club.id,
-        {
-          email: 'test_user2@example.com',
-          role: ownerRole._id.toString()
-        },
-        { isSuperAdmin: true }
+        { email: 'test_user2@example.com' },
+        ownerRole
       );
 
-      const members = await service.listMembers(club.id);
+      const members = await memberService.listMembers(club.id);
 
       expect(members.length).toBe(2); // One is the provisioned owner, one is the new member
 
       const newMember = members.find(
-        (m) => m.userId.email === 'test_user2@example.com'
+        (m) => m.user && m.user.email === 'test_user2@example.com'
       );
       expect(newMember).toBeDefined();
       expect(

@@ -3,6 +3,7 @@ import { registerEventRoutes } from './routes/event.routes.js';
 import { createEventService } from './service/event.service.js';
 import { createEventRepository } from './repository/event.repository.js';
 import { Event } from './schema/event.model.js';
+import { registerEventHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -47,9 +48,16 @@ export async function init(app, registry, eventBus) {
       description: 'Allows editing, publishing, and deleting events'
     });
 
+    registry.registerPublicRoute(/^\/api\/v1\/events\/public$/, 'GET');
+    registry.registerPublicRoute(/^\/api\/v1\/events\/[^/]+\/public$/, 'GET');
+    registry.registerPublicRoute(
+      /^\/api\/v1\/events\/[^/]+\/registrations$/,
+      'POST'
+    );
+
     registry.registerContextResolver('/api/v1/events', async (req) => {
       if (req.method === 'POST' && req.body?.clubId) {
-        return req.body.clubId;
+        return { type: 'clubService', id: req.body.clubId };
       }
 
       const eventId = req.params?.eventId || req.url.split('/')[4];
@@ -60,7 +68,9 @@ export async function init(app, registry, eventBus) {
         const eventDoc = await EventModel.findById(eventId)
           .select('clubId')
           .lean();
-        return eventDoc?.clubId || null;
+        return eventDoc?.clubId
+          ? { type: 'clubService', id: eventDoc.clubId.toString() }
+          : null;
       } catch {
         return null;
       }
@@ -68,11 +78,7 @@ export async function init(app, registry, eventBus) {
   }
 
   if (eventBus) {
-    eventBus.on('club:deleted', async (payload) => {
-      if (payload && payload.clubId) {
-        await eventService.deleteEventsByClub(payload.clubId);
-      }
-    });
+    registerEventHandlers(eventBus, registry, eventService);
   }
 }
 

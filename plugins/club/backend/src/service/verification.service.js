@@ -1,42 +1,34 @@
-import crypto from 'crypto';
-import { VerificationToken } from '../schema/verification-token.model.js';
-import { Club } from '../schema/club.model.js';
+import crypto from 'node:crypto';
 
-/**
- * Handles the generation and validation of verification tokens.
- */
-class VerificationService {
-  /**
-   * Generates a new secure token for a club.
-   * @param {string} clubId
-   * @returns {Promise<string>} The raw token string
-   */
-  async generateTokenForClub(clubId) {
+export function createVerificationService(verificationRepository, clubService) {
+  async function generateTokenForClub(clubId) {
     const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
 
     // Create token expiring in 24 hours
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    await VerificationToken.create({
-      token: rawToken,
+    await verificationRepository.createVerificationToken(
+      hashedToken,
       clubId,
       expiresAt
-    });
+    );
 
     return rawToken;
   }
 
-  /**
-   * Validates a token and approves the email verification.
-   * @param {string} token
-   * @returns {Promise<Object>} The updated club document
-   * @throws {Error} If token is invalid or expired
-   */
-  async verifyEmail(token) {
-    const verificationRecord = await VerificationToken.findOne({
-      token
-    }).populate('clubId');
+  async function verifyEmail(providedToken) {
+    const hashedProvidedToken = crypto
+      .createHash('sha256')
+      .update(providedToken)
+      .digest('hex');
+
+    const verificationRecord =
+      await verificationRepository.findVerificationToken(hashedProvidedToken);
 
     if (!verificationRecord) {
       const error = new Error('Invalid or expired verification token');
@@ -44,7 +36,7 @@ class VerificationService {
       throw error;
     }
 
-    const club = verificationRecord.clubId;
+    const club = await clubService.getClub(verificationRecord.clubId);
     if (!club) {
       const error = new Error('Associated club not found');
       error.status = 404;
@@ -58,14 +50,20 @@ class VerificationService {
     }
 
     // Update club status to pending (awaiting admin approval)
-    club.status = 'pending';
-    await club.save();
+    const updatedClub = await clubService.updateClubStatus(club.id, 'pending');
 
     // Clean up the token so it cannot be used again
-    await VerificationToken.deleteOne({ _id: verificationRecord._id });
+    await verificationRepository.deleteVerificationToken(
+      verificationRecord._id
+    );
 
-    return club;
+    return updatedClub;
   }
+
+  return {
+    generateTokenForClub,
+    verifyEmail
+  };
 }
 
-export const verificationService = new VerificationService();
+export default createVerificationService;

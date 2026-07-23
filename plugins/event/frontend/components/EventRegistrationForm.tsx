@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { registerForEvent } from '../api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@campusos/design-system';
+import { Input } from '@campusos/design-system';
+import { Label } from '@campusos/design-system';
 import { CheckCircle2 } from 'lucide-react';
 
 export function EventRegistrationForm({ eventId }: { eventId: string }) {

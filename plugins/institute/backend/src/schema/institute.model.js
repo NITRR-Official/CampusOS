@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const instituteSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     name: {
       type: String,
       required: true,
@@ -38,5 +34,8 @@ const instituteSchema = new mongoose.Schema(
     collection: 'institutes'
   }
 );
+
+instituteSchema.set('toJSON', { virtuals: true });
+instituteSchema.set('toObject', { virtuals: true });
 
 export const Institute = mongoose.model('Institute', instituteSchema);

@@ -1,12 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Bell } from 'lucide-react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@campusos/design-system';
+import { Input } from '@campusos/design-system';
+import { Button } from '@campusos/design-system';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,8 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from '@campusos/design-system';
+import { Avatar, AvatarFallback } from '@campusos/design-system';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,9 +23,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
+} from '@campusos/design-system';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useAuth } from '@/lib/auth-provider';
+import { useAuth } from '@campus-os/shared/auth-provider';
 import { useUIStore } from '@/lib/store';
 
 function getInitials(value: string) {
@@ -39,6 +39,8 @@ export function Header() {
   const router = useRouter();
   const { user, role, logout } = useAuth();
   const { isSearchOpen, toggleSearch } = useUIStore();
+
+  const searchParams = useSearchParams();
 
   const getBreadcrumbs = () => {
     if (!pathname || pathname === '/')
@@ -77,6 +79,15 @@ export function Header() {
           href: currentPath
         });
       }
+    }
+
+    // Append campaign if present (for Recruitment Pipeline)
+    const campaignId = searchParams?.get('campaign');
+    if (campaignId) {
+      crumbs.push({
+        label: 'Pipeline',
+        href: `${pathname}?campaign=${campaignId}`
+      });
     }
 
     return crumbs;

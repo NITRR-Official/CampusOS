@@ -17,7 +17,7 @@ Whenever you fetch data, you must provide a Zod schema to validate the response 
 
 ```typescript
 import { z } from 'zod';
-import { apiClient } from '@/lib/api/client';
+import { apiClient } from '@campus-os/shared/api-client';
 
 const UserSchema = z.object({
   id: z.string(),

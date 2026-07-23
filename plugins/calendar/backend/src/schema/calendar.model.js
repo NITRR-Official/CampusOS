@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const calendarEventSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     title: {
       type: String,
       required: true,
@@ -49,6 +45,9 @@ calendarEventSchema.index({ startsAt: 1, endsAt: 1 });
 calendarEventSchema.index({ linkedTaskId: 1 });
 calendarEventSchema.index({ linkedEventId: 1 });
 calendarEventSchema.index({ eventType: 1 });
+
+calendarEventSchema.set('toJSON', { virtuals: true });
+calendarEventSchema.set('toObject', { virtuals: true });
 
 export const CalendarEvent = mongoose.model(
   'CalendarEvent',

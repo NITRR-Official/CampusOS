@@ -10,7 +10,10 @@ import {
   TaskApiError,
   type TaskItem
 } from '@plugins/task/frontend/api';
-import { readAccessToken, clearAuthSession } from '@/lib/auth-session';
+import {
+  readAccessToken,
+  clearAuthSession
+} from '@campus-os/shared/auth-session';
 
 export function useTasks(clubId: string) {
   const accessToken = readAccessToken();

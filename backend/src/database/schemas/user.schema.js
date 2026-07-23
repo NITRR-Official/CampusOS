@@ -7,10 +7,6 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     name: {
       type: String,
       required: true,
@@ -41,5 +37,8 @@ const userSchema = new mongoose.Schema(
     collection: 'users'
   }
 );
+
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
 
 export const User = mongoose.model('User', userSchema);

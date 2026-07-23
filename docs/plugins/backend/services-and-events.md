@@ -103,7 +103,15 @@ eventBus.emit('recruitment.applied', {
 
 ```javascript
 // In another plugin (e.g., the Task or Notification plugin)
-eventBus.on('recruitment.applied', async (data) => {
+eventBus.on('recruitment:applied', async (data) => {
   console.log(`Sending email notification to student ${data.studentId}`);
 });
 ```
+
+### EventBus Best Practices
+
+To ensure the monolithic backend remains fast and stable, you must follow these rules when using the EventBus:
+
+1. **Strict Namespacing:** Always prefix your events with your plugin name and a colon (e.g. `recruitment:applied`, `club:created`). Never emit generic events like `created`.
+2. **Emit IDs, Not Objects:** Pass lightweight identifiers (like `userId` or `clubId`) in your payload rather than entire database objects.
+3. **Do Not Block the Thread:** The EventBus operates locally in-memory. If your listener performs heavy synchronous work (like a massive `for` loop), it will block the entire Node.js event loop. Always wrap heavy tasks in `async` functions or background workers.

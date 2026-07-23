@@ -33,6 +33,7 @@ The plugin loader requires a `plugin.json` manifest to perform dependency resolu
   "name": "recruitment",
   "version": "1.0.0",
   "description": "Handles club member applications and interviews",
+  "defaultEnabled": true,
   "dependencies": {
     "club": "^1.0.0",
     "auth": "^1.0.0"
@@ -48,10 +49,43 @@ The plugin loader requires a `plugin.json` manifest to perform dependency resolu
 
 CampusOS uses a Monorepo architecture for the frontend. Plugin-related React components and hooks should be housed _inside_ the plugin's `frontend/` directory, **not** in the core `frontend/app` monolith.
 
-1. **Create your UI in the Plugin:**
-   Create components (e.g., `plugins/task/frontend/TaskDashboard.tsx`), hooks, and context within your plugin folder.
-2. **Export and Import:**
-   The core Next.js application imports these components via TypeScript path aliases.
+### Boilerplate Requirements
+
+If your plugin includes a frontend, you must define the following `peerDependencies` in your plugin's `package.json` to ensure compatibility with the CampusOS host application:
+
+```json
+{
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0",
+    "lucide-react": "*",
+    "@tanstack/react-query": "^5.0.0"
+  },
+  "dependencies": {
+    "@campusos/design-system": "workspace:*"
+  }
+}
+```
+
+### The Design System
+
+CampusOS provides a centralized design system containing all Shadcn UI components, Tailwind configurations, and CSS variables. By importing from this package, your plugin will seamlessly match the platform's premium aesthetic.
+
+1. **Install the Design System:**
+   Run `pnpm add @campusos/design-system --workspace` in your plugin directory.
+2. **Build Your UI:**
+   Import components directly from the design system package:
+
+   ```tsx
+   import { Button, Input, Card } from '@campusos/design-system';
+
+   export function MyPluginDashboard() {
+     return <Button>Click Me</Button>;
+   }
+   ```
+
+3. **Route Integration:**
+   The core Next.js application will import your component and wrap it in a Next.js route:
 
    ```tsx
    // frontend/app/(dashboard)/tasks/page.tsx
@@ -175,15 +209,18 @@ export function registerRecruitmentRoutes(app, requirePermissions) {
 }
 ```
 
+> **Dynamic Contexts:** By default, `requirePermissions` looks for a `:clubId` parameter. If your plugin uses a different context (like `:instituteId`), you must register a **Context Resolver** in your `init` block. See the `rbac-and-security.md` documentation for details.
+
 ---
 
 ## 6. Best Practices
 
 1. **Dependency Injection for Core Models**: Never use relative imports to reach out of your plugin into the monolith (e.g. `import User from '../../../../../backend/src/...'`). Instead, fetch the system's `User` and `Plugin` models from `registry.getService('core:models')` during your `init` function.
-2. **Don't hardcode relationships**: Try to use `eventBus` rather than tightly coupling Mongoose schemas to another plugin's schema.
-3. **Register everything**: Always register your module and permissions so the Frontend UI can render checkboxes and routes dynamically.
-4. **Database Isolation**: Keep your Mongoose models self-contained inside your plugin's `schema/` folder.
-5. **Use Semver**: Always define your `dependencies` in `plugin.json`.
+2. **Unified Error Handling**: Never create your own local `createHttpError` functions. Always import and throw `AppError` from the core for generic domain errors. The global error middleware will automatically format it.
+3. **EventBus Hygiene**: Always namespace your events (e.g., `recruitment:applied`), only emit lightweight IDs (not full objects) to avoid mutation traps, and ensure listeners use `async` to prevent blocking the main Node.js event loop.
+4. **Register everything**: Always register your module and permissions so the Frontend UI can render checkboxes and routes dynamically.
+5. **Database Isolation**: Keep your Mongoose models self-contained inside your plugin's `schema/` folder.
+6. **Use Semver**: Always define your `dependencies` in `plugin.json`.
 
 ---
 

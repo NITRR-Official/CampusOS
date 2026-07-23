@@ -7,11 +7,7 @@ export const createClubSchema = z
       .trim()
       .min(3, 'Name must be between 3 and 120 characters')
       .max(120, 'Name must be between 3 and 120 characters'),
-    instituteId: z
-      .string()
-      .trim()
-      .min(1, 'Institute ID is required')
-      .max(50, 'Institute ID must be 50 characters or fewer'),
+
     description: z
       .string()
       .trim()

@@ -1,6 +1,6 @@
-import { apiClient } from '@/lib/api/client';
+import { apiClient } from '@campus-os/shared/api-client';
 import { z } from 'zod';
-export { ApiError as TaskApiError } from '@/lib/api/errors';
+export { ApiError as TaskApiError } from '@campus-os/shared/api-errors';
 
 export const TaskStatusSchema = z.enum(['todo', 'in-progress', 'done']);
 export const TaskPrioritySchema = z.enum(['low', 'medium', 'high']);

@@ -11,18 +11,18 @@ import {
   useMyClubPermissions
 } from '@plugins/club/frontend/hooks';
 import { ClubMember, Role } from '@plugins/club/frontend/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from '@campusos/design-system';
+import { Input } from '@campusos/design-system';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+} from '@campusos/design-system';
+import { useToast } from '@campusos/design-system';
 import { Trash2, UserPlus, X } from 'lucide-react';
-import { useAuth } from '@/lib/auth-provider';
+import { useAuth } from '@campus-os/shared/auth-provider';
 
 export function MembersManager({ clubId }: { clubId: string }) {
   const { data: members, isLoading: membersLoading } = useClubMembers(clubId);
@@ -270,7 +270,9 @@ export function MembersManager({ clubId }: { clubId: string }) {
                   <div className="flex flex-wrap items-center gap-3">
                     <Select
                       value=""
-                      onValueChange={(val) => handleRoleChange(userIdStr, val)}
+                      onValueChange={(val: string) =>
+                        handleRoleChange(userIdStr, val)
+                      }
                       disabled={isDisabled}
                     >
                       <SelectTrigger className="w-[140px] h-9">

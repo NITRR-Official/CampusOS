@@ -1,3 +1,4 @@
+import { AppError } from '@campus-os/shared/errors';
 import {
   assignTaskSchema,
   createTaskSchema,
@@ -5,21 +6,6 @@ import {
   updateTaskStatusSchema
 } from '../schema/task.schema.js';
 import { getTaskService } from '../service/task.service.js';
-
-function createHttpError(status, message, code, details) {
-  const error = new Error(message);
-  error.status = status;
-
-  if (code) {
-    error.code = code;
-  }
-
-  if (details) {
-    error.details = details;
-  }
-
-  return error;
-}
 
 export function createTaskController() {
   const taskService = getTaskService();
@@ -46,9 +32,9 @@ export function createTaskController() {
       const { clubId } = req.query;
       if (!clubId) {
         return next(
-          createHttpError(
-            400,
+          new AppError(
             'clubId is required for listing tasks',
+            400,
             'VALIDATION_ERROR'
           )
         );
@@ -69,7 +55,7 @@ export function createTaskController() {
       const task = await taskService.getTask(taskId);
 
       if (!task) {
-        next(createHttpError(404, 'Task not found', 'TASK_NOT_FOUND'));
+        next(new AppError('Task not found', 404, 'TASK_NOT_FOUND'));
         return;
       }
 
@@ -90,7 +76,7 @@ export function createTaskController() {
       const task = await taskService.assignTask(taskId, value);
 
       if (!task) {
-        next(createHttpError(404, 'Task not found', 'TASK_NOT_FOUND'));
+        next(new AppError('Task not found', 404, 'TASK_NOT_FOUND'));
         return;
       }
 
@@ -111,7 +97,7 @@ export function createTaskController() {
       const task = await taskService.updateStatus(taskId, value.status);
 
       if (!task) {
-        next(createHttpError(404, 'Task not found', 'TASK_NOT_FOUND'));
+        next(new AppError('Task not found', 404, 'TASK_NOT_FOUND'));
         return;
       }
 
@@ -132,7 +118,7 @@ export function createTaskController() {
       const task = await taskService.updatePriority(taskId, value.priority);
 
       if (!task) {
-        next(createHttpError(404, 'Task not found', 'TASK_NOT_FOUND'));
+        next(new AppError('Task not found', 404, 'TASK_NOT_FOUND'));
         return;
       }
 
@@ -150,9 +136,7 @@ export function createTaskController() {
     const { dependencyId } = req.body;
 
     if (!dependencyId || typeof dependencyId !== 'string') {
-      next(
-        createHttpError(400, 'dependencyId is required', 'VALIDATION_ERROR')
-      );
+      next(new AppError('dependencyId is required', 400, 'VALIDATION_ERROR'));
       return;
     }
 
@@ -196,9 +180,7 @@ export function createTaskController() {
     const { dependencyId } = req.body;
 
     if (!dependencyId || typeof dependencyId !== 'string') {
-      next(
-        createHttpError(400, 'dependencyId is required', 'VALIDATION_ERROR')
-      );
+      next(new AppError('dependencyId is required', 400, 'VALIDATION_ERROR'));
       return;
     }
 

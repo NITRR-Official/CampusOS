@@ -11,6 +11,7 @@ export async function init(app, registry, eventBus) {
 
   const authRepository = createAuthRepository(models.User);
   const authService = createAuthService(authRepository, eventBus);
+  registry.registerService('auth:service', authService);
   const authController = createAuthController({ registry, authService });
 
   const requireSuperAdmin = registry.getService('requireSuperAdmin');

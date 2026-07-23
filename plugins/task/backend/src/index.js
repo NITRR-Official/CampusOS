@@ -1,6 +1,7 @@
 import { createTaskController } from './controller/task.controller.js';
 import { registerTaskRoutes } from './routes/task.routes.js';
 import { Task } from './schema/task.model.js';
+import { registerTaskHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -41,11 +42,17 @@ export async function init(app, registry, eventBus) {
       if (!taskId) return null;
       try {
         const taskDoc = await Task.findById(taskId).select('clubId').lean();
-        return taskDoc?.clubId || null;
+        return taskDoc?.clubId
+          ? { type: 'clubService', id: taskDoc.clubId.toString() }
+          : null;
       } catch {
         return null;
       }
     });
+  }
+
+  if (eventBus) {
+    registerTaskHandlers(eventBus, registry);
   }
 }
 

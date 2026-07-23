@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { apiClient } from '@/lib/api/client';
-export { ApiError as ResourceApiError } from '@/lib/api/errors';
+import { apiClient } from '@campus-os/shared/api-client';
+export { ApiError as ResourceApiError } from '@campus-os/shared/api-errors';
 
 export const ResourceSchema = z.object({
   id: z.string(),

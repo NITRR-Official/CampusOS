@@ -7,10 +7,6 @@ import mongoose from 'mongoose';
 
 const budgetSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     eventId: {
       type: String,
       required: true,
@@ -49,10 +45,6 @@ const budgetSchema = new mongoose.Schema(
 
 const expenseSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     budgetId: {
       type: String,
       required: true,
@@ -97,6 +89,9 @@ budgetSchema.index({ approvalStatus: 1 });
 
 expenseSchema.index({ category: 1 });
 expenseSchema.index({ paymentStatus: 1 });
+
+budgetSchema.set('toJSON', { virtuals: true });
+budgetSchema.set('toObject', { virtuals: true });
 
 export const Budget = mongoose.model('Budget', budgetSchema);
 export const Expense = mongoose.model('Expense', expenseSchema);

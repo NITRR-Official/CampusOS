@@ -22,6 +22,9 @@ const verificationTokenSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+verificationTokenSchema.set('toJSON', { virtuals: true });
+verificationTokenSchema.set('toObject', { virtuals: true });
+
 export const VerificationToken = mongoose.model(
   'VerificationToken',
   verificationTokenSchema

@@ -65,6 +65,11 @@ function createPlugin(pluginName) {
     process.exit(1);
   }
 
+  if (pluginName.startsWith('--')) {
+    console.error('❌ Error: Invalid plugin name. Cannot start with "--".');
+    process.exit(1);
+  }
+
   const targetDir = path.join(PLUGINS_DIR, pluginName);
   if (fs.existsSync(targetDir)) {
     console.error(`❌ Error: Plugin directory already exists at ${targetDir}.`);
@@ -109,7 +114,11 @@ function createPlugin(pluginName) {
     peerDependencies: {
       react: '^18.2.0 || ^19.0.0',
       'react-dom': '^18.2.0 || ^19.0.0',
-      '@tanstack/react-query': '^5.0.0'
+      '@tanstack/react-query': '^5.0.0',
+      'lucide-react': '*'
+    },
+    dependencies: {
+      '@campusos/design-system': 'workspace:*'
     }
   };
   fs.writeFileSync(
@@ -123,9 +132,26 @@ function createPlugin(pluginName) {
     backendIndex
   );
 
+  const safeName = pluginName.replace(/[^a-zA-Z0-9]/g, '');
   const componentName =
-    pluginName.charAt(0).toUpperCase() + pluginName.slice(1) + 'Page';
-  const frontendPage = `import React from 'react';\n\nexport default function ${componentName}() {\n  return (\n    <div className="p-6">\n      <h1 className="text-2xl font-bold">${componentName}</h1>\n      <p>Welcome to the newly scaffolded ${pluginName} plugin!</p>\n    </div>\n  );\n}\n`;
+    safeName.charAt(0).toUpperCase() + safeName.slice(1) + 'Page';
+  const frontendPage = `import React from 'react';
+import { Card, Button } from '@campusos/design-system';
+
+export default function ${componentName}() {
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <Card className="p-8">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-100">${componentName}</h1>
+        <p className="mt-4 text-slate-300">Welcome to the newly scaffolded ${pluginName} plugin!</p>
+        <Button className="mt-6 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold">
+          Get Started
+        </Button>
+      </Card>
+    </div>
+  );
+}
+`;
   fs.writeFileSync(
     path.join(targetDir, 'frontend', 'pages', 'index.tsx'),
     frontendPage
@@ -242,6 +268,11 @@ function installPlugin(sourcePath) {
     process.exit(1);
   }
 
+  if (sourcePath.startsWith('--')) {
+    console.error('❌ Error: Invalid source path. Cannot start with "--".');
+    process.exit(1);
+  }
+
   if (!fs.existsSync(PLUGINS_DIR)) {
     fs.mkdirSync(PLUGINS_DIR, { recursive: true });
   }
@@ -352,6 +383,11 @@ function uninstallPlugin(pluginName) {
     console.error(
       '❌ Error: Please provide the name of the plugin to uninstall.'
     );
+    process.exit(1);
+  }
+
+  if (pluginName.startsWith('--')) {
+    console.error('❌ Error: Invalid plugin name. Cannot start with "--".');
     process.exit(1);
   }
 

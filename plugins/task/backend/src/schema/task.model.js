@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const taskSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     clubId: {
       type: String,
       required: true
@@ -63,5 +59,8 @@ taskSchema.index({ clubId: 1, status: 1 });
 taskSchema.index({ clubId: 1, dueDate: 1 });
 taskSchema.index({ clubId: 1, createdBy: 1 });
 taskSchema.index({ createdBy: 1 });
+
+taskSchema.set('toJSON', { virtuals: true });
+taskSchema.set('toObject', { virtuals: true });
 
 export const Task = mongoose.model('Task', taskSchema);

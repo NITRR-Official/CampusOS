@@ -4,5 +4,6 @@
   "description": "Club Management and RBAC Module",
   "dependencies": {
     "auth": "^1.0.0"
-  }
+  },
+  "defaultEnabled": true
 }

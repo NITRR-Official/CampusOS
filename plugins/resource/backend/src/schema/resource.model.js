@@ -7,10 +7,6 @@ import mongoose from 'mongoose';
 
 const resourceSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     name: {
       type: String,
       required: true,
@@ -109,6 +105,9 @@ const resourceSchema = new mongoose.Schema(
 resourceSchema.index({ type: 1 });
 resourceSchema.index({ 'allocations.eventId': 1 });
 resourceSchema.index({ condition: 1 });
+
+resourceSchema.set('toJSON', { virtuals: true });
+resourceSchema.set('toObject', { virtuals: true });
 
 export const Resource = mongoose.model('Resource', resourceSchema);
 

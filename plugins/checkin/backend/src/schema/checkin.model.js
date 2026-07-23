@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 
 const checkInSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     eventId: {
       type: String,
       required: true
@@ -37,5 +33,8 @@ const checkInSchema = new mongoose.Schema(
 
 // Indexes
 checkInSchema.index({ eventId: 1, userId: 1 }, { unique: true }); // A user can only register/check-in once per event
+
+checkInSchema.set('toJSON', { virtuals: true });
+checkInSchema.set('toObject', { virtuals: true });
 
 export const CheckIn = mongoose.model('CheckIn', checkInSchema);
