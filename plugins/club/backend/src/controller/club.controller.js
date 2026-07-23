@@ -54,12 +54,10 @@ export function createClubController(
       const status = req.query.status;
       const page = parseInt(req.query.page, 10) || 1;
       const limit = parseInt(req.query.limit, 10) || 50;
-      res
-        .status(200)
-        .json({
-          success: true,
-          data: await clubService.listClubs(status, { page, limit })
-        });
+      res.status(200).json({
+        success: true,
+        data: await clubService.listClubs(status, { page, limit })
+      });
     } catch (err) {
       next(err);
     }

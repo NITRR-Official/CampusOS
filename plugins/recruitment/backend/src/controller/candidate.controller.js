@@ -56,13 +56,11 @@ export function createCandidateController({
           };
         });
 
-        res
-          .status(200)
-          .json({
-            success: true,
-            count: enrichedCandidates.length,
-            data: enrichedCandidates
-          });
+        res.status(200).json({
+          success: true,
+          count: enrichedCandidates.length,
+          data: enrichedCandidates
+        });
       } catch (error) {
         next(error);
       }
