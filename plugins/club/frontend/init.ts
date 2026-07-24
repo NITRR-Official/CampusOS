@@ -3,7 +3,8 @@ import {
   ClubStatsWidget,
   ClubMemberStatsWidget,
   ClubQuickActionWidget,
-  ClubMemberQuickActionWidget
+  ClubMemberQuickActionWidget,
+  ClubActivityWidget
 } from './dashboard';
 
 export function initFrontend() {

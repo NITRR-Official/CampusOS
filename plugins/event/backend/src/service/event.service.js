@@ -19,6 +19,16 @@ export function createEventService(eventRepository, eventBus) {
     };
 
     const savedEvent = await eventRepository.saveEvent(event);
+
+    if (eventBus) {
+      eventBus.emit('event:created', {
+        eventId: savedEvent._id || savedEvent.id,
+        clubId: savedEvent.clubId,
+        actorId: savedEvent.createdBy,
+        title: savedEvent.title
+      });
+    }
+
     return savedEvent;
   }
 
@@ -48,6 +58,16 @@ export function createEventService(eventRepository, eventBus) {
     event.status = status;
     event.updatedAt = new Date().toISOString();
     await eventRepository.saveEvent(event);
+
+    if (eventBus && status === 'published') {
+      eventBus.emit('event:published', {
+        eventId: event._id || event.id,
+        clubId: event.clubId,
+        actorId: event.createdBy,
+        title: event.title
+      });
+    }
+
     return event;
   }
 

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Target, Users, Plus } from 'lucide-react';
+import { API_BASE_URL } from '@campus-os/shared/api-client';
 
 export function ClubStatsWidget() {
   return (
@@ -58,5 +59,61 @@ export function ClubMemberQuickActionWidget() {
         Invite Member
       </span>
     </button>
+  );
+}
+
+export function ClubActivityWidget() {
+  const [clubs, setClubs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/clubs`)
+      .then((res) => res.json())
+      .then((data) => {
+        setClubs(data.data?.slice(0, 3) || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch clubs for activity feed:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-sm text-muted-foreground animate-pulse">
+        Loading recent clubs...
+      </div>
+    );
+  }
+
+  if (clubs.length === 0) {
+    return null; // Let the dashboard be empty or handled by other plugins
+  }
+
+  return (
+    <>
+      {clubs.map((club, index) => (
+        <div
+          key={club._id || club.id || index}
+          className="bg-card/80 backdrop-blur rounded-xl border border-border/60 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/10 text-orange-500">
+            <Target className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground m-0">
+              {club.name || 'New Club'}
+            </p>
+            <p className="text-sm text-muted-foreground m-0 mt-0.5">
+              Created on {new Date(club.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+          <span className="text-xs font-semibold tracking-wider uppercase bg-orange-500/10 text-orange-500 px-3 py-1 rounded-full">
+            Club
+          </span>
+        </div>
+      ))}
+    </>
   );
 }

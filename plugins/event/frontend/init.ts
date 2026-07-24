@@ -1,5 +1,9 @@
 import { registry } from '@campus-os/shared/plugin-registry';
-import { EventStatsWidget, EventQuickActionWidget } from './dashboard';
+import {
+  EventStatsWidget,
+  EventQuickActionWidget,
+  EventActivityWidget
+} from './dashboard';
 
 export function initFrontend() {
   registry.registerSidebarLink({

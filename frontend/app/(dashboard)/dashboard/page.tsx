@@ -77,20 +77,11 @@ export default async function Dashboard() {
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
             Recent Activity
           </p>
-          <div className="bg-card/80 backdrop-blur rounded-xl border border-border/60 p-8 md:p-12 text-center shadow-sm">
-            <p className="text-muted-foreground text-sm md:text-base m-0">
-              No recent activity. Create a club or schedule an event to get
-              started!
-            </p>
-            <div className="mt-6 flex justify-center">
-              <Link
-                href="/events/new"
-                className="inline-flex items-center justify-center min-h-[40px] px-6 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 font-medium transition-colors text-sm"
-              >
-                Get Started
-              </Link>
-            </div>
-          </div>
+          <ExtensionPoint
+            id="dashboard-activity"
+            activePlugins={activePlugins}
+            className="space-y-4"
+          />
         </div>
       </div>
     </div>
