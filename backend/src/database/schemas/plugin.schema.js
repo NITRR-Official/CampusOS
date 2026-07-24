@@ -15,6 +15,10 @@ const pluginSchema = new mongoose.Schema(
     version: {
       type: String,
       default: '1.0.0'
+    },
+    settings: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
     }
   },
   {

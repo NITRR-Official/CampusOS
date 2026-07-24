@@ -99,11 +99,35 @@ export function createAuthController({ registry, authService }) {
     });
   }
 
+  async function updateRole(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { isSuperAdmin } = req.body;
+      const user = await authService.updateUserRole(id, isSuperAdmin);
+      res.status(200).json({ success: true, data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async function updateStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+      const user = await authService.updateUserStatus(id, isActive);
+      res.status(200).json({ success: true, data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   return {
     signup,
     login,
     listUsers,
-    getMe
+    getMe,
+    updateRole,
+    updateStatus
   };
 }
 

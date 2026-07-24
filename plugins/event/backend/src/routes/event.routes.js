@@ -1,6 +1,19 @@
-export function registerEventRoutes(app, eventController, requirePermissions) {
+export function registerEventRoutes(
+  app,
+  eventController,
+  requirePermissions,
+  requireSuperAdmin
+) {
   const manageEvents = requirePermissions('event:manage');
   const viewEvents = requirePermissions('event:view');
+
+  if (requireSuperAdmin) {
+    app.get(
+      '/api/v1/admin/events',
+      requireSuperAdmin,
+      eventController.adminList
+    );
+  }
 
   app.get('/api/v1/events', viewEvents, eventController.list);
   app.get('/api/v1/events/public', eventController.listPublic);

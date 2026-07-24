@@ -14,6 +14,7 @@ class ModuleRegistry {
   #contextResolvers = new Map();
   #publicRoutes = [];
   #statProviders = new Map();
+  #settingsConfigs = new Map();
 
   constructor() {}
 
@@ -175,6 +176,35 @@ class ModuleRegistry {
   }
 
   /**
+   * Register a configurable settings schema for a plugin
+   * @param {string} pluginId - The unique plugin ID
+   * @param {Object} schema - The settings schema (e.g. { fields: [...] })
+   */
+  registerSettingsConfig(pluginId, schema) {
+    if (this.#settingsConfigs.has(pluginId)) {
+      throw new Error(
+        `Settings config for plugin '${pluginId}' is already registered.`
+      );
+    }
+    this.#settingsConfigs.set(pluginId, schema);
+    console.log(`✓ Settings config registered: ${pluginId}`);
+  }
+
+  /**
+   * Get settings config for a plugin
+   */
+  getSettingsConfig(pluginId) {
+    return this.#settingsConfigs.get(pluginId) || null;
+  }
+
+  /**
+   * Get all registered settings configs
+   */
+  getAllSettingsConfigs() {
+    return Object.fromEntries(this.#settingsConfigs);
+  }
+
+  /**
    * Register a public route regex that bypasses authentication
    * @param {RegExp} regex - The regex matching the path
    * @param {string} [method] - Optional HTTP method (e.g. 'GET', 'POST'). If omitted, matches all methods.
@@ -209,6 +239,7 @@ class ModuleRegistry {
     this.#resolvers.clear();
     this.#contextResolvers.clear();
     this.#statProviders.clear();
+    this.#settingsConfigs.clear();
     this.#publicRoutes = [];
     // Assuming PermissionRegistry has a clear/reset method, or we can just replace it
     this.#permissions = new PermissionRegistry();

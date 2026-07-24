@@ -172,6 +172,19 @@ export function createEventController(eventService) {
     }
   }
 
+  async function adminList(req, res, next) {
+    try {
+      // List all events regardless of club
+      const events = await eventService.listEvents();
+      res.status(200).json({
+        success: true,
+        data: events
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async function getById(req, res, next) {
     const { eventId } = req.params;
     try {
@@ -302,6 +315,7 @@ export function createEventController(eventService) {
     unpublish,
     list,
     listPublic,
+    adminList,
     getById,
     getPublicById,
     register,

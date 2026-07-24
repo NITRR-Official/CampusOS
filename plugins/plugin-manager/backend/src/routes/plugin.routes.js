@@ -9,6 +9,7 @@ export function registerPluginRoutes(app, requireRoles) {
 
   router.get('/', controller.getPlugins);
   router.put('/:name/toggle', controller.togglePlugin);
+  router.patch('/:name/settings', controller.updateSettings);
   router.post('/restart', controller.restartServer);
 
   app.use('/api/v1/plugins', router);

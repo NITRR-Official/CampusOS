@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { ExtensionPoint } from '@campus-os/shared/extension-point';
 import { API_BASE_URL } from '@campus-os/shared/api-client';
 

@@ -35,6 +35,7 @@ function toPublicUser(user) {
     name: user.name,
     email: user.email,
     isSuperAdmin: user.isSuperAdmin,
+    isActive: user.isActive,
     createdAt
   };
 }
@@ -116,6 +117,16 @@ export function createAuthService(authRepository, eventBus) {
     return toPublicUser(user);
   }
 
+  async function updateUserRole(userId, isSuperAdmin) {
+    const user = await authRepository.updateUser(userId, { isSuperAdmin });
+    return toPublicUser(user);
+  }
+
+  async function updateUserStatus(userId, isActive) {
+    const user = await authRepository.updateUser(userId, { isActive });
+    return toPublicUser(user);
+  }
+
   return {
     createUser,
     authenticateUser,
@@ -123,7 +134,9 @@ export function createAuthService(authRepository, eventBus) {
     deleteUser,
     getUserById,
     getUsersByIds,
-    getUserByEmail
+    getUserByEmail,
+    updateUserRole,
+    updateUserStatus
   };
 }
 

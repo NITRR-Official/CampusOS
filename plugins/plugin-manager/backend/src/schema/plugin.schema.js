@@ -8,3 +8,11 @@ export const togglePluginSchema = z
     })
   })
   .strict();
+
+export const updateSettingsSchema = z
+  .object({
+    settings: z.record(z.any(), {
+      required_error: 'settings object is required'
+    })
+  })
+  .strict();

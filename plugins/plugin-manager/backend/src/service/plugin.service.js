@@ -1,6 +1,8 @@
 let Plugin;
+let globalRegistry;
 
 export function initPluginService(registry) {
+  globalRegistry = registry;
   const models = registry.getService('core:models');
   if (models && models.Plugin) {
     Plugin = models.Plugin;
@@ -16,8 +18,14 @@ export class PluginService {
     try {
       const plugins = await Plugin.find(
         {},
-        { name: 1, enabled: 1, version: 1, _id: 0 }
+        { name: 1, enabled: 1, version: 1, settings: 1, _id: 0 }
       ).lean();
+
+      // Inject configSchema for each plugin
+      for (const plugin of plugins) {
+        plugin.configSchema = globalRegistry.getSettingsConfig(plugin.name);
+      }
+
       return { success: true, plugins };
     } catch (error) {
       return {
@@ -53,6 +61,36 @@ export class PluginService {
       return {
         success: false,
         error: 'Failed to update plugin state: ' + error.message
+      };
+    }
+  }
+
+  /**
+   * Update a plugin's settings
+   */
+  async updateSettings(pluginName, settings) {
+    try {
+      const result = await Plugin.findOneAndUpdate(
+        { name: pluginName },
+        { $set: { settings } },
+        { returnDocument: 'after' }
+      );
+
+      if (!result) {
+        return {
+          success: false,
+          error: `Plugin '${pluginName}' not found in database`
+        };
+      }
+
+      return {
+        success: true,
+        message: `Plugin '${pluginName}' settings updated`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: 'Failed to update plugin settings: ' + error.message
       };
     }
   }

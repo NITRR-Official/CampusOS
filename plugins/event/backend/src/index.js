@@ -7,6 +7,7 @@ import { registerEventHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
+  const requireSuperAdmin = registry.getService('requireSuperAdmin');
 
   if (typeof requirePermissions !== 'function') {
     throw new Error('Permission middleware service is not configured');
@@ -15,7 +16,12 @@ export async function init(app, registry, eventBus) {
   const eventRepository = createEventRepository();
   const eventService = createEventService(eventRepository, eventBus);
   const eventController = createEventController(eventService);
-  registerEventRoutes(app, eventController, requirePermissions);
+  registerEventRoutes(
+    app,
+    eventController,
+    requirePermissions,
+    requireSuperAdmin
+  );
 
   registry.registerModule('event', {
     routes: [

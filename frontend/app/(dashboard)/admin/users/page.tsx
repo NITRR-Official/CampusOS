@@ -20,12 +20,14 @@ interface User {
   name: string;
   email: string;
   isSuperAdmin: boolean;
+  isActive: boolean;
   createdAt: string;
 }
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,6 +48,42 @@ export default function AdminUsersPage() {
     }
     loadUsers();
   }, []);
+
+  async function handleToggleRole(userId: string, currentRole: boolean) {
+    setActionLoading(userId);
+    try {
+      await apiClient.patch(`/users/${userId}/role`, {
+        isSuperAdmin: !currentRole
+      });
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, isSuperAdmin: !currentRole } : u
+        )
+      );
+    } catch (err: any) {
+      alert(err.message || 'Failed to update user role');
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleToggleStatus(userId: string, currentStatus: boolean) {
+    setActionLoading(userId);
+    try {
+      await apiClient.patch(`/users/${userId}/status`, {
+        isActive: !currentStatus
+      });
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId ? { ...u, isActive: !currentStatus } : u
+        )
+      );
+    } catch (err: any) {
+      alert(err.message || 'Failed to update user status');
+    } finally {
+      setActionLoading(null);
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -71,7 +109,9 @@ export default function AdminUsersPage() {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Joined</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -90,12 +130,15 @@ export default function AdminUsersPage() {
                   <TableCell>
                     <Skeleton className="h-4 w-[100px]" />
                   </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-8 w-[150px] ml-auto" />
+                  </TableCell>
                 </TableRow>
               ))
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={4}
+                  colSpan={6}
                   className="text-center py-8 text-muted-foreground"
                 >
                   No users found.
@@ -123,10 +166,49 @@ export default function AdminUsersPage() {
                       </Badge>
                     )}
                   </TableCell>
+                  <TableCell>
+                    {user.isActive !== false ? (
+                      <Badge
+                        variant="outline"
+                        className="text-green-600 border-green-200 bg-green-50"
+                      >
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge
+                        variant="outline"
+                        className="text-red-600 border-red-200 bg-red-50"
+                      >
+                        Blocked
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-muted-foreground">
                     {user.createdAt
                       ? new Date(user.createdAt).toLocaleDateString()
                       : 'Unknown'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() =>
+                          handleToggleRole(user.id, user.isSuperAdmin)
+                        }
+                        disabled={actionLoading === user.id}
+                        className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors"
+                      >
+                        {user.isSuperAdmin ? 'Revoke Admin' : 'Make Admin'}
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleToggleStatus(user.id, user.isActive !== false)
+                        }
+                        disabled={actionLoading === user.id}
+                        className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-background hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 transition-colors"
+                      >
+                        {user.isActive !== false ? 'Block' : 'Unblock'}
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))

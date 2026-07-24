@@ -39,6 +39,10 @@ export function createAuthRepository(User) {
     return User.find({ _id: { $in: userIds } }).lean();
   }
 
+  async function updateUser(userId, updateData) {
+    return User.findByIdAndUpdate(userId, updateData, { new: true }).lean();
+  }
+
   return {
     findUserByEmail,
     findUserById,
@@ -46,6 +50,7 @@ export function createAuthRepository(User) {
     userExists,
     createUser,
     listUsers,
-    deleteUser
+    deleteUser,
+    updateUser
   };
 }

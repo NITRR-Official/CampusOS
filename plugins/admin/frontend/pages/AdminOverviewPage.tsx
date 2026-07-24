@@ -5,7 +5,16 @@ import {
   CardTitle
 } from '@campusos/design-system';
 import { fetchClubs } from '@plugins/club/frontend/api';
-import { Building2, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import {
+  Building2,
+  AlertCircle,
+  CheckCircle2,
+  ArrowRight,
+  Users,
+  Calendar,
+  Settings,
+  Activity
+} from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -99,6 +108,67 @@ export async function AdminOverviewPage() {
             </div>
           </div>
         </Link>
+      </div>
+
+      <div className="mt-8">
+        <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Link href="/admin/users" className="group">
+            <Card className="bg-card/50 backdrop-blur-xl border-border/60 hover:border-primary/50 transition-colors cursor-pointer h-full">
+              <CardHeader className="pb-2">
+                <Users className="size-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                <CardTitle className="text-base">Manage Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  View users, assign roles, and block accounts.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/events" className="group">
+            <Card className="bg-card/50 backdrop-blur-xl border-border/60 hover:border-primary/50 transition-colors cursor-pointer h-full">
+              <CardHeader className="pb-2">
+                <Calendar className="size-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                <CardTitle className="text-base">Manage Events</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Monitor and moderate all events on the platform.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/plugins" className="group">
+            <Card className="bg-card/50 backdrop-blur-xl border-border/60 hover:border-primary/50 transition-colors cursor-pointer h-full">
+              <CardHeader className="pb-2">
+                <Settings className="size-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                <CardTitle className="text-base">Plugin Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Enable, disable, and configure system modules.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/admin/activity" className="group">
+            <Card className="bg-card/50 backdrop-blur-xl border-border/60 hover:border-primary/50 transition-colors cursor-pointer h-full">
+              <CardHeader className="pb-2">
+                <Activity className="size-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                <CardTitle className="text-base">System Activity</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  View real-time global activity logs.
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       </div>
     </div>
   );
