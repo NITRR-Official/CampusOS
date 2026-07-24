@@ -7,11 +7,17 @@ import { registerResourceRoutes } from './routes/resource.routes.js';
 import ResourceService from './service/resource.service.js';
 import { registerResourceHandlers } from './listeners/index.js';
 
+import resourceController from './controller/resource.controller.js';
+
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
 
   if (typeof requirePermissions !== 'function') {
     throw new Error('Permission middleware service is not configured');
+  }
+
+  if (eventBus) {
+    resourceController.setEventBus(eventBus);
   }
 
   registerResourceRoutes(app, requirePermissions);

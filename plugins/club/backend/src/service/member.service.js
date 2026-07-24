@@ -1,7 +1,7 @@
 import { AppError } from '@campus-os/shared/errors';
 import { serializeClubMember } from '../serializers/club.serializer.js';
 
-export function createMemberService(clubRepository, authService) {
+export function createMemberService(clubRepository, authService, eventBus) {
   async function addMember(clubId, memberData, assignedRole) {
     const user = await authService.getUserByEmail(memberData.email);
 
@@ -40,11 +40,26 @@ export function createMemberService(clubRepository, authService) {
       roles: rolesArray
     });
 
-    return serializeClubMember(clubMember);
+    const serialized = serializeClubMember(clubMember);
+    if (eventBus) {
+      eventBus.emit('club:member:added', {
+        clubId,
+        memberUserId: userId,
+        roleId: assignedRole._id
+      });
+    }
+    return serialized;
   }
 
   async function removeMember(clubId, memberUserId) {
-    return clubRepository.deleteMember(clubId, memberUserId);
+    const deleted = await clubRepository.deleteMember(clubId, memberUserId);
+    if (deleted && eventBus) {
+      eventBus.emit('club:member:removed', {
+        clubId,
+        memberUserId
+      });
+    }
+    return deleted;
   }
 
   async function assignRole(clubId, memberUserId, role) {
@@ -62,7 +77,15 @@ export function createMemberService(clubRepository, authService) {
       return undefined; // Handled as member not found
     }
 
-    return serializeClubMember(member);
+    const serialized = serializeClubMember(member);
+    if (eventBus) {
+      eventBus.emit('club:role:assigned', {
+        clubId,
+        memberUserId,
+        roleId: role._id
+      });
+    }
+    return serialized;
   }
 
   async function removeRoleFromMember(clubId, memberUserId, role) {

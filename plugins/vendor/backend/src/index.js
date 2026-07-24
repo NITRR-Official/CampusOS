@@ -7,11 +7,17 @@ import { registerVendorRoutes } from './routes/vendor.routes.js';
 import VendorService from './service/vendor.service.js';
 import { registerVendorHandlers } from './listeners/index.js';
 
+import vendorController from './controller/vendor.controller.js';
+
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
 
   if (typeof requirePermissions !== 'function') {
     throw new Error('Permission middleware service is not configured');
+  }
+
+  if (eventBus) {
+    vendorController.setEventBus(eventBus);
   }
 
   registerVendorRoutes(app, requirePermissions);

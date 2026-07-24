@@ -53,6 +53,10 @@ function normalizeResource(resourceDoc) {
 }
 
 export class ResourceService {
+  setEventBus(eventBus) {
+    this.eventBus = eventBus;
+  }
+
   /**
    * Create a new resource
    * @param {object} resourceData - Resource information
@@ -84,7 +88,14 @@ export class ResourceService {
         status: 'available'
       });
 
-      return { success: true, resource: normalizeResource(resource) };
+      const serialized = normalizeResource(resource);
+      if (this.eventBus) {
+        this.eventBus.emit('resource:created', {
+          resourceId: serialized.id,
+          data: serialized
+        });
+      }
+      return { success: true, resource: serialized };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -273,9 +284,18 @@ export class ResourceService {
 
       await resource.save();
 
+      const serialized = normalizeAllocation(allocation, resourceId);
+      if (this.eventBus) {
+        this.eventBus.emit('resource:allocated', {
+          resourceId,
+          eventId,
+          allocationId: serialized.id,
+          data: serialized
+        });
+      }
       return {
         success: true,
-        allocation: normalizeAllocation(allocation, resourceId)
+        allocation: serialized
       };
     } catch (error) {
       return { success: false, error: error.message };

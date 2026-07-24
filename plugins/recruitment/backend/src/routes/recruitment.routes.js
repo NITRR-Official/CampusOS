@@ -11,46 +11,46 @@ export function registerRecruitmentRoutes(
   // Campaign Routes
   router.get(
     '/campaigns',
-    requirePermissions('recruitment:view'),
+    requirePermissions(),
     campaignController.getCampaigns
   );
   router.post(
     '/campaigns',
-    requirePermissions('recruitment:manage'),
+    requirePermissions(),
     campaignController.createCampaign
   );
 
   router.get(
     '/campaigns/:campaignId',
-    requirePermissions('recruitment:view'),
+    requirePermissions(),
     campaignController.getCampaign
   );
   router.put(
     '/campaigns/:campaignId',
-    requirePermissions('recruitment:manage'),
+    requirePermissions(),
     campaignController.updateCampaign
   );
 
   // Candidate Routes (Nested under campaigns)
   router.get(
     '/campaigns/:campaignId/candidates',
-    requirePermissions('recruitment:manage'),
+    requirePermissions(),
     candidateController.getCandidates
   );
   router.get(
     '/campaigns/:campaignId/candidates/:candidateId',
-    requirePermissions('recruitment:manage'),
+    requirePermissions(),
     candidateController.getCandidate
   );
 
   router.patch(
     '/campaigns/:campaignId/candidates/:candidateId/status',
-    requirePermissions('recruitment:manage'),
+    requirePermissions(),
     candidateController.updateStatus
   );
   router.patch(
     '/campaigns/:campaignId/candidates/:candidateId/notes',
-    requirePermissions('recruitment:manage'),
+    requirePermissions(),
     candidateController.updateNotes
   );
 

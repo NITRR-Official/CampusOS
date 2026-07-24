@@ -1,9 +1,17 @@
 import { AppError } from '@campus-os/shared/errors';
 
-export function createFormService(formRepository) {
+export function createFormService(formRepository, eventBus) {
   return {
     async createForm(data) {
-      return await formRepository.create(data);
+      const form = await formRepository.create(data);
+      if (eventBus) {
+        eventBus.emit('form:created', {
+          formId: form._id,
+          entityType: form.entityType,
+          entityId: form.entityId
+        });
+      }
+      return form;
     },
 
     async getFormById(formId) {

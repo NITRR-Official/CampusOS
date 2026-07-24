@@ -11,7 +11,16 @@ export function registerAuditListeners(eventBus) {
     'event:created',
     'event:published',
     'form:created',
-    'campaign:created'
+    'campaign:created',
+    'task:created',
+    'task:status_updated',
+    'budget:created',
+    'budget:approved',
+    'budget:expense_logged',
+    'resource:created',
+    'resource:allocated',
+    'vendor:created',
+    'vendor:assigned'
   ];
 
   HIGH_VALUE_EVENTS.forEach((eventName) => {
@@ -24,6 +33,10 @@ export function registerAuditListeners(eventBus) {
         payload?.eventId ||
         payload?.formId ||
         payload?.campaignId ||
+        payload?.taskId ||
+        payload?.budgetId ||
+        payload?.resourceId ||
+        payload?.vendorId ||
         payload?.id ||
         payload?._id;
 
@@ -35,6 +48,14 @@ export function registerAuditListeners(eventBus) {
         entityType = 'form';
       else if (payload?.campaignId || eventName.startsWith('campaign:'))
         entityType = 'campaign';
+      else if (payload?.taskId || eventName.startsWith('task:'))
+        entityType = 'task';
+      else if (payload?.budgetId || eventName.startsWith('budget:'))
+        entityType = 'budget';
+      else if (payload?.resourceId || eventName.startsWith('resource:'))
+        entityType = 'resource';
+      else if (payload?.vendorId || eventName.startsWith('vendor:'))
+        entityType = 'vendor';
 
       // Dynamic import to avoid mongoose dependency at module load if not needed
       const mongoose = await import('mongoose');

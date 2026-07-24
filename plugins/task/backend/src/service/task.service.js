@@ -15,6 +15,10 @@ function serializeTask(task) {
 }
 
 class TaskService {
+  setEventBus(eventBus) {
+    this.eventBus = eventBus;
+  }
+
   async createTask(payload) {
     const task = new Task({
       clubId: payload.clubId,
@@ -29,7 +33,15 @@ class TaskService {
     });
 
     await task.save();
-    return serializeTask(task.toObject());
+    const serialized = serializeTask(task.toObject());
+    if (this.eventBus) {
+      this.eventBus.emit('task:created', {
+        taskId: serialized.id,
+        clubId: serialized.clubId,
+        data: serialized
+      });
+    }
+    return serialized;
   }
 
   async listTasks(clubId) {
@@ -64,7 +76,16 @@ class TaskService {
     )
       .lean()
       .exec();
-    return serializeTask(task);
+    const serialized = serializeTask(task);
+    if (this.eventBus) {
+      this.eventBus.emit('task:status_updated', {
+        taskId: serialized.id,
+        clubId: serialized.clubId,
+        status: serialized.status,
+        data: serialized
+      });
+    }
+    return serialized;
   }
 
   async updatePriority(taskId, priority) {

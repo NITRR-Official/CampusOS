@@ -57,6 +57,10 @@ function normalizeVendor(vendorDoc) {
 }
 
 export class VendorService {
+  setEventBus(eventBus) {
+    this.eventBus = eventBus;
+  }
+
   /**
    * Create a new vendor
    * @param {object} vendorData - Vendor information
@@ -98,7 +102,15 @@ export class VendorService {
         totalEvents: 0
       });
 
-      return { success: true, vendor: normalizeVendor(vendor) };
+      const serialized = normalizeVendor(vendor);
+      if (this.eventBus) {
+        this.eventBus.emit('vendor:created', {
+          vendorId: serialized.id,
+          clubId,
+          data: serialized
+        });
+      }
+      return { success: true, vendor: serialized };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -238,9 +250,18 @@ export class VendorService {
       vendor.assignments.push(assignment);
       await vendorRepository.saveDocument(vendor);
 
+      const serialized = normalizeAssignment(assignment, vendorId);
+      if (this.eventBus) {
+        this.eventBus.emit('vendor:assigned', {
+          vendorId,
+          eventId,
+          assignmentId: serialized.id,
+          data: serialized
+        });
+      }
       return {
         success: true,
-        assignment: normalizeAssignment(assignment, vendorId)
+        assignment: serialized
       };
     } catch (error) {
       return { success: false, error: error.message };

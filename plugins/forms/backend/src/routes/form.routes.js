@@ -5,29 +5,25 @@ export function registerFormRoutes(app, controller, requirePermissions) {
 
   // Define routes
   // Forms
-  router.get('/', requirePermissions('forms:view'), controller.getForms);
-  router.post('/', requirePermissions('forms:manage'), controller.createForm);
-  router.get('/:formId', requirePermissions('forms:view'), controller.getForm);
-  router.put(
-    '/:formId',
-    requirePermissions('forms:manage'),
-    controller.updateForm
-  );
+  router.get('/', requirePermissions(), controller.getForms);
+  router.post('/', requirePermissions(), controller.createForm);
+  router.get('/:formId', requirePermissions(), controller.getForm);
+  router.put('/:formId', requirePermissions(), controller.updateForm);
 
   // Responses
   router.get(
     '/:formId/responses',
-    requirePermissions('forms:manage'),
+    requirePermissions(),
     controller.getResponses
   );
   router.get(
     '/:formId/responses/:responseId',
-    requirePermissions('forms:manage'),
+    requirePermissions(),
     controller.getResponse
   );
   router.post(
     '/:formId/responses',
-    requirePermissions('forms:submit'),
+    requirePermissions(),
     controller.submitResponse
   );
 

@@ -28,6 +28,13 @@ export function createClubService(
 
     if (eventBus) {
       eventBus.emit(ClubEvents.PROPOSED, { clubId: club._id, data: club });
+      // Emit generic created event for activity timeline
+      eventBus.emit('club:created', {
+        clubId: club._id,
+        data: club,
+        entityType: 'club',
+        entityId: club._id
+      });
     }
 
     console.info('[ClubService] Club created and proposed', {
@@ -85,12 +92,25 @@ export function createClubService(
           clubId,
           roles: rolesMap
         });
+        // Emit generic approved event for activity timeline
+        eventBus.emit('club:approved', {
+          clubId,
+          entityType: 'club',
+          entityId: clubId
+        });
       }
     } else {
       finalClub = await clubRepository.updateClubStatus(
         clubId,
         ClubStatus.APPROVED
       );
+      if (eventBus) {
+        eventBus.emit('club:approved', {
+          clubId,
+          entityType: 'club',
+          entityId: clubId
+        });
+      }
     }
 
     console.info('[ClubService] Club approved and provisioned', { clubId });

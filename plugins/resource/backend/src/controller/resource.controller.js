@@ -15,6 +15,10 @@ const resourceService = new ResourceService();
  */
 
 export const resourceController = {
+  setEventBus(eventBus) {
+    resourceService.setEventBus(eventBus);
+  },
+
   /**
    * POST /api/v1/resources
    * Create a new resource (admin/coordinator only)

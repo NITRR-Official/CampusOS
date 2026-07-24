@@ -45,7 +45,7 @@ export function init(app, registry, eventBus) {
     createFormResponseRepository(FormResponseModel);
 
   // 3. Instantiate Services
-  const formService = createFormService(formRepository);
+  const formService = createFormService(formRepository, eventBus);
   const formResponseService = createFormResponseService(
     formResponseRepository,
     formRepository,
@@ -55,7 +55,8 @@ export function init(app, registry, eventBus) {
   // 4. Instantiate Controller
   const formController = createFormController({
     formService,
-    formResponseService
+    formResponseService,
+    registry
   });
 
   // 4. Register Routes

@@ -24,9 +24,9 @@ export function createFormResponseService(
       for (const field of form.fields) {
         if (
           field.required &&
-          (answers[field.name] === undefined ||
-            answers[field.name] === null ||
-            answers[field.name] === '')
+          (answers[field.id] === undefined ||
+            answers[field.id] === null ||
+            answers[field.id] === '')
         ) {
           throw new AppError(`Field '${field.label}' is required`, 400);
         }

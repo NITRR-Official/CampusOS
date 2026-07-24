@@ -26,7 +26,11 @@ export async function init(app, registry, eventBus) {
   );
 
   const roleService = createRoleService(clubRepository);
-  const memberService = createMemberService(clubRepository, authService);
+  const memberService = createMemberService(
+    clubRepository,
+    authService,
+    eventBus
+  );
   const provisioningService = createProvisioningService(
     clubRepository,
     authService

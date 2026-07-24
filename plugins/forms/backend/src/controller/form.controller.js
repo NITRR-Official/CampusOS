@@ -5,11 +5,43 @@ import {
   submitFormResponseSchema
 } from '../schema/form.schema.js';
 
-export function createFormController({ formService, formResponseService }) {
+export function createFormController({
+  formService,
+  formResponseService,
+  registry
+}) {
+  async function assertManagePermission(entityType, entityId, user) {
+    if (user?.isSuperAdmin) return true;
+    if (!user || !user.id) throw new AppError('Unauthorized', 401);
+
+    if (entityType === 'club') {
+      const clubService = registry.getService('clubService');
+      if (!clubService) return false;
+      const userPerms = await clubService.getUserPermissions(user.id, entityId);
+      const userPermsSet = new Set(userPerms);
+      if (
+        userPermsSet.has('administrator') ||
+        userPermsSet.has('forms:manage')
+      ) {
+        return true;
+      }
+    }
+    throw new AppError(
+      'Forbidden: Insufficient permissions for this entity',
+      403
+    );
+  }
+
   return {
     async createForm(req, res, next) {
       try {
         const validatedData = createFormSchema.parse(req.body);
+        await assertManagePermission(
+          validatedData.entityType,
+          validatedData.entityId,
+          req.user
+        );
+
         const form = await formService.createForm(validatedData);
         res.status(201).json({ success: true, data: form });
       } catch (error) {
@@ -32,6 +64,13 @@ export function createFormController({ formService, formResponseService }) {
     async updateForm(req, res, next) {
       try {
         const validatedData = updateFormSchema.parse(req.body);
+        const existingForm = await formService.getFormById(req.params.formId);
+        await assertManagePermission(
+          existingForm.entityType,
+          existingForm.entityId,
+          req.user
+        );
+
         const form = await formService.updateForm(
           req.params.formId,
           validatedData
@@ -54,6 +93,9 @@ export function createFormController({ formService, formResponseService }) {
             400
           );
         }
+
+        // Let anyone view forms for an entity if they are active, or require manage permission to view drafts
+        // For simplicity, we just fetch them. View permission is usually public or member-based.
         const forms = await formService.getFormsByEntity(entityType, entityId);
         res
           .status(200)
@@ -90,6 +132,13 @@ export function createFormController({ formService, formResponseService }) {
 
     async getResponses(req, res, next) {
       try {
+        const existingForm = await formService.getFormById(req.params.formId);
+        await assertManagePermission(
+          existingForm.entityType,
+          existingForm.entityId,
+          req.user
+        );
+
         const responses = await formResponseService.getResponsesByFormId(
           req.params.formId
         );

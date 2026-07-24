@@ -33,6 +33,9 @@ function normalizeExpense(expenseDoc) {
 }
 
 export class BudgetService {
+  constructor(eventBus) {
+    this.eventBus = eventBus;
+  }
   /**
    * Create budget for event
    * @param {object} budgetData - Budget information
@@ -76,7 +79,15 @@ export class BudgetService {
         notes: notes || null
       });
 
-      return { success: true, budget: normalizeBudget(budget) };
+      const serialized = normalizeBudget(budget);
+      if (this.eventBus) {
+        this.eventBus.emit('budget:created', {
+          budgetId: serialized.id,
+          eventId: serialized.eventId,
+          data: serialized
+        });
+      }
+      return { success: true, budget: serialized };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -182,7 +193,15 @@ export class BudgetService {
 
       await budget.save();
 
-      return { success: true, budget: normalizeBudget(budget) };
+      const serialized = normalizeBudget(budget);
+      if (this.eventBus) {
+        this.eventBus.emit('budget:approved', {
+          budgetId: serialized.id,
+          eventId: serialized.eventId,
+          data: serialized
+        });
+      }
+      return { success: true, budget: serialized };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -269,7 +288,16 @@ export class BudgetService {
         notes: notes || null
       });
 
-      return { success: true, expense: normalizeExpense(expense) };
+      const serialized = normalizeExpense(expense);
+      if (this.eventBus) {
+        this.eventBus.emit('budget:expense_logged', {
+          budgetId,
+          expenseId: serialized.id,
+          eventId: budget.eventId,
+          data: serialized
+        });
+      }
+      return { success: true, expense: serialized };
     } catch (error) {
       return { success: false, error: error.message };
     }

@@ -41,7 +41,7 @@ export function init(app, registry, eventBus) {
   const candidateRepository = createCandidateRepository(CandidateModel);
 
   // 3. Instantiate Services
-  const campaignService = createCampaignService(campaignRepository);
+  const campaignService = createCampaignService(campaignRepository, eventBus);
   const candidateService = createCandidateService(
     candidateRepository,
     campaignRepository,

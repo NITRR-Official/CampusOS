@@ -14,7 +14,7 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  const budgetService = new BudgetService();
+  const budgetService = new BudgetService(eventBus);
   registerBudgetRoutes(app, requirePermissions, budgetService);
 
   registry.registerModule('budget', {

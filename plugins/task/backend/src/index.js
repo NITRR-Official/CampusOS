@@ -11,6 +11,8 @@ export async function init(app, registry, eventBus) {
   }
 
   const taskController = createTaskController();
+  const { getTaskService } = await import('./service/task.service.js');
+  getTaskService().setEventBus(eventBus);
   registerTaskRoutes(app, taskController, requirePermissions);
 
   registry.registerModule('task', {

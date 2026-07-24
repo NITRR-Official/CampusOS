@@ -5,10 +5,23 @@ import {
 } from '../schema/recruitment.schema.js';
 
 export function createCampaignController({ campaignService, registry }) {
+  const assertManagePermission = async (entityType, entityId, user) => {
+    const policy = registry.getService(`${entityType}RbacPolicy`);
+    if (policy) {
+      const context = await policy.getContext(entityId, user);
+      policy.assertPermissions(['recruitment:manage'], context);
+    }
+  };
+
   return {
     async createCampaign(req, res, next) {
       try {
         const validatedData = createCampaignSchema.parse(req.body);
+        await assertManagePermission(
+          validatedData.entityType,
+          validatedData.entityId,
+          req.user
+        );
 
         const campaign = await campaignService.createCampaign(validatedData);
         res.status(201).json({ success: true, data: campaign });
@@ -59,6 +72,11 @@ export function createCampaignController({ campaignService, registry }) {
         // Fetch campaign to know its entityType/entityId
         const existingCampaign = await campaignService.getCampaignById(
           req.params.campaignId
+        );
+        await assertManagePermission(
+          existingCampaign.entityType,
+          existingCampaign.entityId,
+          req.user
         );
 
         const campaign = await campaignService.updateCampaign(

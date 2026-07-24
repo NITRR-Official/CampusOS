@@ -15,7 +15,7 @@ export function createCandidateController({
     const policy = registry.getService(`${entityType}RbacPolicy`);
     if (policy) {
       const context = await policy.getContext(entityId, user);
-      policy.assertPermissions(['campaign:manage'], context);
+      policy.assertPermissions(['recruitment:manage'], context);
     }
   };
 

@@ -16,6 +16,10 @@ const vendorService = new VendorService();
  */
 
 export const vendorController = {
+  setEventBus(eventBus) {
+    vendorService.setEventBus(eventBus);
+  },
+
   /**
    * POST /api/v1/vendors
    * Create a new vendor (admin/coordinator only)
