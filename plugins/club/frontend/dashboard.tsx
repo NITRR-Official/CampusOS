@@ -1,8 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Target, Users, Plus } from 'lucide-react';
-import { API_BASE_URL } from '@campus-os/shared/api-client';
+import { API_BASE_URL, apiClient } from '@campus-os/shared/api-client';
+import Link from 'next/link';
 
 export function ClubStatsWidget() {
+  const [count, setCount] = useState<number>(0);
+
+  useEffect(() => {
+    apiClient
+      .get('/system/stats')
+      .then((data: any) => {
+        if (data?.club?.clubs !== undefined) {
+          setCount(data.club.clubs);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="bg-card/80 backdrop-blur text-card-foreground rounded-lg shadow-sm border border-border/60 p-6 flex items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/10 text-orange-500 text-2xl min-w-fit">
@@ -12,13 +26,28 @@ export function ClubStatsWidget() {
         <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
           Clubs
         </p>
-        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">0</p>
+        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
+          {count}
+        </p>
       </div>
     </div>
   );
 }
 
 export function ClubMemberStatsWidget() {
+  const [count, setCount] = useState<number>(0);
+
+  useEffect(() => {
+    apiClient
+      .get('/system/stats')
+      .then((data: any) => {
+        if (data?.club?.members !== undefined) {
+          setCount(data.club.members);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="bg-card/80 backdrop-blur text-card-foreground rounded-lg shadow-sm border border-border/60 p-6 flex items-center gap-4 hover:border-primary/50 hover:shadow-md transition-all duration-200">
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500 text-2xl min-w-fit">
@@ -28,37 +57,11 @@ export function ClubMemberStatsWidget() {
         <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-semibold m-0 mb-1">
           Members
         </p>
-        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">0</p>
+        <p className="text-2xl md:text-3xl font-bold m-0 text-foreground">
+          {count}
+        </p>
       </div>
     </div>
-  );
-}
-
-export function ClubQuickActionWidget() {
-  return (
-    <button className="group relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6 bg-card/80 backdrop-blur text-card-foreground border border-border/60 shadow-sm rounded-xl cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 text-center min-h-[140px]">
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border/50 text-foreground shadow-sm group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 transition-colors">
-        <Plus className="h-6 w-6" />
-      </div>
-      <span className="relative text-sm font-semibold tracking-wide text-foreground">
-        Create Club
-      </span>
-    </button>
-  );
-}
-
-export function ClubMemberQuickActionWidget() {
-  return (
-    <button className="group relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6 bg-card/80 backdrop-blur text-card-foreground border border-border/60 shadow-sm rounded-xl cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 text-center min-h-[140px]">
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border/50 text-foreground shadow-sm group-hover:bg-purple-500 group-hover:text-white group-hover:border-purple-500 transition-colors">
-        <Users className="h-6 w-6" />
-      </div>
-      <span className="relative text-sm font-semibold tracking-wide text-foreground">
-        Invite Member
-      </span>
-    </button>
   );
 }
 
@@ -115,5 +118,22 @@ export function ClubActivityWidget() {
         </div>
       ))}
     </>
+  );
+}
+
+export function ClubQuickActionWidget() {
+  return (
+    <Link
+      href="/clubs/new"
+      className="group relative overflow-hidden flex flex-col items-center justify-center gap-4 p-6 bg-card/80 backdrop-blur text-card-foreground border border-border/60 shadow-sm rounded-xl cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 text-center min-h-[140px]"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-background border border-border/50 text-foreground shadow-sm group-hover:bg-orange-500 group-hover:text-white group-hover:border-orange-500 transition-colors">
+        <Plus className="h-6 w-6" />
+      </div>
+      <span className="relative text-sm font-semibold tracking-wide text-foreground">
+        Create Club
+      </span>
+    </Link>
   );
 }

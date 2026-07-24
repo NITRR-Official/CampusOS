@@ -1,0 +1,9 @@
+feat(dashboard): implement dynamic personalized system stats and quick actions
+
+- Add `registerStatProvider` and `getAllStatProviders` to `ModuleRegistry`
+- Add protected `GET /api/v1/system/stats` endpoint to aggregate stats from plugins
+- Update `club` plugin to register stats provider supporting global (Super Admin) and personal user scopes, bypassing mongoose object ID coercion
+- Update `event` plugin to register stats provider supporting global and personal scopes
+- Refactor `ClubStatsWidget`, `ClubMemberStatsWidget`, and `EventStatsWidget` to fetch dynamic data via `apiClient`
+- Remove dummy quick action widgets and restore functional `Create Club` quick action
+- Add `dashboard-integration.md` guide for plugin developers

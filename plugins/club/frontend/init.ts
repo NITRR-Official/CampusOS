@@ -2,9 +2,8 @@ import { registry } from '@campus-os/shared/plugin-registry';
 import {
   ClubStatsWidget,
   ClubMemberStatsWidget,
-  ClubQuickActionWidget,
-  ClubMemberQuickActionWidget,
-  ClubActivityWidget
+  ClubActivityWidget,
+  ClubQuickActionWidget
 } from './dashboard';
 
 export function initFrontend() {
@@ -20,9 +19,4 @@ export function initFrontend() {
   registry.registerWidget('dashboard-stats', 'club', ClubStatsWidget);
   registry.registerWidget('dashboard-stats', 'club', ClubMemberStatsWidget);
   registry.registerWidget('dashboard-actions', 'club', ClubQuickActionWidget);
-  registry.registerWidget(
-    'dashboard-actions',
-    'club',
-    ClubMemberQuickActionWidget
-  );
 }

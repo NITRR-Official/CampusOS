@@ -102,6 +102,28 @@ export async function createApp(registry) {
   registry.registerService('requireSuperAdmin', requireSuperAdmin);
   app.use(authMiddleware);
 
+  // Protected endpoint for frontend to fetch aggregated dashboard stats
+  app.get('/api/v1/system/stats', async (req, res) => {
+    try {
+      const providers = registry.getAllStatProviders();
+      const statsData = {};
+
+      for (const [pluginId, fetcher] of providers) {
+        try {
+          statsData[pluginId] = await fetcher(req.user);
+        } catch (err) {
+          console.error(`Failed to fetch stats for plugin ${pluginId}:`, err);
+          statsData[pluginId] = { error: 'Failed to load stats' };
+        }
+      }
+
+      res.json({ success: true, data: statsData });
+    } catch (err) {
+      console.error('Failed to aggregate system stats:', err);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  });
+
   // ============== PLUGIN LOADING ==============
   // Load all modules from /apps/ and let them register routes
   try {

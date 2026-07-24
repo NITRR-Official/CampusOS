@@ -80,6 +80,29 @@ export async function init(app, registry, eventBus) {
   if (eventBus) {
     registerEventHandlers(eventBus, registry, eventService);
   }
+
+  // Register Stat Provider for Global Dashboard
+  registry.registerStatProvider('event', async (user) => {
+    try {
+      if (!user || !user.email) return { events: 0 };
+
+      // If the user is a super admin, show global stats
+      if (user.isSuperAdmin) {
+        const eventsCount = await Event.countDocuments({ status: 'published' });
+        return { events: eventsCount };
+      }
+
+      // Get events the user has registered for (assuming attendeeEmail matches user.email)
+      const eventsCount = await Event.countDocuments({
+        'registrations.attendeeEmail': user.email,
+        status: 'published'
+      });
+      return { events: eventsCount };
+    } catch (err) {
+      console.error('Error fetching event stats:', err);
+      return { events: 0 };
+    }
+  });
 }
 
 export default init;

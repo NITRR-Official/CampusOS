@@ -1,16 +1,13 @@
 import { registry } from '@campus-os/shared/plugin-registry';
-import {
-  EventStatsWidget,
-  EventQuickActionWidget,
-  EventActivityWidget
-} from './dashboard';
+import { EventStatsWidget, EventActivityWidget } from './dashboard';
 
 export function initFrontend() {
   registry.registerSidebarLink({
     pluginId: 'event',
     title: 'Events',
     url: '/events',
-    icon: 'Ticket'
+    icon: 'Calendar',
+    context: 'global'
   });
 
   registry.registerSidebarLink({
@@ -22,5 +19,4 @@ export function initFrontend() {
 
   // Register Dashboard Widgets
   registry.registerWidget('dashboard-stats', 'event', EventStatsWidget);
-  registry.registerWidget('dashboard-actions', 'event', EventQuickActionWidget);
 }

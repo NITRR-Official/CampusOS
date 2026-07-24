@@ -99,6 +99,40 @@ export async function init(app, registry, eventBus) {
   });
 
   registerClubPermissions(registry);
+
+  // Register Stat Provider for Global Dashboard
+  registry.registerStatProvider('club', async (user) => {
+    try {
+      if (!user) return { clubs: 0, members: 0 };
+
+      // If the user is a super admin, show global stats
+      if (user.isSuperAdmin) {
+        const clubsCount = await Club.countDocuments({ status: 'approved' });
+        const membersCount = await ClubMember.countDocuments();
+        return { clubs: clubsCount, members: membersCount };
+      }
+
+      // Get clubs the user is a part of
+      const userMemberships = await ClubMember.find({ userId: user.id });
+      const clubIds = userMemberships.map((m) => m.clubId);
+
+      // Count valid clubs (using collection to bypass mongoose _id ObjectId casting since DB stores strings)
+      const clubsCount = await Club.collection.countDocuments({
+        _id: { $in: clubIds },
+        status: 'approved'
+      });
+
+      // Count total members in those clubs (your network)
+      const membersCount = await ClubMember.countDocuments({
+        clubId: { $in: clubIds }
+      });
+
+      return { clubs: clubsCount, members: membersCount };
+    } catch (err) {
+      console.error('Error fetching club stats:', err);
+      return { clubs: 0, members: 0 };
+    }
+  });
 }
 
 export default init;

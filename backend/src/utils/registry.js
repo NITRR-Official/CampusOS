@@ -13,6 +13,7 @@ class ModuleRegistry {
   #permissions = new PermissionRegistry();
   #contextResolvers = new Map();
   #publicRoutes = [];
+  #statProviders = new Map();
 
   constructor() {}
 
@@ -154,6 +155,26 @@ class ModuleRegistry {
   }
 
   /**
+   * Register a stat provider function for the dashboard
+   */
+  registerStatProvider(pluginId, fetcherFunction) {
+    if (this.#statProviders.has(pluginId)) {
+      throw new Error(
+        `Stat provider for plugin '${pluginId}' is already registered.`
+      );
+    }
+    this.#statProviders.set(pluginId, fetcherFunction);
+    console.log(`✓ Stat provider registered: ${pluginId}`);
+  }
+
+  /**
+   * Get all registered stat providers
+   */
+  getAllStatProviders() {
+    return Array.from(this.#statProviders.entries());
+  }
+
+  /**
    * Register a public route regex that bypasses authentication
    * @param {RegExp} regex - The regex matching the path
    * @param {string} [method] - Optional HTTP method (e.g. 'GET', 'POST'). If omitted, matches all methods.
@@ -187,6 +208,7 @@ class ModuleRegistry {
     this.#authenticators.clear();
     this.#resolvers.clear();
     this.#contextResolvers.clear();
+    this.#statProviders.clear();
     this.#publicRoutes = [];
     // Assuming PermissionRegistry has a clear/reset method, or we can just replace it
     this.#permissions = new PermissionRegistry();
