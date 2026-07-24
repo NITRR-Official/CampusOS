@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
                         disabled={actionLoading === user.id}
                         className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors"
                       >
-                        {user.isSuperAdmin ? 'Revoke Admin' : 'Make Admin'}
+                        {user.isSuperAdmin ? 'Revoke Super Admin' : 'Make Super Admin'}
                       </button>
                       <button
                         onClick={() =>

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Users, Building2 } from 'lucide-react';
+import { ShieldCheck, Users, Building2, Calendar, Settings, Activity } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
@@ -35,6 +35,27 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         >
           <Users className="size-4" />
           User Management
+        </Link>
+        <Link
+          href="/admin/events"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50 flex items-center gap-2"
+        >
+          <Calendar className="size-4" />
+          Events
+        </Link>
+        <Link
+          href="/admin/plugins"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50 flex items-center gap-2"
+        >
+          <Settings className="size-4" />
+          Plugins
+        </Link>
+        <Link
+          href="/admin/activity"
+          className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted/50 flex items-center gap-2"
+        >
+          <Activity className="size-4" />
+          Activity
         </Link>
       </nav>
 
