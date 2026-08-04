@@ -59,7 +59,9 @@ describe('SchedulingService', () => {
         // missing startTime, endTime, capacity
       };
 
-      await expect(service.createTimeSlot(slotData)).rejects.toThrow('Missing required fields');
+      await expect(service.createTimeSlot(slotData)).rejects.toThrow(
+        'Missing required fields'
+      );
     });
 
     it('should fail when startTime is after endTime', async () => {
@@ -71,7 +73,9 @@ describe('SchedulingService', () => {
         capacity: 500
       };
 
-      await expect(service.createTimeSlot(slotData)).rejects.toThrow('startTime must be before endTime');
+      await expect(service.createTimeSlot(slotData)).rejects.toThrow(
+        'startTime must be before endTime'
+      );
     });
 
     it('should generate unique slot IDs', async () => {
