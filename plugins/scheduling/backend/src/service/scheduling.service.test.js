@@ -4,7 +4,7 @@ import {
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
 import { Conflict, TimeSlot } from '../schema/scheduling.model.js';
-import { SchedulingService } from './scheduling.service.js';
+import { createSchedulingService } from './scheduling.service.js';
 
 describe('SchedulingService', () => {
   let service;
@@ -25,7 +25,7 @@ describe('SchedulingService', () => {
   beforeEach(async () => {
     await TimeSlot.deleteMany({});
     await Conflict.deleteMany({});
-    service = new SchedulingService();
+    service = createSchedulingService();
   });
 
   describe('createTimeSlot', () => {
@@ -43,14 +43,13 @@ describe('SchedulingService', () => {
         notes: 'Main event session'
       };
 
-      const result = await service.createTimeSlot(slotData);
+      const slot = await service.createTimeSlot(slotData);
 
-      expect(result.success).toBe(true);
-      expect(result.slot).toBeDefined();
-      expect(result.slot.eventId).toBe('event-1');
-      expect(result.slot.venue).toBe('Auditorium A');
-      expect(result.slot.capacity).toBe(500);
-      expect(result.slot.status).toBe('scheduled');
+      expect(slot).toBeDefined();
+      expect(slot.eventId).toBe('event-1');
+      expect(slot.venue).toBe('Auditorium A');
+      expect(slot.capacity).toBe(500);
+      expect(slot.status).toBe('scheduled');
     });
 
     it('should fail when missing required fields', async () => {
@@ -60,10 +59,7 @@ describe('SchedulingService', () => {
         // missing startTime, endTime, capacity
       };
 
-      const result = await service.createTimeSlot(slotData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Missing required fields');
+      await expect(service.createTimeSlot(slotData)).rejects.toThrow('Missing required fields');
     });
 
     it('should fail when startTime is after endTime', async () => {
@@ -75,10 +71,7 @@ describe('SchedulingService', () => {
         capacity: 500
       };
 
-      const result = await service.createTimeSlot(slotData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('startTime must be before endTime');
+      await expect(service.createTimeSlot(slotData)).rejects.toThrow('startTime must be before endTime');
     });
 
     it('should generate unique slot IDs', async () => {
@@ -98,10 +91,10 @@ describe('SchedulingService', () => {
         capacity: 300
       };
 
-      const result1 = await service.createTimeSlot(slot1);
-      const result2 = await service.createTimeSlot(slot2);
+      const slot1Res = await service.createTimeSlot(slot1);
+      const slot2Res = await service.createTimeSlot(slot2);
 
-      expect(result1.slot.id).not.toBe(result2.slot.id);
+      expect(slot1Res.id).not.toBe(slot2Res.id);
     });
   });
 
@@ -115,18 +108,21 @@ describe('SchedulingService', () => {
         capacity: 100
       };
 
-      const createResult = await service.createTimeSlot(slotData);
-      const slotId = createResult.slot.id;
+      const slot = await service.createTimeSlot(slotData);
+      const slotId = slot.id;
 
       const getResult = await service.getTimeSlotById(slotId);
 
       expect(getResult).toBeDefined();
-      expect(getResult.id).toBe(slotId);
+      expect(getResult.id.toString()).toBe(slotId.toString());
       expect(getResult.venue).toBe('Hall A');
     });
 
     it('should return null for non-existent slot', async () => {
-      const result = await service.getTimeSlotById('non-existent-id');
+      // Mock ObjectId CastError or just use a valid string that doesn't exist
+      const mongoose = (await import('mongoose')).default;
+      const validId = new mongoose.Types.ObjectId().toString();
+      const result = await service.getTimeSlotById(validId);
 
       expect(result).toBeNull();
     });
@@ -294,13 +290,13 @@ describe('SchedulingService', () => {
       const conflicts = await service.getAllConflicts();
       if (conflicts.length > 0) {
         const conflictId = conflicts[0].id;
-        const result = await service.resolveConflict(
+        const conflict = await service.resolveConflict(
           conflictId,
           'Rescheduled event-2'
         );
 
-        expect(result.success).toBe(true);
-        expect(result.conflict.resolved).toBe(true);
+        expect(conflict).toBeDefined();
+        expect(conflict.resolved).toBe(true);
       }
     });
   });

@@ -401,11 +401,14 @@ describe('Calendar controller and middleware wiring', () => {
       // Dummy mock for requirePermissions that matches the test expectations
       const mockRequirePermissions = (perm) => {
         return (req, res, next) => {
-          if (['admin', 'coordinator'].includes(req.user?.role) || req.user?.isSuperAdmin) {
-             return next();
+          if (
+            ['admin', 'coordinator'].includes(req.user?.role) ||
+            req.user?.isSuperAdmin
+          ) {
+            return next();
           }
           return res.status(403).json({});
-        }
+        };
       };
       registerCalendarRoutes(app, controller, mockRequirePermissions);
       return { app, controller };

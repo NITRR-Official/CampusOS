@@ -27,7 +27,9 @@ function makeRegistry() {
     permissions: new PermissionRegistry(),
     registerModule: vi.fn(),
     getService: (name) =>
-      name === 'requirePermissions' ? () => (req, res, next) => next() : undefined
+      name === 'requirePermissions'
+        ? () => (req, res, next) => next()
+        : undefined
   };
 }
 
