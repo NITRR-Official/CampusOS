@@ -41,7 +41,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return Club.findByIdAndUpdate(
       clubId,
       { status },
-      { new: true, ...options }
+      { returnDocument: 'after', ...options }
     ).lean();
   }
 
@@ -49,7 +49,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return Club.findByIdAndUpdate(
       clubId,
       { $set: updateData },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -92,7 +92,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
         $addToSet: { roles: roleId },
         $setOnInsert: { joinedAt: new Date(), status: 'active' }
       },
-      { new: true, upsert: true, ...options }
+      { returnDocument: 'after', upsert: true, ...options }
     ).lean();
   }
 
@@ -116,7 +116,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return ClubMember.findOneAndUpdate(
       { clubId, userId },
       { $pull: { roles: roleId } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -151,7 +151,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return ClubRole.findOneAndUpdate(
       { _id: roleId, clubId },
       { $set: updateData },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 
@@ -159,7 +159,7 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return ClubRole.findOneAndUpdate(
       { _id: roleId, clubId },
       { $addToSet: { permissions: { $each: permissions } } },
-      { new: true }
+      { returnDocument: 'after' }
     ).lean();
   }
 

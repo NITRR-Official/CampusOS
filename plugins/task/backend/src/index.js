@@ -10,9 +10,16 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  const taskController = createTaskController();
-  const { getTaskService } = await import('./service/task.service.js');
-  getTaskService().setEventBus(eventBus);
+  const { createTaskService } = await import('./service/task.service.js');
+  const { createTaskRepository } =
+    await import('./repository/task.repository.js');
+
+  const taskRepository = createTaskRepository();
+  const taskService = createTaskService(taskRepository);
+  if (eventBus) {
+    taskService.setEventBus(eventBus);
+  }
+  const taskController = createTaskController(taskService);
   registerTaskRoutes(app, taskController, requirePermissions);
 
   registry.registerModule('task', {
@@ -45,7 +52,7 @@ export async function init(app, registry, eventBus) {
       try {
         const taskDoc = await Task.findById(taskId).select('clubId').lean();
         return taskDoc?.clubId
-          ? { type: 'clubService', id: taskDoc.clubId.toString() }
+          ? { type: 'club:member_service', id: taskDoc.clubId.toString() }
           : null;
       } catch {
         return null;

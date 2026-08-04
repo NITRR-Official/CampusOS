@@ -7,10 +7,14 @@ import {
 export function createCampaignController({ campaignService, registry }) {
   const assertManagePermission = async (entityType, entityId, user) => {
     const policy = registry.getService(`${entityType}RbacPolicy`);
-    if (policy) {
-      const context = await policy.getContext(entityId, user);
-      policy.assertPermissions(['recruitment:manage'], context);
+    if (!policy) {
+      throw new AppError(
+        `No RBAC policy found for entity type ${entityType}`,
+        500
+      );
     }
+    const context = await policy.getContext(entityId, user);
+    policy.assertPermissions(['recruitment:manage'], context);
   };
 
   return {
@@ -26,9 +30,6 @@ export function createCampaignController({ campaignService, registry }) {
         const campaign = await campaignService.createCampaign(validatedData);
         res.status(201).json({ success: true, data: campaign });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     },
@@ -85,9 +86,6 @@ export function createCampaignController({ campaignService, registry }) {
         );
         res.status(200).json({ success: true, data: campaign });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     }

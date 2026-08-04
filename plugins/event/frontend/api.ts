@@ -30,8 +30,18 @@ export const EventItemSchema = z.object({
 export type EventRegistration = z.infer<typeof EventRegistrationSchema>;
 export type EventItem = z.infer<typeof EventItemSchema>;
 
-export function fetchEvents(clubId: string, accessToken?: string | null) {
-  return apiClient.get<EventItem[]>(`/events?clubId=${clubId}`, {
+export function fetchEvents(
+  options?: { clubId?: string | null; myEvents?: boolean },
+  accessToken?: string | null
+) {
+  const params = new URLSearchParams();
+  if (options?.clubId) params.append('clubId', options.clubId);
+  if (options?.myEvents) params.append('myEvents', 'true');
+
+  const qs = params.toString();
+  const url = qs ? `/events?${qs}` : '/events';
+
+  return apiClient.get<EventItem[]>(url, {
     schema: z.array(EventItemSchema),
     accessToken,
     cache: 'no-store'

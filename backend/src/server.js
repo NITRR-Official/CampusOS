@@ -3,7 +3,6 @@
  * Handles server initialization, graceful shutdown, and error handling
  */
 
-import 'dotenv/config';
 import { disconnectDB } from './database/connection.js';
 
 export function startServer(app, port = 3000) {

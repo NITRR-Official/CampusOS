@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 const taskSchema = new mongoose.Schema(
   {
     clubId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Club',
       required: true
     },
     title: {
@@ -36,12 +37,13 @@ const taskSchema = new mongoose.Schema(
       default: 'todo'
     },
     createdBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     },
     dependsOn: [
       {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
       }
     ]

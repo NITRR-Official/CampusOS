@@ -2,9 +2,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { apiClient } from '@campus-os/shared/api-client';
 import { Skeleton, useToast, Badge } from '@campusos/design-system';
+import { Search, Plus, Store } from 'lucide-react';
 
 interface PluginSettingsConfig {
   type: string;
@@ -23,13 +24,14 @@ interface Plugin {
   enabled: boolean;
   version?: string;
   settings: Record<string, any>;
-  settingsConfig?: PluginConfigSchema | null;
+  configSchema?: PluginConfigSchema | null;
 }
 
 export default function AdminPluginsPage() {
   const [plugins, setPlugins] = useState<Plugin[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   // State for settings forms
@@ -41,12 +43,12 @@ export default function AdminPluginsPage() {
     try {
       setLoading(true);
       const data = await apiClient.get<any>('/plugins');
-      if (data && Array.isArray(data.data)) {
-        setPlugins(data.data);
+      if (data && Array.isArray(data.plugins)) {
+        setPlugins(data.plugins);
 
         // Initialize settings values
         const initialSettings: Record<string, Record<string, any>> = {};
-        data.data.forEach((p: Plugin) => {
+        data.plugins.forEach((p: Plugin) => {
           initialSettings[p.name] = { ...p.settings };
         });
         setSettingsValues(initialSettings);
@@ -124,15 +126,48 @@ export default function AdminPluginsPage() {
     }));
   }
 
+  const filteredPlugins = useMemo(() => {
+    if (!searchQuery.trim()) return plugins;
+    const lowerQuery = searchQuery.toLowerCase();
+    return plugins.filter((p) => p.name.toLowerCase().includes(lowerQuery));
+  }, [plugins, searchQuery]);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight">
-          Plugin Management
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Enable or disable modules and configure their dynamic settings.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">
+            Plugin Management
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Enable or disable modules and configure their dynamic settings.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search plugins..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-background border border-input rounded-md text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-muted-foreground"
+            />
+          </div>
+          <button
+            onClick={() => {
+              toast({
+                title: 'Coming Soon',
+                description:
+                  'The Community Plugin Store will be available in a future update.'
+              });
+            }}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm shrink-0"
+          >
+            <Store className="size-4" />
+            Browse Plugins
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -153,13 +188,15 @@ export default function AdminPluginsPage() {
             </div>
           ))}
         </div>
-      ) : plugins.length === 0 ? (
+      ) : filteredPlugins.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground border border-border/50 rounded-md bg-card/50">
-          No plugins found.
+          {searchQuery
+            ? 'No plugins matched your search.'
+            : 'No plugins found.'}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {plugins.map((plugin) => (
+          {filteredPlugins.map((plugin) => (
             <div
               key={plugin.name}
               className="border border-border/50 rounded-md overflow-hidden bg-card/50 backdrop-blur-sm flex flex-col transition-all hover:shadow-sm"
@@ -187,14 +224,14 @@ export default function AdminPluginsPage() {
                 )}
 
                 {/* Dynamic Settings Form */}
-                {plugin.settingsConfig &&
-                plugin.settingsConfig.fields &&
-                Object.keys(plugin.settingsConfig.fields).length > 0 ? (
+                {plugin.configSchema &&
+                plugin.configSchema.fields &&
+                Object.keys(plugin.configSchema.fields).length > 0 ? (
                   <div className="space-y-4 mt-6">
                     <h4 className="text-sm font-medium border-b border-border/50 pb-2">
                       Configuration
                     </h4>
-                    {Object.entries(plugin.settingsConfig.fields).map(
+                    {Object.entries(plugin.configSchema.fields).map(
                       ([fieldKey, config]) => (
                         <div key={fieldKey} className="space-y-1">
                           <label className="text-xs font-medium capitalize">
@@ -275,13 +312,26 @@ export default function AdminPluginsPage() {
                 )}
               </div>
 
-              <div className="p-4 bg-muted/20 border-t border-border/50">
+              <div className="p-4 bg-muted/20 border-t border-border/50 flex items-center justify-between">
+                <span className="text-sm font-medium text-foreground">
+                  {plugin.enabled ? 'Enabled' : 'Disabled'}
+                </span>
                 <button
+                  type="button"
+                  role="switch"
+                  aria-checked={plugin.enabled}
                   onClick={() => handleToggle(plugin.name, plugin.enabled)}
                   disabled={actionLoading === `toggle-${plugin.name}`}
-                  className="w-full px-4 py-2 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors"
+                  className={`${
+                    plugin.enabled ? 'bg-primary' : 'bg-input'
+                  } relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  {plugin.enabled ? 'Disable Plugin' : 'Enable Plugin'}
+                  <span
+                    aria-hidden="true"
+                    className={`${
+                      plugin.enabled ? 'translate-x-4' : 'translate-x-0'
+                    } pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out`}
+                  />
                 </button>
               </div>
             </div>

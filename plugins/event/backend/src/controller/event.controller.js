@@ -2,11 +2,26 @@ import { AppError } from '@campus-os/shared/errors';
 import {
   createEventSchema,
   registrationSchema,
-  validateStatus,
   updateEventSchema
 } from '../schema/event.schema.js';
 
-export function createEventController(eventService) {
+export function createEventController(eventService, registry) {
+  async function resolveClubId(clubId) {
+    let resolvedClubId = clubId;
+    if (clubId && !clubId.match(/^[0-9a-fA-F]{24}$/)) {
+      try {
+        const clubService = registry.getService('club');
+        const clubDoc = await clubService.getClubBySlug(clubId);
+        if (clubDoc) {
+          resolvedClubId = String(clubDoc.id || clubDoc._id);
+        }
+      } catch (err) {
+        console.error('Could not resolve club slug in listEvents:', err);
+      }
+    }
+    return resolvedClubId;
+  }
+
   async function create(req, res, next) {
     try {
       const value = createEventSchema.parse(req.body);
@@ -55,11 +70,6 @@ export function createEventController(eventService) {
         return;
       }
 
-      if (!validateStatus(event.status)) {
-        next(new AppError('Invalid event status', 500, 'INVALID_EVENT_STATUS'));
-        return;
-      }
-
       res.status(200).json({
         success: true,
         data: event
@@ -90,29 +100,15 @@ export function createEventController(eventService) {
 
   async function list(req, res, next) {
     try {
-      const { clubId } = req.query;
-      if (!clubId) {
-        return next(
-          new AppError(
-            'clubId is required for listing events',
-            400,
-            'VALIDATION_ERROR'
-          )
-        );
-      }
-      let resolvedClubId = clubId;
-      if (!clubId.match(/^[0-9a-fA-F]{24}$/)) {
-        try {
-          const { Club } =
-            await import('../../../../club/backend/src/schema/club.model.js');
-          const clubDoc = await Club.findOne({ slug: clubId }).lean();
-          if (clubDoc) resolvedClubId = clubDoc._id.toString();
-        } catch (err) {
-          console.error('Could not resolve club slug in listEvents:', err);
-        }
+      const { clubId, myEvents } = req.query;
+      const resolvedClubId = await resolveClubId(clubId);
+
+      const options = {};
+      if (myEvents === 'true' && req.user?.email) {
+        options.participantEmail = req.user.email;
       }
 
-      const events = await eventService.listEvents(resolvedClubId);
+      const events = await eventService.listEvents(resolvedClubId, options);
       res.status(200).json({
         success: true,
         data: events
@@ -125,43 +121,9 @@ export function createEventController(eventService) {
   async function listPublic(req, res, next) {
     try {
       const { clubId } = req.query;
-      if (!clubId) {
-        return next(
-          new AppError(
-            'clubId is required for listing events',
-            400,
-            'VALIDATION_ERROR'
-          )
-        );
-      }
-      let resolvedClubId = clubId;
-      if (!clubId.match(/^[0-9a-fA-F]{24}$/)) {
-        try {
-          const { Club } =
-            await import('../../../../club/backend/src/schema/club.model.js');
-          const clubDoc = await Club.findOne({ slug: clubId }).lean();
-          if (clubDoc) resolvedClubId = clubDoc._id.toString();
-        } catch (err) {
-          console.error('Could not resolve club slug in listEvents:', err);
-        }
-      }
+      const resolvedClubId = await resolveClubId(clubId);
 
-      const events = await eventService.listEvents(resolvedClubId);
-
-      // Filter for published events and remove sensitive data
-      const publicEvents = events
-        .filter((event) => event.status === 'published')
-        .map((event) => ({
-          _id: event._id || event.id,
-          id: event.id || event._id,
-          title: event.title,
-          description: event.description,
-          startsAt: event.startsAt,
-          endsAt: event.endsAt,
-          venue: event.venue,
-          status: event.status,
-          clubId: event.clubId
-        }));
+      const publicEvents = await eventService.listPublicEvents(resolvedClubId);
 
       res.status(200).json({
         success: true,
@@ -207,9 +169,9 @@ export function createEventController(eventService) {
   async function getPublicById(req, res, next) {
     const { eventId } = req.params;
     try {
-      const event = await eventService.getEvent(eventId);
+      const publicEvent = await eventService.getPublicEventById(eventId);
 
-      if (!event || event.status !== 'published') {
+      if (!publicEvent) {
         next(
           new AppError(
             'Event not found or not published',
@@ -219,20 +181,6 @@ export function createEventController(eventService) {
         );
         return;
       }
-
-      const publicEvent = {
-        _id: event._id || event.id,
-        id: event.id || event._id,
-        title: event.title,
-        description: event.description,
-        startsAt: event.startsAt,
-        endsAt: event.endsAt,
-        venue: event.venue,
-        status: event.status,
-        clubId: event.clubId,
-        capacity: event.capacity,
-        registrationsCount: event.registrations?.length || 0
-      };
 
       res.status(200).json({
         success: true,
@@ -248,6 +196,11 @@ export function createEventController(eventService) {
 
     try {
       const value = registrationSchema.parse(req.body);
+
+      if (req.user && req.user.id) {
+        value.userId = req.user.id;
+      }
+
       const registrationResult = await eventService.registerForEvent(
         eventId,
         value
@@ -295,12 +248,14 @@ export function createEventController(eventService) {
         return;
       }
 
+      const registrations = await eventService.getEventRegistrations(eventId);
+
       res.status(200).json({
         success: true,
         data: {
           eventId,
-          totalRegistrations: event.registrations.length,
-          registrations: event.registrations
+          totalRegistrations: registrations.length,
+          registrations
         }
       });
     } catch (error) {

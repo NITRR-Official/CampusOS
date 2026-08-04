@@ -51,7 +51,11 @@ class CampusEventBus {
     // Defer the event emission to the end of the event loop iteration.
     // This instantly frees up the main thread (e.g., an HTTP response) so plugins don't block it.
     setImmediate(() => {
-      this.#emitter.emit(eventName, safePayload);
+      try {
+        this.#emitter.emit(eventName, safePayload);
+      } catch (err) {
+        console.error(`[EventBus] Error emitting ${eventName}:`, err);
+      }
     });
 
     return true;

@@ -26,7 +26,7 @@ export function requirePermissions(...allowedPermissions) {
       } else if (req.params?.clubId || req.body?.clubId) {
         // Fallback for legacy club context
         context = {
-          type: 'clubService',
+          type: 'club:member_service',
           id: req.params?.clubId || req.body?.clubId
         };
       } else {

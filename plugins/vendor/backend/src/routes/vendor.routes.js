@@ -3,9 +3,11 @@
  * Registers vendor management endpoints with Express
  */
 
-import vendorController from '../controller/vendor.controller.js';
-
-export function registerVendorRoutes(app, requirePermissions) {
+export function registerVendorRoutes(
+  app,
+  vendorController,
+  requirePermissions
+) {
   const viewVendor = requirePermissions('vendor:view');
   // Create vendor (admin/coordinator only)
   app.post(

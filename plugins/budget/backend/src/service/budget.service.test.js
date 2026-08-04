@@ -1,19 +1,33 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import {
   connectDB,
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
 
+import mongoose from 'mongoose';
 import { Budget, Expense } from '../schema/budget.model.js';
-import { BudgetService } from './budget.service.js';
+import { createBudgetService } from './budget.service.js';
+import { createBudgetRepository } from '../repository/budget.repository.js';
 
 describe('BudgetService', () => {
   let service;
   let mongoServer;
 
+  const event1 = new mongoose.Types.ObjectId().toString();
+  const event2 = new mongoose.Types.ObjectId().toString();
+  const event123 = new mongoose.Types.ObjectId().toString();
+  const eventNoBudget = new mongoose.Types.ObjectId().toString();
+  const user123 = new mongoose.Types.ObjectId().toString();
+  const fakeId = new mongoose.Types.ObjectId().toString();
+  const vendor123 = new mongoose.Types.ObjectId().toString();
+  const vendor456 = new mongoose.Types.ObjectId().toString();
+  const vendor1 = new mongoose.Types.ObjectId().toString();
+  const vendor2 = new mongoose.Types.ObjectId().toString();
+  const vendor3 = new mongoose.Types.ObjectId().toString();
+
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
+    mongoServer = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
     await connectDB(mongoServer.getUri());
   }, 120000);
 
@@ -27,13 +41,15 @@ describe('BudgetService', () => {
   beforeEach(async () => {
     await Budget.deleteMany({});
     await Expense.deleteMany({});
-    service = new BudgetService();
+    const eventBus = { emit: () => {} };
+    const budgetRepository = createBudgetRepository();
+    service = createBudgetService(budgetRepository, eventBus);
   });
 
   describe('createBudget', () => {
     it('should create a new budget with required fields', async () => {
       const budgetData = {
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000,
         budgetBreakdown: [
           { category: 'catering', amount: 40000 },
@@ -47,149 +63,110 @@ describe('BudgetService', () => {
 
       const result = await service.createBudget(budgetData);
 
-      expect(result.success).toBe(true);
-      expect(result.budget).toBeDefined();
-      expect(result.budget.eventId).toBe('event-1');
-      expect(result.budget.totalAllocation).toBe(100000);
-      expect(result.budget.approvalStatus).toBe('draft');
-      expect(result.budget.approvedBy).toBeNull();
+      expect(result).toBeDefined();
+      expect(result.eventId.toString()).toBe(event1);
+      expect(result.totalAllocation).toBe(100000);
+      expect(result.approvalStatus).toBe('draft');
+      expect(result.approvedBy).toBeNull();
     });
 
     it('should fail when missing required fields', async () => {
       const budgetData = {
-        eventId: 'event-1'
-        // missing totalAllocation
+        eventId: event1
       };
-
-      const result = await service.createBudget(budgetData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Missing required fields');
+      await expect(service.createBudget(budgetData)).rejects.toThrow();
     });
 
     it('should fail when totalAllocation is zero or negative', async () => {
       const budgetData = {
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: -5000
       };
-
-      const result = await service.createBudget(budgetData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('greater than 0');
+      await expect(service.createBudget(budgetData)).rejects.toThrow();
     });
 
     it('should set default currency to INR', async () => {
       const budgetData = {
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 50000
       };
-
       const result = await service.createBudget(budgetData);
-
-      expect(result.budget.currency).toBe('INR');
+      expect(result.currency).toBe('INR');
     });
 
     it('should generate unique budget IDs', async () => {
-      const budget1 = {
-        eventId: 'event-1',
-        totalAllocation: 50000
-      };
-
-      const budget2 = {
-        eventId: 'event-2',
-        totalAllocation: 75000
-      };
-
+      const budget1 = { eventId: event1, totalAllocation: 50000 };
+      const budget2 = { eventId: event2, totalAllocation: 75000 };
       const result1 = await service.createBudget(budget1);
       const result2 = await service.createBudget(budget2);
-
-      expect(result1.budget.id).not.toBe(result2.budget.id);
+      expect(result1.id || result1._id).not.toBe(result2.id || result2._id);
     });
   });
 
   describe('getBudgetById', () => {
     it('should retrieve budget by ID', async () => {
-      const budgetData = {
-        eventId: 'event-1',
-        totalAllocation: 100000
-      };
-
+      const budgetData = { eventId: event1, totalAllocation: 100000 };
       const createResult = await service.createBudget(budgetData);
-      const budgetId = createResult.budget.id;
-
+      const budgetId = createResult.id || createResult._id;
       const getResult = await service.getBudgetById(budgetId);
-
       expect(getResult).toBeDefined();
-      expect(getResult.id).toBe(budgetId);
+      expect((getResult.id || getResult._id).toString()).toBe(
+        budgetId.toString()
+      );
       expect(getResult.totalAllocation).toBe(100000);
     });
 
     it('should return null for non-existent budget', async () => {
-      const result = await service.getBudgetById('non-existent-id');
-
-      expect(result).toBeNull();
+      await expect(
+        service.getBudgetById(new mongoose.Types.ObjectId().toString())
+      ).rejects.toThrow();
     });
   });
 
   describe('getEventBudget', () => {
     it('should retrieve budget for specific event', async () => {
-      const budgetData = {
-        eventId: 'event-123',
-        totalAllocation: 100000
-      };
-
+      const budgetData = { eventId: event123, totalAllocation: 100000 };
       await service.createBudget(budgetData);
-      const result = await service.getEventBudget('event-123');
-
+      const result = await service.getEventBudget(event123);
       expect(result).toBeDefined();
-      expect(result.eventId).toBe('event-123');
+      expect(result.eventId.toString()).toBe(event123);
     });
 
     it('should return null if event has no budget', async () => {
-      const result = await service.getEventBudget('event-no-budget');
-
-      expect(result).toBeNull();
+      await expect(service.getEventBudget(eventNoBudget)).rejects.toThrow();
     });
   });
 
   describe('approveBudget', () => {
     let budgetId;
-
     beforeEach(async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      budgetId = budgetResult.budget.id;
+      budgetId = budgetResult.id || budgetResult._id;
     });
 
     it('should approve a budget in draft status', async () => {
-      const result = await service.approveBudget(budgetId, 'user-123');
-
-      expect(result.success).toBe(true);
-      expect(result.budget.approvalStatus).toBe('approved');
-      expect(result.budget.approvedBy).toBe('user-123');
-      expect(result.budget.approvedDate).toBeDefined();
+      const result = await service.approveBudget(budgetId, user123);
+      expect(result.approvalStatus).toBe('approved');
+      expect(result.approvedBy.toString()).toBe(user123);
+      expect(result.approvedDate).toBeDefined();
     });
 
     it('should fail to approve non-existent budget', async () => {
-      const result = await service.approveBudget('fake-id', 'user-123');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('not found');
+      await expect(service.approveBudget(fakeId, user123)).rejects.toThrow();
     });
   });
 
   describe('rejectBudget', () => {
     let budgetId;
-
     beforeEach(async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      budgetId = budgetResult.budget.id;
+      budgetId = budgetResult.id || budgetResult._id;
     });
 
     it('should reject a budget and provide rejection reason', async () => {
@@ -197,21 +174,18 @@ describe('BudgetService', () => {
         budgetId,
         'Budget exceeds available funds'
       );
-
-      expect(result.success).toBe(true);
-      expect(result.budget.approvalStatus).toBe('rejected');
+      expect(result.approvalStatus).toBe('rejected');
     });
   });
 
   describe('logExpense', () => {
     let budgetId;
-
     beforeEach(async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      budgetId = budgetResult.budget.id;
+      budgetId = budgetResult.id || budgetResult._id;
     });
 
     it('should log an expense', async () => {
@@ -219,30 +193,22 @@ describe('BudgetService', () => {
         category: 'catering',
         description: 'Food and beverages',
         amount: 25000,
-        vendor: 'vendor-123',
+        vendor: vendor123,
         receipt: 'receipt-123'
       };
-
       const result = await service.logExpense(budgetId, expenseData);
-
-      expect(result.success).toBe(true);
-      expect(result.expense).toBeDefined();
-      expect(result.expense.amount).toBe(25000);
-      expect(result.expense.paymentStatus).toBe('pending');
+      expect(result.amount).toBe(25000);
+      expect(result.paymentStatus).toBe('pending');
     });
 
     it('should fail when expense exceeds remaining budget', async () => {
       const expenseData = {
         category: 'catering',
         description: 'Catering',
-        amount: 150000, // More than total allocation
-        vendor: 'vendor-123'
+        amount: 150000,
+        vendor: vendor123
       };
-
-      const result = await service.logExpense(budgetId, expenseData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('exceeds budget');
+      await expect(service.logExpense(budgetId, expenseData)).rejects.toThrow();
     });
 
     it('should update remaining budget after logging expense', async () => {
@@ -250,33 +216,29 @@ describe('BudgetService', () => {
         category: 'decoration',
         description: 'Decoration items',
         amount: 30000,
-        vendor: 'vendor-456'
+        vendor: vendor456
       };
-
       await service.logExpense(budgetId, expenseData);
       const summary = await service.getBudgetSummary(budgetId);
-
-      expect(summary.remaining).toBe(70000); // 100000 - 30000
+      expect(summary.remaining).toBe(70000);
     });
   });
 
   describe('markExpenseAsPaid', () => {
     let budgetId, expenseId;
-
     beforeEach(async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      budgetId = budgetResult.budget.id;
-
+      budgetId = budgetResult.id || budgetResult._id;
       const expenseResult = await service.logExpense(budgetId, {
         category: 'catering',
         description: 'Catering',
         amount: 25000,
-        vendor: 'vendor-123'
+        vendor: vendor123
       });
-      expenseId = expenseResult.expense.id;
+      expenseId = expenseResult.id || expenseResult._id;
     });
 
     it('should mark expense as paid', async () => {
@@ -284,22 +246,19 @@ describe('BudgetService', () => {
         expenseId,
         'bank_transfer'
       );
-
-      expect(result.success).toBe(true);
-      expect(result.expense.paymentStatus).toBe('paid');
-      expect(result.expense.paymentMethod).toBe('bank_transfer');
+      expect(result.paymentStatus).toBe('paid');
+      expect(result.paymentMethod).toBe('bank_transfer');
     });
 
     it('should track payment date when marking as paid', async () => {
       const beforePayment = new Date();
       const result = await service.markExpenseAsPaid(expenseId, 'cash');
       const afterPayment = new Date();
-
-      expect(result.expense.paidDate).toBeInstanceOf(Date);
-      expect(result.expense.paidDate.getTime()).toBeGreaterThanOrEqual(
+      expect(result.paidDate).toBeInstanceOf(Date);
+      expect(result.paidDate.getTime()).toBeGreaterThanOrEqual(
         beforePayment.getTime()
       );
-      expect(result.expense.paidDate.getTime()).toBeLessThanOrEqual(
+      expect(result.paidDate.getTime()).toBeLessThanOrEqual(
         afterPayment.getTime()
       );
     });
@@ -308,27 +267,23 @@ describe('BudgetService', () => {
   describe('getBudgetSummary', () => {
     it('should provide budget summary with totals', async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      const budgetId = budgetResult.budget.id;
-
+      const budgetId = budgetResult.id || budgetResult._id;
       await service.logExpense(budgetId, {
         category: 'catering',
         description: 'Catering',
         amount: 25000,
-        vendor: 'vendor-1'
+        vendor: vendor1
       });
-
       await service.logExpense(budgetId, {
         category: 'decoration',
         description: 'Decoration',
         amount: 15000,
-        vendor: 'vendor-2'
+        vendor: vendor2
       });
-
       const result = await service.getBudgetSummary(budgetId);
-
       expect(result).toBeDefined();
       expect(result.totalAllocation).toBe(100000);
       expect(result.totalExpenses).toBe(40000);
@@ -339,7 +294,7 @@ describe('BudgetService', () => {
   describe('getBudgetVsActual', () => {
     it('should compare budgeted vs actual expenses by category', async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000,
         budgetBreakdown: [
           { category: 'catering', amount: 40000 },
@@ -347,25 +302,20 @@ describe('BudgetService', () => {
           { category: 'sound', amount: 20000 }
         ]
       });
-      const budgetId = budgetResult.budget.id;
-
-      // Log actual expenses
+      const budgetId = budgetResult.id || budgetResult._id;
       await service.logExpense(budgetId, {
         category: 'catering',
         description: 'Catering',
-        amount: 42000, // Over budget
-        vendor: 'vendor-1'
+        amount: 42000,
+        vendor: vendor1
       });
-
       await service.logExpense(budgetId, {
         category: 'decoration',
         description: 'Decoration',
-        amount: 28000, // Under budget
-        vendor: 'vendor-2'
+        amount: 28000,
+        vendor: vendor2
       });
-
       const result = await service.getBudgetVsActual(budgetId);
-
       expect(result).toBeDefined();
       expect(result.variance).toBeDefined();
     });
@@ -374,52 +324,48 @@ describe('BudgetService', () => {
   describe('Budget safety validations', () => {
     it('should prevent negative expenses', async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      const budgetId = budgetResult.budget.id;
-
-      const result = await service.logExpense(budgetId, {
-        category: 'catering',
-        description: 'Catering',
-        amount: -5000, // Negative amount
-        vendor: 'vendor-1'
-      });
-
-      expect(result.success).toBe(false);
+      const budgetId = budgetResult.id || budgetResult._id;
+      await expect(
+        service.logExpense(budgetId, {
+          category: 'catering',
+          description: 'Catering',
+          amount: -5000,
+          vendor: vendor1
+        })
+      ).rejects.toThrow();
     });
 
     it('should maintain budget integrity across multiple expenses', async () => {
       const budgetResult = await service.createBudget({
-        eventId: 'event-1',
+        eventId: event1,
         totalAllocation: 100000
       });
-      const budgetId = budgetResult.budget.id;
-
+      const budgetId = budgetResult.id || budgetResult._id;
       const exp1 = await service.logExpense(budgetId, {
         category: 'catering',
         description: 'Catering',
         amount: 40000,
-        vendor: 'vendor-1'
+        vendor: vendor1
       });
-
       const exp2 = await service.logExpense(budgetId, {
         category: 'decoration',
         description: 'Decoration',
         amount: 30000,
-        vendor: 'vendor-2'
+        vendor: vendor2
       });
-
-      const exp3 = await service.logExpense(budgetId, {
-        category: 'sound',
-        description: 'Sound system',
-        amount: 35000, // Should fail - only 30000 left
-        vendor: 'vendor-3'
-      });
-
-      expect(exp1.success).toBe(true);
-      expect(exp2.success).toBe(true);
-      expect(exp3.success).toBe(false);
+      await expect(
+        service.logExpense(budgetId, {
+          category: 'sound',
+          description: 'Sound system',
+          amount: 35000,
+          vendor: vendor3
+        })
+      ).rejects.toThrow();
+      expect(exp1).toBeDefined();
+      expect(exp2).toBeDefined();
     });
   });
 });

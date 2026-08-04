@@ -1,4 +1,4 @@
-import type { AuthResponseData } from '@plugins/auth/frontend/api';
+import type { AuthResponseData } from './auth-types';
 
 const AUTH_STORAGE_KEY = 'campusos.auth-session';
 const AUTH_SESSION_EVENT = 'campusos.auth-session-change';
@@ -21,8 +21,9 @@ export function storeAuthSession(data: AuthResponseData | null) {
     return;
   }
 
+  const isSecure = window.location.protocol === 'https:' ? 'Secure;' : '';
   window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
-  document.cookie = `campusos_access_token=${data.accessToken}; path=/; max-age=604800; SameSite=Lax`;
+  document.cookie = `campusos_access_token=${data.accessToken}; path=/; max-age=900; SameSite=Lax; ${isSecure}`;
   emitAuthSessionChange();
 }
 
@@ -53,9 +54,9 @@ export function clearAuthSession() {
     return;
   }
 
+  const isSecure = window.location.protocol === 'https:' ? 'Secure;' : '';
   window.localStorage.removeItem(AUTH_STORAGE_KEY);
-  document.cookie =
-    'campusos_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+  document.cookie = `campusos_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax; ${isSecure}`;
   emitAuthSessionChange();
 }
 

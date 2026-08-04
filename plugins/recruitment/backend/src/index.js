@@ -9,7 +9,7 @@ import { createCandidateController } from './controller/candidate.controller.js'
 import { registerRecruitmentRoutes } from './routes/recruitment.routes.js';
 import { registerEventHandlers } from './listeners/index.js';
 
-export function init(app, registry, eventBus) {
+export async function init(app, registry, eventBus) {
   // 1. Get EventBus and Middlewares
   const requirePermissions = registry.getService('requirePermissions');
 

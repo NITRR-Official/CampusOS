@@ -4,7 +4,8 @@ const STATUS_VALUES = [
   'pending_verification',
   'pending',
   'approved',
-  'rejected'
+  'rejected',
+  'archived'
 ];
 
 const clubSchema = new mongoose.Schema(
@@ -42,7 +43,8 @@ const clubSchema = new mongoose.Schema(
       default: 'pending_verification'
     },
     createdBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     }
   },

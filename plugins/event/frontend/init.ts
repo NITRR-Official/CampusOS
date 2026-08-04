@@ -10,11 +10,20 @@ export function initFrontend() {
     context: 'global'
   });
 
+  // Workspace Context
   registry.registerSidebarLink({
     pluginId: 'event',
-    title: 'Participants',
-    url: '/participants',
-    icon: 'Users'
+    title: 'Events',
+    url: '/events',
+    icon: 'Ticket'
+  });
+
+  registry.registerSidebarLink({
+    pluginId: 'event',
+    title: 'My Events',
+    url: '/my-events',
+    icon: 'Users',
+    context: 'global'
   });
 
   // Register Dashboard Widgets

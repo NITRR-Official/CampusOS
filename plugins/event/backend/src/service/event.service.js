@@ -1,5 +1,3 @@
-import crypto from 'node:crypto';
-
 export function createEventService(eventRepository, eventBus) {
   async function createEvent(payload) {
     const event = {
@@ -13,9 +11,7 @@ export function createEventService(eventRepository, eventBus) {
       endsAt: payload.endsAt || null,
       status: 'draft',
       registrations: [],
-      createdBy: payload.createdBy,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      createdBy: payload.createdBy
     };
 
     const savedEvent = await eventRepository.saveEvent(event);
@@ -33,15 +29,27 @@ export function createEventService(eventRepository, eventBus) {
   }
 
   async function updateEvent(eventId, updates) {
-    const event = await eventRepository.getEventById(eventId);
+    const allowedFields = [
+      'title',
+      'description',
+      'venue',
+      'capacity',
+      'startsAt',
+      'endsAt'
+    ];
+    const safeUpdates = { _id: eventId };
 
-    if (!event) {
-      return null;
+    for (const field of allowedFields) {
+      if (updates[field] !== undefined) {
+        safeUpdates[field] = updates[field];
+      }
     }
 
-    Object.assign(event, updates, { updatedAt: new Date().toISOString() });
-    await eventRepository.saveEvent(event);
-    return event;
+    if (Object.keys(safeUpdates).length === 1) {
+      return eventRepository.getEventById(eventId);
+    }
+
+    return eventRepository.saveEvent(safeUpdates);
   }
 
   async function getEvent(eventId) {
@@ -49,30 +57,37 @@ export function createEventService(eventRepository, eventBus) {
   }
 
   async function setStatus(eventId, status) {
-    const event = await eventRepository.getEventById(eventId);
+    const updatedEvent = await eventRepository.saveEvent({
+      _id: eventId,
+      status
+    });
 
-    if (!event) {
+    if (!updatedEvent) {
       return null;
     }
 
-    event.status = status;
-    event.updatedAt = new Date().toISOString();
-    await eventRepository.saveEvent(event);
-
     if (eventBus && status === 'published') {
       eventBus.emit('event:published', {
-        eventId: event._id || event.id,
-        clubId: event.clubId,
-        actorId: event.createdBy,
-        title: event.title
+        eventId: updatedEvent._id || updatedEvent.id,
+        clubId: updatedEvent.clubId,
+        actorId: updatedEvent.createdBy,
+        title: updatedEvent.title
       });
     }
 
-    return event;
+    return updatedEvent;
   }
 
-  async function listEvents(clubId) {
-    return eventRepository.listEvents(clubId);
+  async function listEvents(clubId, options = {}) {
+    return eventRepository.listEvents(clubId, options);
+  }
+
+  async function listPublicEvents(clubId) {
+    return eventRepository.listPublicEvents(clubId);
+  }
+
+  async function getPublicEventById(eventId) {
+    return eventRepository.getPublicEventById(eventId);
   }
 
   async function registerForEvent(eventId, registrationPayload) {
@@ -82,39 +97,45 @@ export function createEventService(eventRepository, eventBus) {
       return { type: 'EVENT_NOT_FOUND' };
     }
 
-    const existing = event.registrations.find(
-      (registration) =>
-        registration.attendeeEmail === registrationPayload.attendeeEmail
+    // Atomically increment count first (enforces capacity)
+    const updatedEvent = await eventRepository.incrementRegistrationCount(
+      eventId,
+      1,
+      event.capacity
     );
 
-    if (existing) {
-      return { type: 'ALREADY_REGISTERED' };
-    }
-
-    if (
-      event.capacity !== null &&
-      event.registrations.length >= event.capacity
-    ) {
+    if (!updatedEvent) {
+      // If updatedEvent is null, it means the query didn't match (capacity reached)
       return { type: 'EVENT_CAPACITY_REACHED' };
     }
 
-    const registration = {
-      id: crypto.randomUUID(),
-      attendeeName: registrationPayload.attendeeName,
-      attendeeEmail: registrationPayload.attendeeEmail,
-      createdAt: new Date().toISOString()
-    };
+    try {
+      // Create the registration record
+      // If this email is already registered, it will throw a duplicate key error (code 11000)
+      const registrationData = {
+        eventId,
+        attendeeName: registrationPayload.attendeeName,
+        attendeeEmail: registrationPayload.attendeeEmail,
+        userId: registrationPayload.userId || null
+      };
 
-    event.registrations.push(registration);
-    event.updatedAt = new Date().toISOString();
+      const registration =
+        await eventRepository.createRegistration(registrationData);
 
-    await eventRepository.saveEvent(event);
+      return {
+        type: 'REGISTERED',
+        registration,
+        totalRegistrations: updatedEvent.registrationsCount
+      };
+    } catch (error) {
+      // Rollback the counter on ANY failure (including duplicate registration)
+      await eventRepository.incrementRegistrationCount(eventId, -1, null);
 
-    return {
-      type: 'REGISTERED',
-      registration,
-      totalRegistrations: event.registrations.length
-    };
+      if (error.code === 11000) {
+        return { type: 'ALREADY_REGISTERED' };
+      }
+      throw error;
+    }
   }
 
   async function deleteEvent(eventId) {
@@ -125,16 +146,18 @@ export function createEventService(eventRepository, eventBus) {
     return deleted;
   }
 
+  async function getEventRegistrations(eventId) {
+    return eventRepository.findRegistrationsByEvent(eventId);
+  }
+
   async function deleteEventsByClub(clubId) {
     const events = await eventRepository.getEventsByClub(clubId);
-    let count = 0;
 
-    for (const event of events) {
-      const deleted = await deleteEvent(event._id || event.id);
-      if (deleted) count++;
-    }
+    const results = await Promise.all(
+      events.map((event) => deleteEvent(event._id || event.id))
+    );
 
-    return count;
+    return results.filter(Boolean).length;
   }
 
   return {
@@ -143,9 +166,12 @@ export function createEventService(eventRepository, eventBus) {
     getEvent,
     setStatus,
     listEvents,
+    listPublicEvents,
+    getPublicEventById,
     registerForEvent,
     deleteEvent,
-    deleteEventsByClub
+    deleteEventsByClub,
+    getEventRegistrations
   };
 }
 

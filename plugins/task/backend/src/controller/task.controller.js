@@ -5,11 +5,7 @@ import {
   updateTaskPrioritySchema,
   updateTaskStatusSchema
 } from '../schema/task.schema.js';
-import { getTaskService } from '../service/task.service.js';
-
-export function createTaskController() {
-  const taskService = getTaskService();
-
+export function createTaskController(taskService) {
   async function create(req, res, next) {
     try {
       const value = createTaskSchema.parse(req.body);
@@ -18,10 +14,7 @@ export function createTaskController() {
         createdBy: req.user?.id || 'unknown'
       });
 
-      res.status(201).json({
-        success: true,
-        data: task
-      });
+      res.status(201).json(task);
     } catch (err) {
       next(err);
     }
@@ -40,10 +33,7 @@ export function createTaskController() {
         );
       }
       const tasks = await taskService.listTasks(clubId);
-      res.status(200).json({
-        success: true,
-        data: tasks
-      });
+      res.status(200).json(tasks);
     } catch (err) {
       next(err);
     }
@@ -59,10 +49,7 @@ export function createTaskController() {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        data: task
-      });
+      res.status(200).json(task);
     } catch (err) {
       next(err);
     }
@@ -80,10 +67,7 @@ export function createTaskController() {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        data: task
-      });
+      res.status(200).json(task);
     } catch (err) {
       next(err);
     }
@@ -101,10 +85,7 @@ export function createTaskController() {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        data: task
-      });
+      res.status(200).json(task);
     } catch (err) {
       next(err);
     }
@@ -122,10 +103,7 @@ export function createTaskController() {
         return;
       }
 
-      res.status(200).json({
-        success: true,
-        data: task
-      });
+      res.status(200).json(task);
     } catch (err) {
       next(err);
     }
@@ -141,35 +119,9 @@ export function createTaskController() {
     }
 
     try {
-      const result = await taskService.addDependency(taskId, dependencyId);
+      const task = await taskService.addDependency(taskId, dependencyId);
 
-      if (!result.success) {
-        const statusMap = {
-          TASK_NOT_FOUND: 404,
-          DEPENDENCY_NOT_FOUND: 404,
-          SELF_REFERENCE: 400,
-          DEPENDENCY_EXISTS: 409,
-          CIRCULAR_DEPENDENCY: 409
-        };
-
-        const status = statusMap[result.error] || 400;
-        const messages = {
-          TASK_NOT_FOUND: 'Task not found',
-          DEPENDENCY_NOT_FOUND: 'Dependency task not found',
-          SELF_REFERENCE: 'A task cannot depend on itself',
-          DEPENDENCY_EXISTS: 'Dependency already exists',
-          CIRCULAR_DEPENDENCY:
-            'Adding this dependency would create a circular reference'
-        };
-
-        next(createHttpError(status, messages[result.error], result.error));
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: result.task
-      });
+      res.status(200).json(task);
     } catch (err) {
       next(err);
     }
@@ -185,28 +137,9 @@ export function createTaskController() {
     }
 
     try {
-      const result = await taskService.removeDependency(taskId, dependencyId);
+      const task = await taskService.removeDependency(taskId, dependencyId);
 
-      if (!result.success) {
-        const statusMap = {
-          TASK_NOT_FOUND: 404,
-          DEPENDENCY_NOT_FOUND: 404
-        };
-
-        const status = statusMap[result.error] || 400;
-        const messages = {
-          TASK_NOT_FOUND: 'Task not found',
-          DEPENDENCY_NOT_FOUND: 'Dependency not found on this task'
-        };
-
-        next(createHttpError(status, messages[result.error], result.error));
-        return;
-      }
-
-      res.status(200).json({
-        success: true,
-        data: result.task
-      });
+      res.status(200).json(task);
     } catch (err) {
       next(err);
     }

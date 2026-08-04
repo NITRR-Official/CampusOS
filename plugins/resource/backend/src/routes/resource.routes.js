@@ -3,9 +3,11 @@
  * Registers resource management endpoints with Express
  */
 
-import resourceController from '../controller/resource.controller.js';
-
-export function registerResourceRoutes(app, requirePermissions) {
+export function registerResourceRoutes(
+  app,
+  resourceController,
+  requirePermissions
+) {
   const viewResource = requirePermissions('resource:view');
   // Create resource (admin/coordinator only)
   app.post(

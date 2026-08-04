@@ -19,7 +19,7 @@ const formResponseSchema = new mongoose.Schema(
 );
 
 // Indexes
-formResponseSchema.index({ formId: 1, userId: 1 });
+formResponseSchema.index({ formId: 1, userId: 1 }, { unique: true });
 formResponseSchema.index({ formId: 1 });
 
 export const FormResponseModel = mongoose.model(

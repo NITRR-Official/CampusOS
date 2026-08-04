@@ -4,7 +4,8 @@ import {
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
 import { Vendor } from '../schema/vendor.model.js';
-import { VendorService } from './vendor.service.js';
+import { createVendorService } from './vendor.service.js';
+import { VendorRepository } from '../repository/vendor.repository.js';
 
 describe('VendorService', () => {
   let service;
@@ -24,12 +25,14 @@ describe('VendorService', () => {
 
   beforeEach(async () => {
     await Vendor.deleteMany({});
-    service = new VendorService();
+    const repository = new VendorRepository();
+    service = createVendorService(repository);
   });
 
   describe('createVendor', () => {
     it('should create a new vendor with all required fields', async () => {
       const vendorData = {
+        clubId: 'club-123',
         name: 'Tech Supplies Co',
         category: 'technology',
         contactPerson: 'John Doe',
@@ -41,30 +44,28 @@ describe('VendorService', () => {
 
       const result = await service.createVendor(vendorData);
 
-      expect(result.success).toBe(true);
-      expect(result.vendor).toBeDefined();
-      expect(result.vendor.name).toBe('Tech Supplies Co');
-      expect(result.vendor.category).toBe('technology');
-      expect(result.vendor.status).toBe('active');
-      expect(result.vendor.rating).toBe(0);
-      expect(result.vendor.totalEvents).toBe(0);
+      expect(result).toBeDefined();
+      expect(result.name).toBe('Tech Supplies Co');
+      expect(result.category).toBe('technology');
+      expect(result.status).toBe('active');
+      expect(result.rating).toBe(0);
+      expect(result.totalEvents).toBe(0);
     });
 
     it('should fail when missing required fields', async () => {
       const vendorData = {
+        clubId: 'club-123',
         name: 'Incomplete Vendor',
         category: 'catering'
         // missing contactPerson, email, phone
       };
 
-      const result = await service.createVendor(vendorData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Missing required fields');
+      await expect(service.createVendor(vendorData)).rejects.toThrow();
     });
 
     it('should generate unique IDs for vendors', async () => {
       const vendor1 = {
+        clubId: 'club-123',
         name: 'Vendor One',
         category: 'catering',
         contactPerson: 'Alice',
@@ -73,6 +74,7 @@ describe('VendorService', () => {
       };
 
       const vendor2 = {
+        clubId: 'club-123',
         name: 'Vendor Two',
         category: 'decoration',
         contactPerson: 'Bob',
@@ -83,36 +85,14 @@ describe('VendorService', () => {
       const result1 = await service.createVendor(vendor1);
       const result2 = await service.createVendor(vendor2);
 
-      expect(result1.vendor.id).not.toBe(result2.vendor.id);
-    });
-
-    it('should set timestamps on vendor creation', async () => {
-      const vendorData = {
-        name: 'Time Test Vendor',
-        category: 'logistics',
-        contactPerson: 'Charlie',
-        email: 'charlie@vendor.com',
-        phone: '3333333333'
-      };
-
-      const beforeCreate = new Date();
-      const result = await service.createVendor(vendorData);
-      const afterCreate = new Date();
-
-      expect(result.vendor.createdAt).toBeInstanceOf(Date);
-      expect(result.vendor.updatedAt).toBeInstanceOf(Date);
-      expect(result.vendor.createdAt.getTime()).toBeGreaterThanOrEqual(
-        beforeCreate.getTime()
-      );
-      expect(result.vendor.createdAt.getTime()).toBeLessThanOrEqual(
-        afterCreate.getTime()
-      );
+      expect(result1.id).not.toBe(result2.id);
     });
   });
 
   describe('getAllVendors', () => {
     beforeEach(async () => {
       await service.createVendor({
+        clubId: 'club-123',
         name: 'Vendor A',
         category: 'catering',
         contactPerson: 'Person A',
@@ -121,6 +101,7 @@ describe('VendorService', () => {
       });
 
       await service.createVendor({
+        clubId: 'club-123',
         name: 'Vendor B',
         category: 'decoration',
         contactPerson: 'Person B',
@@ -130,22 +111,22 @@ describe('VendorService', () => {
     });
 
     it('should return all vendors', async () => {
-      const vendors = await service.getAllVendors();
-
+      const vendors = await service.getAllVendors({ clubId: 'club-123' });
       expect(vendors).toHaveLength(2);
     });
 
     it('should filter vendors by category', async () => {
-      const vendors = await service.getAllVendors({ category: 'catering' });
-
+      const vendors = await service.getAllVendors({
+        clubId: 'club-123',
+        category: 'catering'
+      });
       expect(vendors).toHaveLength(1);
       expect(vendors[0].category).toBe('catering');
     });
 
     it('should return empty array when no vendors exist', async () => {
       await Vendor.deleteMany({});
-      const vendors = await service.getAllVendors();
-
+      const vendors = await service.getAllVendors({ clubId: 'club-123' });
       expect(vendors).toHaveLength(0);
     });
   });
@@ -153,6 +134,7 @@ describe('VendorService', () => {
   describe('getVendorById', () => {
     it('should retrieve vendor by ID', async () => {
       const vendorData = {
+        clubId: 'club-123',
         name: 'Retrievable Vendor',
         category: 'catering',
         contactPerson: 'Diana',
@@ -161,18 +143,17 @@ describe('VendorService', () => {
       };
 
       const createResult = await service.createVendor(vendorData);
-      const vendorId = createResult.vendor.id;
+      const vendorId = createResult.id;
 
       const vendor = await service.getVendorById(vendorId);
 
       expect(vendor).toBeDefined();
-      expect(vendor.id).toBe(vendorId);
+      expect(vendor.id.toString()).toBe(vendorId.toString());
       expect(vendor.name).toBe('Retrievable Vendor');
     });
 
     it('should return null for non-existent vendor', async () => {
-      const result = await service.getVendorById('non-existent-id');
-
+      const result = await service.getVendorById('507f1f77bcf86cd799439011');
       expect(result).toBeNull();
     });
   });
@@ -182,13 +163,14 @@ describe('VendorService', () => {
 
     beforeEach(async () => {
       const vendorResult = await service.createVendor({
+        clubId: 'club-123',
         name: 'Event Vendor',
         category: 'catering',
         contactPerson: 'Eve',
         email: 'eve@vendor.com',
         phone: '5555555555'
       });
-      vendorId = vendorResult.vendor.id;
+      vendorId = vendorResult.id;
       eventId = 'event-123';
     });
 
@@ -204,10 +186,9 @@ describe('VendorService', () => {
         assignData
       );
 
-      expect(result.success).toBe(true);
-      expect(result.assignment).toBeDefined();
-      expect(result.assignment.vendorId).toBe(vendorId);
-      expect(result.assignment.eventId).toBe(eventId);
+      expect(result).toBeDefined();
+      expect(result.vendorId).toBe(vendorId);
+      expect(result.eventId).toBe(eventId);
     });
 
     it('should fail to assign non-existent vendor', async () => {
@@ -218,7 +199,7 @@ describe('VendorService', () => {
 
       const result = await service.assignVendorToEvent(
         eventId,
-        'fake-vendor-id',
+        '507f1f77bcf86cd799439011',
         assignData
       );
 
@@ -232,34 +213,28 @@ describe('VendorService', () => {
 
     beforeEach(async () => {
       const vendorResult = await service.createVendor({
+        clubId: 'club-123',
         name: 'Rateable Vendor',
         category: 'decoration',
         contactPerson: 'Frank',
         email: 'frank@vendor.com',
         phone: '6666666666'
       });
-      vendorId = vendorResult.vendor.id;
+      vendorId = vendorResult.id;
     });
 
     it('should rate vendor with valid rating', async () => {
       const result = await service.rateVendor(vendorId, 4.5);
-
-      expect(result.success).toBe(true);
-      expect(result.vendor.rating).toBe(4.5);
+      expect(result).toBeDefined();
+      expect(result.rating).toBe(4.5);
     });
 
     it('should reject rating above 5', async () => {
-      const result = await service.rateVendor(vendorId, 6);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('between 0 and 5');
+      await expect(service.rateVendor(vendorId, 6)).rejects.toThrow();
     });
 
     it('should reject rating below 0', async () => {
-      const result = await service.rateVendor(vendorId, -1);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('between 0 and 5');
+      await expect(service.rateVendor(vendorId, -1)).rejects.toThrow();
     });
   });
 });

@@ -3,9 +3,11 @@
  * Registers scheduling and time slot endpoints with Express
  */
 
-import schedulingController from '../controller/scheduling.controller.js';
-
-export function registerSchedulingRoutes(app, requirePermissions) {
+export function registerSchedulingRoutes(
+  app,
+  schedulingController,
+  requirePermissions
+) {
   // Create time slot (admin/coordinator only)
   app.post(
     '/api/v1/events/:eventId/schedule',

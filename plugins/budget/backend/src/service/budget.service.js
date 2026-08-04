@@ -1,423 +1,277 @@
-import crypto from 'crypto';
-import { Budget, Expense } from '../schema/budget.model.js';
-
-/**
- * Budget Service
- * Manages budget allocation, expense tracking, and financial reporting
- */
+import { AppError } from '@campus-os/shared/errors';
 
 function normalizeBudget(budgetDoc) {
-  if (!budgetDoc) {
-    return null;
-  }
-
+  if (!budgetDoc) return null;
   const budget = budgetDoc.toObject ? budgetDoc.toObject() : { ...budgetDoc };
   budget.id = budget.id || budget._id;
   delete budget._id;
-
   return budget;
 }
 
 function normalizeExpense(expenseDoc) {
-  if (!expenseDoc) {
-    return null;
-  }
-
+  if (!expenseDoc) return null;
   const expense = expenseDoc.toObject
     ? expenseDoc.toObject()
     : { ...expenseDoc };
   expense.id = expense.id || expense._id;
   delete expense._id;
-
   return expense;
 }
 
-export class BudgetService {
-  constructor(eventBus) {
-    this.eventBus = eventBus;
-  }
-  /**
-   * Create budget for event
-   * @param {object} budgetData - Budget information
-   * @returns {object} Created budget record
-   */
-  async createBudget(budgetData) {
+export function createBudgetService(budgetRepository, eventBus) {
+  async function createBudget(budgetData) {
     const { eventId, totalAllocation, budgetBreakdown, currency, notes } =
       budgetData;
 
-    if (!eventId || !totalAllocation) {
-      return {
-        success: false,
-        error: 'Missing required fields: eventId, totalAllocation'
-      };
+    const existing = await budgetRepository.getBudgetByEventId(eventId);
+    if (existing) {
+      throw new AppError(
+        'Budget already exists for this event',
+        409,
+        'BUDGET_EXISTS'
+      );
     }
 
-    if (totalAllocation <= 0) {
-      return {
-        success: false,
-        error: 'Budget allocation must be greater than 0'
-      };
-    }
+    const budget = await budgetRepository.createBudget({
+      eventId,
+      totalAllocation,
+      budgetBreakdown: budgetBreakdown || [],
+      currency: currency || 'INR',
+      approvalStatus: 'draft',
+      approvedBy: null,
+      approvedDate: null,
+      notes: notes || null
+    });
 
-    try {
-      const existing = await Budget.findOne({ eventId }).lean();
-      if (existing) {
-        return {
-          success: false,
-          error: 'Budget already exists for this event'
-        };
-      }
-
-      const budget = await Budget.create({
-        eventId,
-        totalAllocation,
-        budgetBreakdown: budgetBreakdown || [],
-        currency: currency || 'INR',
-        approvalStatus: 'draft',
-        approvedBy: null,
-        approvedDate: null,
-        notes: notes || null
+    const serialized = normalizeBudget(budget);
+    if (eventBus) {
+      eventBus.emit('budget:created', {
+        budgetId: serialized.id,
+        eventId: serialized.eventId,
+        data: serialized
       });
-
-      const serialized = normalizeBudget(budget);
-      if (this.eventBus) {
-        this.eventBus.emit('budget:created', {
-          budgetId: serialized.id,
-          eventId: serialized.eventId,
-          data: serialized
-        });
-      }
-      return { success: true, budget: serialized };
-    } catch (error) {
-      return { success: false, error: error.message };
     }
+    return serialized;
   }
 
-  /**
-   * Get budget by ID
-   * @param {string} budgetId - Budget ID
-   * @returns {object|null} Budget record
-   */
-  async getBudgetById(budgetId) {
-    try {
-      const budget = await Budget.findById(budgetId).lean();
-      return normalizeBudget(budget);
-    } catch (error) {
-      console.error('Error fetching budget:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get budget for event
-   * @param {string} eventId - Event ID
-   * @returns {object|null} Budget record for event
-   */
-  async getEventBudget(eventId) {
-    try {
-      const budget = await Budget.findOne({ eventId }).lean();
-      return normalizeBudget(budget);
-    } catch (error) {
-      console.error('Error fetching event budget:', error);
-      return null;
-    }
-  }
-  /**
-   * Delete budget for event
-   * @param {string} eventId - Event ID
-   * @returns {object} Deletion result
-   */
-  async deleteEventBudget(eventId) {
-    try {
-      const budget = await Budget.findOne({ eventId });
-      if (!budget) return { success: false, error: 'Budget not found' };
-
-      await Expense.deleteMany({ budgetId: budget._id });
-      await Budget.deleteOne({ _id: budget._id });
-
-      return { success: true };
-    } catch (error) {
-      console.error('Error deleting event budget:', error);
-      return { success: false, error: error.message };
-    }
-  }
-  /**
-   * Update budget
-   * @param {string} budgetId - Budget ID
-   * @param {object} updateData - Data to update
-   * @returns {object} Updated budget
-   */
-  async updateBudget(budgetId, updateData) {
-    try {
-      const budget = await Budget.findById(budgetId);
-
-      if (!budget) {
-        return { success: false, error: 'Budget not found' };
-      }
-
-      if (budget.approvalStatus === 'approved') {
-        return { success: false, error: 'Cannot modify an approved budget' };
-      }
-
-      Object.assign(budget, updateData, { updatedAt: new Date() });
-      await budget.save();
-
-      return { success: true, budget: normalizeBudget(budget) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Approve budget
-   * @param {string} budgetId - Budget ID
-   * @param {string} userId - User ID approving budget
-   * @returns {object} Updated budget
-   */
-  async approveBudget(budgetId, userId) {
-    try {
-      const budget = await Budget.findById(budgetId);
-
-      if (!budget) {
-        return { success: false, error: 'Budget not found' };
-      }
-
-      if (budget.approvalStatus === 'approved') {
-        return { success: false, error: 'Budget is already approved' };
-      }
-
-      budget.approvalStatus = 'approved';
-      budget.approvedBy = userId;
-      budget.approvedDate = new Date();
-      budget.updatedAt = new Date();
-
-      await budget.save();
-
-      const serialized = normalizeBudget(budget);
-      if (this.eventBus) {
-        this.eventBus.emit('budget:approved', {
-          budgetId: serialized.id,
-          eventId: serialized.eventId,
-          data: serialized
-        });
-      }
-      return { success: true, budget: serialized };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Reject budget
-   * @param {string} budgetId - Budget ID
-   * @returns {object} Updated budget
-   */
-  async rejectBudget(budgetId) {
-    try {
-      const budget = await Budget.findById(budgetId);
-
-      if (!budget) {
-        return { success: false, error: 'Budget not found' };
-      }
-
-      budget.approvalStatus = 'rejected';
-      budget.updatedAt = new Date();
-
-      await budget.save();
-
-      return { success: true, budget: normalizeBudget(budget) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Log an expense
-   * @param {string} budgetId - Budget ID
-   * @param {object} expenseData - Expense information
-   * @returns {object} Created expense record
-   */
-  async logExpense(budgetId, expenseData) {
-    const budget = await Budget.findById(budgetId).lean();
-
+  async function getBudgetById(budgetId) {
+    const budget = await budgetRepository.getBudgetById(budgetId);
     if (!budget) {
-      return { success: false, error: 'Budget not found' };
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
+    }
+    return normalizeBudget(budget);
+  }
+
+  async function getEventBudget(eventId) {
+    const budget = await budgetRepository.getBudgetByEventId(eventId);
+    if (!budget) {
+      throw new AppError(
+        'Budget not found for this event',
+        404,
+        'BUDGET_NOT_FOUND'
+      );
+    }
+    return normalizeBudget(budget);
+  }
+
+  async function deleteEventBudget(eventId) {
+    const budget = await budgetRepository.getBudgetByEventId(eventId);
+    if (!budget) {
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
     }
 
-    const {
-      category,
-      description,
-      amount,
-      vendor,
-      paymentMethod,
-      receipt,
-      notes
-    } = expenseData;
+    await budgetRepository.deleteBudget(budget._id || budget.id);
+    return { deleted: true };
+  }
 
-    if (!category || !description || !amount) {
-      return {
-        success: false,
-        error: 'Missing required fields: category, description, amount'
-      };
+  async function updateBudget(budgetId, updateData) {
+    const budget = await budgetRepository.getBudgetById(budgetId);
+    if (!budget) {
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
     }
 
-    if (amount <= 0) {
-      return { success: false, error: 'Expense amount must be greater than 0' };
+    if (budget.approvalStatus === 'approved') {
+      throw new AppError(
+        'Cannot modify an approved budget',
+        400,
+        'BUDGET_APPROVED'
+      );
     }
 
-    const totalExpenses = await this.getTotalExpenses(budgetId);
-    if (totalExpenses + amount > budget.totalAllocation) {
-      return {
-        success: false,
-        error: `Expense exceeds budget. Remaining: ${budget.totalAllocation - totalExpenses}`
-      };
+    // SEC-12: Allowlist fields
+    const allowedFields = [
+      'totalAllocation',
+      'budgetBreakdown',
+      'currency',
+      'notes'
+    ];
+    const safeUpdates = { updatedAt: new Date() };
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        safeUpdates[field] = updateData[field];
+      }
     }
 
+    const updated = await budgetRepository.updateBudget(budgetId, safeUpdates);
+    return normalizeBudget(updated);
+  }
+
+  async function approveBudget(budgetId, userId) {
+    const budget = await budgetRepository.getBudgetById(budgetId);
+    if (!budget) {
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
+    }
+
+    if (budget.approvalStatus === 'approved') {
+      throw new AppError(
+        'Budget is already approved',
+        400,
+        'BUDGET_ALREADY_APPROVED'
+      );
+    }
+
+    const updated = await budgetRepository.updateBudget(budgetId, {
+      approvalStatus: 'approved',
+      approvedBy: userId,
+      approvedDate: new Date(),
+      updatedAt: new Date()
+    });
+
+    const serialized = normalizeBudget(updated);
+    if (eventBus) {
+      eventBus.emit('budget:approved', {
+        budgetId: serialized.id,
+        eventId: serialized.eventId,
+        data: serialized
+      });
+    }
+    return serialized;
+  }
+
+  async function rejectBudget(budgetId) {
+    const budget = await budgetRepository.getBudgetById(budgetId);
+    if (!budget) {
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
+    }
+
+    const updated = await budgetRepository.updateBudget(budgetId, {
+      approvalStatus: 'rejected',
+      updatedAt: new Date()
+    });
+    return normalizeBudget(updated);
+  }
+
+  async function logExpense(budgetId, expenseData) {
+    // SEC-13: Handled by logExpenseAtomic in repository
     try {
-      const expense = await Expense.create({
-        budgetId,
-        category,
-        description,
-        amount,
-        vendor: vendor || null,
-        paymentMethod: paymentMethod || 'pending',
+      const expense = await budgetRepository.logExpenseAtomic(budgetId, {
+        ...expenseData,
+        paymentMethod: expenseData.paymentMethod || 'pending',
         paymentStatus: 'pending',
         paidDate: null,
-        receipt: receipt || null,
-        approvedBy: null,
-        notes: notes || null
+        approvedBy: null
       });
 
       const serialized = normalizeExpense(expense);
-      if (this.eventBus) {
-        this.eventBus.emit('budget:expense_logged', {
+      if (eventBus) {
+        // Need eventId for eventBus
+        const budget = await budgetRepository.getBudgetById(budgetId);
+        eventBus.emit('budget:expense_logged', {
           budgetId,
           expenseId: serialized.id,
-          eventId: budget.eventId,
+          eventId: budget?.eventId,
           data: serialized
         });
       }
-      return { success: true, expense: serialized };
+      return serialized;
     } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Get all expenses for a budget
-   * @param {string} budgetId - Budget ID
-   * @returns {array} Expense records
-   */
-  async getBudgetExpenses(budgetId) {
-    try {
-      const expenses = await Expense.find({ budgetId }).lean();
-      return expenses.map((expense) => normalizeExpense(expense));
-    } catch (error) {
-      console.error('Error fetching budget expenses:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Get expense by ID
-   * @param {string} expenseId - Expense ID
-   * @returns {object|null} Expense record
-   */
-  async getExpenseById(expenseId) {
-    try {
-      const expense = await Expense.findById(expenseId).lean();
-      return normalizeExpense(expense);
-    } catch (error) {
-      console.error('Error fetching expense:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Update expense
-   * @param {string} expenseId - Expense ID
-   * @param {object} updateData - Data to update
-   * @returns {object} Updated expense
-   */
-  async updateExpense(expenseId, updateData) {
-    try {
-      const expense = await Expense.findById(expenseId);
-
-      if (!expense) {
-        return { success: false, error: 'Expense not found' };
+      if (error.message === 'Budget not found') {
+        throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
       }
-
-      if (expense.paymentStatus === 'paid' && updateData.amount) {
-        return {
-          success: false,
-          error: 'Cannot modify amount of a paid expense'
-        };
+      if (error.message.startsWith('Expense exceeds budget')) {
+        throw new AppError(error.message, 400, 'BUDGET_EXCEEDED');
       }
-
-      Object.assign(expense, updateData, { updatedAt: new Date() });
-      await expense.save();
-
-      return { success: true, expense: normalizeExpense(expense) };
-    } catch (error) {
-      return { success: false, error: error.message };
+      throw error;
     }
   }
 
-  /**
-   * Mark expense as paid
-   * @param {string} expenseId - Expense ID
-   * @param {string} paymentMethod - Payment method used
-   * @returns {object} Updated expense
-   */
-  async markExpenseAsPaid(expenseId, paymentMethod) {
-    try {
-      const expense = await Expense.findById(expenseId);
+  async function getBudgetExpenses(budgetId) {
+    const expenses = await budgetRepository.getExpensesByBudget(budgetId);
+    return expenses.map(normalizeExpense);
+  }
 
-      if (!expense) {
-        return { success: false, error: 'Expense not found' };
-      }
-
-      expense.paymentStatus = 'paid';
-      expense.paymentMethod = paymentMethod || expense.paymentMethod;
-      expense.paidDate = new Date();
-      expense.updatedAt = new Date();
-
-      await expense.save();
-
-      return { success: true, expense: normalizeExpense(expense) };
-    } catch (error) {
-      return { success: false, error: error.message };
+  async function getExpenseById(expenseId) {
+    const expense = await budgetRepository.getExpenseById(expenseId);
+    if (!expense) {
+      throw new AppError('Expense not found', 404, 'EXPENSE_NOT_FOUND');
     }
+    return normalizeExpense(expense);
   }
 
-  /**
-   * Get total expenses for a budget
-   * @param {string} budgetId - Budget ID
-   * @returns {number} Total expenses amount
-   */
-  async getTotalExpenses(budgetId) {
-    const result = await Expense.aggregate([
-      { $match: { budgetId } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
+  async function updateExpense(expenseId, updateData) {
+    const expense = await budgetRepository.getExpenseById(expenseId);
+    if (!expense) {
+      throw new AppError('Expense not found', 404, 'EXPENSE_NOT_FOUND');
+    }
 
-    return result[0]?.total || 0;
+    if (expense.paymentStatus === 'paid' && updateData.amount) {
+      throw new AppError(
+        'Cannot modify amount of a paid expense',
+        400,
+        'EXPENSE_ALREADY_PAID'
+      );
+    }
+
+    const allowedFields = [
+      'category',
+      'description',
+      'amount',
+      'vendor',
+      'paymentMethod',
+      'receipt',
+      'notes'
+    ];
+    const safeUpdates = { updatedAt: new Date() };
+    for (const field of allowedFields) {
+      if (updateData[field] !== undefined) {
+        safeUpdates[field] = updateData[field];
+      }
+    }
+
+    const updated = await budgetRepository.updateExpense(
+      expenseId,
+      safeUpdates
+    );
+    return normalizeExpense(updated);
   }
 
-  /**
-   * Get budget summary/overview
-   * @param {string} budgetId - Budget ID
-   * @returns {object} Budget overview with statistics
-   */
-  async getBudgetSummary(budgetId) {
-    const budget = await Budget.findById(budgetId).lean();
+  async function markExpenseAsPaid(expenseId, paymentMethod) {
+    const expense = await budgetRepository.getExpenseById(expenseId);
+    if (!expense) {
+      throw new AppError('Expense not found', 404, 'EXPENSE_NOT_FOUND');
+    }
 
+    const updated = await budgetRepository.updateExpense(expenseId, {
+      paymentStatus: 'paid',
+      paymentMethod: paymentMethod || expense.paymentMethod,
+      paidDate: new Date(),
+      updatedAt: new Date()
+    });
+    return normalizeExpense(updated);
+  }
+
+  async function getTotalExpenses(budgetId) {
+    return budgetRepository.getTotalExpenses(budgetId);
+  }
+
+  async function getBudgetSummary(budgetId) {
+    const budget = await budgetRepository.getBudgetById(budgetId);
     if (!budget) {
-      return null;
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
     }
 
-    const expenses = await this.getBudgetExpenses(budgetId);
-    const totalExpenses = await this.getTotalExpenses(budgetId);
+    const expenses = await getBudgetExpenses(budgetId);
+    const totalExpenses = await getTotalExpenses(budgetId);
     const remaining = budget.totalAllocation - totalExpenses;
     const utilisationPercent = (totalExpenses / budget.totalAllocation) * 100;
 
@@ -453,18 +307,13 @@ export class BudgetService {
     };
   }
 
-  /**
-   * Get comparison between allocation and breakdown
-   * @param {string} budgetId - Budget ID
-   * @returns {object} Comparison data
-   */
-  async getBudgetVsActual(budgetId) {
-    const budget = await Budget.findById(budgetId).lean();
+  async function getBudgetVsActual(budgetId) {
+    const budget = await budgetRepository.getBudgetById(budgetId);
     if (!budget) {
-      return null;
+      throw new AppError('Budget not found', 404, 'BUDGET_NOT_FOUND');
     }
 
-    const expenses = await this.getBudgetExpenses(budgetId);
+    const expenses = await getBudgetExpenses(budgetId);
     const breakdown = {};
     const actual = {};
 
@@ -504,6 +353,22 @@ export class BudgetService {
       variance
     };
   }
-}
 
-export default BudgetService;
+  return {
+    createBudget,
+    getBudgetById,
+    getEventBudget,
+    deleteEventBudget,
+    updateBudget,
+    approveBudget,
+    rejectBudget,
+    logExpense,
+    getBudgetExpenses,
+    getExpenseById,
+    updateExpense,
+    markExpenseAsPaid,
+    getTotalExpenses,
+    getBudgetSummary,
+    getBudgetVsActual
+  };
+}

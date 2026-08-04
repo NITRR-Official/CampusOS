@@ -4,7 +4,8 @@
  */
 
 import { registerSchedulingRoutes } from './routes/scheduling.routes.js';
-import SchedulingService from './service/scheduling.service.js';
+import { createSchedulingService } from './service/scheduling.service.js';
+import { createSchedulingController } from './controller/scheduling.controller.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -13,7 +14,10 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  registerSchedulingRoutes(app, requirePermissions);
+  const schedulingService = createSchedulingService();
+  const schedulingController = createSchedulingController(schedulingService);
+
+  registerSchedulingRoutes(app, schedulingController, requirePermissions);
 
   registry.registerModule('scheduling', {
     routes: [
@@ -45,7 +49,7 @@ export async function init(app, registry, eventBus) {
         .ScheduleSlot;
       const slotDoc = await SlotModel.findById(slotId).select('clubId').lean();
       return slotDoc?.clubId
-        ? { type: 'clubService', id: slotDoc.clubId.toString() }
+        ? { type: 'club:member_service', id: slotDoc.clubId.toString() }
         : null;
     } catch {
       return null;
@@ -53,10 +57,16 @@ export async function init(app, registry, eventBus) {
   });
 
   if (eventBus) {
-    const schedulingService = new SchedulingService();
     eventBus.on('event:deleted', async (payload) => {
-      if (payload && payload.eventId) {
-        await schedulingService.deleteEventSchedule(payload.eventId);
+      try {
+        if (payload && payload.eventId) {
+          await schedulingService.deleteEventSchedule(payload.eventId);
+        }
+      } catch (err) {
+        console.error(
+          '[Scheduling Listener] Error handling event:deleted event:',
+          err
+        );
       }
     });
   }

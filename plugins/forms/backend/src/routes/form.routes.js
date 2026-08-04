@@ -3,27 +3,26 @@ import { Router } from 'express';
 export function registerFormRoutes(app, controller, requirePermissions) {
   const router = Router();
 
+  const viewForms = requirePermissions('form:view');
+  const manageForms = requirePermissions('form:manage');
+
   // Define routes
   // Forms
-  router.get('/', requirePermissions(), controller.getForms);
-  router.post('/', requirePermissions(), controller.createForm);
-  router.get('/:formId', requirePermissions(), controller.getForm);
-  router.put('/:formId', requirePermissions(), controller.updateForm);
+  router.get('/', viewForms, controller.getForms);
+  router.post('/', manageForms, controller.createForm);
+  router.get('/:formId', viewForms, controller.getForm);
+  router.put('/:formId', manageForms, controller.updateForm);
 
   // Responses
-  router.get(
-    '/:formId/responses',
-    requirePermissions(),
-    controller.getResponses
-  );
+  router.get('/:formId/responses', manageForms, controller.getResponses);
   router.get(
     '/:formId/responses/:responseId',
-    requirePermissions(),
+    manageForms,
     controller.getResponse
   );
   router.post(
     '/:formId/responses',
-    requirePermissions(),
+    requirePermissions('forms:submit'),
     controller.submitResponse
   );
 

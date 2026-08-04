@@ -3,11 +3,13 @@ import mongoose from 'mongoose';
 const checkInSchema = new mongoose.Schema(
   {
     eventId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
       required: true
     },
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     },
     qrCode: {

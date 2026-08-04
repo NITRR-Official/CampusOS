@@ -45,7 +45,7 @@ export function createSlugResolver(ClubModel) {
 
       // Attach the context so downstream middleware (like RBAC) doesn't have to query it again
       req.clubContext = club;
-      req.resolvedContext = { type: 'clubService', id: realObjectId };
+      req.resolvedContext = { type: 'club:member_service', id: realObjectId };
 
       next();
     } catch (error) {

@@ -15,7 +15,7 @@ export function createFormController({
     if (!user || !user.id) throw new AppError('Unauthorized', 401);
 
     if (entityType === 'club') {
-      const clubService = registry.getService('clubService');
+      const clubService = registry.getService('club:member_service');
       if (!clubService) return false;
       const userPerms = await clubService.getUserPermissions(user.id, entityId);
       const userPermsSet = new Set(userPerms);
@@ -45,9 +45,6 @@ export function createFormController({
         const form = await formService.createForm(validatedData);
         res.status(201).json({ success: true, data: form });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     },
@@ -77,9 +74,6 @@ export function createFormController({
         );
         res.status(200).json({ success: true, data: form });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     },
@@ -123,9 +117,6 @@ export function createFormController({
         );
         res.status(201).json({ success: true, data: response });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     },

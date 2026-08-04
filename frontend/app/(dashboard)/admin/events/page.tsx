@@ -4,6 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiClient } from '@campus-os/shared/api-client';
+import { fetchClubs } from '@plugins/club/frontend/api';
 import {
   Table,
   TableBody,
@@ -28,24 +29,38 @@ interface CampusEvent {
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<CampusEvent[]>([]);
+  const [clubs, setClubs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CampusEvent | null>(null);
   const { toast } = useToast();
 
-  async function loadEvents() {
+  async function loadData() {
     try {
       setLoading(true);
-      const data = await apiClient.get<any>('/admin/events');
-      if (Array.isArray(data)) {
-        setEvents(data);
-      } else if (data && Array.isArray(data.data)) {
-        setEvents(data.data);
+      const [eventsData, approvedClubs, pendingClubs] = await Promise.all([
+        apiClient.get<any>('/admin/events').catch(() => []),
+        fetchClubs('approved').catch(() => []),
+        fetchClubs('pending').catch(() => [])
+      ]);
+
+      if (Array.isArray(eventsData)) {
+        setEvents(eventsData);
+      } else if (eventsData && Array.isArray(eventsData.data)) {
+        setEvents(eventsData.data);
       } else {
         setEvents([]);
       }
+
+      const allClubs = [...approvedClubs, ...pendingClubs];
+      const clubMap: Record<string, string> = {};
+      allClubs.forEach((c: any) => {
+        clubMap[c._id || c.id] = c.name;
+      });
+      setClubs(clubMap);
     } catch (err: any) {
       toast({
-        title: 'Failed to load events',
+        title: 'Failed to load data',
         description: err.message || 'An error occurred',
         variant: 'destructive'
       });
@@ -55,7 +70,7 @@ export default function AdminEventsPage() {
   }
 
   useEffect(() => {
-    loadEvents();
+    loadData();
   }, []);
 
   async function handleTogglePublish(eventId: string, isPublished: boolean) {
@@ -101,7 +116,7 @@ export default function AdminEventsPage() {
           <TableHeader className="bg-muted/50">
             <TableRow>
               <TableHead>Event Title</TableHead>
-              <TableHead>Club ID</TableHead>
+              <TableHead>Club</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Starts At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -144,11 +159,12 @@ export default function AdminEventsPage() {
                 return (
                   <TableRow
                     key={id}
-                    className="hover:bg-muted/30 transition-colors"
+                    className="hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => setSelectedEvent(event)}
                   >
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {event.clubId}
+                      {clubs[event.clubId] || event.clubId}
                     </TableCell>
                     <TableCell>
                       {isPublished ? (
@@ -172,7 +188,10 @@ export default function AdminEventsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <button
-                        onClick={() => handleTogglePublish(id, isPublished)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTogglePublish(id, isPublished);
+                        }}
                         disabled={actionLoading === id}
                         className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors"
                       >
@@ -186,6 +205,66 @@ export default function AdminEventsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedEvent && (
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div
+            className="bg-card border border-border shadow-lg rounded-xl w-full max-w-lg p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedEvent(null)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-bold mb-4">Event Details</h3>
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Title</div>
+                <div className="col-span-2 font-medium">
+                  {selectedEvent.title}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Club</div>
+                <div className="col-span-2">
+                  {clubs[selectedEvent.clubId] || selectedEvent.clubId}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Status</div>
+                <div className="col-span-2 capitalize">
+                  {selectedEvent.status}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Starts At</div>
+                <div className="col-span-2">
+                  {new Date(selectedEvent.startsAt).toLocaleString()}
+                </div>
+              </div>
+              {selectedEvent.endsAt && (
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-muted-foreground">Ends At</div>
+                  <div className="col-span-2">
+                    {new Date(selectedEvent.endsAt).toLocaleString()}
+                  </div>
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Internal ID</div>
+                <div className="col-span-2 text-xs font-mono">
+                  {selectedEvent.id || selectedEvent._id}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

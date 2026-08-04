@@ -43,8 +43,15 @@ export async function init(app, registry, eventBus) {
 
   if (eventBus) {
     eventBus.on('event:deleted', async (payload) => {
-      if (payload && payload.eventId) {
-        await checkInService.deleteEventCheckIns(payload.eventId);
+      try {
+        if (payload && payload.eventId) {
+          await checkInService.deleteEventCheckIns(payload.eventId);
+        }
+      } catch (err) {
+        console.error(
+          '[CheckIn Listener] Error handling event:deleted event:',
+          err
+        );
       }
     });
   }

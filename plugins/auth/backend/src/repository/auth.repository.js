@@ -22,8 +22,8 @@ export function createAuthRepository(User) {
     }
   }
 
-  async function listUsers() {
-    return User.find({}).select('-password').lean();
+  async function listUsers({ limit = 50, skip = 0 } = {}) {
+    return User.find({}).select('-passwordHash').skip(skip).limit(limit).lean();
   }
 
   async function deleteUser(userId) {
@@ -40,7 +40,9 @@ export function createAuthRepository(User) {
   }
 
   async function updateUser(userId, updateData) {
-    return User.findByIdAndUpdate(userId, updateData, { new: true }).lean();
+    return User.findByIdAndUpdate(userId, updateData, {
+      returnDocument: 'after'
+    }).lean();
   }
 
   return {

@@ -4,10 +4,10 @@
  */
 
 import { registerResourceRoutes } from './routes/resource.routes.js';
-import ResourceService from './service/resource.service.js';
+import { createResourceService } from './service/resource.service.js';
+import { createResourceRepository } from './repository/resource.repository.js';
 import { registerResourceHandlers } from './listeners/index.js';
-
-import resourceController from './controller/resource.controller.js';
+import { createResourceController } from './controller/resource.controller.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -16,11 +16,15 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
+  const resourceRepository = createResourceRepository();
+  const resourceService = createResourceService(resourceRepository);
+  const resourceController = createResourceController(resourceService);
+
   if (eventBus) {
     resourceController.setEventBus(eventBus);
   }
 
-  registerResourceRoutes(app, requirePermissions);
+  registerResourceRoutes(app, resourceController, requirePermissions);
 
   registry.registerModule('resource', {
     routes: [
@@ -68,7 +72,7 @@ export async function init(app, registry, eventBus) {
         .select('clubId')
         .lean();
       return resDoc?.clubId
-        ? { type: 'clubService', id: resDoc.clubId.toString() }
+        ? { type: 'club:member_service', id: resDoc.clubId.toString() }
         : null;
     } catch {
       return null;
@@ -76,7 +80,6 @@ export async function init(app, registry, eventBus) {
   });
 
   if (eventBus) {
-    const resourceService = new ResourceService();
     registerResourceHandlers(eventBus, registry, resourceService);
   }
 }

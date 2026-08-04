@@ -86,8 +86,10 @@ export async function init(app, registry, eventBus) {
     });
   }
 
-  // Also register role:service for other plugins to use
+  // Also register services for other plugins and middleware to use
   registry.registerService('club:role_service', roleService);
+  registry.registerService('club', clubService);
+  registry.registerService('club:member_service', memberService);
 
   registry.registerModule('club', {
     routes: [

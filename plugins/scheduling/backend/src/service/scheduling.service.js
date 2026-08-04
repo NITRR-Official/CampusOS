@@ -1,8 +1,8 @@
-import crypto from 'crypto';
 import { TimeSlot, Conflict } from '../schema/scheduling.model.js';
+import { AppError } from '@campus-os/shared/errors';
 
 /**
- * Scheduling Service
+ * Scheduling Service Factory
  * Manages time slot bookings and detects scheduling conflicts
  */
 
@@ -39,39 +39,41 @@ function normalizeConflict(conflictDoc) {
   return conflict;
 }
 
-export class SchedulingService {
-  /**
-   * Create a new time slot
-   * @param {object} slotData - Time slot information
-   * @returns {object} Created slot record
-   */
-  async createTimeSlot(slotData) {
-    const {
-      eventId,
-      venue,
-      startTime,
-      endTime,
-      capacity,
-      allocatedResources,
-      notes
-    } = slotData;
+export function createSchedulingService() {
+  const service = {
+    /**
+     * Create a new time slot
+     */
+    async createTimeSlot(slotData) {
+      const {
+        eventId,
+        venue,
+        startTime,
+        endTime,
+        capacity,
+        allocatedResources,
+        notes
+      } = slotData;
 
-    if (!eventId || !venue || !startTime || !endTime || !capacity) {
-      return {
-        success: false,
-        error:
-          'Missing required fields: eventId, venue, startTime, endTime, capacity'
-      };
-    }
+      if (!eventId || !venue || !startTime || !endTime || !capacity) {
+        throw new AppError(
+          'Missing required fields: eventId, venue, startTime, endTime, capacity',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
 
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+      const start = new Date(startTime);
+      const end = new Date(endTime);
 
-    if (start >= end) {
-      return { success: false, error: 'startTime must be before endTime' };
-    }
+      if (start >= end) {
+        throw new AppError(
+          'startTime must be before endTime',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
 
-    try {
       const slot = await TimeSlot.create({
         eventId,
         venue,
@@ -83,52 +85,31 @@ export class SchedulingService {
         notes: notes || null
       });
 
-      await this.detectConflictsForSlot(slot._id);
+      await service.detectConflictsForSlot(slot._id);
 
-      return { success: true, slot: normalizeSlot(slot) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+      return normalizeSlot(slot);
+    },
 
-  /**
-   * Get time slot by ID
-   * @param {string} slotId - Time slot ID
-   * @returns {object|null} Slot record
-   */
-  async getTimeSlotById(slotId) {
-    try {
+    /**
+     * Get time slot by ID
+     */
+    async getTimeSlotById(slotId) {
       const slot = await TimeSlot.findById(slotId).lean();
       return normalizeSlot(slot);
-    } catch (error) {
-      console.error('Error fetching time slot:', error);
-      return null;
-    }
-  }
+    },
 
-  /**
-   * Get all time slots for event
-   * @param {string} eventId - Event ID
-   * @returns {array} List of time slots
-   */
-  async getEventTimeSlots(eventId) {
-    try {
+    /**
+     * Get all time slots for event
+     */
+    async getEventTimeSlots(eventId) {
       const slots = await TimeSlot.find({ eventId }).lean();
       return slots.map((slot) => normalizeSlot(slot));
-    } catch (error) {
-      console.error('Error fetching event time slots:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Update time slot
-   * @param {string} slotId - Time slot ID
-   * @param {object} updateData - Data to update
-   * @returns {object} Updated slot
-   */
-  async updateTimeSlot(slotId, updateData) {
-    try {
+    /**
+     * Update time slot
+     */
+    async updateTimeSlot(slotId, updateData) {
       const updates = { ...updateData, updatedAt: new Date() };
       if (updates.allocatedResources) {
         updates.resourcesAllocated = updates.allocatedResources;
@@ -136,12 +117,12 @@ export class SchedulingService {
       }
 
       const slot = await TimeSlot.findByIdAndUpdate(slotId, updates, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
       });
 
       if (!slot) {
-        return { success: false, error: 'Time slot not found' };
+        throw new AppError('Time slot not found', 404, 'NOT_FOUND');
       }
 
       if (
@@ -150,41 +131,29 @@ export class SchedulingService {
         updateData.venue ||
         updateData.allocatedResources
       ) {
-        await this.detectConflictsForSlot(slotId);
+        await service.detectConflictsForSlot(slotId);
       }
 
-      return { success: true, slot: normalizeSlot(slot) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+      return normalizeSlot(slot);
+    },
 
-  /**
-   * Delete time slot
-   * @param {string} slotId - Time slot ID
-   * @returns {object} Deletion result
-   */
-  async deleteTimeSlot(slotId) {
-    try {
+    /**
+     * Delete time slot
+     */
+    async deleteTimeSlot(slotId) {
       const slot = await TimeSlot.findByIdAndDelete(slotId);
 
       if (!slot) {
-        return { success: false, error: 'Time slot not found' };
+        throw new AppError('Time slot not found', 404, 'NOT_FOUND');
       }
 
       return { success: true, message: 'Time slot deleted successfully' };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+    },
 
-  /**
-   * Delete schedule for event
-   * @param {string} eventId - Event ID
-   * @returns {object} Deletion result
-   */
-  async deleteEventSchedule(eventId) {
-    try {
+    /**
+     * Delete schedule for event
+     */
+    async deleteEventSchedule(eventId) {
       const slots = await TimeSlot.find({ eventId }).lean();
       const slotIds = slots.map((slot) => slot._id);
 
@@ -195,30 +164,27 @@ export class SchedulingService {
       await TimeSlot.deleteMany({ eventId });
 
       return { success: true };
-    } catch (error) {
-      console.error('Error deleting event schedule:', error);
-      return { success: false, error: error.message };
-    }
-  }
+    },
 
-  /**
-   * Detect conflicts for a time slot
-   * @param {string} slotId - Time slot ID to check
-   * @returns {array} Detected conflicts
-   */
-  async detectConflictsForSlot(slotId) {
-    try {
+    /**
+     * Detect conflicts for a time slot
+     */
+    async detectConflictsForSlot(slotId) {
       const slot = await TimeSlot.findById(slotId).lean();
       if (!slot) {
         return [];
       }
 
       const conflicts = [];
-      const otherSlots = await TimeSlot.find({ _id: { $ne: slotId } }).lean();
+      const otherSlots = await TimeSlot.find({
+        _id: { $ne: slotId },
+        startTime: { $lt: slot.endTime },
+        endTime: { $gt: slot.startTime }
+      }).lean();
 
       otherSlots.forEach((otherSlot) => {
         if (slot.venue === otherSlot.venue) {
-          if (this.hasTimeOverlap(slot, otherSlot)) {
+          if (service.hasTimeOverlap(slot, otherSlot)) {
             conflicts.push({
               slotId: otherSlot._id,
               type: 'venue-overlap',
@@ -227,10 +193,10 @@ export class SchedulingService {
           }
         }
 
-        const commonResources = this.findCommonResources(slot, otherSlot);
+        const commonResources = service.findCommonResources(slot, otherSlot);
         if (
           commonResources.length > 0 &&
-          this.hasTimeOverlap(slot, otherSlot)
+          service.hasTimeOverlap(slot, otherSlot)
         ) {
           conflicts.push({
             slotId: otherSlot._id,
@@ -258,49 +224,36 @@ export class SchedulingService {
       }
 
       return conflicts;
-    } catch (error) {
-      console.error('Error detecting conflicts:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Check if two slots have time overlap
-   * @param {object} slot1 - First slot
-   * @param {object} slot2 - Second slot
-   * @returns {boolean} Whether slots overlap
-   */
-  hasTimeOverlap(slot1, slot2) {
-    return slot1.startTime < slot2.endTime && slot1.endTime > slot2.startTime;
-  }
+    /**
+     * Check if two slots have time overlap
+     */
+    hasTimeOverlap(slot1, slot2) {
+      return slot1.startTime < slot2.endTime && slot1.endTime > slot2.startTime;
+    },
 
-  /**
-   * Find common resources between two slots
-   * @param {object} slot1 - First slot
-   * @param {object} slot2 - Second slot
-   * @returns {array} Common resource IDs
-   */
-  findCommonResources(slot1, slot2) {
-    const slot1Resources =
-      slot1.resourcesAllocated || slot1.allocatedResources || [];
-    const slot2Resources =
-      slot2.resourcesAllocated || slot2.allocatedResources || [];
+    /**
+     * Find common resources between two slots
+     */
+    findCommonResources(slot1, slot2) {
+      const slot1Resources =
+        slot1.resourcesAllocated || slot1.allocatedResources || [];
+      const slot2Resources =
+        slot2.resourcesAllocated || slot2.allocatedResources || [];
 
-    const res1Ids = new Set(
-      slot1Resources.map((resource) => resource.resourceId)
-    );
-    const res2Ids = slot2Resources.map((resource) => resource.resourceId);
+      const res1Ids = new Set(
+        slot1Resources.map((resource) => resource.resourceId)
+      );
+      const res2Ids = slot2Resources.map((resource) => resource.resourceId);
 
-    return res2Ids.filter((id) => res1Ids.has(id));
-  }
+      return res2Ids.filter((id) => res1Ids.has(id));
+    },
 
-  /**
-   * Get all conflicts
-   * @param {object} filters - Filter options
-   * @returns {array} List of conflicts
-   */
-  async getAllConflicts(filters = {}) {
-    try {
+    /**
+     * Get all conflicts
+     */
+    async getAllConflicts(filters = {}) {
       const query = {};
 
       if (filters.resolved !== undefined) {
@@ -313,42 +266,27 @@ export class SchedulingService {
 
       const conflicts = await Conflict.find(query).lean();
       return conflicts.map((conflict) => normalizeConflict(conflict));
-    } catch (error) {
-      console.error('Error fetching conflicts:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Get conflicts for a specific slot
-   * @param {string} slotId - Time slot ID
-   * @returns {array} Conflicts involving this slot
-   */
-  async getSlotConflicts(slotId) {
-    try {
+    /**
+     * Get conflicts for a specific slot
+     */
+    async getSlotConflicts(slotId) {
       const conflicts = await Conflict.find({
         $or: [{ slotId1: slotId }, { slotId2: slotId }]
       }).lean();
 
       return conflicts.map((conflict) => normalizeConflict(conflict));
-    } catch (error) {
-      console.error('Error fetching slot conflicts:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Mark conflict as resolved
-   * @param {string} conflictId - Conflict ID
-   * @param {string} resolution - Resolution description
-   * @returns {object} Updated conflict
-   */
-  async resolveConflict(conflictId, resolution) {
-    try {
+    /**
+     * Mark conflict as resolved
+     */
+    async resolveConflict(conflictId, resolution) {
       const conflict = await Conflict.findById(conflictId);
 
       if (!conflict) {
-        return { success: false, error: 'Conflict not found' };
+        throw new AppError('Conflict not found', 404, 'NOT_FOUND');
       }
 
       conflict.resolved = true;
@@ -358,64 +296,58 @@ export class SchedulingService {
 
       await conflict.save();
 
-      return { success: true, conflict: normalizeConflict(conflict) };
-    } catch (error) {
-      return { success: false, error: error.message };
+      return normalizeConflict(conflict);
+    },
+
+    /**
+     * Check venue availability
+     */
+    async isVenueAvailable(venue, startTime, endTime) {
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+
+      const overlap = await TimeSlot.exists({
+        venue,
+        startTime: { $lt: end },
+        endTime: { $gt: start }
+      });
+
+      return !overlap;
+    },
+
+    /**
+     * Get schedule overview for event
+     */
+    async getScheduleOverview(eventId) {
+      const slots = await TimeSlot.find({ eventId }).lean();
+      const slotIds = slots.map((slot) => slot._id);
+
+      const conflicts = await Conflict.find({
+        $or: [{ slotId1: { $in: slotIds } }, { slotId2: { $in: slotIds } }]
+      }).lean();
+
+      const normalizedSlots = slots.map((slot) => normalizeSlot(slot));
+      const normalizedConflicts = conflicts.map((conflict) =>
+        normalizeConflict(conflict)
+      );
+
+      return {
+        eventId,
+        totalSlots: normalizedSlots.length,
+        totalConflicts: normalizedConflicts.length,
+        resolvedConflicts: normalizedConflicts.filter(
+          (conflict) => conflict.resolved
+        ).length,
+        unresolvedConflicts: normalizedConflicts.filter(
+          (conflict) => !conflict.resolved
+        ).length,
+        slots: normalizedSlots,
+        conflicts: normalizedConflicts
+      };
     }
-  }
+  };
 
-  /**
-   * Check venue availability
-   * @param {string} venue - Venue name
-   * @param {Date} startTime - Start time
-   * @param {Date} endTime - End time
-   * @returns {boolean} Whether venue is available
-   */
-  async isVenueAvailable(venue, startTime, endTime) {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-
-    const overlap = await TimeSlot.exists({
-      venue,
-      startTime: { $lt: end },
-      endTime: { $gt: start }
-    });
-
-    return !overlap;
-  }
-
-  /**
-   * Get schedule overview for event
-   * @param {string} eventId - Event ID
-   * @returns {object} Schedule overview with stats
-   */
-  async getScheduleOverview(eventId) {
-    const slots = await TimeSlot.find({ eventId }).lean();
-    const slotIds = slots.map((slot) => slot._id);
-
-    const conflicts = await Conflict.find({
-      $or: [{ slotId1: { $in: slotIds } }, { slotId2: { $in: slotIds } }]
-    }).lean();
-
-    const normalizedSlots = slots.map((slot) => normalizeSlot(slot));
-    const normalizedConflicts = conflicts.map((conflict) =>
-      normalizeConflict(conflict)
-    );
-
-    return {
-      eventId,
-      totalSlots: normalizedSlots.length,
-      totalConflicts: normalizedConflicts.length,
-      resolvedConflicts: normalizedConflicts.filter(
-        (conflict) => conflict.resolved
-      ).length,
-      unresolvedConflicts: normalizedConflicts.filter(
-        (conflict) => !conflict.resolved
-      ).length,
-      slots: normalizedSlots,
-      conflicts: normalizedConflicts
-    };
-  }
+  return service;
 }
 
-export default SchedulingService;
+export default createSchedulingService;

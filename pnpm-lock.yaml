@@ -81,6 +81,12 @@ importers:
       express:
         specifier: ^5.2.1
         version: 5.2.1
+      express-rate-limit:
+        specifier: ^8.5.2
+        version: 8.5.2(express@5.2.1)
+      helmet:
+        specifier: ^8.3.0
+        version: 8.3.0
       joi:
         specifier: ^18.1.2
         version: 18.2.1
@@ -132,7 +138,7 @@ importers:
         version: 3.2.2(react@19.2.4)
       '@hookform/resolvers':
         specifier: ^3.9.1
-        version: 3.10.0(react-hook-form@7.76.0(react@19.2.4))
+        version: 3.10.0(react-hook-form@7.84.0(react@19.2.4))
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -176,8 +182,8 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: ^7.75.0
-        version: 7.76.0(react@19.2.4)
+        specifier: ^7.84.0
+        version: 7.84.0(react@19.2.4)
       shadcn:
         specifier: ^4.6.0
         version: 4.7.0(@types/node@20.19.41)(typescript@5.9.3)
@@ -317,12 +323,18 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      radix-ui:
+        specifier: ^1.4.3
+        version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react:
         specifier: ^18.2.0 || ^19.0.0
         version: 19.2.4
       react-dom:
         specifier: ^18.2.0 || ^19.0.0
         version: 19.2.4(react@19.2.4)
+      react-hook-form:
+        specifier: ^7.84.0
+        version: 7.84.0(react@19.2.4)
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.1
@@ -377,7 +389,7 @@ importers:
         version: link:../../packages/design-system
       '@hookform/resolvers':
         specifier: ^3.10.0
-        version: 3.10.0(react-hook-form@7.76.0(react@19.2.4))
+        version: 3.10.0(react-hook-form@7.84.0(react@19.2.4))
       '@tanstack/react-query':
         specifier: ^5.101.2
         version: 5.101.2(react@19.2.4)
@@ -394,8 +406,8 @@ importers:
         specifier: ^18.2.0 || ^19.0.0
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: ^7.76.0
-        version: 7.76.0(react@19.2.4)
+        specifier: ^7.84.0
+        version: 7.84.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -541,7 +553,7 @@ importers:
         version: 3.2.2(react@19.2.4)
       '@hookform/resolvers':
         specifier: ^5.4.0
-        version: 5.4.0(react-hook-form@7.82.0(react@19.2.4))
+        version: 5.4.0(react-hook-form@7.84.0(react@19.2.4))
       '@tanstack/react-query':
         specifier: ^5.0.0
         version: 5.101.2(react@19.2.4)
@@ -561,8 +573,8 @@ importers:
         specifier: ^18.2.0 || ^19.0.0
         version: 19.2.4(react@19.2.4)
       react-hook-form:
-        specifier: ^7.82.0
-        version: 7.82.0(react@19.2.4)
+        specifier: ^7.84.0
+        version: 7.84.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -4645,6 +4657,10 @@ packages:
   headers-polyfill@5.0.1:
     resolution: {integrity: sha512-1TJ6Fih/b8h5TIcv+1+Hw0PDQWJTKDKzFZzcKOiW1wJza3XoAQlkCuXLbymPYB8+ZQyw8mHvdw560e8zVFIWyA==}
 
+  helmet@8.3.0:
+    resolution: {integrity: sha512-Qgpiaws3Sm30Av8Eah6sjMCZZwjlBu+E68rhpCWBshY1lb09HtLwj5GviX0OyQIn+ulUS0iX0AxN5n3tLZzz1w==}
+    engines: {node: '>=18.0.0'}
+
   hermes-estree@0.25.1:
     resolution: {integrity: sha512-0wUoCcLp+5Ev5pDW2OriHC2MJCbwLwuRx+gAqMTOkGKJJiBCLjtrvy4PWUGn6MIVefecRpzoOZ/UV6iGdOr+Cw==}
 
@@ -6015,14 +6031,8 @@ packages:
     peerDependencies:
       react: ^19.2.4
 
-  react-hook-form@7.76.0:
-    resolution: {integrity: sha512-eKtLGgFeSgkHqQD8J59AMZ9a4uD1D83iSIzt4YlTGD7liDen5rrjcUO1rVIGd9yC1gofryjtHbv+4ny4hkLWlw==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: ^16.8.0 || ^17 || ^18 || ^19
-
-  react-hook-form@7.82.0:
-    resolution: {integrity: sha512-Zw/uFZ2dO+02GHlBn7JFGn8kZJ7LdM33B/0BXOovzFay+CMhf94JMw5BVu+F1tVkUKjNvBuaE3fz5BJhga10Tg==}
+  react-hook-form@7.84.0:
+    resolution: {integrity: sha512-+hWvQP6GLco56mDwrbU4XnHix8t1z90ltZsDIrREl+jnQFQxYLX8oAzqe/Xn8nHpmoXTY5M6oEXrAhbP1qevNQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -6033,8 +6043,8 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-is@19.2.6:
-    resolution: {integrity: sha512-XjBR15BhXuylgWGuslhDKqlSayuqvqBX91BP8pauG8kd1zY8kotkNWbXksTCNRarse4kuGbe2kIY05ARtwNIvw==}
+  react-is@19.2.8:
+    resolution: {integrity: sha512-s5un28nYxKJw5gvUHyW5PCC28CvBqLu9r3cWgzHT4Vo/5fqqkFcdRYsGcKf50WMPpjjFZS5d76fn3YCo2njKwQ==}
 
   react-remove-scroll-bar@2.3.8:
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
@@ -7792,14 +7802,14 @@ snapshots:
     dependencies:
       hono: 4.12.19
 
-  '@hookform/resolvers@3.10.0(react-hook-form@7.76.0(react@19.2.4))':
+  '@hookform/resolvers@3.10.0(react-hook-form@7.84.0(react@19.2.4))':
     dependencies:
-      react-hook-form: 7.76.0(react@19.2.4)
+      react-hook-form: 7.84.0(react@19.2.4)
 
-  '@hookform/resolvers@5.4.0(react-hook-form@7.82.0(react@19.2.4))':
+  '@hookform/resolvers@5.4.0(react-hook-form@7.84.0(react@19.2.4))':
     dependencies:
       '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.82.0(react@19.2.4)
+      react-hook-form: 7.84.0(react@19.2.4)
 
   '@humanfs/core@0.19.2':
     dependencies:
@@ -11361,6 +11371,8 @@ snapshots:
       '@types/set-cookie-parser': 2.4.10
       set-cookie-parser: 3.1.0
 
+  helmet@8.3.0: {}
+
   hermes-estree@0.25.1: {}
 
   hermes-parser@0.25.1:
@@ -12820,7 +12832,7 @@ snapshots:
       '@jest/schemas': 30.4.1
       ansi-styles: 5.2.0
       react-is-18: react-is@18.3.1
-      react-is-19: react-is@19.2.6
+      react-is-19: react-is@19.2.8
 
   pretty-ms@9.3.0:
     dependencies:
@@ -12933,11 +12945,7 @@ snapshots:
       react: 19.2.4
       scheduler: 0.27.0
 
-  react-hook-form@7.76.0(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-
-  react-hook-form@7.82.0(react@19.2.4):
+  react-hook-form@7.84.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
@@ -12945,7 +12953,7 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-is@19.2.6: {}
+  react-is@19.2.8: {}
 
   react-remove-scroll-bar@2.3.8(@types/react@19.2.14)(react@19.2.4):
     dependencies:

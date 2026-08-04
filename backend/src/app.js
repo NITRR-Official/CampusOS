@@ -5,6 +5,9 @@
 
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import mongoose from 'mongoose';
+import rateLimit from 'express-rate-limit';
 import { loggerMiddleware } from './middleware/logger.js';
 import { authMiddleware } from './middleware/auth.js';
 import {
@@ -36,6 +39,9 @@ export async function createApp(registry) {
     .filter(Boolean);
 
   // ============== MIDDLEWARE CHAIN (Order matters!) ==============
+
+  // 0. Security Headers
+  app.use(helmet());
 
   // 1. Body parsing
   app.use(express.json({ limit: '2mb' }));
@@ -72,14 +78,31 @@ export async function createApp(registry) {
     })
   );
 
-  // 3. Logging - Log all requests
+  // 3. Rate Limiting - Global default limiter
+  const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Limit each IP to 500 requests per `window`
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      success: false,
+      error: 'Too many requests, please try again later.'
+    }
+  });
+  app.use('/api', globalLimiter);
+
+  // 4. Logging - Log all requests
   app.use(loggerMiddleware);
 
-  // 4. Health check endpoint (no auth required)
+  // 5. Health check endpoint (no auth required)
   app.get('/health', (req, res) => {
-    res.json({
-      success: true,
-      status: 'healthy',
+    const dbState = mongoose.connection.readyState;
+    const isHealthy = dbState === 1;
+
+    res.status(isHealthy ? 200 : 503).json({
+      success: isHealthy,
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      database: isHealthy ? 'connected' : 'disconnected',
       timestamp: new Date().toISOString()
     });
   });
@@ -96,7 +119,7 @@ export async function createApp(registry) {
     res.json({ success: true, permissions });
   });
 
-  // 5. Authentication - Verify JWT before protected routes
+  // 6. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);
   registry.registerService('requirePermissions', requirePermissions);
   registry.registerService('requireSuperAdmin', requireSuperAdmin);
@@ -125,7 +148,7 @@ export async function createApp(registry) {
   });
 
   // ============== PLUGIN LOADING ==============
-  // Load all modules from /apps/ and let them register routes
+  // Load all modules from /plugins/ and let them register routes
   try {
     await loadPlugins(app, registry);
   } catch (error) {

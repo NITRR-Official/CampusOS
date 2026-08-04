@@ -1,5 +1,4 @@
-import crypto from 'crypto';
-import { Resource } from '../schema/resource.model.js';
+import { AppError } from '@campus-os/shared/errors';
 
 /**
  * Resource Service
@@ -52,29 +51,22 @@ function normalizeResource(resourceDoc) {
   return resource;
 }
 
-export class ResourceService {
-  setEventBus(eventBus) {
-    this.eventBus = eventBus;
-  }
+export function createResourceService(resourceRepository) {
+  let eventBus = null;
 
-  /**
-   * Create a new resource
-   * @param {object} resourceData - Resource information
-   * @returns {object} Created resource record
-   */
-  async createResource(resourceData) {
-    const { name, type, quantity, description, location, owner, cost } =
-      resourceData;
+  return {
+    setEventBus(eb) {
+      eventBus = eb;
+    },
 
-    if (!name || !type || !quantity) {
-      return {
-        success: false,
-        error: 'Missing required fields: name, type, quantity'
-      };
-    }
+    /**
+     * Create a new resource
+     */
+    async createResource(resourceData) {
+      const { name, type, quantity, description, location, owner, cost } =
+        resourceData;
 
-    try {
-      const resource = await Resource.create({
+      const resource = await resourceRepository.create({
         name,
         type,
         quantity,
@@ -89,166 +81,132 @@ export class ResourceService {
       });
 
       const serialized = normalizeResource(resource);
-      if (this.eventBus) {
-        this.eventBus.emit('resource:created', {
+      if (eventBus) {
+        eventBus.emit('resource:created', {
           resourceId: serialized.id,
           data: serialized
         });
       }
-      return { success: true, resource: serialized };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+      return serialized;
+    },
 
-  /**
-   * Get resource by ID
-   * @param {string} resourceId - Resource ID
-   * @returns {object|null} Resource record
-   */
-  async getResourceById(resourceId) {
-    try {
-      const resource = await Resource.findById(resourceId).lean();
+    /**
+     * Get resource by ID
+     */
+    async getResourceById(resourceId) {
+      const resource = await resourceRepository.findById(resourceId);
+      if (!resource) return null;
       return normalizeResource(resource);
-    } catch (error) {
-      console.error('Error fetching resource:', error);
-      return null;
-    }
-  }
+    },
 
-  /**
-   * Get all resources
-   * @param {object} filters - Filter options (type, status, condition)
-   * @returns {array} List of resources
-   */
-  async getAllResources(filters = {}) {
-    try {
+    /**
+     * Get all resources
+     */
+    async getAllResources(filters = {}) {
       const query = {};
+      if (filters.type) query.type = filters.type;
+      if (filters.status) query.status = filters.status;
+      if (filters.condition) query.condition = filters.condition;
 
-      if (filters.type) {
-        query.type = filters.type;
-      }
-
-      if (filters.status) {
-        query.status = filters.status;
-      }
-
-      if (filters.condition) {
-        query.condition = filters.condition;
-      }
-
-      const resources = await Resource.find(query).lean();
+      const resources = await resourceRepository.find(query);
       return resources.map((resource) => normalizeResource(resource));
-    } catch (error) {
-      console.error('Error fetching resources:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Get available resources
-   * @param {object} filters - Filter options
-   * @returns {array} Resources with available quantity > 0
-   */
-  async getAvailableResources(filters = {}) {
-    try {
+    /**
+     * Get available resources
+     */
+    async getAvailableResources(filters = {}) {
       const query = { availableQuantity: { $gt: 0 } };
+      if (filters.type) query.type = filters.type;
+      if (filters.status) query.status = filters.status;
+      if (filters.condition) query.condition = filters.condition;
 
-      if (filters.type) {
-        query.type = filters.type;
-      }
-
-      if (filters.status) {
-        query.status = filters.status;
-      }
-
-      if (filters.condition) {
-        query.condition = filters.condition;
-      }
-
-      const resources = await Resource.find(query).lean();
+      const resources = await resourceRepository.find(query);
       return resources.map((resource) => normalizeResource(resource));
-    } catch (error) {
-      console.error('Error fetching available resources:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Update resource information
-   * @param {string} resourceId - Resource ID
-   * @param {object} updateData - Data to update
-   * @returns {object} Updated resource record
-   */
-  async updateResource(resourceId, updateData) {
-    try {
-      const resource = await Resource.findByIdAndUpdate(
-        resourceId,
-        { ...updateData, updatedAt: new Date() },
-        { new: true, runValidators: true }
-      );
+    /**
+     * Update resource information
+     */
+    async updateResource(resourceId, updateData) {
+      const resource = await resourceRepository.updateById(resourceId, {
+        ...updateData,
+        updatedAt: new Date()
+      });
 
       if (!resource) {
-        return { success: false, error: 'Resource not found' };
+        throw new AppError('Resource not found', 404, 'NOT_FOUND');
       }
 
-      return { success: true, resource: normalizeResource(resource) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+      return normalizeResource(resource);
+    },
 
-  /**
-   * Delete resource
-   * @param {string} resourceId - Resource ID
-   * @returns {object} Deletion result
-   */
-  async deleteResource(resourceId) {
-    try {
-      const resource = await Resource.findByIdAndDelete(resourceId);
-
+    /**
+     * Delete resource
+     */
+    async deleteResource(resourceId) {
+      const resource = await resourceRepository.deleteById(resourceId);
       if (!resource) {
-        return { success: false, error: 'Resource not found' };
+        throw new AppError('Resource not found', 404, 'NOT_FOUND');
       }
-
       return { success: true, message: 'Resource deleted successfully' };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+    },
 
-  /**
-   * Allocate resource to event
-   * @param {string} eventId - Event ID
-   * @param {string} resourceId - Resource ID
-   * @param {object} allocationData - Allocation details
-   * @returns {object} Created allocation
-   */
-  async allocateResourceToEvent(eventId, resourceId, allocationData = {}) {
-    if (!eventId || !resourceId) {
-      return { success: false, error: 'eventId and resourceId are required' };
-    }
+    /**
+     * Check for conflicting allocations
+     */
+    async checkAllocationConflicts(resourceId, startDate, endDate) {
+      const resource =
+        typeof resourceId === 'string'
+          ? await resourceRepository.findById(resourceId)
+          : resourceId;
 
-    const { allocatedQuantity, startDate, endDate, notes } = allocationData;
+      if (!resource) return [];
 
-    if (!allocatedQuantity || !startDate || !endDate) {
-      return {
-        success: false,
-        error: 'Missing required fields: allocatedQuantity, startDate, endDate'
-      };
-    }
+      const start = new Date(startDate);
+      const end = new Date(endDate);
 
-    try {
-      const resource = await Resource.findById(resourceId);
+      return (resource.allocations || [])
+        .filter((allocation) => {
+          if (
+            allocation.status === 'returned' ||
+            allocation.status === 'damaged'
+          ) {
+            return false;
+          }
+          return !(end <= allocation.startDate || start >= allocation.endDate);
+        })
+        .map((allocation) =>
+          normalizeAllocation(allocation, resource.id || resource._id)
+        )
+        .filter(Boolean);
+    },
+
+    /**
+     * Allocate resource to event
+     */
+    async allocateResourceToEvent(eventId, resourceId, allocationData = {}) {
+      if (!eventId || !resourceId) {
+        throw new AppError(
+          'eventId and resourceId are required',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
+
+      const { allocatedQuantity, startDate, endDate, notes } = allocationData;
+
+      const resource = await resourceRepository.findDocumentById(resourceId);
       if (!resource) {
-        return { success: false, error: 'Resource not found' };
+        throw new AppError('Resource not found', 404, 'NOT_FOUND');
       }
 
       if (allocatedQuantity > resource.availableQuantity) {
-        return {
-          success: false,
-          error: `Insufficient availability. Available: ${resource.availableQuantity}, Requested: ${allocatedQuantity}`
-        };
+        throw new AppError(
+          `Insufficient availability. Available: ${resource.availableQuantity}, Requested: ${allocatedQuantity}`,
+          400,
+          'BAD_REQUEST'
+        );
       }
 
       const conflicts = await this.checkAllocationConflicts(
@@ -257,11 +215,12 @@ export class ResourceService {
         endDate
       );
       if (conflicts.length > 0) {
-        return {
-          success: false,
-          error: 'Resource is already allocated during this period',
-          conflicts
-        };
+        throw new AppError(
+          'Resource is already allocated during this period',
+          400,
+          'BAD_REQUEST',
+          { conflicts }
+        );
       }
 
       const now = new Date();
@@ -282,78 +241,27 @@ export class ResourceService {
       resource.availableQuantity -= allocatedQuantity;
       resource.updatedAt = now;
 
-      await resource.save();
+      await resourceRepository.saveDocument(resource);
 
       const serialized = normalizeAllocation(allocation, resourceId);
-      if (this.eventBus) {
-        this.eventBus.emit('resource:allocated', {
+      if (eventBus) {
+        eventBus.emit('resource:allocated', {
           resourceId,
           eventId,
           allocationId: serialized.id,
           data: serialized
         });
       }
-      return {
-        success: true,
-        allocation: serialized
-      };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+      return serialized;
+    },
 
-  /**
-   * Check for conflicting allocations
-   * @param {string|object} resourceId - Resource ID or resource document
-   * @param {Date} startDate - Allocation start date
-   * @param {Date} endDate - Allocation end date
-   * @returns {array} Conflicting allocations
-   */
-  async checkAllocationConflicts(resourceId, startDate, endDate) {
-    try {
-      const resource =
-        typeof resourceId === 'string'
-          ? await Resource.findById(resourceId).lean()
-          : resourceId;
-
-      if (!resource) {
-        return [];
-      }
-
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      return (resource.allocations || [])
-        .filter((allocation) => {
-          if (
-            allocation.status === 'returned' ||
-            allocation.status === 'damaged'
-          ) {
-            return false;
-          }
-
-          return !(end <= allocation.startDate || start >= allocation.endDate);
-        })
-        .map((allocation) =>
-          normalizeAllocation(allocation, resource.id || resource._id)
-        )
-        .filter(Boolean);
-    } catch (error) {
-      console.error('Error checking allocation conflicts:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Get allocations for event
-   * @param {string} eventId - Event ID
-   * @returns {array} Resource allocations for event
-   */
-  async getEventResources(eventId) {
-    try {
-      const resources = await Resource.find({
+    /**
+     * Get allocations for event
+     */
+    async getEventResources(eventId) {
+      const resources = await resourceRepository.find({
         'allocations.eventId': eventId
-      }).lean();
+      });
 
       return resources.flatMap((resource) =>
         (resource.allocations || [])
@@ -370,32 +278,22 @@ export class ResourceService {
             }
           }))
       );
-    } catch (error) {
-      console.error('Error fetching event resources:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Delete all allocations for an event
-   * @param {string} eventId - Event ID
-   * @returns {object} Deletion result
-   */
-  async deleteEventAllocations(eventId) {
-    try {
-      // Find all resources that have allocations for this event
-      const resources = await Resource.find({
+    /**
+     * Delete all allocations for an event
+     */
+    async deleteEventAllocations(eventId) {
+      const resources = await resourceRepository.findDocuments({
         'allocations.eventId': eventId
       });
 
       for (const resource of resources) {
-        // Find which allocations will be removed to restore availableQuantity
         const removedAllocations = resource.allocations.filter(
           (allocation) =>
             allocation.eventId === eventId && allocation.status !== 'returned'
         );
 
-        // Restore available quantity for allocations that weren't returned
         const quantityToRestore = removedAllocations.reduce(
           (total, allocation) => total + allocation.allocatedQuantity,
           0
@@ -403,70 +301,52 @@ export class ResourceService {
 
         resource.availableQuantity += quantityToRestore;
 
-        // Remove the allocations
         resource.allocations = resource.allocations.filter(
           (allocation) => allocation.eventId !== eventId
         );
 
-        await resource.save();
+        await resourceRepository.saveDocument(resource);
       }
-
       return { success: true };
-    } catch (error) {
-      console.error('Error deleting event allocations:', error);
-      return { success: false, error: error.message };
-    }
-  }
+    },
 
-  /**
-   * Get allocations for resource
-   * @param {string} resourceId - Resource ID
-   * @returns {array} All allocations for this resource
-   */
-  async getResourceAllocations(resourceId) {
-    try {
-      const resource = await Resource.findById(resourceId).lean();
-      if (!resource) {
-        return [];
-      }
+    /**
+     * Get allocations for resource
+     */
+    async getResourceAllocations(resourceId) {
+      const resource = await resourceRepository.findById(resourceId);
+      if (!resource) return [];
 
       return (resource.allocations || [])
         .map((allocation) => normalizeAllocation(allocation, resourceId))
         .filter(Boolean);
-    } catch (error) {
-      console.error('Error fetching resource allocations:', error);
-      return [];
-    }
-  }
+    },
 
-  /**
-   * Update allocation status
-   * @param {string} allocationId - Allocation ID
-   * @param {string} newStatus - New status (allocated, in-use, returned, damaged)
-   * @returns {object} Updated allocation
-   */
-  async updateAllocationStatus(allocationId, newStatus) {
-    const validStatuses = ['allocated', 'in-use', 'returned', 'damaged'];
-    if (!validStatuses.includes(newStatus)) {
-      return {
-        success: false,
-        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-      };
-    }
+    /**
+     * Update allocation status
+     */
+    async updateAllocationStatus(allocationId, newStatus) {
+      const validStatuses = ['allocated', 'in-use', 'returned', 'damaged'];
+      if (!validStatuses.includes(newStatus)) {
+        throw new AppError(
+          `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
 
-    try {
-      const resource = await Resource.findOne({
+      const resource = await resourceRepository.findOneDocument({
         'allocations.allocationId': allocationId
       });
       if (!resource) {
-        return { success: false, error: 'Allocation not found' };
+        throw new AppError('Allocation not found', 404, 'NOT_FOUND');
       }
 
       const allocation = resource.allocations.find(
         (item) => item.allocationId === allocationId
       );
       if (!allocation) {
-        return { success: false, error: 'Allocation not found' };
+        throw new AppError('Allocation not found', 404, 'NOT_FOUND');
       }
 
       const previousStatus = allocation.status;
@@ -477,45 +357,29 @@ export class ResourceService {
         resource.availableQuantity += allocation.allocatedQuantity;
       }
 
-      await resource.save();
+      await resourceRepository.saveDocument(resource);
 
-      return {
-        success: true,
-        allocation: normalizeAllocation(allocation, resource.id || resource._id)
-      };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+      return normalizeAllocation(allocation, resource.id || resource._id);
+    },
 
-  /**
-   * Update resource maintenance date
-   * @param {string} resourceId - Resource ID
-   * @param {Date} maintenanceDate - Maintenance date
-   * @returns {object} Updated resource
-   */
-  async updateMaintenance(resourceId, maintenanceDate) {
-    try {
+    /**
+     * Update resource maintenance date
+     */
+    async updateMaintenance(resourceId, maintenanceDate) {
       const maintenance = new Date(maintenanceDate);
-      const resource = await Resource.findByIdAndUpdate(
-        resourceId,
-        {
-          maintenanceDate: maintenance,
-          lastMaintenanceDate: maintenance,
-          updatedAt: new Date()
-        },
-        { new: true, runValidators: true }
-      );
+      const resource = await resourceRepository.updateById(resourceId, {
+        maintenanceDate: maintenance,
+        lastMaintenanceDate: maintenance,
+        updatedAt: new Date()
+      });
 
       if (!resource) {
-        return { success: false, error: 'Resource not found' };
+        throw new AppError('Resource not found', 404, 'NOT_FOUND');
       }
 
-      return { success: true, resource: normalizeResource(resource) };
-    } catch (error) {
-      return { success: false, error: error.message };
+      return normalizeResource(resource);
     }
-  }
+  };
 }
 
-export default ResourceService;
+export default createResourceService;

@@ -4,7 +4,8 @@
  */
 
 import { registerBudgetRoutes } from './routes/budget.routes.js';
-import BudgetService from './service/budget.service.js';
+import { createBudgetService } from './service/budget.service.js';
+import { createBudgetRepository } from './repository/budget.repository.js';
 import { registerBudgetHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
@@ -14,7 +15,8 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
-  const budgetService = new BudgetService(eventBus);
+  const budgetRepository = createBudgetRepository();
+  const budgetService = createBudgetService(budgetRepository, eventBus);
   registerBudgetRoutes(app, requirePermissions, budgetService);
 
   registry.registerModule('budget', {
@@ -77,7 +79,7 @@ export async function init(app, registry, eventBus) {
         .select('clubId')
         .lean();
       return budgetDoc?.clubId
-        ? { type: 'clubService', id: budgetDoc.clubId.toString() }
+        ? { type: 'club:member_service', id: budgetDoc.clubId.toString() }
         : null;
     } catch {
       return null;

@@ -4,7 +4,7 @@ import { fetchEventById, fetchEvents, registerForEvent } from './api';
 export function useEvents(clubId: string) {
   return useQuery({
     queryKey: ['events', clubId],
-    queryFn: () => fetchEvents(clubId),
+    queryFn: () => fetchEvents({ clubId }),
     enabled: !!clubId
   });
 }

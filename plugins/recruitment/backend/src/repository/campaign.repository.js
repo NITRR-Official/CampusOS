@@ -26,7 +26,7 @@ export function createCampaignRepository(CampaignModel) {
 
     async update(id, data) {
       return await CampaignModel.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
       });
     }

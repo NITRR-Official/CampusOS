@@ -18,7 +18,7 @@ export function createCandidateRepository(CandidateModel) {
       return await CandidateModel.findByIdAndUpdate(
         id,
         { status },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     },
 
@@ -26,7 +26,7 @@ export function createCandidateRepository(CandidateModel) {
       return await CandidateModel.findByIdAndUpdate(
         id,
         { notes },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
     }
   };

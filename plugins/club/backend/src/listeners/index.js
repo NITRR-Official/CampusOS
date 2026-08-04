@@ -24,8 +24,12 @@ export function registerEventHandlers(eventBus, services) {
   });
 
   eventBus.on('user:deleted', async (payload) => {
-    if (payload && payload.userId) {
-      await memberService.removeAllUserMemberships(payload.userId);
+    try {
+      if (payload && payload.userId) {
+        await memberService.removeAllUserMemberships(payload.userId);
+      }
+    } catch (err) {
+      console.error('[Club Listener] Error handling user:deleted event:', err);
     }
   });
 }

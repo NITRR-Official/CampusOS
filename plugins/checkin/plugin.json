@@ -5,5 +5,6 @@
   "dependencies": {
     "event": "^1.0.0"
   },
-  "defaultEnabled": true
+  "defaultEnabled": true,
+  "themeColor": "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/30 dark:text-cyan-400 dark:border-cyan-800"
 }

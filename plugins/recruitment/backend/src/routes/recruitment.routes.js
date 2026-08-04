@@ -8,49 +8,48 @@ export function registerRecruitmentRoutes(
 ) {
   const router = Router();
 
+  const viewRecruitment = requirePermissions('recruitment:view');
+  const manageRecruitment = requirePermissions('recruitment:manage');
+
   // Campaign Routes
-  router.get(
-    '/campaigns',
-    requirePermissions(),
-    campaignController.getCampaigns
-  );
+  router.get('/campaigns', viewRecruitment, campaignController.getCampaigns);
   router.post(
     '/campaigns',
-    requirePermissions(),
+    manageRecruitment,
     campaignController.createCampaign
   );
 
   router.get(
     '/campaigns/:campaignId',
-    requirePermissions(),
+    viewRecruitment,
     campaignController.getCampaign
   );
   router.put(
     '/campaigns/:campaignId',
-    requirePermissions(),
+    manageRecruitment,
     campaignController.updateCampaign
   );
 
   // Candidate Routes (Nested under campaigns)
   router.get(
     '/campaigns/:campaignId/candidates',
-    requirePermissions(),
+    manageRecruitment,
     candidateController.getCandidates
   );
   router.get(
     '/campaigns/:campaignId/candidates/:candidateId',
-    requirePermissions(),
+    manageRecruitment,
     candidateController.getCandidate
   );
 
   router.patch(
     '/campaigns/:campaignId/candidates/:candidateId/status',
-    requirePermissions(),
+    manageRecruitment,
     candidateController.updateStatus
   );
   router.patch(
     '/campaigns/:campaignId/candidates/:candidateId/notes',
-    requirePermissions(),
+    manageRecruitment,
     candidateController.updateNotes
   );
 

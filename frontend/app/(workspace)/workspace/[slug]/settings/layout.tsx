@@ -20,7 +20,7 @@ export default async function ClubSettingsLayout(props: {
     <div className="max-w-6xl mx-auto space-y-8 pb-10">
       <div className="flex items-center gap-4">
         <Link
-          href={`/clubs/${club.slug}`}
+          href={`/workspace/${club.slug}`}
           className="inline-flex items-center justify-center p-2 rounded-full hover:bg-secondary transition-colors"
         >
           <ChevronLeft className="size-5" />

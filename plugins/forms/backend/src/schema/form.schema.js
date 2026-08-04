@@ -45,6 +45,13 @@ export const updateFormSchema = z
 
 export const submitFormResponseSchema = z
   .object({
-    answers: z.record(z.any())
+    answers: z.record(
+      z.union([
+        z.string().max(5000),
+        z.number(),
+        z.boolean(),
+        z.array(z.string().max(500))
+      ])
+    )
   })
   .strict();

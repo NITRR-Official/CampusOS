@@ -3,6 +3,7 @@ import { registerEventRoutes } from './routes/event.routes.js';
 import { createEventService } from './service/event.service.js';
 import { createEventRepository } from './repository/event.repository.js';
 import { Event } from './schema/event.model.js';
+import { EventRegistration } from './schema/event-registration.model.js';
 import { registerEventHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
@@ -15,7 +16,7 @@ export async function init(app, registry, eventBus) {
 
   const eventRepository = createEventRepository();
   const eventService = createEventService(eventRepository, eventBus);
-  const eventController = createEventController(eventService);
+  const eventController = createEventController(eventService, registry);
   registerEventRoutes(
     app,
     eventController,
@@ -63,7 +64,7 @@ export async function init(app, registry, eventBus) {
 
     registry.registerContextResolver('/api/v1/events', async (req) => {
       if (req.method === 'POST' && req.body?.clubId) {
-        return { type: 'clubService', id: req.body.clubId };
+        return { type: 'club:member_service', id: req.body.clubId };
       }
 
       const eventId = req.params?.eventId || req.url.split('/')[4];
@@ -75,7 +76,7 @@ export async function init(app, registry, eventBus) {
           .select('clubId')
           .lean();
         return eventDoc?.clubId
-          ? { type: 'clubService', id: eventDoc.clubId.toString() }
+          ? { type: 'club:member_service', id: eventDoc.clubId.toString() }
           : null;
       } catch {
         return null;
@@ -99,8 +100,16 @@ export async function init(app, registry, eventBus) {
       }
 
       // Get events the user has registered for (assuming attendeeEmail matches user.email)
+      const registrations = await EventRegistration.find({
+        attendeeEmail: user.email.toLowerCase()
+      })
+        .select('eventId')
+        .lean();
+
+      const eventIds = registrations.map((r) => r.eventId);
+
       const eventsCount = await Event.countDocuments({
-        'registrations.attendeeEmail': user.email,
+        _id: { $in: eventIds },
         status: 'published'
       });
       return { events: eventsCount };

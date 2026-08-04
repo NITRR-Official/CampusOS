@@ -15,6 +15,7 @@ class ModuleRegistry {
   #publicRoutes = [];
   #statProviders = new Map();
   #settingsConfigs = new Map();
+  #pluginMetadata = new Map();
 
   constructor() {}
 
@@ -205,6 +206,28 @@ class ModuleRegistry {
   }
 
   /**
+   * Register a plugin's raw metadata (e.g. plugin.json)
+   * @param {string} pluginId
+   * @param {Object} metadata
+   */
+  registerPluginMetadata(pluginId, metadata) {
+    if (this.#pluginMetadata.has(pluginId)) {
+      throw new Error(
+        `Metadata for plugin '${pluginId}' is already registered.`
+      );
+    }
+    this.#pluginMetadata.set(pluginId, metadata);
+    console.log(`✓ Plugin metadata registered: ${pluginId}`);
+  }
+
+  /**
+   * Get plugin metadata
+   */
+  getPluginMetadata(pluginId) {
+    return this.#pluginMetadata.get(pluginId) || null;
+  }
+
+  /**
    * Register a public route regex that bypasses authentication
    * @param {RegExp} regex - The regex matching the path
    * @param {string} [method] - Optional HTTP method (e.g. 'GET', 'POST'). If omitted, matches all methods.
@@ -240,6 +263,7 @@ class ModuleRegistry {
     this.#contextResolvers.clear();
     this.#statProviders.clear();
     this.#settingsConfigs.clear();
+    this.#pluginMetadata.clear();
     this.#publicRoutes = [];
     // Assuming PermissionRegistry has a clear/reset method, or we can just replace it
     this.#permissions = new PermissionRegistry();

@@ -45,12 +45,8 @@ export function createCheckInController(checkInService) {
       }
 
       try {
-        const result = await checkInService.createCheckIn(eventId, userId);
-        if (!result.success) {
-          return res.status(400).json({ error: result.error });
-        }
-
-        return res.status(201).json(result.checkIn);
+        const checkIn = await checkInService.createCheckIn(eventId, userId);
+        return res.status(201).json(checkIn);
       } catch (error) {
         return next(error);
       }
@@ -91,14 +87,10 @@ export function createCheckInController(checkInService) {
     async scanQRCode(req, res, next) {
       try {
         const { qrCode } = scanQRCodeSchema.parse(req.body);
-        const result = await checkInService.markAsCheckedInByQRCode(qrCode);
-        if (!result.success) {
-          return res.status(400).json({ error: result.error });
-        }
-
+        const checkIn = await checkInService.markAsCheckedInByQRCode(qrCode);
         return res.status(200).json({
           message: 'Successfully checked in',
-          checkIn: result.checkIn
+          checkIn
         });
       } catch (error) {
         return next(error);

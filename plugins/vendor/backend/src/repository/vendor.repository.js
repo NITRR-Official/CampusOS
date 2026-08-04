@@ -23,7 +23,7 @@ export class VendorRepository {
 
   async updateById(id, updates) {
     return await Vendor.findByIdAndUpdate(id, updates, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     });
   }

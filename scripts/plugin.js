@@ -13,6 +13,75 @@ const REGISTRY_FILE = path.join(__dirname, '../frontend/lib/plugins/init.ts');
 const FRONTEND_APP_DIR = path.join(__dirname, '../frontend/app/(dashboard)');
 
 function generateNextjsWrapper(pluginName) {
+  const pluginFrontendAppDir = path.join(
+    PLUGINS_DIR,
+    pluginName,
+    'frontend',
+    'app'
+  );
+
+  // NEW: App Router recursive support
+  if (fs.existsSync(pluginFrontendAppDir)) {
+    const walkSync = (dir, filelist = []) => {
+      fs.readdirSync(dir).forEach((file) => {
+        const filepath = path.join(dir, file);
+        if (fs.statSync(filepath).isDirectory()) {
+          filelist = walkSync(filepath, filelist);
+        } else {
+          filelist.push(filepath);
+        }
+      });
+      return filelist;
+    };
+
+    const appFiles = walkSync(pluginFrontendAppDir);
+
+    appFiles.forEach((file) => {
+      // Only wrap Next.js special files
+      const basename = path.basename(file);
+      if (
+        ![
+          'page.tsx',
+          'layout.tsx',
+          'loading.tsx',
+          'error.tsx',
+          'not-found.tsx'
+        ].includes(basename)
+      ) {
+        return;
+      }
+
+      // Calculate relative path from the plugin's app/ dir
+      // e.g., (dashboard)/events/page.tsx
+      const relativePath = path.relative(pluginFrontendAppDir, file);
+
+      // Calculate target path in frontend/app/
+      const targetPath = path.join(__dirname, '../frontend/app', relativePath);
+      const targetDir = path.dirname(targetPath);
+
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+
+      // Generate import path
+      let importPath = relativePath.replace(/\\/g, '/');
+      if (importPath.endsWith('.tsx')) {
+        importPath = importPath.substring(0, importPath.length - 4);
+      }
+
+      const wrapperContent = `// AUTO-GENERATED - DO NOT EDIT\nexport * from '@plugins/${pluginName}/frontend/app/${importPath}';\nexport { default } from '@plugins/${pluginName}/frontend/app/${importPath}';\n`;
+
+      fs.writeFileSync(targetPath, wrapperContent, 'utf8');
+      console.log(
+        `✅ Generated Next.js wrapper route at frontend/app/${relativePath.replace(/\\/g, '/')}`
+      );
+    });
+
+    // Skip legacy wrapper if plugin provides frontend/app
+    return;
+  }
+
+  // LEGACY: Support for single root page in frontend/pages/
   const pluginFrontendPagesDir = path.join(
     PLUGINS_DIR,
     pluginName,
@@ -29,6 +98,15 @@ function generateNextjsWrapper(pluginName) {
   );
 
   if (mainPageFile) {
+    const mainPagePath = path.join(pluginFrontendPagesDir, mainPageFile);
+    const content = fs.readFileSync(mainPagePath, 'utf8');
+    if (!content.includes('export default')) {
+      console.log(
+        `⏭️  Skipping legacy wrapper for /${pluginName} (no default export found)`
+      );
+      return;
+    }
+
     const componentNameMatch = mainPageFile.match(/^([a-zA-Z0-9]+)\.tsx$/);
     let componentName = componentNameMatch
       ? componentNameMatch[1]
@@ -47,7 +125,7 @@ function generateNextjsWrapper(pluginName) {
 
     const wrapperFile = path.join(routeDir, 'page.tsx');
     fs.writeFileSync(wrapperFile, wrapperContent, 'utf8');
-    console.log(`✅ Generated Next.js wrapper route at /${pluginName}`);
+    console.log(`✅ Generated legacy Next.js wrapper route at /${pluginName}`);
   }
 }
 
@@ -197,6 +275,8 @@ function generateRegistry() {
         varName: `init${plugin.charAt(0).toUpperCase() + plugin.slice(1).replace(/[^a-zA-Z0-9]/g, '')}`
       });
     }
+    // Also regenerate Next.js wrappers during sync
+    generateNextjsWrapper(plugin);
   }
 
   const imports = activePlugins

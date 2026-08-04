@@ -93,7 +93,3 @@ export const registrationSchema = z
       .email('Attendee email must be valid')
   })
   .strict();
-
-export function validateStatus(status) {
-  return ['draft', 'published'].includes(status);
-}

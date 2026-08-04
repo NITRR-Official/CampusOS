@@ -34,3 +34,19 @@ export const loginSchema = z
     password: z.string().min(1, 'Password is required')
   })
   .strict();
+
+export const updateRoleSchema = z
+  .object({
+    isSuperAdmin: z.boolean()
+  })
+  .strict();
+
+export const updateStatusSchema = z
+  .object({
+    isActive: z.boolean()
+  })
+  .strict();
+
+export const objectIdSchema = z
+  .string()
+  .regex(/^[0-9a-fA-F]{24}$/, 'Invalid ObjectId');

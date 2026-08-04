@@ -29,6 +29,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   useEffect(() => {
     async function loadUsers() {
@@ -148,7 +149,8 @@ export default function AdminUsersPage() {
               users.map((user) => (
                 <TableRow
                   key={user.id}
-                  className="hover:bg-muted/30 transition-colors"
+                  className="hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => setSelectedUser(user)}
                 >
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
@@ -191,20 +193,24 @@ export default function AdminUsersPage() {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <button
-                        onClick={() =>
-                          handleToggleRole(user.id, user.isSuperAdmin)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleRole(user.id, user.isSuperAdmin);
+                        }}
                         disabled={actionLoading === user.id}
                         className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 transition-colors"
                       >
-                        {user.isSuperAdmin ? 'Revoke Super Admin' : 'Make Super Admin'}
+                        {user.isSuperAdmin
+                          ? 'Revoke Super Admin'
+                          : 'Make Super Admin'}
                       </button>
                       <button
-                        onClick={() =>
-                          handleToggleStatus(user.id, user.isActive !== false)
-                        }
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleStatus(user.id, user.isActive !== false);
+                        }}
                         disabled={actionLoading === user.id}
-                        className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-background hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 transition-colors"
+                        className="px-3 py-1 text-xs font-medium rounded-md border border-input bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-50 transition-colors"
                       >
                         {user.isActive !== false ? 'Block' : 'Unblock'}
                       </button>
@@ -216,6 +222,64 @@ export default function AdminUsersPage() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedUser && (
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedUser(null)}
+        >
+          <div
+            className="bg-card border border-border shadow-lg rounded-xl w-full max-w-lg p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
+            <h3 className="text-xl font-bold mb-4">User Details</h3>
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Name</div>
+                <div className="col-span-2 font-medium">
+                  {selectedUser.name}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Email</div>
+                <div className="col-span-2">{selectedUser.email}</div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Role</div>
+                <div className="col-span-2">
+                  {selectedUser.isSuperAdmin ? 'Super Admin' : 'Regular User'}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Status</div>
+                <div className="col-span-2">
+                  {selectedUser.isActive !== false ? 'Active' : 'Blocked'}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Joined</div>
+                <div className="col-span-2">
+                  {selectedUser.createdAt
+                    ? new Date(selectedUser.createdAt).toLocaleString()
+                    : 'Unknown'}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-muted-foreground">Internal ID</div>
+                <div className="col-span-2 text-xs font-mono">
+                  {selectedUser.id}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

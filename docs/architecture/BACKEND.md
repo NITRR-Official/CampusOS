@@ -66,14 +66,13 @@ flowchart TD
 
 ### Public Routes (no auth required)
 
-These are hardcoded in `middleware/auth.js`:
+Public routes are handled dynamically to support the plugin system. A few fundamental routes are hardcoded in `middleware/auth.js`:
 
 - `GET /health`
 - `POST /api/v1/auth/signup`
 - `POST /api/v1/auth/login`
-- `GET /api/v1/events` (listing)
-- `GET /api/v1/events/:id` (single event)
-- `POST /api/v1/events/:id/registrations`
+
+For other public endpoints, plugins register them dynamically via the registry when they initialize. The auth middleware calls `registry.getPublicRoutes()` and permits access if the request path matches the plugin-defined public route pattern (e.g., event listings or public forms).
 
 Everything else requires a `Bearer` token in the `Authorization` header.
 

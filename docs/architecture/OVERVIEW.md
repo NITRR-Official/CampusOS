@@ -37,13 +37,13 @@ flowchart TD
         O["Vendor · Resource · Scheduling · Budget<br/>(plugins/vendor, resource, scheduling, budget)"]
     end
     subgraph L3 ["3. Execution Layer"]
-        E["Task · Calendar<br/>(plugins/task, calendar)"]
+        E["Task · Calendar · Recruitment<br/>(plugins/task, calendar, recruitment)"]
     end
     subgraph L2 ["2. Event Layer"]
-        Ev["Event · Check-in<br/>(plugins/event, checkin)"]
+        Ev["Event · Check-in · Forms<br/>(plugins/event, checkin, forms)"]
     end
     subgraph L1 ["1. Foundation Layer"]
-        F["Auth · Club · Institute<br/>(plugins/auth, club, institute)"]
+        F["Auth · Club · Institute · Admin · Plugin Manager · Activity<br/>(plugins/auth, club, institute, admin, plugin-manager, activity)"]
     end
 
     L5 --> L4
@@ -54,15 +54,15 @@ flowchart TD
 
 ### What's in each layer
 
-| Layer          | Modules                                      | What it handles                                                                | Storage |
-| -------------- | -------------------------------------------- | ------------------------------------------------------------------------------ | ------- |
-| **Foundation** | `auth`, `club`, `institute`                  | User accounts, JWT auth, RBAC, org structure                                   | MongoDB |
-| **Event**      | `event`, `checkin`                           | Event CRUD, RSVP/registration, QR check-in                                     | MongoDB |
-| **Execution**  | `task`, `calendar`                           | Task assignment, dependencies, deadlines                                       | MongoDB |
-| **Operations** | `vendor`, `resource`, `scheduling`, `budget` | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB |
-| **Growth**     | _(not yet built)_                            | Sponsorship, marketing, analytics                                              | —       |
+| Layer          | Modules                                                            | What it handles                                                                | Storage |
+| -------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------- |
+| **Foundation** | `auth`, `club`, `institute`, `admin`, `plugin-manager`, `activity` | User accounts, JWT auth, RBAC, org structure, system config, activity feeds    | MongoDB |
+| **Event**      | `event`, `checkin`, `forms`                                        | Event CRUD, RSVP/registration, QR check-in, dynamic forms                      | MongoDB |
+| **Execution**  | `task`, `calendar`, `recruitment`                                  | Task assignment, dependencies, deadlines, candidate campaigns                  | MongoDB |
+| **Operations** | `vendor`, `resource`, `scheduling`, `budget`                       | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB |
+| **Growth**     | _(not yet built)_                                                  | Sponsorship, marketing, analytics                                              | —       |
 
-- `auth`, `club`, and `institute` all use MongoDB for storage.
+- `auth`, `club`, `institute`, and others use MongoDB for storage.
 
 > **Important**: MongoDB is required to run the server - `connectDB()` runs at startup and the process exits if it fails. All modules (Auth, Event, Task, Calendar, Club, Institute, Vendor, Resource, Scheduling, Budget) are backed by MongoDB with Mongoose. The legacy in-memory Map storage has been completely deprecated.
 

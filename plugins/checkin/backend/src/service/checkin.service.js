@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { AppError } from '@campus-os/shared/errors';
 
 /**
  * Check-in Service
@@ -13,7 +14,11 @@ export function createCheckInService(checkInRepository) {
    */
   async function createCheckIn(eventId, userId) {
     if (!eventId || !userId) {
-      return { success: false, error: 'eventId and userId are required' };
+      throw new AppError(
+        'eventId and userId are required',
+        400,
+        'VALIDATION_ERROR'
+      );
     }
 
     const qrCode = crypto.randomBytes(16).toString('hex');
@@ -29,8 +34,7 @@ export function createCheckInService(checkInRepository) {
       updatedAt: now
     };
 
-    const savedCheckIn = await checkInRepository.saveCheckIn(checkIn);
-    return { success: true, checkIn: savedCheckIn };
+    return await checkInRepository.saveCheckIn(checkIn);
   }
 
   /**
@@ -78,19 +82,18 @@ export function createCheckInService(checkInRepository) {
   async function markAsCheckedInByQRCode(qrCode) {
     const checkIn = await checkInRepository.getCheckInByQRCode(qrCode);
     if (!checkIn) {
-      return { success: false, error: 'Invalid QR code' };
+      throw new AppError('Invalid QR code', 404, 'NOT_FOUND');
     }
 
     if (checkIn.status === 'checked-in') {
-      return { success: false, error: 'Already checked in' };
+      throw new AppError('Already checked in', 400, 'BAD_REQUEST');
     }
 
     checkIn.status = 'checked-in';
     checkIn.checkedInAt = new Date();
     checkIn.updatedAt = new Date();
 
-    const updatedCheckIn = await checkInRepository.saveCheckIn(checkIn);
-    return { success: true, checkIn: updatedCheckIn };
+    return await checkInRepository.saveCheckIn(checkIn);
   }
 
   /**

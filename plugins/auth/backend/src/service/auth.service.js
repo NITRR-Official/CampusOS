@@ -85,8 +85,8 @@ export function createAuthService(authRepository, eventBus) {
     return toPublicUser(user);
   }
 
-  async function listUsers() {
-    const users = await authRepository.listUsers();
+  async function listUsers(options = {}) {
+    const users = await authRepository.listUsers(options);
     return users.map(toPublicUser);
   }
 

@@ -12,15 +12,18 @@ const eventSchema = new mongoose.Schema(
       trim: true
     },
     instituteId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Institute',
       required: true
     },
     clubId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Club',
       required: true
     },
     createdBy: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true
     },
     venue: {
@@ -45,9 +48,9 @@ const eventSchema = new mongoose.Schema(
       enum: ['draft', 'published'],
       default: 'draft'
     },
-    registrations: {
-      type: Array,
-      default: []
+    registrationsCount: {
+      type: Number,
+      default: 0
     }
   },
   {

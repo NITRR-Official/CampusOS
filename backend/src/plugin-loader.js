@@ -74,7 +74,8 @@ export async function loadPlugins(app, registry) {
         name: manifest.name,
         version: manifest.version,
         dependencies: manifest.dependencies || {},
-        modulePath
+        modulePath,
+        manifest
       });
     } catch (err) {
       console.error(
@@ -201,6 +202,7 @@ export async function loadPlugins(app, registry) {
       }
 
       await init(app, registry, eventBus);
+      registry.registerPluginMetadata(plugin.name, plugin.manifest);
       console.log(`✓ Loaded plugin: ${plugin.name} (v${plugin.version})`);
     } catch (error) {
       console.error(

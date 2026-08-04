@@ -3,12 +3,19 @@ export function registerActivityRoutes(
   activityController,
   requirePermissions
 ) {
+  const viewActivity = requirePermissions('activity:view');
+
   // Keeping endpoints publicly accessible for the V1 dashboard,
   // but in prod they would be behind requirePermissions('audit:view')
-  app.get('/api/v1/activity/global', activityController.getGlobalFeed);
+  app.get(
+    '/api/v1/activity/global',
+    viewActivity,
+    activityController.getGlobalFeed
+  );
   app.get('/api/v1/activity/me', activityController.getUserFeed);
   app.get(
     '/api/v1/activity/entity/:entityId',
+    viewActivity,
     activityController.getEntityFeed
   );
 }

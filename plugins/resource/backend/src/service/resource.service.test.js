@@ -4,7 +4,8 @@ import {
   disconnectDB
 } from '@campusos/backend-core/database/connection.js';
 import { Resource } from '../schema/resource.model.js';
-import { ResourceService } from './resource.service.js';
+import { createResourceService } from './resource.service.js';
+import { createResourceRepository } from '../repository/resource.repository.js';
 
 describe('ResourceService', () => {
   let service;
@@ -24,7 +25,8 @@ describe('ResourceService', () => {
 
   beforeEach(async () => {
     await Resource.deleteMany({});
-    service = new ResourceService();
+    const repository = createResourceRepository();
+    service = createResourceService(repository);
   });
 
   describe('createResource', () => {
@@ -41,14 +43,13 @@ describe('ResourceService', () => {
 
       const result = await service.createResource(resourceData);
 
-      expect(result.success).toBe(true);
-      expect(result.resource).toBeDefined();
-      expect(result.resource.name).toBe('Projector');
-      expect(result.resource.type).toBe('technology');
-      expect(result.resource.quantity).toBe(5);
-      expect(result.resource.availableQuantity).toBe(5);
-      expect(result.resource.status).toBe('available');
-      expect(result.resource.condition).toBe('good');
+      expect(result).toBeDefined();
+      expect(result.name).toBe('Projector');
+      expect(result.type).toBe('technology');
+      expect(result.quantity).toBe(5);
+      expect(result.availableQuantity).toBe(5);
+      expect(result.status).toBe('available');
+      expect(result.condition).toBe('good');
     });
 
     it('should fail when missing required fields', async () => {
@@ -57,10 +58,7 @@ describe('ResourceService', () => {
         // missing type and quantity
       };
 
-      const result = await service.createResource(resourceData);
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Missing required fields');
+      await expect(service.createResource(resourceData)).rejects.toThrow();
     });
 
     it('should generate unique IDs for resources', async () => {
@@ -79,7 +77,7 @@ describe('ResourceService', () => {
       const result1 = await service.createResource(resource1);
       const result2 = await service.createResource(resource2);
 
-      expect(result1.resource.id).not.toBe(result2.resource.id);
+      expect(result1.id).not.toBe(result2.id);
     });
 
     it('should set initial availableQuantity equal to quantity', async () => {
@@ -91,7 +89,7 @@ describe('ResourceService', () => {
 
       const result = await service.createResource(resourceData);
 
-      expect(result.resource.availableQuantity).toBe(result.resource.quantity);
+      expect(result.availableQuantity).toBe(result.quantity);
     });
   });
 
@@ -104,17 +102,17 @@ describe('ResourceService', () => {
       };
 
       const createResult = await service.createResource(resourceData);
-      const resourceId = createResult.resource.id;
+      const resourceId = createResult.id;
 
       const getResult = await service.getResourceById(resourceId);
 
       expect(getResult).toBeDefined();
-      expect(getResult.id).toBe(resourceId);
+      expect(getResult.id.toString()).toBe(resourceId.toString());
       expect(getResult.name).toBe('Lights');
     });
 
     it('should return null for non-existent resource', async () => {
-      const result = await service.getResourceById('non-existent-id');
+      const result = await service.getResourceById('507f1f77bcf86cd799439011');
 
       expect(result).toBeNull();
     });
@@ -171,15 +169,11 @@ describe('ResourceService', () => {
       });
 
       // Simulate full allocation
-      await service.allocateResourceToEvent(
-        'event-1',
-        allocatedResource.resource.id,
-        {
-          allocatedQuantity: 2,
-          startDate: new Date('2026-05-10'),
-          endDate: new Date('2026-05-11')
-        }
-      );
+      await service.allocateResourceToEvent('event-1', allocatedResource.id, {
+        allocatedQuantity: 2,
+        startDate: new Date('2026-05-10'),
+        endDate: new Date('2026-05-11')
+      });
     });
 
     it('should return only resources with available quantity', async () => {
@@ -198,7 +192,7 @@ describe('ResourceService', () => {
         type: 'furniture',
         quantity: 10
       });
-      resourceId = resourceResult.resource.id;
+      resourceId = resourceResult.id;
       eventId = 'event-123';
     });
 
@@ -215,11 +209,10 @@ describe('ResourceService', () => {
         allocationData
       );
 
-      expect(result.success).toBe(true);
-      expect(result.allocation).toBeDefined();
-      expect(result.allocation.allocatedQuantity).toBe(5);
-      expect(result.allocation.resourceId).toBe(resourceId);
-      expect(result.allocation.eventId).toBe(eventId);
+      expect(result).toBeDefined();
+      expect(result.allocatedQuantity).toBe(5);
+      expect(result.resourceId).toBe(resourceId);
+      expect(result.eventId).toBe(eventId);
     });
 
     it('should fail when allocating more than available', async () => {
@@ -229,14 +222,9 @@ describe('ResourceService', () => {
         endDate: new Date('2026-05-11')
       };
 
-      const result = await service.allocateResourceToEvent(
-        eventId,
-        resourceId,
-        allocationData
-      );
-
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('Insufficient availability');
+      await expect(
+        service.allocateResourceToEvent(eventId, resourceId, allocationData)
+      ).rejects.toThrow('Insufficient availability');
     });
 
     it('should update availableQuantity after allocation', async () => {
@@ -266,7 +254,7 @@ describe('ResourceService', () => {
         type: 'furniture',
         quantity: 10
       });
-      resourceId = resourceResult.resource.id;
+      resourceId = resourceResult.id;
 
       // Create overlapping allocations
       await service.allocateResourceToEvent('event-1', resourceId, {
@@ -307,7 +295,7 @@ describe('ResourceService', () => {
 
       const allocationResult = await service.allocateResourceToEvent(
         'event-1',
-        resourceResult.resource.id,
+        resourceResult.id,
         {
           allocatedQuantity: 3,
           startDate: new Date('2026-05-10'),
@@ -316,12 +304,12 @@ describe('ResourceService', () => {
       );
 
       const updateResult = await service.updateAllocationStatus(
-        allocationResult.allocation.id,
+        allocationResult.id,
         'returned'
       );
 
-      expect(updateResult.success).toBe(true);
-      expect(updateResult.allocation.status).toBe('returned');
+      expect(updateResult).toBeDefined();
+      expect(updateResult.status).toBe('returned');
     });
   });
 });

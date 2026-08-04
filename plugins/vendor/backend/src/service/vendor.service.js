@@ -1,7 +1,5 @@
-import crypto from 'crypto';
 import VendorRepository from '../repository/vendor.repository.js';
-
-const vendorRepository = new VendorRepository();
+import { AppError } from '@campus-os/shared/errors';
 
 /**
  * Vendor Service
@@ -56,378 +54,385 @@ function normalizeVendor(vendorDoc) {
   return vendor;
 }
 
-export class VendorService {
-  setEventBus(eventBus) {
-    this.eventBus = eventBus;
-  }
+export function createVendorService(vendorRepository) {
+  let eventBus = null;
 
-  /**
-   * Create a new vendor
-   * @param {object} vendorData - Vendor information
-   * @returns {object} Created vendor record
-   */
-  async createVendor(vendorData) {
-    const {
-      clubId,
-      name,
-      category,
-      contactPerson,
-      email,
-      phone,
-      address,
-      bankDetails
-    } = vendorData;
+  return {
+    setEventBus(eb) {
+      eventBus = eb;
+    },
 
-    if (!name || !category || !contactPerson || !email || !phone) {
-      return {
-        success: false,
-        error:
-          'Missing required fields: name, category, contactPerson, email, phone'
-      };
-    }
-
-    try {
-      const vendor = await vendorRepository.create({
+    /**
+     * Create a new vendor
+     * @param {object} vendorData - Vendor information
+     * @returns {object} Created vendor record
+     */
+    async createVendor(vendorData) {
+      const {
         clubId,
         name,
-        nameLower: name.toLowerCase(),
         category,
         contactPerson,
         email,
         phone,
-        address: address || null,
-        bankDetails: bankDetails || null,
-        status: 'active',
-        rating: 0,
-        totalEvents: 0
-      });
+        address,
+        bankDetails
+      } = vendorData;
 
-      const serialized = normalizeVendor(vendor);
-      if (this.eventBus) {
-        this.eventBus.emit('vendor:created', {
-          vendorId: serialized.id,
-          clubId,
-          data: serialized
-        });
-      }
-      return { success: true, vendor: serialized };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Get vendor by ID
-   * @param {string} vendorId - Vendor ID
-   * @returns {object|null} Vendor record
-   */
-  async getVendorById(vendorId) {
-    try {
-      const vendor = await vendorRepository.findById(vendorId);
-      return normalizeVendor(vendor);
-    } catch (error) {
-      console.error('Error fetching vendor:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get vendor by name
-   * @param {string} name - Vendor name
-   * @returns {object|null} Vendor record
-   */
-  async getVendorByName(name) {
-    try {
-      const vendor = await vendorRepository.findOne({
-        nameLower: name.toLowerCase()
-      });
-      return normalizeVendor(vendor);
-    } catch (error) {
-      console.error('Error fetching vendor by name:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get all vendors
-   * @param {object} filters - Filter options (category, status)
-   * @returns {array} List of vendors
-   */
-  async getAllVendors(filters = {}) {
-    try {
-      const query = { clubId: filters.clubId };
-
-      if (filters.category) {
-        query.category = filters.category;
-      }
-
-      if (filters.status) {
-        query.status = filters.status;
-      }
-
-      const vendors = await vendorRepository.find(query);
-      return vendors.map((vendor) => normalizeVendor(vendor));
-    } catch (error) {
-      console.error('Error fetching vendors:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Update vendor information
-   * @param {string} vendorId - Vendor ID
-   * @param {object} updateData - Data to update
-   * @returns {object} Updated vendor record
-   */
-  async updateVendor(vendorId, updateData) {
-    try {
-      const updates = { ...updateData, updatedAt: new Date() };
-      if (updateData?.name) {
-        updates.nameLower = updateData.name.toLowerCase();
-      }
-
-      const vendor = await vendorRepository.updateById(vendorId, updates);
-
-      if (!vendor) {
-        return { success: false, error: 'Vendor not found' };
-      }
-
-      return { success: true, vendor: normalizeVendor(vendor) };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Delete vendor
-   * @param {string} vendorId - Vendor ID
-   * @returns {object} Deletion result
-   */
-  async deleteVendor(vendorId) {
-    try {
-      const vendor = await vendorRepository.deleteById(vendorId);
-
-      if (!vendor) {
-        return { success: false, error: 'Vendor not found' };
-      }
-
-      return { success: true, message: 'Vendor deleted successfully' };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Assign vendor to event
-   * @param {string} eventId - Event ID
-   * @param {string} vendorId - Vendor ID
-   * @param {object} assignmentData - Assignment details (amount, notes)
-   * @returns {object} Created assignment
-   */
-  async assignVendorToEvent(eventId, vendorId, assignmentData = {}) {
-    if (!eventId || !vendorId) {
-      return { success: false, error: 'eventId and vendorId are required' };
-    }
-
-    try {
-      const vendor = await vendorRepository.findDocumentById(vendorId);
-      if (!vendor) {
-        return { success: false, error: 'Vendor not found' };
-      }
-
-      const now = new Date();
-      const assignment = {
-        assignmentId: crypto.randomUUID(),
-        eventId,
-        amount: assignmentData.amount || null,
-        status: 'assigned',
-        notes: assignmentData.notes || null,
-        assignedAt: now,
-        createdAt: now,
-        updatedAt: now
-      };
-
-      vendor.assignments.push(assignment);
-      await vendorRepository.saveDocument(vendor);
-
-      const serialized = normalizeAssignment(assignment, vendorId);
-      if (this.eventBus) {
-        this.eventBus.emit('vendor:assigned', {
-          vendorId,
-          eventId,
-          assignmentId: serialized.id,
-          data: serialized
-        });
-      }
-      return {
-        success: true,
-        assignment: serialized
-      };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
-
-  /**
-   * Get vendor assignments for event
-   * @param {string} eventId - Event ID
-   * @returns {array} List of vendor assignments
-   */
-  async getEventVendors(eventId) {
-    try {
-      const vendors = await vendorRepository.find({
-        'assignments.eventId': eventId
-      });
-
-      return vendors.flatMap((vendor) =>
-        (vendor.assignments || [])
-          .filter((assignment) => assignment.eventId === eventId)
-          .map((assignment) => ({
-            ...normalizeAssignment(assignment, vendor._id),
-            vendorDetails: {
-              id: vendor._id,
-              name: vendor.name,
-              category: vendor.category,
-              email: vendor.email,
-              phone: vendor.phone
-            }
-          }))
-      );
-    } catch (error) {
-      console.error('Error fetching event vendors:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Delete all assignments for an event
-   * @param {string} eventId - Event ID
-   * @returns {object} Deletion result
-   */
-  async deleteEventAssignments(eventId) {
-    try {
-      const vendors = await vendorRepository.findDocuments({
-        'assignments.eventId': eventId
-      });
-
-      for (const vendor of vendors) {
-        vendor.assignments = vendor.assignments.filter(
-          (assignment) => assignment.eventId !== eventId
+      if (!name || !category || !contactPerson || !email || !phone) {
+        throw new AppError(
+          'Missing required fields: name, category, contactPerson, email, phone',
+          400,
+          'VALIDATION_ERROR'
         );
-
-        await vendorRepository.saveDocument(vendor);
       }
 
-      return { success: true };
-    } catch (error) {
-      console.error('Error deleting event assignments:', error);
-      return { success: false, error: error.message };
-    }
-  }
+      try {
+        const vendor = await vendorRepository.create({
+          clubId,
+          name,
+          nameLower: name.toLowerCase(),
+          category,
+          contactPerson,
+          email,
+          phone,
+          address: address || null,
+          bankDetails: bankDetails || null,
+          status: 'active',
+          rating: 0,
+          totalEvents: 0
+        });
 
-  /**
-   * Get assignments for vendor
-   * @param {string} vendorId - Vendor ID
-   * @returns {array} List of assignments
-   */
-  async getVendorAssignments(vendorId) {
-    try {
-      const vendor = await vendorRepository.findById(vendorId);
-      if (!vendor) {
+        const serialized = normalizeVendor(vendor);
+        if (eventBus) {
+          eventBus.emit('vendor:created', {
+            vendorId: serialized.id,
+            clubId,
+            data: serialized
+          });
+        }
+        return serialized;
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    /**
+     * Get vendor by ID
+     * @param {string} vendorId - Vendor ID
+     * @returns {object|null} Vendor record
+     */
+    async getVendorById(vendorId) {
+      try {
+        const vendor = await vendorRepository.findById(vendorId);
+        return normalizeVendor(vendor);
+      } catch (error) {
+        console.error('Error fetching vendor:', error);
+        return null;
+      }
+    },
+
+    /**
+     * Get vendor by name
+     * @param {string} name - Vendor name
+     * @returns {object|null} Vendor record
+     */
+    async getVendorByName(name) {
+      try {
+        const vendor = await vendorRepository.findOne({
+          nameLower: name.toLowerCase()
+        });
+        return normalizeVendor(vendor);
+      } catch (error) {
+        console.error('Error fetching vendor by name:', error);
+        return null;
+      }
+    },
+
+    /**
+     * Get all vendors
+     * @param {object} filters - Filter options (category, status)
+     * @returns {array} List of vendors
+     */
+    async getAllVendors(filters = {}) {
+      try {
+        const query = { clubId: filters.clubId };
+
+        if (filters.category) {
+          query.category = filters.category;
+        }
+
+        if (filters.status) {
+          query.status = filters.status;
+        }
+
+        const vendors = await vendorRepository.find(query);
+        return vendors.map((vendor) => normalizeVendor(vendor));
+      } catch (error) {
+        console.error('Error fetching vendors:', error);
         return [];
       }
+    },
 
-      return (vendor.assignments || [])
-        .map((assignment) => normalizeAssignment(assignment, vendorId))
-        .filter(Boolean);
-    } catch (error) {
-      console.error('Error fetching vendor assignments:', error);
-      return [];
-    }
-  }
+    /**
+     * Update vendor information
+     * @param {string} vendorId - Vendor ID
+     * @param {object} updateData - Data to update
+     * @returns {object} Updated vendor record
+     */
+    async updateVendor(vendorId, updateData) {
+      try {
+        const updates = { ...updateData, updatedAt: new Date() };
+        if (updateData?.name) {
+          updates.nameLower = updateData.name.toLowerCase();
+        }
 
-  /**
-   * Update assignment status
-   * @param {string} assignmentId - Assignment ID
-   * @param {string} newStatus - New status (assigned, confirmed, completed, cancelled)
-   * @returns {object} Updated assignment
-   */
-  async updateAssignmentStatus(assignmentId, newStatus) {
-    const validStatuses = ['assigned', 'confirmed', 'completed', 'cancelled'];
-    if (!validStatuses.includes(newStatus)) {
-      return {
-        success: false,
-        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-      };
-    }
+        const vendor = await vendorRepository.updateById(vendorId, updates);
 
-    try {
-      const vendor =
-        await vendorRepository.findDocumentByAssignmentId(assignmentId);
-      if (!vendor) {
-        return { success: false, error: 'Assignment not found' };
+        if (!vendor) {
+          throw new AppError('Vendor not found', 404, 'NOT_FOUND');
+        }
+
+        return normalizeVendor(vendor);
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    /**
+     * Delete vendor
+     * @param {string} vendorId - Vendor ID
+     * @returns {object} Deletion result
+     */
+    async deleteVendor(vendorId) {
+      try {
+        const vendor = await vendorRepository.deleteById(vendorId);
+
+        if (!vendor) {
+          throw new AppError('Vendor not found', 404, 'NOT_FOUND');
+        }
+
+        return { success: true, message: 'Vendor deleted successfully' };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    /**
+     * Assign vendor to event
+     * @param {string} eventId - Event ID
+     * @param {string} vendorId - Vendor ID
+     * @param {object} assignmentData - Assignment details (amount, notes)
+     * @returns {object} Created assignment
+     */
+    async assignVendorToEvent(eventId, vendorId, assignmentData = {}) {
+      if (!eventId || !vendorId) {
+        throw new AppError(
+          'eventId and vendorId are required',
+          400,
+          'VALIDATION_ERROR'
+        );
       }
 
-      const assignment = vendor.assignments.find(
-        (item) => item.assignmentId === assignmentId
-      );
-      if (!assignment) {
-        return { success: false, error: 'Assignment not found' };
+      try {
+        const vendor = await vendorRepository.findDocumentById(vendorId);
+        if (!vendor) {
+          return { success: false, error: 'Vendor not found' };
+        }
+
+        const now = new Date();
+        const assignment = {
+          assignmentId: crypto.randomUUID(),
+          eventId,
+          amount: assignmentData.amount || null,
+          status: 'assigned',
+          notes: assignmentData.notes || null,
+          assignedAt: now,
+          createdAt: now,
+          updatedAt: now
+        };
+
+        vendor.assignments.push(assignment);
+        await vendorRepository.saveDocument(vendor);
+
+        const serialized = normalizeAssignment(assignment, vendorId);
+        if (eventBus) {
+          eventBus.emit('vendor:assigned', {
+            vendorId,
+            eventId,
+            assignmentId: serialized.id,
+            data: serialized
+          });
+        }
+        return serialized;
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    /**
+     * Get vendor assignments for event
+     * @param {string} eventId - Event ID
+     * @returns {array} List of vendor assignments
+     */
+    async getEventVendors(eventId) {
+      try {
+        const vendors = await vendorRepository.find({
+          'assignments.eventId': eventId
+        });
+
+        return vendors.flatMap((vendor) =>
+          (vendor.assignments || [])
+            .filter((assignment) => assignment.eventId === eventId)
+            .map((assignment) => ({
+              ...normalizeAssignment(assignment, vendor._id),
+              vendorDetails: {
+                id: vendor._id,
+                name: vendor.name,
+                category: vendor.category,
+                email: vendor.email,
+                phone: vendor.phone
+              }
+            }))
+        );
+      } catch (error) {
+        console.error('Error fetching event vendors:', error);
+        return [];
+      }
+    },
+
+    /**
+     * Delete all assignments for an event
+     * @param {string} eventId - Event ID
+     * @returns {object} Deletion result
+     */
+    async deleteEventAssignments(eventId) {
+      try {
+        const vendors = await vendorRepository.findDocuments({
+          'assignments.eventId': eventId
+        });
+
+        for (const vendor of vendors) {
+          vendor.assignments = vendor.assignments.filter(
+            (assignment) => assignment.eventId !== eventId
+          );
+
+          await vendorRepository.saveDocument(vendor);
+        }
+
+        return { success: true };
+      } catch (error) {
+        console.error('Error deleting event assignments:', error);
+        return { success: false, error: error.message };
+      }
+    },
+
+    /**
+     * Get assignments for vendor
+     * @param {string} vendorId - Vendor ID
+     * @returns {array} List of assignments
+     */
+    async getVendorAssignments(vendorId) {
+      try {
+        const vendor = await vendorRepository.findById(vendorId);
+        if (!vendor) {
+          return [];
+        }
+
+        return (vendor.assignments || [])
+          .map((assignment) => normalizeAssignment(assignment, vendorId))
+          .filter(Boolean);
+      } catch (error) {
+        console.error('Error fetching vendor assignments:', error);
+        return [];
+      }
+    },
+
+    /**
+     * Update assignment status
+     * @param {string} assignmentId - Assignment ID
+     * @param {string} newStatus - New status (assigned, confirmed, completed, cancelled)
+     * @returns {object} Updated assignment
+     */
+    async updateAssignmentStatus(assignmentId, newStatus) {
+      const validStatuses = ['assigned', 'confirmed', 'completed', 'cancelled'];
+      if (!validStatuses.includes(newStatus)) {
+        throw new AppError(
+          `Invalid status. Must be one of: ${validStatuses.join(', ')}`,
+          400,
+          'VALIDATION_ERROR'
+        );
       }
 
-      const previousStatus = assignment.status;
-      assignment.status = newStatus;
-      assignment.updatedAt = new Date();
+      try {
+        const vendor =
+          await vendorRepository.findDocumentByAssignmentId(assignmentId);
+        if (!vendor) {
+          throw new AppError('Assignment not found', 404, 'NOT_FOUND');
+        }
 
-      if (previousStatus !== 'completed' && newStatus === 'completed') {
-        vendor.totalEvents = (vendor.totalEvents || 0) + 1;
+        const assignment = vendor.assignments.find(
+          (item) => item.assignmentId === assignmentId
+        );
+        if (!assignment) {
+          throw new AppError('Assignment not found', 404, 'NOT_FOUND');
+        }
+
+        const previousStatus = assignment.status;
+        assignment.status = newStatus;
+        assignment.updatedAt = new Date();
+
+        if (previousStatus !== 'completed' && newStatus === 'completed') {
+          vendor.totalEvents = (vendor.totalEvents || 0) + 1;
+        }
+
+        await vendorRepository.saveDocument(vendor);
+
+        return normalizeAssignment(assignment, vendor.id || vendor._id);
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    },
+
+    /**
+     * Rate vendor
+     * @param {string} vendorId - Vendor ID
+     * @param {number} rating - Rating 0-5
+     * @returns {object} Updated vendor
+     */
+    async rateVendor(vendorId, rating) {
+      if (rating < 0 || rating > 5) {
+        throw new AppError(
+          'Rating must be between 0 and 5',
+          400,
+          'VALIDATION_ERROR'
+        );
       }
 
-      await vendorRepository.saveDocument(vendor);
+      try {
+        const vendor = await vendorRepository.findDocumentById(vendorId);
+        if (!vendor) {
+          throw new AppError('Vendor not found', 404, 'NOT_FOUND');
+        }
 
-      return {
-        success: true,
-        assignment: normalizeAssignment(assignment, vendor.id || vendor._id)
-      };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  }
+        vendor.ratings.push({ rating, ratedAt: new Date() });
+        vendor.totalRatings = vendor.ratings.length;
+        vendor.averageRating =
+          vendor.totalRatings > 0
+            ? vendor.ratings.reduce((sum, entry) => sum + entry.rating, 0) /
+              vendor.totalRatings
+            : 0;
+        vendor.rating = vendor.averageRating;
+        vendor.updatedAt = new Date();
 
-  /**
-   * Rate vendor
-   * @param {string} vendorId - Vendor ID
-   * @param {number} rating - Rating 0-5
-   * @returns {object} Updated vendor
-   */
-  async rateVendor(vendorId, rating) {
-    if (rating < 0 || rating > 5) {
-      return { success: false, error: 'Rating must be between 0 and 5' };
-    }
+        await vendorRepository.saveDocument(vendor);
 
-    try {
-      const vendor = await vendorRepository.findDocumentById(vendorId);
-      if (!vendor) {
-        return { success: false, error: 'Vendor not found' };
+        return normalizeVendor(vendor);
+      } catch (error) {
+        return { success: false, error: error.message };
       }
-
-      vendor.ratings.push({ rating, ratedAt: new Date() });
-      vendor.totalRatings = vendor.ratings.length;
-      vendor.averageRating =
-        vendor.totalRatings > 0
-          ? vendor.ratings.reduce((sum, entry) => sum + entry.rating, 0) /
-            vendor.totalRatings
-          : 0;
-      vendor.rating = vendor.averageRating;
-      vendor.updatedAt = new Date();
-
-      await vendorRepository.saveDocument(vendor);
-
-      return { success: true, vendor: normalizeVendor(vendor) };
-    } catch (error) {
-      return { success: false, error: error.message };
     }
-  }
+  };
 }
 
-export default VendorService;
+export default createVendorService;

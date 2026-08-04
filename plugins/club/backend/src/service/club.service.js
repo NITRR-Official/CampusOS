@@ -63,6 +63,14 @@ export function createClubService(
     return { ...serializeClub(club), memberCount };
   }
 
+  async function getClubBySlug(slug) {
+    if (!slug) return null;
+    const club = await clubRepository.getClubBySlug(slug);
+    if (!club) return null;
+    const memberCount = await clubRepository.countMembers(club._id);
+    return { ...serializeClub(club), memberCount };
+  }
+
   async function approveClub(clubId) {
     const existingRolesCount = await clubRepository.countRoles(clubId);
     let finalClub = null;
@@ -149,6 +157,20 @@ export function createClubService(
       ClubStatus.APPROVED
     );
     console.info('[ClubService] Club restored from archive', { clubId });
+    if (eventBus && club) {
+      // Emit event for activity timeline and listeners
+      eventBus.emit('club:restored', {
+        clubId,
+        entityType: 'club',
+        entityId: clubId
+      });
+    }
+    return serializeClub(club);
+  }
+
+  async function updateClubStatus(clubId, status) {
+    const club = await clubRepository.updateClubStatus(clubId, status);
+    console.info('[ClubService] Club status updated', { clubId, status });
     return serializeClub(club);
   }
 
@@ -189,11 +211,13 @@ export function createClubService(
     createClub,
     listClubs,
     getClub,
+    getClubBySlug,
     approveClub,
     rejectClub,
     archiveClub,
     restoreClub,
     updateClub,
+    updateClubStatus,
     deleteClub
   };
 }

@@ -15,19 +15,19 @@ export function SettingsNav({ clubSlug }: SettingsNavProps) {
   const navItems = [
     {
       name: 'General',
-      href: `/clubs/${clubSlug}/settings`,
+      href: `/workspace/${clubSlug}/settings`,
       icon: Settings,
       exact: true
     },
     {
       name: 'Roles & Permissions',
-      href: `/clubs/${clubSlug}/settings/roles`,
+      href: `/workspace/${clubSlug}/settings/roles`,
       icon: Shield,
       exact: false
     },
     {
       name: 'Members',
-      href: `/clubs/${clubSlug}/settings/members`,
+      href: `/workspace/${clubSlug}/settings/members`,
       icon: Users,
       exact: false
     }

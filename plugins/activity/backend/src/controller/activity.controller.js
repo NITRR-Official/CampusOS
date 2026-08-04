@@ -1,21 +1,19 @@
-import { activityService } from '../service/activity.service.js';
-
-class ActivityController {
-  async getGlobalFeed(req, res) {
+export function createActivityController({ activityService }) {
+  async function getGlobalFeed(req, res, next) {
     try {
-      const limit = parseInt(req.query.limit, 10) || 50;
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
       const skip = parseInt(req.query.skip, 10) || 0;
       const feed = await activityService.getGlobalFeed({ limit, skip });
       res.status(200).json({ success: true, data: feed });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   }
 
-  async getEntityFeed(req, res) {
+  async function getEntityFeed(req, res, next) {
     try {
       const { entityId } = req.params;
-      const limit = parseInt(req.query.limit, 10) || 50;
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
       const skip = parseInt(req.query.skip, 10) || 0;
       const feed = await activityService.getEntityFeed(entityId, {
         limit,
@@ -23,26 +21,30 @@ class ActivityController {
       });
       res.status(200).json({ success: true, data: feed });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   }
 
-  async getUserFeed(req, res) {
+  async function getUserFeed(req, res, next) {
     try {
-      // In a real authenticated setup, req.user would be populated by the Auth middleware
-      const actorId = req.user?.id || req.query.userId;
+      const actorId = req.user?.id;
       if (!actorId) {
         return res.status(401).json({ success: false, error: 'Unauthorized' });
       }
-      const limit = parseInt(req.query.limit, 10) || 50;
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
       const skip = parseInt(req.query.skip, 10) || 0;
       const feed = await activityService.getUserFeed(actorId, { limit, skip });
       res.status(200).json({ success: true, data: feed });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   }
+
+  return {
+    getGlobalFeed,
+    getEntityFeed,
+    getUserFeed
+  };
 }
 
-export const activityController = new ActivityController();
-export default activityController;
+export default createActivityController;

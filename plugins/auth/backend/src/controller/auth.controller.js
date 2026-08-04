@@ -1,4 +1,10 @@
-import { signupSchema, loginSchema } from '../schema/auth.schema.js';
+import {
+  signupSchema,
+  loginSchema,
+  updateRoleSchema,
+  updateStatusSchema,
+  objectIdSchema
+} from '../schema/auth.schema.js';
 
 import { AppError } from '@campus-os/shared/errors';
 export function createAuthController({ registry, authService }) {
@@ -80,7 +86,9 @@ export function createAuthController({ registry, authService }) {
 
   async function listUsers(req, res, next) {
     try {
-      const users = await authService.listUsers();
+      const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+      const skip = parseInt(req.query.skip, 10) || 0;
+      const users = await authService.listUsers({ limit, skip });
       res.status(200).json({
         success: true,
         data: users
@@ -101,8 +109,8 @@ export function createAuthController({ registry, authService }) {
 
   async function updateRole(req, res, next) {
     try {
-      const { id } = req.params;
-      const { isSuperAdmin } = req.body;
+      const id = objectIdSchema.parse(req.params.id);
+      const { isSuperAdmin } = updateRoleSchema.parse(req.body);
       const user = await authService.updateUserRole(id, isSuperAdmin);
       res.status(200).json({ success: true, data: user });
     } catch (error) {
@@ -112,8 +120,8 @@ export function createAuthController({ registry, authService }) {
 
   async function updateStatus(req, res, next) {
     try {
-      const { id } = req.params;
-      const { isActive } = req.body;
+      const id = objectIdSchema.parse(req.params.id);
+      const { isActive } = updateStatusSchema.parse(req.body);
       const user = await authService.updateUserStatus(id, isActive);
       res.status(200).json({ success: true, data: user });
     } catch (error) {

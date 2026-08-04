@@ -10,8 +10,8 @@ export function createFormRepository(FormModel) {
       return await FormModel.findById(id).lean();
     },
 
-    async findAll() {
-      return await FormModel.find().lean();
+    async findAll({ limit = 100, skip = 0 } = {}) {
+      return await FormModel.find().skip(skip).limit(limit).lean();
     },
 
     async findByEntity(entityType, entityId) {
@@ -20,7 +20,7 @@ export function createFormRepository(FormModel) {
 
     async update(id, data) {
       return await FormModel.findByIdAndUpdate(id, data, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
       }).lean();
     }

@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+// removed useParams
 
 import {
   readAccessToken,
@@ -27,8 +27,6 @@ interface UserEventWithCheckIn extends EventItem {
 }
 
 export default function ParticipantDashboard() {
-  const params = useParams();
-  const clubId = params.slug as string;
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [events, setEvents] = useState<UserEventWithCheckIn[]>([]);
   const [error, setError] = useState('');
@@ -44,8 +42,8 @@ export default function ParticipantDashboard() {
       setError('');
 
       try {
-        // Fetch registered events
-        const userEvents = await fetchEvents(clubId, currentToken);
+        // Fetch all registered events globally
+        const userEvents = await fetchEvents({ myEvents: true }, currentToken);
 
         // Fetch check-in status for each event
         const eventsWithCheckIn = await Promise.all(
@@ -90,7 +88,7 @@ export default function ParticipantDashboard() {
     } else {
       setIsLoading(false);
     }
-  }, [accessToken, clubId]);
+  }, [accessToken]);
 
   const upcomingEvents = events.filter(
     (e) => new Date(e.startsAt) > new Date()

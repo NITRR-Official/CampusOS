@@ -111,19 +111,24 @@ plugins/<module>/
 
 These are the actual directories in `/plugins/` right now:
 
-| Module     | Directory             | Layer      |
-| ---------- | --------------------- | ---------- |
-| Auth       | `plugins/auth/`       | Foundation |
-| Club       | `plugins/club/`       | Foundation |
-| Institute  | `plugins/institute/`  | Foundation |
-| Event      | `plugins/event/`      | Event      |
-| Check-in   | `plugins/checkin/`    | Event      |
-| Task       | `plugins/task/`       | Execution  |
-| Calendar   | `plugins/calendar/`   | Execution  |
-| Vendor     | `plugins/vendor/`     | Operations |
-| Resource   | `plugins/resource/`   | Operations |
-| Scheduling | `plugins/scheduling/` | Operations |
-| Budget     | `plugins/budget/`     | Operations |
+| Module         | Directory                 | Layer      |
+| -------------- | ------------------------- | ---------- |
+| Auth           | `plugins/auth/`           | Foundation |
+| Club           | `plugins/club/`           | Foundation |
+| Institute      | `plugins/institute/`      | Foundation |
+| Admin          | `plugins/admin/`          | Foundation |
+| Plugin Manager | `plugins/plugin-manager/` | Foundation |
+| Activity       | `plugins/activity/`       | Foundation |
+| Event          | `plugins/event/`          | Event      |
+| Check-in       | `plugins/checkin/`        | Event      |
+| Forms          | `plugins/forms/`          | Event      |
+| Task           | `plugins/task/`           | Execution  |
+| Calendar       | `plugins/calendar/`       | Execution  |
+| Recruitment    | `plugins/recruitment/`    | Execution  |
+| Vendor         | `plugins/vendor/`         | Operations |
+| Resource       | `plugins/resource/`       | Operations |
+| Scheduling     | `plugins/scheduling/`     | Operations |
+| Budget         | `plugins/budget/`         | Operations |
 
 ## Module Communication Rules
 

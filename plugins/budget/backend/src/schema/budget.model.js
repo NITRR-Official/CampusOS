@@ -8,7 +8,8 @@ import mongoose from 'mongoose';
 const budgetSchema = new mongoose.Schema(
   {
     eventId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
       required: true,
       unique: true
     },
@@ -46,7 +47,8 @@ const budgetSchema = new mongoose.Schema(
 const expenseSchema = new mongoose.Schema(
   {
     budgetId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Budget',
       required: true,
       index: true
     },

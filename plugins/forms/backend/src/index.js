@@ -7,7 +7,7 @@ import { FormResponseModel } from './schema/form-response.model.js';
 import { createFormController } from './controller/form.controller.js';
 import { registerFormRoutes } from './routes/form.routes.js';
 
-export function init(app, registry, eventBus) {
+export async function init(app, registry, eventBus) {
   // 1. Get Shared Services
   const requirePermissions = registry.getService('requirePermissions');
 

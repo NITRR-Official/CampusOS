@@ -4,10 +4,10 @@
  */
 
 import { registerVendorRoutes } from './routes/vendor.routes.js';
-import VendorService from './service/vendor.service.js';
+import { createVendorService } from './service/vendor.service.js';
+import { VendorRepository } from './repository/vendor.repository.js';
 import { registerVendorHandlers } from './listeners/index.js';
-
-import vendorController from './controller/vendor.controller.js';
+import { createVendorController } from './controller/vendor.controller.js';
 
 export async function init(app, registry, eventBus) {
   const requirePermissions = registry.getService('requirePermissions');
@@ -16,11 +16,18 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission middleware service is not configured');
   }
 
+  const vendorRepository = new VendorRepository();
+  const vendorService = createVendorService(vendorRepository);
+  if (eventBus) {
+    vendorService.setEventBus(eventBus);
+  }
+  const vendorController = createVendorController(vendorService);
+
   if (eventBus) {
     vendorController.setEventBus(eventBus);
   }
 
-  registerVendorRoutes(app, requirePermissions);
+  registerVendorRoutes(app, vendorController, requirePermissions);
 
   registry.registerModule('vendor', {
     routes: [
@@ -61,7 +68,7 @@ export async function init(app, registry, eventBus) {
         .select('clubId')
         .lean();
       return vendorDoc?.clubId
-        ? { type: 'clubService', id: vendorDoc.clubId.toString() }
+        ? { type: 'club:member_service', id: vendorDoc.clubId.toString() }
         : null;
     } catch {
       return null;
@@ -69,7 +76,6 @@ export async function init(app, registry, eventBus) {
   });
 
   if (eventBus) {
-    const vendorService = new VendorService();
     registerVendorHandlers(eventBus, registry, vendorService);
   }
 }

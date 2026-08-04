@@ -1,6 +1,4 @@
-import { activityService } from '../service/activity.service.js';
-
-export function registerAuditListeners(eventBus) {
+export function registerAuditListeners(eventBus, activityService) {
   // High value events determined by the user for V1 logging
   const HIGH_VALUE_EVENTS = [
     'club:created',
@@ -25,57 +23,62 @@ export function registerAuditListeners(eventBus) {
 
   HIGH_VALUE_EVENTS.forEach((eventName) => {
     eventBus.on(eventName, async (payload) => {
-      // Intelligently parse the payload generic identifiers
-      const rawActorId =
-        payload?.actorId || payload?.userId || payload?.adminId;
-      const rawEntityId =
-        payload?.clubId ||
-        payload?.eventId ||
-        payload?.formId ||
-        payload?.campaignId ||
-        payload?.taskId ||
-        payload?.budgetId ||
-        payload?.resourceId ||
-        payload?.vendorId ||
-        payload?.id ||
-        payload?._id;
+      try {
+        // Intelligently parse the payload generic identifiers
+        const rawActorId =
+          payload?.actorId || payload?.userId || payload?.adminId;
+        const rawEntityId =
+          payload?.clubId ||
+          payload?.eventId ||
+          payload?.formId ||
+          payload?.campaignId ||
+          payload?.taskId ||
+          payload?.budgetId ||
+          payload?.resourceId ||
+          payload?.vendorId ||
+          payload?.id ||
+          payload?._id;
 
-      let entityType = 'system';
-      if (payload?.clubId || eventName.startsWith('club:')) entityType = 'club';
-      else if (payload?.eventId || eventName.startsWith('event:'))
-        entityType = 'event';
-      else if (payload?.formId || eventName.startsWith('form:'))
-        entityType = 'form';
-      else if (payload?.campaignId || eventName.startsWith('campaign:'))
-        entityType = 'campaign';
-      else if (payload?.taskId || eventName.startsWith('task:'))
-        entityType = 'task';
-      else if (payload?.budgetId || eventName.startsWith('budget:'))
-        entityType = 'budget';
-      else if (payload?.resourceId || eventName.startsWith('resource:'))
-        entityType = 'resource';
-      else if (payload?.vendorId || eventName.startsWith('vendor:'))
-        entityType = 'vendor';
+        let entityType = 'system';
+        if (payload?.clubId || eventName.startsWith('club:'))
+          entityType = 'club';
+        else if (payload?.eventId || eventName.startsWith('event:'))
+          entityType = 'event';
+        else if (payload?.formId || eventName.startsWith('form:'))
+          entityType = 'form';
+        else if (payload?.campaignId || eventName.startsWith('campaign:'))
+          entityType = 'campaign';
+        else if (payload?.taskId || eventName.startsWith('task:'))
+          entityType = 'task';
+        else if (payload?.budgetId || eventName.startsWith('budget:'))
+          entityType = 'budget';
+        else if (payload?.resourceId || eventName.startsWith('resource:'))
+          entityType = 'resource';
+        else if (payload?.vendorId || eventName.startsWith('vendor:'))
+          entityType = 'vendor';
 
-      // Dynamic import to avoid mongoose dependency at module load if not needed
-      const mongoose = await import('mongoose');
+        // Dynamic import to avoid mongoose dependency at module load if not needed
+        const mongoose = await import('mongoose');
 
-      const actorId = mongoose.Types.ObjectId.isValid(rawActorId)
-        ? rawActorId
-        : null;
-      const entityId = mongoose.Types.ObjectId.isValid(rawEntityId)
-        ? rawEntityId
-        : null;
+        const actorId = mongoose.Types.ObjectId.isValid(rawActorId)
+          ? rawActorId
+          : null;
+        const entityId = mongoose.Types.ObjectId.isValid(rawEntityId)
+          ? rawEntityId
+          : null;
 
-      const logPayload = {
-        actorId,
-        action: eventName,
-        entityId,
-        entityType,
-        metadata: payload
-      };
+        const logPayload = {
+          actorId,
+          action: eventName,
+          entityId,
+          entityType,
+          metadata: payload
+        };
 
-      await activityService.logActivity(logPayload);
+        await activityService.logActivity(logPayload);
+      } catch (err) {
+        console.error(`[ActivityAudit] Failed to log event ${eventName}:`, err);
+      }
     });
   });
 }

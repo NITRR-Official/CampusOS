@@ -13,10 +13,14 @@ export function createCandidateController({
   // Helper for dynamic RBAC
   const assertManagePermission = async (entityType, entityId, user) => {
     const policy = registry.getService(`${entityType}RbacPolicy`);
-    if (policy) {
-      const context = await policy.getContext(entityId, user);
-      policy.assertPermissions(['recruitment:manage'], context);
+    if (!policy) {
+      throw new AppError(
+        `No RBAC policy found for entity type ${entityType}`,
+        500
+      );
     }
+    const context = await policy.getContext(entityId, user);
+    policy.assertPermissions(['recruitment:manage'], context);
   };
 
   const checkCandidateAccess = async (candidateId, user) => {
@@ -35,7 +39,7 @@ export function createCandidateController({
         );
 
         // Fetch user names
-        const User = mongoose.model('User');
+        const User = registry.getService('core:models').User;
         const userIds = candidates
           .map((c) => c.userId)
           .filter((id) => mongoose.Types.ObjectId.isValid(id));
@@ -92,9 +96,6 @@ export function createCandidateController({
         );
         res.status(200).json({ success: true, data: candidate });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     },
@@ -110,9 +111,6 @@ export function createCandidateController({
         );
         res.status(200).json({ success: true, data: candidate });
       } catch (error) {
-        if (error.name === 'ZodError') {
-          return next(new AppError('Validation failed', 400, error.errors));
-        }
         next(error);
       }
     }
