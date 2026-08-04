@@ -13,6 +13,7 @@ The `resource` plugin registers the following atomic permissions:
 
 | Permission ID     | Label            | Description                                              |
 | ----------------- | ---------------- | -------------------------------------------------------- |
+| `resource:view`   | View Resources   | Allows viewing resource data                             |
 | `resource:manage` | Manage Resources | Allows adding, removing, and updating physical resources |
 
 ## 3. Services Exported

@@ -17,18 +17,17 @@ This document tracks technical debt, scaling strategies, and security upgrades t
 
 ## Core Architecture (Pub/Sub)
 
-### 2. Event Bus Scaling & Constraints
+### 2. Event Bus Persistence (Message Broker)
 
 **Current State:** The system uses an in-memory Node.js `EventEmitter` (`backend/src/core/event-bus.js`) for cross-plugin communication.
-**The Risks/Limitations:**
 
-1.  **Synchronous Blocking:** The native `EventEmitter` is synchronous. Heavy event listeners can block the main thread and delay HTTP responses.
-2.  **Payload Mutability:** Objects are passed by reference. A rogue plugin listener can mutate the event payload, affecting downstream listeners.
-3.  **No Persistence:** If the server crashes, unprocessed events are lost forever.
-    **The Upgrade Path:**
+- **Resolved**: We recently wrapped emissions in `setImmediate` (to fix synchronous blocking) and `structuredClone` (to fix payload mutability).
+  **The Risks/Limitations:**
+- **No Persistence:** If the server crashes, unprocessed events in the event loop are lost forever. We lack guaranteed delivery across distributed instances.
 
-- **Short-Term (Code Convention):** Enforce strict namespacing (e.g., `event:created`), emit only IDs instead of full objects to avoid mutability traps, and mandate that listeners wrap heavy work in Promises or `setImmediate`.
-- **Long-Term (Message Broker):** As the monolith scales or breaks into microservices, replace the internal `EventEmitter` with a distributed message broker (e.g., Redis Pub/Sub, RabbitMQ, or Kafka). This provides guaranteed delivery, asynchronous processing, and persistence.
+**The Upgrade Path:**
+
+- **Long-Term (Message Broker):** As the monolith scales or breaks into microservices, replace the internal `EventEmitter` with a distributed message broker (e.g., Redis Pub/Sub, RabbitMQ, or Kafka). This provides guaranteed delivery, asynchronous processing, horizontal scaling, and persistence.
 
 ## V2 Enterprise Features (Post V1 Launch)
 

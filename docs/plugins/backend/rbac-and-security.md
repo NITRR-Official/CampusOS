@@ -60,11 +60,14 @@ However, if your plugin introduces a new type of context (e.g., `instituteId` or
 export async function init(app, registry, eventBus) {
   // Tell the global middleware how to resolve the "institute" context
   registry.registerContextResolver(
-    'instituteService', // The service that implements getUserPermissions()
+    '/api/v1/institutes', // The route prefix to match
     (req) => {
       // If the route has an :instituteId, return the context
-      if (req.params.instituteId) {
-        return { type: 'instituteService', id: req.params.instituteId };
+      if (req.params.instituteId || req.body.instituteId) {
+        return {
+          type: 'institute:member_service',
+          id: req.params.instituteId || req.body.instituteId
+        };
       }
       return null;
     }

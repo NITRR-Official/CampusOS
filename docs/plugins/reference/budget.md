@@ -11,9 +11,10 @@ The `budget` plugin provides financial tracking, expense reporting, and resource
 
 The `budget` plugin registers the following atomic permissions:
 
-| Permission ID   | Label          | Description                                                         |
-| --------------- | -------------- | ------------------------------------------------------------------- |
-| `budget:manage` | Manage Budgets | Allows creating, updating, and viewing financial ledgers for a club |
+| Permission ID   | Label          | Description                                               |
+| --------------- | -------------- | --------------------------------------------------------- |
+| `budget:view`   | View Budgets   | Allows viewing financial ledgers                          |
+| `budget:manage` | Manage Budgets | Allows creating, updating, and managing financial ledgers |
 
 ## 3. Services Exported
 

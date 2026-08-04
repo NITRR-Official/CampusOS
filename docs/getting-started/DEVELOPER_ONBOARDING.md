@@ -22,10 +22,15 @@ CampusOS/
 │   ├── auth/              #   User registration, login, JWT
 │   ├── club/              #   Club management
 │   ├── institute/         #   Institute management
+│   ├── admin/             #   Super-admin management
+│   ├── plugin-manager/    #   Dynamic plugin registry
+│   ├── activity/          #   Activity feeds
 │   ├── event/             #   Event CRUD
 │   ├── checkin/           #   QR check-in
+│   ├── forms/             #   Dynamic forms
 │   ├── task/              #   Task assignment
 │   ├── calendar/          #   Calendar management
+│   ├── recruitment/       #   Candidate campaigns
 │   ├── vendor/            #   Vendor management
 │   ├── resource/          #   Resource allocation
 │   ├── scheduling/        #   Time slot scheduling
@@ -126,7 +131,7 @@ sequenceDiagram
 
     F->>B: fetch('/api/v1/vendors')<br/>Authorization: Bearer <token>
     B->>M: middleware/auth.js (Verifies JWT)
-    M->>M: middleware/permissions (Checks role)
+    M->>M: middleware/permissions.js (Checks atomic permissions)
     M->>R: plugins/vendor/routes (Matches route)
     R->>R: plugins/vendor/controller (Extracts params, calls service)
     R->>S: plugins/vendor/service (Business logic → MongoDB)

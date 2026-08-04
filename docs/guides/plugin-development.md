@@ -14,11 +14,19 @@ Every plugin must live in its own directory inside the `plugins/` folder of the 
 plugins/
 └── recruitment/
     ├── plugin.json         # (Required) Metadata and dependencies
-    ├── src/
-    │   ├── index.js        # (Required) Entry point
-    │   ├── controller/     # Express route handlers
-    │   ├── routes/         # Express router definitions
-    │   └── schema/         # Mongoose models
+    ├── backend/
+    │   └── src/
+    │       ├── index.js    # (Required) Backend Entry point
+    │       ├── controller/ # Express controllers (Factory pattern)
+    │       ├── routes/     # Express route definitions
+    │       ├── service/    # Business logic (Factory pattern)
+    │       └── schema/     # Mongoose models
+    ├── frontend/
+    │   ├── api/            # API clients & React Query hooks
+    │   ├── components/     # Internal UI components specific to plugin
+    │   ├── hooks/          # Custom React hooks (e.g. useApplications)
+    │   ├── lib/            # Utilities, Zod schemas, helper functions
+    │   └── pages/          # Top-level React page components
     └── package.json        # (Optional) If you have unique NPM dependencies
 ```
 
@@ -100,12 +108,14 @@ CampusOS provides a centralized design system containing all Shadcn UI component
 
 ---
 
-## 4. The Entry Point (`src/index.js`)
+## 4. The Entry Point (`backend/src/index.js`)
 
 Your plugin must export an `init` function as its default or named export. The CampusOS plugin loader will dynamically import this file and invoke `init(app, registry, eventBus)`.
 
 ```javascript
 import { registerRecruitmentRoutes } from './routes/recruitment.routes.js';
+import { createRecruitmentService } from './service/recruitment.service.js';
+import { createRecruitmentController } from './controller/recruitment.controller.js';
 
 export async function init(app, registry, eventBus) {
   // 1. Fetch cross-plugin services (e.g., RBAC middleware)
@@ -114,10 +124,14 @@ export async function init(app, registry, eventBus) {
     throw new Error('Permission service is missing');
   }
 
-  // 2. Mount your Express routes
-  registerRecruitmentRoutes(app, requirePermissions);
+  // 2. Instantiate your factories (Dependency Inversion Principle)
+  const recruitmentService = createRecruitmentService(); // Pass a repository if needed
+  const recruitmentController = createRecruitmentController(recruitmentService);
 
-  // 3. Register your module with the system so the Frontend can discover it
+  // 3. Mount your Express routes
+  registerRecruitmentRoutes(app, recruitmentController, requirePermissions);
+
+  // 4. Register your module with the system so the Frontend can discover it
   registry.registerModule('recruitment', {
     routes: [
       'GET /api/v1/recruitment/applications',
@@ -188,21 +202,17 @@ CampusOS uses a strictly enforced Discord-style RBAC system. You should protect 
 // routes/recruitment.routes.js
 import express from 'express';
 
-export function registerRecruitmentRoutes(app, requirePermissions) {
+export function registerRecruitmentRoutes(app, controller, requirePermissions) {
   const router = express.Router({ mergeParams: true });
 
   // Anyone can apply (Requires Authentication via token, but no specific club permission)
-  router.post('/clubs/:clubId/apply', (req, res) => {
-    res.json({ success: true, message: 'Applied!' });
-  });
+  router.post('/clubs/:clubId/apply', controller.apply);
 
   // Only users with 'recruitment:manage' in this specific club can view applications
   router.get(
     '/clubs/:clubId/applications',
     requirePermissions('recruitment:manage'),
-    (req, res) => {
-      res.json({ success: true, applications: [] });
-    }
+    controller.getApplications
   );
 
   app.use('/api/v1', router);
@@ -215,8 +225,8 @@ export function registerRecruitmentRoutes(app, requirePermissions) {
 
 ## 6. Best Practices
 
-1. **Dependency Injection for Core Models**: Never use relative imports to reach out of your plugin into the monolith (e.g. `import User from '../../../../../backend/src/...'`). Instead, fetch the system's `User` and `Plugin` models from `registry.getService('core:models')` during your `init` function.
-2. **Unified Error Handling**: Never create your own local `createHttpError` functions. Always import and throw `AppError` from the core for generic domain errors. The global error middleware will automatically format it.
+1. **Dependency Inversion Principle (DIP)**: Never use classes that directly import Mongoose models. Instead, use Factory Functions (e.g., `createService(repository)`) and inject repositories. This eliminates circular dependencies and makes unit testing trivial.
+2. **Unified Error Handling & Zod**: Never create your own local `createHttpError` functions. Validate incoming data using `Zod` (the global error handler automatically catches `ZodError`), and throw `AppError` from the core for generic domain errors.
 3. **EventBus Hygiene**: Always namespace your events (e.g., `recruitment:applied`), only emit lightweight IDs (not full objects) to avoid mutation traps, and ensure listeners use `async` to prevent blocking the main Node.js event loop.
 4. **Register everything**: Always register your module and permissions so the Frontend UI can render checkboxes and routes dynamically.
 5. **Database Isolation**: Keep your Mongoose models self-contained inside your plugin's `schema/` folder.

@@ -58,31 +58,36 @@ export async function init(app, registry) {
 
 ```javascript
 import { registerVendorRoutes } from './routes/vendor.routes.js';
+import { createVendorService } from './service/vendor.service.js';
+import { VendorRepository } from './repository/vendor.repository.js';
+import { createVendorController } from './controller/vendor.controller.js';
 
-export async function init(app, registry) {
-  const requireRoles = registry.getService('requireRoles');
+export async function init(app, registry, eventBus) {
+  const requirePermissions = registry.getService('requirePermissions');
 
-  if (typeof requireRoles !== 'function') {
-    throw new Error('Permission middleware service is not configured');
+  const vendorRepository = new VendorRepository();
+  const vendorService = createVendorService(vendorRepository);
+  const vendorController = createVendorController(vendorService);
+
+  if (eventBus) vendorService.setEventBus(eventBus);
+
+  registerVendorRoutes(app, vendorController, requirePermissions);
+
+  if (registry.permissions) {
+    registry.permissions.register({
+      id: 'vendor:manage',
+      module: 'vendor',
+      label: 'Manage Vendors'
+    });
   }
-
-  registerVendorRoutes(app, requireRoles);
-
-  registry.registerModule('vendor', {
-    routes: [
-      'POST /api/v1/vendors',
-      'GET /api/v1/vendors'
-      // ... etc
-    ]
-  });
 }
 ```
 
 ### Key patterns to notice:
 
 1. **Export a named `init` function** (or default export) — the loader accepts either
-2. **Receive `(app, registry)` as arguments** — `app` is Express, `registry` is the service locator
-3. **Get shared services from the registry** — like `requireRoles` for RBAC
+2. **Receive `(app, registry, eventBus)` as arguments** — `app` is Express, `registry` is the service locator, `eventBus` is for cascade events
+3. **Get shared services from the registry** — like `requirePermissions` for RBAC
 4. **Register your routes directly on `app`** — there's no route aggregator
 5. **Register your module in the registry** — `registry.registerModule('name', { routes })` for discoverability
 
@@ -139,7 +144,7 @@ Modules cannot import each other. This is enforced by convention:
 import { UserService } from '../../auth/src/service/auth.service.js';
 
 // ✅ Use the registry — loose coupling
-const requireRoles = registry.getService('requireRoles');
+const requirePermissions = registry.getService('requirePermissions');
 ```
 
 Modules communicate through:
@@ -172,23 +177,21 @@ const myModuleSchema = new mongoose.Schema(
 export const MyModel = mongoose.model('MyModel', myModuleSchema);
 ```
 
-### Step 3: Create the service (business logic)
+### Step 3: Create the repository and service (business logic)
 
 ```javascript
 // plugins/my-module/src/service/my-module.service.js
-import { MyModel } from '../schema/my-module.schema.js';
-
-export class MyModuleService {
-  async create(data) {
-    const doc = new MyModel(data);
-    await doc.save();
-    return { success: true, data: doc.toObject() };
-  }
-
-  async getAll(filters = {}) {
-    const docs = await MyModel.find(filters);
-    return { success: true, count: docs.length, data: docs };
-  }
+export function createMyModuleService(repository) {
+  return {
+    async create(data) {
+      const doc = await repository.create(data);
+      return { success: true, data: doc };
+    },
+    async getAll(filters = {}) {
+      const docs = await repository.find(filters);
+      return { success: true, count: docs.length, data: docs };
+    }
+  };
 }
 ```
 
@@ -196,26 +199,25 @@ export class MyModuleService {
 
 ```javascript
 // plugins/my-module/src/controller/my-module.controller.js
-import { MyModuleService } from '../service/my-module.service.js';
-
-const service = new MyModuleService();
-
-export async function create(req, res, next) {
-  try {
-    const result = await service.create(req.body);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
-  }
-}
-
-export async function getAll(req, res, next) {
-  try {
-    const result = await service.getAll(req.query);
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
+export function createMyModuleController(service) {
+  return {
+    async create(req, res, next) {
+      try {
+        const result = await service.create(req.body);
+        res.status(201).json(result);
+      } catch (error) {
+        next(error);
+      }
+    },
+    async getAll(req, res, next) {
+      try {
+        const result = await service.getAll(req.query);
+        res.json(result);
+      } catch (error) {
+        next(error);
+      }
+    }
+  };
 }
 ```
 
@@ -224,13 +226,12 @@ export async function getAll(req, res, next) {
 ```javascript
 // plugins/my-module/src/routes/my-module.routes.js
 import { Router } from 'express';
-import * as controller from '../controller/my-module.controller.js';
 
-export function registerMyModuleRoutes(app, requireRoles) {
+export function registerMyModuleRoutes(app, controller, requirePermissions) {
   const router = Router();
 
   router.get('/', controller.getAll);
-  router.post('/', requireRoles('admin', 'coordinator'), controller.create);
+  router.post('/', requirePermissions('my-module:manage'), controller.create);
 
   app.use('/api/v1/my-module', router);
 }
@@ -241,14 +242,16 @@ export function registerMyModuleRoutes(app, requireRoles) {
 ```javascript
 // plugins/my-module/src/index.js
 import { registerMyModuleRoutes } from './routes/my-module.routes.js';
+import { createMyModuleService } from './service/my-module.service.js';
+import { createMyModuleController } from './controller/my-module.controller.js';
 
-export async function init(app, registry) {
-  const requireRoles = registry.getService('requireRoles');
-  registerMyModuleRoutes(app, requireRoles);
+export async function init(app, registry, eventBus) {
+  const requirePermissions = registry.getService('requirePermissions');
 
-  registry.registerModule('my-module', {
-    routes: ['GET /api/v1/my-module', 'POST /api/v1/my-module']
-  });
+  const service = createMyModuleService(); // Inject repo if used
+  const controller = createMyModuleController(service);
+
+  registerMyModuleRoutes(app, controller, requirePermissions);
 }
 ```
 

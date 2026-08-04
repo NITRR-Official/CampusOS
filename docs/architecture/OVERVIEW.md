@@ -81,7 +81,8 @@ All feature code lives in `/plugins/<module>/`. The backend core (`backend/src/`
 
 Modules talk to each other through:
 
-- **The service registry** — `registry.getService('requireRoles')`
+- **The service registry** — `registry.getService('requirePermissions')`
+- **The EventBus** — `eventBus.emit('club:deleted', { clubId })` to trigger cross-domain actions like cascade deletes
 - **The database** — Modules can read any collection via Mongoose
 
 This rule ensures you can add, remove, or disable modules without breaking others.
@@ -96,22 +97,22 @@ Don't build "all services first, then all controllers." This catches integration
 
 ## Tech Stack
 
-| Component       | Technology                          | Why                                                        |
-| --------------- | ----------------------------------- | ---------------------------------------------------------- |
-| **Backend**     | Node.js 18+ with Express **v5**     | ES module support, async middleware natively               |
-| **Frontend**    | Next.js 16 (App Router) + React 19  | SSR, file-based routing, TypeScript                        |
-| **Database**    | MongoDB + Mongoose                  | Flexible schemas, fast prototyping, embedded documents     |
-| **UI**          | Tailwind CSS v4 + shadcn/ui         | Utility-first styling with pre-built accessible components |
-| **Validation**  | Zod (frontend) + Mongoose (backend) | Schema validation at both ends                             |
-| **Auth**        | JWT (HS256)                         | Stateless auth, simple to implement                        |
-| **Package mgr** | pnpm (workspaces)                   | Fast, strict, supports monorepo                            |
+| Component       | Technology                              | Why                                                        |
+| --------------- | --------------------------------------- | ---------------------------------------------------------- |
+| **Backend**     | Node.js 18+ with Express **v5**         | ES module support, async middleware natively               |
+| **Frontend**    | Next.js 16 (App Router) + React 19      | SSR, file-based routing, TypeScript                        |
+| **Database**    | MongoDB + Mongoose                      | Flexible schemas, fast prototyping, embedded documents     |
+| **UI**          | Tailwind CSS v4 + shadcn/ui             | Utility-first styling with pre-built accessible components |
+| **Validation**  | Zod (frontend & API schemas) + Mongoose | Schema validation at API layer and Database layer          |
+| **Auth**        | JWT (HS256)                             | Stateless auth, simple to implement                        |
+| **Package mgr** | pnpm (workspaces)                       | Fast, strict, supports monorepo                            |
 
 ## Non-Negotiable Rules
 
 1. **Feature code goes in `/plugins/`** — Not in `backend/src/`
 2. **No direct module imports** — Use the registry or database
 3. **Controllers are thin** — Business logic belongs in services
-4. **Every module exports `init(app, registry)`** — That's the plugin contract
+4. **Every module exports `init(app, registry, eventBus)`** — That's the plugin contract
 5. **ES modules only** — `import`/`export`, never `require()`
 
 ## When You're Unsure

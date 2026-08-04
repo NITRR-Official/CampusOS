@@ -15,13 +15,14 @@ plugins/scheduling/  plugins/budget/
 
 Backend core (`backend/src/`) only handles middleware, plugin loading, and the service registry.
 
-### 2. Every module exports `init(app, registry)`
+### 2. Every module exports `init(app, registry, eventBus)`
 
 ```javascript
-// plugins/my-module/src/index.js
-export async function init(app, registry) {
-  const requireRoles = registry.getService('requireRoles');
-  registerRoutes(app, requireRoles);
+// plugins/my-module/backend/src/index.js
+export async function init(app, registry, eventBus) {
+  const requirePermissions = registry.getService('requirePermissions');
+  // Initialize services and controllers
+  registerRoutes(app, controller, requirePermissions);
   registry.registerModule('my-module', { routes: [...] });
 }
 ```
@@ -92,85 +93,98 @@ var vendors = [];
 
 ## Controller Pattern
 
-Controllers are thin. They extract params, call the service, and send the response:
+Controllers are created via factory functions. They extract params, call the service, and send the response:
 
 ```javascript
-async createVendor(req, res, next) {
-  try {
-    const { name, category, email, phone } = req.body;
-    const result = await vendorService.createVendor({ name, category, email, phone });
+export function createVendorController(vendorService) {
+  return {
+    async createVendor(req, res, next) {
+      try {
+        const { name, category, email, phone } = req.body;
+        // Centralized Zod middleware handles validation before this runs
+        const result = await vendorService.createVendor({
+          name,
+          category,
+          email,
+          phone
+        });
 
-    if (!result.success) {
-      return res.status(400).json({ error: result.error });
+        if (!result.success) {
+          return res.status(400).json({ error: result.error });
+        }
+
+        return res.status(201).json(result.vendor);
+      } catch (error) {
+        return next(error);
+      }
     }
-
-    return res.status(201).json(result.vendor);
-  } catch (error) {
-    return next(error);
-  }
+  };
 }
 ```
 
 **Rules**:
 
-- Extract specific fields from `req.body` — don't spread the whole thing
-- Always wrap in `try/catch`
-- Always call `next(error)` in catch blocks
-- No business logic — that goes in services
+- Controllers must be factories that accept services (Dependency Injection).
+- Extract specific fields from `req.body` — don't spread the whole thing.
+- Always wrap in `try/catch`.
+- Always call `next(error)` in catch blocks.
+- No business logic — that goes in services.
 
 ## Service Pattern
 
-Services contain business logic and return result objects:
+Services are created via factory functions and inject repositories:
 
 ```javascript
-createVendor(data) {
-  if (!data.name || !data.email) {
-    return { success: false, error: 'Missing required fields' };
-  }
-
-  const vendor = new Vendor(data);
-  await vendor.save();
-  return { success: true, vendor: vendor.toObject() };
+export function createVendorService(repository) {
+  return {
+    async createVendor(data) {
+      // Zod has already validated `data` at the API layer
+      const vendor = await repository.create(data);
+      return { success: true, vendor };
+    }
+  };
 }
 ```
 
 **Rules**:
 
-- Return `{ success: true, data }` or `{ success: false, error }`
-- Don't throw for business errors — return error objects
-- Only throw for unexpected/system errors
+- Services must be factories that accept repositories. Never import Mongoose models directly.
+- Return `{ success: true, data }` or `{ success: false, error }`.
+- Don't throw for business errors — return error objects.
+- Only throw for unexpected/system errors.
 
 ## Route Pattern
 
-Routes register directly on `app` and use `requireRoles` for RBAC:
+Routes register directly on `app` and use `requirePermissions` for RBAC:
 
 ```javascript
-export function registerVendorRoutes(app, requireRoles) {
+export function registerVendorRoutes(app, controller, requirePermissions) {
   app.post(
     '/api/v1/vendors',
-    requireRoles('admin', 'coordinator'),
-    controller.create
+    requirePermissions('vendor:manage'),
+    controller.createVendor
   );
-  app.get('/api/v1/vendors', controller.list);
+  app.get('/api/v1/vendors', controller.listVendors);
   app.delete(
     '/api/v1/vendors/:vendorId',
-    requireRoles('admin'),
-    controller.delete
+    requirePermissions('vendor:delete'),
+    controller.deleteVendor
   );
 }
 ```
 
 ## Naming Conventions
 
-| Element          | Convention           | Example             |
-| ---------------- | -------------------- | ------------------- |
-| Files            | `kebab-case.js`      | `vendor.service.js` |
-| Variables        | `camelCase`          | `vendorService`     |
-| Classes          | `PascalCase`         | `VendorService`     |
-| Functions        | `camelCase`          | `createVendor`      |
-| Constants        | `UPPER_SNAKE_CASE`   | `PUBLIC_ROUTES`     |
-| React components | `PascalCase`         | `ThemeToggle`       |
-| API routes       | `/api/v1/kebab-case` | `/api/v1/vendors`   |
+| Element          | Convention           | Example               |
+| ---------------- | -------------------- | --------------------- |
+| Files            | `kebab-case.js`      | `vendor.service.js`   |
+| Variables        | `camelCase`          | `vendorService`       |
+| Factories        | `camelCase`          | `createVendorService` |
+| Classes (Repos)  | `PascalCase`         | `VendorRepository`    |
+| Functions        | `camelCase`          | `createVendor`        |
+| Constants        | `UPPER_SNAKE_CASE`   | `PUBLIC_ROUTES`       |
+| React components | `PascalCase`         | `ThemeToggle`         |
+| API routes       | `/api/v1/kebab-case` | `/api/v1/vendors`     |
 
 ## TypeScript (Frontend)
 

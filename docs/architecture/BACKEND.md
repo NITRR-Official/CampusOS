@@ -81,28 +81,28 @@ Everything else requires a `Bearer` token in the `Authorization` header.
 The registry (`utils/registry.js`) is a singleton `ModuleRegistry` with 4 Map-based stores:
 
 ```javascript
-registry.modules; // Map — loaded plugin metadata
-registry.services; // Map — shared service instances
-registry.authenticators; // Map — auth strategies (e.g., 'jwt')
-registry.resolvers; // Map — data resolvers
-registry.events; // EventBus — cross-plugin asynchronous event emitter
+registry.permissions; // PermissionRegistry — for atomic RBAC
+registry.getAllModules(); // Array of loaded modules
+registry.getAllServices(); // Array of shared services
+registry.getAuthenticator('jwt'); // Retrieve auth strategies
+registry.resolveContext(req); // Dynamically look up contexts (like clubId)
 ```
 
 It's attached to the Express app via `app.locals.registry`, so any middleware or route handler can access it:
 
 ```javascript
 // In a plugin's init function — register something
-registry.registerService('requireRoles', requireRoles);
+registry.registerService('requirePermissions', requirePermissions);
 registry.registerService('core:models', { ... }); // Mongoose models
 registry.registerAuthenticator('jwt', jwtAuthenticator);
 registry.registerModule('vendor', { routes: [...] });
 
 // In a controller — retrieve something
-const requireRoles = req.app.locals.registry.getService('requireRoles');
+const requirePermissions = req.app.locals.registry.getService('requirePermissions');
 const EventModel = req.app.locals.registry.getService('core:models').Event;
 
-// Trigger an event
-req.app.locals.registry.events.emit('club:deleted', { clubId });
+// Trigger an event via eventBus
+eventBus.emit('club:deleted', { clubId });
 ```
 
 This is how modules communicate without importing each other.
@@ -119,7 +119,7 @@ This is how modules communicate without importing each other.
    - `plugin.js` (root of module)
    - `src/index.js`
 6. Dynamically imports the entry file
-7. Calls `init(app, registry)` — the module's exported function
+7. Calls `init(app, registry, eventBus)` — the module's exported function
 8. If a module fails to load, it logs the error but continues loading others
 
 In production, a plugin failure is fatal. In development, it's logged and skipped.
@@ -135,20 +135,25 @@ In production, a plugin failure is fatal. In development, it's logged and skippe
 
 ## RBAC
 
-`middleware/permissions.js` exports `requireRoles()` — a factory that returns middleware:
+`middleware/permissions.js` exports `requirePermissions()` — a factory that returns middleware enforcing granular atomic permissions:
 
 ```javascript
 // In a route definition:
-router.delete('/:id', requireRoles('admin'), controller.delete);
-router.post('/', requireRoles('admin', 'coordinator'), controller.create);
+router.delete('/:id', requirePermissions('event:delete'), controller.delete);
+router.post(
+  '/',
+  requirePermissions('event:create', 'event:edit'),
+  controller.create
+);
 ```
 
-Valid roles: `admin`, `coordinator`, `volunteer`
+Permissions are granular (e.g., `club:view`, `event:delete`). Roles map to sets of these atomic permissions dynamically.
 
-The `requireRoles` function is registered as a service so plugins can access it:
+The `requirePermissions` function and `requireSuperAdmin` are exported from `middleware/permissions.js` and registered as services so plugins can access them:
 
 ```javascript
-const requireRoles = registry.getService('requireRoles');
+const requirePermissions = registry.getService('requirePermissions');
+const requireSuperAdmin = registry.getService('requireSuperAdmin');
 ```
 
 ## Error Handling

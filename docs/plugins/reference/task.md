@@ -13,6 +13,7 @@ The `task` plugin registers the following atomic permissions:
 
 | Permission ID | Label        | Description                                                        |
 | ------------- | ------------ | ------------------------------------------------------------------ |
+| `task:view`   | View Tasks   | Allows viewing task boards and assignments                         |
 | `task:manage` | Manage Tasks | Allows creating task boards, assigning members, and deleting tasks |
 
 ## 3. Services Exported

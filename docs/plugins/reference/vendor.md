@@ -13,6 +13,7 @@ The `vendor` plugin registers the following atomic permissions:
 
 | Permission ID   | Label          | Description                                                |
 | --------------- | -------------- | ---------------------------------------------------------- |
+| `vendor:view`   | View Vendors   | Allows viewing vendor data                                 |
 | `vendor:manage` | Manage Vendors | Allows adding or removing external sponsor/contractor data |
 
 ## 3. Services Exported

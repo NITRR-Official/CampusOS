@@ -18,6 +18,7 @@ The `event` plugin registers the following atomic permissions to the CampusOS co
 
 | Permission ID  | Label         | Description                                     |
 | -------------- | ------------- | ----------------------------------------------- |
+| `event:view`   | View Events   | Allows viewing events data                      |
 | `event:create` | Create Events | Allows creating new events for a club           |
 | `event:manage` | Manage Events | Allows editing, publishing, and deleting events |
 
