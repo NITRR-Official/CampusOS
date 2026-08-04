@@ -3,6 +3,7 @@
  * Initializes the Express app and starts the HTTP server
  */
 
+import 'dotenv/config';
 import registry from './utils/registry.js';
 import { createApp } from './app.js';
 import { startServer } from './server.js';

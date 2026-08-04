@@ -328,14 +328,10 @@ GET /api/v1/budget/bdg-456/summary
 
 ## Frontend Integration
 
-API clients live in `frontend/lib/`:
+API clients are isolated by plugin and live in `plugins/<module>/frontend/api.ts`.
+React Query hooks for components live in `plugins/<module>/frontend/hooks.ts`.
 
-- `vendor-api.ts` — Vendor API client
-- `resource-api.ts` — Resource API client
-- `scheduling-api.ts` — Scheduling API client
-- `budget-api.ts` — Budget API client
-
-All clients handle authentication and error handling automatically.
+All clients utilize the global `apiClient` (`frontend/lib/api/client.ts`) which automatically handles authentication (Bearer tokens), error propagation, and **Zod schema validation** for strict type safety on responses.
 
 ---
 

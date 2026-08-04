@@ -17,7 +17,7 @@ trigger: model_decision
 
 1. Create release branch: `git checkout -b release/v2.1.0`
 2. Bump version: `pnpm version minor`
-3. Run full test suite: `pnpm -C apps/<module> test -- --run`
+3. Run full test suite: `pnpm -C plugins/<module> test -- --run`
 4. Build: `pnpm build`
 5. Generate changelog from conventional commits
 6. Create PR to `main` for review

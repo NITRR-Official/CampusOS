@@ -44,7 +44,7 @@ Rules:
 ### Phase 2: Schema Locations
 
 - **Operations modules** (vendor, resource, scheduling, budget): `backend/src/database/schemas/`
-- **Other modules**: `apps/<module>/src/schema/`
+- **Other modules**: `plugins/<module>/src/schema/`
 
 ### Phase 3: Indexing Strategy
 

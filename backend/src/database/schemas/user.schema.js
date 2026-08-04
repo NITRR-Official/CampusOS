@@ -7,10 +7,6 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
-    _id: {
-      type: String,
-      default: () => new mongoose.Types.ObjectId().toString()
-    },
     name: {
       type: String,
       required: true,
@@ -27,10 +23,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true
     },
-    role: {
-      type: String,
-      enum: ['admin', 'coordinator', 'volunteer', 'user'],
-      default: 'volunteer'
+    isSuperAdmin: {
+      type: Boolean,
+      default: false
     },
     isActive: {
       type: Boolean,
@@ -43,6 +38,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.index({ role: 1 });
+userSchema.set('toJSON', { virtuals: true });
+userSchema.set('toObject', { virtuals: true });
 
 export const User = mongoose.model('User', userSchema);

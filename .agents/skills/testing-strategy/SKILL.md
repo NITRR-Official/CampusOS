@@ -36,7 +36,7 @@ export default defineConfig({
 
 Tests co-locate with source code:
 ```
-apps/<module>/src/service/
+plugins/<module>/src/service/
 ├── module.service.js       # Service implementation
 └── module.service.test.js  # Tests
 ```
@@ -109,7 +109,7 @@ it('should fail with invalid enum value', async () => {
 
 Run with coverage per module:
 ```bash
-pnpm -C apps/vendor test -- --coverage
+pnpm -C plugins/vendor test -- --coverage
 ```
 
 Targets:
@@ -121,16 +121,16 @@ Targets:
 
 ```bash
 # Run single module tests
-pnpm -C apps/vendor test -- --run
+pnpm -C plugins/vendor test -- --run
 
 # Watch mode
-pnpm -C apps/vendor test
+pnpm -C plugins/vendor test
 
 # With coverage
-pnpm -C apps/vendor test -- --coverage
+pnpm -C plugins/vendor test -- --coverage
 
 # Run all module tests
-pnpm -C apps/vendor test -- --run && pnpm -C apps/resource test -- --run
+pnpm -C plugins/vendor test -- --run && pnpm -C plugins/resource test -- --run
 ```
 
 ## Current Test Suite

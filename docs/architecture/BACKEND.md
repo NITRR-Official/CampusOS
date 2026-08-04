@@ -29,7 +29,7 @@ backend/src/
 ├── index.js                  # Entry point — calls connectDB → createApp → startServer
 ├── app.js                    # Creates Express app, loads middleware + plugins
 ├── server.js                 # HTTP server with graceful shutdown
-├── plugin-loader.js          # Scans /apps/ and calls init() on each module
+├── plugin-loader.js          # Scans /plugins/ and calls init() on each module
 │
 ├── auth/
 │   └── jwt-authenticator.js  # JWT sign/verify, registered as authenticator
@@ -59,21 +59,20 @@ flowchart TD
     M2 --> M3["3. Logger<br/><small>Assigns req.id, logs method/path/status/duration</small>"]
     M3 --> M4["4. Health check<br/><small>GET /health (returns early, no auth needed)</small>"]
     M4 --> M5["5. Auth<br/><small>Skips PUBLIC_ROUTES, verifies JWT, sets req.user</small>"]
-    M5 --> M6["6. Plugin routes<br/><small>Loaded dynamically from /apps/</small>"]
+    M5 --> M6["6. Plugin routes<br/><small>Loaded dynamically from /plugins/</small>"]
     M6 --> M7["7. 404 handler<br/><small>notFoundMiddleware — catches unmatched routes</small>"]
     M7 --> M8["8. Error handler<br/><small>errorMiddleware — catches all thrown errors</small>"]
 ```
 
 ### Public Routes (no auth required)
 
-These are hardcoded in `middleware/auth.js`:
+Public routes are handled dynamically to support the plugin system. A few fundamental routes are hardcoded in `middleware/auth.js`:
 
 - `GET /health`
 - `POST /api/v1/auth/signup`
 - `POST /api/v1/auth/login`
-- `GET /api/v1/events` (listing)
-- `GET /api/v1/events/:id` (single event)
-- `POST /api/v1/events/:id/registrations`
+
+For other public endpoints, plugins register them dynamically via the registry when they initialize. The auth middleware calls `registry.getPublicRoutes()` and permits access if the request path matches the plugin-defined public route pattern (e.g., event listings or public forms).
 
 Everything else requires a `Bearer` token in the `Authorization` header.
 
@@ -82,39 +81,45 @@ Everything else requires a `Bearer` token in the `Authorization` header.
 The registry (`utils/registry.js`) is a singleton `ModuleRegistry` with 4 Map-based stores:
 
 ```javascript
-registry.modules; // Map — loaded plugin metadata
-registry.services; // Map — shared service instances
-registry.authenticators; // Map — auth strategies (e.g., 'jwt')
-registry.resolvers; // Map — data resolvers
+registry.permissions; // PermissionRegistry — for atomic RBAC
+registry.getAllModules(); // Array of loaded modules
+registry.getAllServices(); // Array of shared services
+registry.getAuthenticator('jwt'); // Retrieve auth strategies
+registry.resolveContext(req); // Dynamically look up contexts (like clubId)
 ```
 
 It's attached to the Express app via `app.locals.registry`, so any middleware or route handler can access it:
 
 ```javascript
 // In a plugin's init function — register something
-registry.registerService('requireRoles', requireRoles);
+registry.registerService('requirePermissions', requirePermissions);
+registry.registerService('core:models', { ... }); // Mongoose models
 registry.registerAuthenticator('jwt', jwtAuthenticator);
 registry.registerModule('vendor', { routes: [...] });
 
 // In a controller — retrieve something
-const requireRoles = req.app.locals.registry.getService('requireRoles');
+const requirePermissions = req.app.locals.registry.getService('requirePermissions');
+const EventModel = req.app.locals.registry.getService('core:models').Event;
+
+// Trigger an event via eventBus
+eventBus.emit('club:deleted', { clubId });
 ```
 
 This is how modules communicate without importing each other.
 
 ## Plugin Loader
 
-`plugin-loader.js` scans the `/apps/` directory and loads each module:
+`plugin-loader.js` scans the `/plugins/` directory and loads each module:
 
 1. Connects to MongoDB via `connectDB()`
-2. Reads all directories in `/apps/`
+2. Reads all directories in `/plugins/`
 3. Queries the `Plugin` MongoDB collection to find which plugins are enabled
 4. For each directory, checks if it's marked `enabled: true` in the DB
 5. Looks for an entry point in this order:
    - `plugin.js` (root of module)
    - `src/index.js`
 6. Dynamically imports the entry file
-7. Calls `init(app, registry)` — the module's exported function
+7. Calls `init(app, registry, eventBus)` — the module's exported function
 8. If a module fails to load, it logs the error but continues loading others
 
 In production, a plugin failure is fatal. In development, it's logged and skipped.
@@ -130,20 +135,25 @@ In production, a plugin failure is fatal. In development, it's logged and skippe
 
 ## RBAC
 
-`middleware/permissions.js` exports `requireRoles()` — a factory that returns middleware:
+`middleware/permissions.js` exports `requirePermissions()` — a factory that returns middleware enforcing granular atomic permissions:
 
 ```javascript
 // In a route definition:
-router.delete('/:id', requireRoles('admin'), controller.delete);
-router.post('/', requireRoles('admin', 'coordinator'), controller.create);
+router.delete('/:id', requirePermissions('event:delete'), controller.delete);
+router.post(
+  '/',
+  requirePermissions('event:create', 'event:edit'),
+  controller.create
+);
 ```
 
-Valid roles: `admin`, `coordinator`, `volunteer`
+Permissions are granular (e.g., `club:view`, `event:delete`). Roles map to sets of these atomic permissions dynamically.
 
-The `requireRoles` function is registered as a service so plugins can access it:
+The `requirePermissions` function and `requireSuperAdmin` are exported from `middleware/permissions.js` and registered as services so plugins can access them:
 
 ```javascript
-const requireRoles = registry.getService('requireRoles');
+const requirePermissions = registry.getService('requirePermissions');
+const requireSuperAdmin = registry.getService('requireSuperAdmin');
 ```
 
 ## Error Handling
@@ -152,7 +162,8 @@ const requireRoles = registry.getService('requireRoles');
 
 - **`notFoundMiddleware`** — Returns 404 with the attempted route path
 - **`errorMiddleware`** — Catches all errors:
-  - Validation errors (with `err.details`) → 400 with field-level details
+  - Zod validation errors (`ZodError` instances) → parsed into 400 Bad Request with formatted field-level details
+  - Custom validation errors (with `err.details`) → 400 with field-level details
   - All other errors → status from `err.status` or 500
   - In development mode, includes stack trace in response
   - Includes `requestId` from the logger for tracing
@@ -171,6 +182,15 @@ const requireRoles = registry.getService('requireRoles');
 Default URI: `mongodb://localhost:27017/campusos`
 
 Exports: `connectDB()`, `disconnectDB()`, `healthCheck()`, `isDBConnected()`
+
+## Testing Strategy
+
+Testing in the CampusOS backend is executed using **Vitest** paired with **MongoDB Memory Server**.
+
+1. **In-Memory Database**: Tests instantiate a fresh MongoDB Memory Server instance. This eliminates the need for Docker or external databases for testing, and ensures accurate execution of Mongoose models, validation hooks, and compound indexes.
+2. **Isolation**: Tests are isolated per-plugin. Each test suite typically handles its own `connectDB` and `disconnectDB` lifecycle using the memory server URI.
+3. **Mongoose Best Practices**: The tests enforce modern Mongoose standards, heavily relying on `{ returnDocument: 'after' }` in `findOneAndUpdate` calls rather than the deprecated `{ new: true }` option.
+4. **Execution**: To run tests across all backend plugins, run `pnpm test` from the workspace root or `pnpm -C plugins/<name> test` to test a specific plugin.
 
 ---
 

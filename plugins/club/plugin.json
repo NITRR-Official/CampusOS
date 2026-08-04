@@ -1,0 +1,10 @@
+{
+  "name": "club",
+  "version": "1.0.0",
+  "description": "Club Management and RBAC Module",
+  "dependencies": {
+    "auth": "^1.0.0"
+  },
+  "defaultEnabled": true,
+  "themeColor": "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800"
+}

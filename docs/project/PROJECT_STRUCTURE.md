@@ -6,7 +6,7 @@ How the repository is organized, verified against the filesystem.
 
 ```
 CampusOS/
-├── apps/                       # Feature modules (plugins)
+├── plugins/                       # Feature modules (plugins)
 ├── backend/                    # Express core server
 ├── frontend/                   # Next.js web application
 ├── shared/                     # Shared utilities package
@@ -32,7 +32,7 @@ Workspaces are defined in `pnpm-workspace.yaml`:
 packages:
   - backend
   - frontend
-  - apps/*
+  - plugins/*
   - shared
 ```
 
@@ -45,7 +45,7 @@ backend/
     ├── index.js                # Entry point — connectDB → createApp → startServer
     ├── app.js                  # Express app — middleware chain + plugin loading
     ├── server.js               # HTTP server — graceful shutdown, signal handling
-    ├── plugin-loader.js        # Scans /apps/ for plugin.js or src/index.js
+    ├── plugin-loader.js        # Scans /plugins/ for plugin.js or src/index.js
     │
     ├── auth/
     │   └── jwt-authenticator.js  # JWT sign/verify — registered as authenticator
@@ -85,18 +85,23 @@ frontend/
 │
 ├── app/                        # Next.js App Router (pages)
 │   ├── layout.tsx              # Root layout — Geist fonts, ThemeProvider
-│   ├── page.tsx                # Home/dashboard page
+│   ├── page.tsx                # Landing page
 │   ├── globals.css             # Global styles + Tailwind + CSS variables
-│   ├── login/                  # Login page
-│   ├── signup/                 # Registration page
-│   ├── forgot-password/        # Password reset
-│   ├── events/                 # Event management
-│   ├── tasks/                  # Task management
-│   ├── calendar/               # Calendar view
-│   ├── vendors/                # Vendor management
-│   ├── resources/              # Resource management
-│   ├── participants/           # Participant dashboard
-│   └── components/             # Page-level shared components
+│   ├── (auth)/                 # Public auth routes
+│   │   ├── login/              # Login page
+│   │   ├── signup/             # Registration page
+│   │   └── forgot-password/    # Password reset
+│   ├── (dashboard)/            # Protected app routes
+│   │   ├── layout.tsx          # Dashboard layout (sidebar, header)
+│   │   ├── admin/              # Super-admin routes
+│   │   ├── events/             # Event management
+│   │   ├── tasks/              # Task management
+│   │   ├── calendar/           # Calendar view
+│   │   ├── clubs/              # Club management
+│   │   ├── vendors/            # Vendor management
+│   │   ├── resources/          # Resource management
+│   │   └── participants/       # Participant dashboard
+│   ├── components/             # Page-level shared components
 │
 ├── components/                 # Shared components
 │   ├── ThemeToggle.tsx         # Dark/light mode switch
@@ -109,31 +114,21 @@ frontend/
 │       ├── label.tsx
 │       └── toast.tsx
 │
-└── lib/                        # API clients and utilities
-    ├── auth-api.ts             # Login/signup API calls
-    ├── auth-session.ts         # JWT token storage (localStorage)
-    ├── event-api.ts            # Event API client
-    ├── task-api.ts             # Task API client
-    ├── calendar-api.ts         # Calendar API client
-    ├── checkin-api.ts          # Check-in API client
-    ├── vendor-api.ts           # Vendor API client
-    ├── resource-api.ts         # Resource API client
-    ├── scheduling-api.ts       # Scheduling API client
-    ├── budget-api.ts           # Budget API client
-    ├── theme-provider.tsx      # Dark mode context provider
-    ├── utils.ts                # cn() utility for Tailwind class merging
-    └── validations/
-        └── auth.ts             # Zod schemas for login/signup forms
+├── lib/                        # Global API clients and utilities
+│   ├── api/                    # Core API layer
+│   │   └── client.ts           # Unified Zod-validated API client
+│   ├── theme-provider.tsx      # Dark mode context provider
+│   └── utils.ts                # cn() utility for Tailwind class merging
 ```
 
-**Note**: Frontend has no `src/` subdirectory — `app/`, `components/`, and `lib/` are direct children of `frontend/`.
+**Note**: Frontend has no `src/` subdirectory — `app/`, `components/`, and `lib/` are direct children of `frontend/`. Plugin-specific frontend code (like API hooks and components) lives in `plugins/<module>/frontend/`.
 
-## Feature Modules (`apps/`)
+## Feature Modules (`plugins/`)
 
 All 11 modules follow the same internal structure:
 
 ```
-apps/<module>/
+plugins/<module>/
 ├── package.json
 ├── vitest.config.js            # If tests exist
 └── src/
@@ -151,24 +146,23 @@ apps/<module>/
 
 ### Module Inventory
 
-| Module     | Directory          | Storage   | Description                          |
-| ---------- | ------------------ | --------- | ------------------------------------ |
-| Auth       | `apps/auth/`       | MongoDB   | User registration, login, JWT tokens |
-| Club       | `apps/club/`       | In-memory | Club management, membership          |
-| Institute  | `apps/institute/`  | In-memory | Institute management                 |
-| Event      | `apps/event/`      | In-memory | Event CRUD, RSVP/registration        |
-| Check-in   | `apps/checkin/`    | In-memory | QR code check-in, attendance         |
-| Task       | `apps/task/`       | In-memory | Task assignment and tracking         |
-| Calendar   | `apps/calendar/`   | In-memory | Calendar event management            |
-| Vendor     | `apps/vendor/`     | MongoDB   | Vendor management and rating         |
-| Resource   | `apps/resource/`   | MongoDB   | Equipment and resource tracking      |
-| Scheduling | `apps/scheduling/` | MongoDB   | Time slot scheduling, conflicts      |
-| Budget     | `apps/budget/`     | MongoDB   | Budget allocation, expenses          |
+| Module     | Directory             | Storage | Description                          |
+| ---------- | --------------------- | ------- | ------------------------------------ |
+| Auth       | `plugins/auth/`       | MongoDB | User registration, login, JWT tokens |
+| Club       | `plugins/club/`       | MongoDB | Club management, membership          |
+| Institute  | `plugins/institute/`  | MongoDB | Institute management                 |
+| Event      | `plugins/event/`      | MongoDB | Event CRUD, RSVP/registration        |
+| Check-in   | `plugins/checkin/`    | MongoDB | QR code check-in, attendance         |
+| Task       | `plugins/task/`       | MongoDB | Task assignment and tracking         |
+| Calendar   | `plugins/calendar/`   | MongoDB | Calendar event management            |
+| Vendor     | `plugins/vendor/`     | MongoDB | Vendor management and rating         |
+| Resource   | `plugins/resource/`   | MongoDB | Equipment and resource tracking      |
+| Scheduling | `plugins/scheduling/` | MongoDB | Time slot scheduling, conflicts      |
+| Budget     | `plugins/budget/`     | MongoDB | Budget allocation, expenses          |
 
 > [!NOTE]
 > MongoDB is required to start the server — `connectDB()` runs at boot and exits on failure.
-> Some modules (Club, Institute, Event, Check-in, Task, Calendar) store data in-memory using `Map()` objects, meaning their data is lost on restart.
-> Operations layer modules use MongoDB with Mongoose.
+> All plugins now natively store data in MongoDB via Mongoose. The legacy in-memory Map implementations have been fully deprecated.
 
 ## Shared Package (`shared/`)
 

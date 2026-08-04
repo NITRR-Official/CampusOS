@@ -74,9 +74,9 @@ describe('VendorService', () => {
 ## Running Tests
 
 ```bash
-pnpm -C apps/vendor test              # Run module tests
-pnpm -C apps/vendor test -- --run     # Exit after completion
-pnpm -C apps/vendor test -- --coverage # With coverage report
+pnpm -C plugins/vendor test              # Run module tests
+pnpm -C plugins/vendor test -- --run     # Exit after completion
+pnpm -C plugins/vendor test -- --coverage # With coverage report
 ```
 
 ## Current Test Suite

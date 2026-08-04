@@ -23,11 +23,16 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@campus-os/shared": "workspace:*",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.3.0",
     "joi": "^18.1.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "semver": "^7.8.5",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

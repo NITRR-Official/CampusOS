@@ -10,27 +10,21 @@ Set up monorepo structure, Express server with plugin loader, Next.js frontend s
 
 ## ✅ Phase 1: Foundation System — Complete
 
-**Modules**: Auth (JWT), Club, Institute, RBAC
+**Modules**: Auth (JWT), Club, Institute, Admin, Plugin Manager, Activity, RBAC
 
-Functional login system, club management, and role-based permissions (`admin`, `coordinator`, `volunteer`).
+Functional login system, club management, system configurations, dynamic plugin CLI, activity feeds, and atomic role-based access control.
 
 ## ✅ Phase 2: Event Engine — Complete
 
-**Modules**: Event, RSVP
+**Modules**: Event, Check-in, Forms
 
-Event CRUD, registration with capacity handling, public event listing and detail pages.
+Event CRUD, registration with capacity handling, QR check-in, and dynamic schema-driven form building.
 
 ## ✅ Phase 3: Execution Engine — Complete
 
-**Modules**: Task, Calendar
+**Modules**: Task, Calendar, Recruitment
 
-Task assignment with priority and status tracking, calendar management, task dependency system with circular dependency detection.
-
-## ✅ Phase 4: Live Event Support — Complete
-
-**Modules**: Check-in
-
-QR code generation, check-in API, attendance tracking, participant dashboard.
+Task assignment with priority, calendar management, and recruitment campaigns for onboarding new members.
 
 ## ✅ Phase 5: Operations Layer — Complete
 
@@ -47,22 +41,16 @@ QR code generation, check-in API, attendance tracking, participant dashboard.
 
 ---
 
-## 🟢 Phase 6: Growth Layer — Next
+## 🟢 Phase 6: The V1 Launch (NIT Raipur)
 
-**Goal**: Enable sponsorship and marketing workflows.
+**Goal**: Make the existing Core and Domain plugins predictable, secure, and production-ready for the upcoming semester.
 
-- [ ] Sponsorship Module — Add sponsors, track deliverables, payment tracking
-- [ ] Marketing Module — Campaign management, creative tracking
-- [ ] Sponsor dashboard and marketing dashboard (frontend)
-
-## 🟢 Phase 7: System Maturity
-
-**Goal**: Production readiness and scalability.
-
-- [ ] In-app notifications and event reminders
-- [ ] Audit logs — Track user actions
-- [ ] File management — Upload posters, documents
-- [ ] Analytics — Event participation stats, budget insights, basic reporting
+- [ ] **Feature Completion:** Fix known logic regressions (e.g., Forms validation) and enforce dynamic entity-level RBAC across all endpoints.
+- [ ] **Manual Testing:** Dogfood the platform with 3-5 real clubs to find UX edge cases.
+- [ ] **Architecture Audit:** Run anti-pattern checks and ensure strict decoupling (Core vs Domain plugins).
+- [ ] **Security & Pentesting:** Conduct vulnerability assessments (IDOR, XSS, Privacy).
+- [ ] **Automated Testing:** Implement unit, integration, and E2E testing for critical lifecycles.
+- [ ] **Launch:** Deploy on free-tier infrastructure (Cloudflare R2, MongoDB Atlas) and open source the v1 release!
 
 ---
 
@@ -73,10 +61,11 @@ QR code generation, check-in API, attendance tracking, participant dashboard.
 | 1   | Foundation Ready       | ✅ Complete |
 | 2   | Event System Live      | ✅ Complete |
 | 3   | Execution System Ready | ✅ Complete |
-| 4   | First Fest Ready 🎉    | ✅ Complete |
+| 4   | First Fest Ready 🎪    | ✅ Complete |
 | 5   | Full Ops System        | ✅ Complete |
-| 6   | Growth Enabled         | 🟢 Next     |
-| 7   | Production Ready       | 🟢 Planned  |
+| 5.5 | Architecture Migration | ✅ Complete |
+| 6   | The V1 Launch          | 🚀 Next     |
+| 7   | Enterprise Workflows   | 🚀 Planned  |
 
 ---
 

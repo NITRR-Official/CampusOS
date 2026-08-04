@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchClubs, approveClub, rejectClub, Club } from '@/lib/club-api';
+import {
+  fetchClubs,
+  approveClub,
+  rejectClub,
+  Club
+} from '@plugins/club/frontend/api';
 import { ShieldCheck, Check, X, Clock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@campusos/design-system';
 
 export default function ClubApprovalsPage() {
   const [pendingClubs, setPendingClubs] = useState<Club[]>([]);
@@ -138,7 +143,7 @@ export default function ClubApprovalsPage() {
 
               <div className="flex md:flex-col items-center justify-end md:justify-center gap-3 border-t md:border-t-0 md:border-l border-border/50 pt-4 md:pt-0 md:pl-6 shrink-0 min-w-[140px]">
                 <Button
-                  onClick={() => handleApprove(club.id)}
+                  onClick={() => handleApprove(club.id!)}
                   disabled={processingId === club.id}
                   className="w-full bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-500/20 shadow-none transition-colors group-hover:border-emerald-500/50"
                 >
@@ -146,7 +151,7 @@ export default function ClubApprovalsPage() {
                   Approve
                 </Button>
                 <Button
-                  onClick={() => handleReject(club.id)}
+                  onClick={() => handleReject(club.id!)}
                   disabled={processingId === club.id}
                   variant="outline"
                   className="w-full text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/20 hover:border-destructive transition-colors group-hover:border-destructive/50"

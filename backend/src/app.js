@@ -5,17 +5,27 @@
 
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import mongoose from 'mongoose';
+import rateLimit from 'express-rate-limit';
 import { loggerMiddleware } from './middleware/logger.js';
 import { authMiddleware } from './middleware/auth.js';
-import { requireRoles } from './middleware/permissions.js';
+import {
+  requirePermissions,
+  requireSuperAdmin
+} from './middleware/permissions.js';
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.js';
 import { registerJwtAuthenticator } from './auth/jwt-authenticator.js';
 import { loadPlugins } from './plugin-loader.js';
+import { User, Plugin } from './database/schemas/index.js';
 
 export async function createApp(registry) {
   const app = express();
   app.disable('x-powered-by');
   app.locals.registry = registry;
+
+  // Register Core Models so plugins can use them
+  registry.registerService('core:models', { User, Plugin });
 
   // Environment config
   const isDev = process.env.NODE_ENV !== 'production';
@@ -30,9 +40,12 @@ export async function createApp(registry) {
 
   // ============== MIDDLEWARE CHAIN (Order matters!) ==============
 
+  // 0. Security Headers
+  app.use(helmet());
+
   // 1. Body parsing
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ limit: '10mb', extended: true }));
+  app.use(express.json({ limit: '2mb' }));
+  app.use(express.urlencoded({ limit: '2mb', extended: true }));
 
   // 2. CORS - Allow cross-origin requests from frontend
   app.use(
@@ -53,7 +66,7 @@ export async function createApp(registry) {
         // In non-production, allow Vercel preview URLs (*.vercel.app)
         // This is safe because preview environments use separate databases
         if (isDev || process.env.ALLOW_PREVIEW_CORS === 'true') {
-          if (/^https:\/\/[\w-]+\.vercel\.app$/.test(origin)) {
+          if (/^https:\/\/campus-os-[\w-]+\.vercel\.app$/.test(origin)) {
             callback(null, true);
             return;
           }
@@ -65,21 +78,38 @@ export async function createApp(registry) {
     })
   );
 
-  // 3. Logging - Log all requests
+  // 3. Rate Limiting - Global default limiter
+  const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Limit each IP to 500 requests per `window`
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      success: false,
+      error: 'Too many requests, please try again later.'
+    }
+  });
+  app.use('/api', globalLimiter);
+
+  // 4. Logging - Log all requests
   app.use(loggerMiddleware);
 
-  // 4. Health check endpoint (no auth required)
+  // 5. Health check endpoint (no auth required)
   app.get('/health', (req, res) => {
-    res.json({
-      success: true,
-      status: 'healthy',
+    const dbState = mongoose.connection.readyState;
+    const isHealthy = dbState === 1;
+
+    res.status(isHealthy ? 200 : 503).json({
+      success: isHealthy,
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      database: isHealthy ? 'connected' : 'disconnected',
       timestamp: new Date().toISOString()
     });
   });
 
   // Public endpoint for frontend to discover active modules (no auth required)
   app.get('/api/v1/system/modules', (req, res) => {
-    const activeModules = Array.from(registry.modules.keys());
+    const activeModules = registry.getAllModules();
     res.json({ success: true, modules: activeModules });
   });
 
@@ -89,13 +119,36 @@ export async function createApp(registry) {
     res.json({ success: true, permissions });
   });
 
-  // 5. Authentication - Verify JWT before protected routes
+  // 6. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);
-  registry.registerService('requireRoles', requireRoles);
+  registry.registerService('requirePermissions', requirePermissions);
+  registry.registerService('requireSuperAdmin', requireSuperAdmin);
   app.use(authMiddleware);
 
+  // Protected endpoint for frontend to fetch aggregated dashboard stats
+  app.get('/api/v1/system/stats', async (req, res) => {
+    try {
+      const providers = registry.getAllStatProviders();
+      const statsData = {};
+
+      for (const [pluginId, fetcher] of providers) {
+        try {
+          statsData[pluginId] = await fetcher(req.user);
+        } catch (err) {
+          console.error(`Failed to fetch stats for plugin ${pluginId}:`, err);
+          statsData[pluginId] = { error: 'Failed to load stats' };
+        }
+      }
+
+      res.json({ success: true, data: statsData });
+    } catch (err) {
+      console.error('Failed to aggregate system stats:', err);
+      res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  });
+
   // ============== PLUGIN LOADING ==============
-  // Load all modules from /apps/ and let them register routes
+  // Load all modules from /plugins/ and let them register routes
   try {
     await loadPlugins(app, registry);
   } catch (error) {

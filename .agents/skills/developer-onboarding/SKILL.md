@@ -59,7 +59,7 @@ CampusOS/
 │       ├── middleware/  # Auth, RBAC, logger, error handler
 │       ├── database/   # Mongoose connection + schemas
 │       └── utils/      # Service registry
-├── apps/               # Plugin modules
+├── plugins/               # Plugin modules
 │   ├── auth/           # Authentication
 │   ├── club/           # Club management
 │   ├── event/          # Event management
@@ -79,7 +79,7 @@ git checkout -b feature/<issue>-<description>
 
 # Run checks
 pnpm lint
-pnpm -C apps/<module> test -- --run
+pnpm -C plugins/<module> test -- --run
 
 # Commit with Conventional Commits
 git commit -m "feat: add new feature"
@@ -102,7 +102,7 @@ gh pr create --fill
 ```bash
 pnpm dev              # Start everything
 pnpm lint             # Code quality
-pnpm -C apps/vendor test -- --run  # Run tests
+pnpm -C plugins/vendor test -- --run  # Run tests
 pnpm build            # Build all
 ```
 

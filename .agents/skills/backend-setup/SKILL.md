@@ -22,7 +22,7 @@ backend/src/
 ├── index.js              # Entry point — connectDB → createApp → startServer
 ├── app.js                # Express app, middleware + plugin loading
 ├── server.js             # HTTP server with graceful shutdown
-├── plugin-loader.js      # Scans /apps/ and calls init() on each module
+├── plugin-loader.js      # Scans /plugins/ and calls init() on each module
 ├── auth/
 │   └── jwt-authenticator.js
 ├── middleware/
@@ -39,7 +39,7 @@ backend/src/
 
 ### Phase 2: Creating a New Module
 
-1. Create directory: `apps/<module-name>/src/`
+1. Create directory: `plugins/<module-name>/src/`
 2. Create entry file (`src/index.js` or `plugin.js`):
 
 ```javascript
@@ -55,7 +55,7 @@ export async function init(app, registry) {
 
 3. Create module structure:
 ```
-apps/<module>/src/
+plugins/<module>/src/
 ├── index.js          # Plugin entry (exports init)
 ├── controller/       # Thin HTTP handlers
 ├── routes/           # Express route definitions
@@ -72,7 +72,7 @@ index.js → connectDB() → createApp(registry) → startServer(app, 4000)
 ```
 
 - MongoDB must be running before startup
-- Plugin loader scans `/apps/` for `plugin.js` or `src/index.js`
+- Plugin loader scans `/plugins/` for `plugin.js` or `src/index.js`
 - Failed plugins log errors but don't crash (dev mode)
 
 ### Phase 4: Middleware Order (in app.js)

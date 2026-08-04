@@ -4,8 +4,8 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
-import type { UserRole } from '@/lib/auth-api';
-import { useAuth } from '@/lib/auth-provider';
+import type { UserRole } from '@campus-os/shared/auth-types';
+import { useAuth } from '@campus-os/shared/auth-provider';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -27,7 +27,10 @@ export function RequireAuth({ children, allowedRoles }: RequireAuthProps) {
       return '/dashboard';
     }
 
-    const search = searchParams?.toString();
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.delete('next');
+    const search = params.toString();
+
     if (!search) {
       return pathname;
     }

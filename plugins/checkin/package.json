@@ -1,0 +1,27 @@
+{
+  "name": "@campus-os/checkin",
+  "version": "0.0.1",
+  "description": "Check-in module for CampusOS - Event attendance tracking with QR codes",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "checkin",
+    "attendance",
+    "qr-code",
+    "event-tracking"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.25.76",
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": "*",
+    "@tanstack/react-query": "^5.101.2"
+  },
+  "type": "module"
+}

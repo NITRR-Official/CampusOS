@@ -33,10 +33,10 @@ pnpm version major   # 2.1.3 → 3.0.0
 2. Bump version: `pnpm version minor`
 3. Run full test suite:
    ```bash
-   pnpm -C apps/vendor test -- --run
-   pnpm -C apps/resource test -- --run
-   pnpm -C apps/scheduling test -- --run
-   pnpm -C apps/budget test -- --run
+   pnpm -C plugins/vendor test -- --run
+   pnpm -C plugins/resource test -- --run
+   pnpm -C plugins/scheduling test -- --run
+   pnpm -C plugins/budget test -- --run
    ```
 4. Build: `pnpm build`
 5. Generate changelog from conventional commits

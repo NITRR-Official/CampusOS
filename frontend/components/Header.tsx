@@ -1,12 +1,12 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Bell } from 'lucide-react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@campusos/design-system';
+import { Input } from '@campusos/design-system';
+import { Button } from '@campusos/design-system';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,8 +14,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+} from '@campusos/design-system';
+import { Avatar, AvatarFallback } from '@campusos/design-system';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,9 +23,9 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator
-} from '@/components/ui/breadcrumb';
+} from '@campusos/design-system';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useAuth } from '@/lib/auth-provider';
+import { useAuth } from '@campus-os/shared/auth-provider';
 import { useUIStore } from '@/lib/store';
 
 function getInitials(value: string) {
@@ -40,6 +40,8 @@ export function Header() {
   const { user, role, logout } = useAuth();
   const { isSearchOpen, toggleSearch } = useUIStore();
 
+  const searchParams = useSearchParams();
+
   const getBreadcrumbs = () => {
     if (!pathname || pathname === '/')
       return [{ label: 'Dashboard', href: '/' }];
@@ -48,11 +50,43 @@ export function Header() {
     const crumbs = [];
     let currentPath = '';
 
-    for (const part of parts) {
-      currentPath += `/${part}`;
+    if (parts[0] === 'workspace' && parts.length > 1) {
       crumbs.push({
-        label: part.charAt(0).toUpperCase() + part.slice(1),
+        label: 'Club Workspace',
+        href: '/dashboard'
+      });
+      currentPath = `/workspace/${parts[1]}`;
+      const slug = parts[1];
+      crumbs.push({
+        label: slug
+          .split('-')
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' '),
         href: currentPath
+      });
+      for (let i = 2; i < parts.length; i++) {
+        currentPath += `/${parts[i]}`;
+        crumbs.push({
+          label: parts[i].charAt(0).toUpperCase() + parts[i].slice(1),
+          href: currentPath
+        });
+      }
+    } else {
+      for (const part of parts) {
+        currentPath += `/${part}`;
+        crumbs.push({
+          label: part.charAt(0).toUpperCase() + part.slice(1),
+          href: currentPath
+        });
+      }
+    }
+
+    // Append campaign if present (for Recruitment Pipeline)
+    const campaignId = searchParams?.get('campaign');
+    if (campaignId) {
+      crumbs.push({
+        label: 'Pipeline',
+        href: `${pathname}?campaign=${campaignId}`
       });
     }
 
@@ -62,7 +96,14 @@ export function Header() {
   const breadcrumbs = getBreadcrumbs();
   const displayName = user?.name || 'Campus User';
   const displayEmail = user?.email || 'No email on file';
-  const displayRole = role ? `${role[0].toUpperCase()}${role.slice(1)}` : '';
+
+  let displayRole = '';
+  if (user?.isSuperAdmin) {
+    displayRole = 'Super Admin';
+  } else if (role) {
+    displayRole = `${role[0].toUpperCase()}${role.slice(1)}`;
+  }
+
   const avatarFallback = getInitials(user?.name || user?.email || 'User');
 
   function handleLogout() {

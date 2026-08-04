@@ -42,42 +42,27 @@ POST /api/v1/events/:id/registrations
 
 Everything else returns `401 Unauthorized` without a valid token.
 
-## RBAC (Role-Based Access Control)
+## RBAC (Dynamic Atomic Access Control)
 
-### Roles
+### Roles & Permissions
 
-Four roles defined in `user.schema.js`:
+Roles in CampusOS are dynamically constructed from atomic permissions. Instead of checking if a user is an "admin", plugins check if the user has a specific atomic permission (e.g., `event:delete`).
 
-| Role          | Access                                                 |
-| ------------- | ------------------------------------------------------ |
-| `admin`       | Full access — CRUD on all resources, delete, approve   |
-| `coordinator` | Create, update, assign — event and resource management |
-| `volunteer`   | View and participate (default role for new users)      |
-| `user`        | Basic access                                           |
+> **Auto-admin**: The first user to sign up automatically gets the `owner` role, which grants the global `isSuperAdmin` bypass.
 
-> **Auto-admin**: The first user to sign up automatically gets the `admin` role (see `auth.service.js`). All subsequent users get `volunteer`.
+### How `requirePermissions()` works
 
-### How `requireRoles()` works
-
-`middleware/permissions.js` only checks against 3 roles (`admin`, `coordinator`, `volunteer`). The `user` role exists in the schema but is not listed in the `VALID_ROLES` set — a request from a `user`-role account will be rejected by `requireRoles()`.
+`middleware/permissions.js` exports `requirePermissions()`, which verifies if the authenticated user has any of the requested atomic permissions, either globally or within a specific context (like a club).
 
 ```javascript
 // middleware/permissions.js
-export function requireRoles(...allowedRoles) {
-  const allowed = new Set(allowedRoles);
-
-  return function roleGuard(req, res, next) {
-    const userRole = req.user?.role;
-
-    if (!userRole) {
-      return res.status(401).json({ error: 'User context missing' });
-    }
-
-    if (!allowed.has(userRole)) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
-    }
-
-    next();
+export function requirePermissions(...allowedPermissions) {
+  return async function permissionGuard(req, res, next) {
+    // 1. Verifies JWT user context
+    // 2. Checks global isSuperAdmin bypass
+    // 3. Resolves dynamic context (e.g. Club) via registry.resolveContext
+    // 4. Fetches user permissions within that context
+    // 5. Checks if user possesses an allowed atomic permission
   };
 }
 ```
@@ -87,10 +72,14 @@ Used in routes like:
 ```javascript
 app.post(
   '/api/v1/vendors',
-  requireRoles('admin', 'coordinator'),
+  requirePermissions('vendor:manage'),
   controller.create
 );
-app.delete('/api/v1/vendors/:id', requireRoles('admin'), controller.delete);
+app.delete(
+  '/api/v1/vendors/:id',
+  requirePermissions('vendor:delete'),
+  controller.delete
+);
 ```
 
 ## Secrets Management
@@ -138,11 +127,10 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 ### Validation approach
 
-- **Auth module**: Custom validation functions in `schema/auth.schema.js` (not Mongoose, not Joi)
-- **Event module**: Custom validation functions in `schema/event.schema.js`
-- **Operations modules (Phase 5)**: Mongoose schema validation (required fields, enums, types)
-- **Frontend**: Zod schemas in `lib/validations/` + react-hook-form
-- Joi is listed as a backend dependency but is not actively used in current modules
+- **Backend (API Layer)**: We use **Zod** for schema validation on all incoming request bodies and queries (see ADR-010). The global `errorMiddleware` automatically catches `ZodError` exceptions thrown by controllers and translates them into standard `400 Bad Request` responses with field-level details.
+- **Backend (Database Layer)**: Mongoose schemas enforce data integrity at the database level (required fields, enums, ObjectId refs).
+- **Frontend**: Zod schemas combined with `react-hook-form` and `@hookform/resolvers/zod` provide identical client-side validation.
+- Joi is completely deprecated and should not be used.
 
 ### Field extraction pattern
 
@@ -213,7 +201,7 @@ pnpm outdated
 Before merging, verify:
 
 - [ ] No hardcoded secrets, API keys, or passwords
-- [ ] Protected endpoints have `requireRoles()` guards
+- [ ] Protected endpoints have `requirePermissions()` guards (not `requireRoles`)
 - [ ] Controller extracts specific fields (not `...req.body`)
 - [ ] Error responses don't expose internal details
 - [ ] New env vars are documented

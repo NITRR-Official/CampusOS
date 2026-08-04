@@ -1,0 +1,30 @@
+{
+  "name": "@campus-os/budget",
+  "version": "0.0.1",
+  "description": "Budget module for CampusOS - Event budget allocation and expense tracking",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "keywords": [
+    "budget",
+    "expenses",
+    "financial-tracking",
+    "cost-management"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.25.76",
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": "*",
+    "@tanstack/react-query": "^5.101.2"
+  },
+  "type": "module"
+}

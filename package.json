@@ -16,6 +16,13 @@
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint --fix",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs",
+    "plugin:create": "node scripts/plugin.js create",
+    "plugin:install": "node scripts/plugin.js install",
+    "plugin:uninstall": "node scripts/plugin.js uninstall",
+    "plugin:sync": "node scripts/plugin.js generate-registry",
     "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -40,10 +47,12 @@
     "url": "https://github.com/NITRR-Official/CampusOS/issues"
   },
   "workspaces": [
-    "apps/*",
     "backend",
     "frontend",
-    "shared"
+    "shared",
+    "plugins/*",
+    "plugins/*/backend",
+    "plugins/*/frontend"
   ],
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
@@ -54,18 +63,27 @@
     ]
   },
   "dependencies": {
-    "mongoose": "^9.6.1"
+    "@types/react": "^19.2.14",
+    "adm-zip": "^0.5.17",
+    "mongoose": "^9.6.1",
+    "next": "16.2.2",
+    "react": "19.2.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
     "@eslint/js": "^10.0.1",
+    "@types/node": "^26.1.1",
     "eslint": "^10.3.0",
+    "eslint-plugin-import": "^2.32.0",
     "fast-check": "^3.23.2",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "mongodb-memory-server": "^11.1.0",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "vitepress": "^1.6.4",
+    "vitest": "^1.6.1"
   }
 }

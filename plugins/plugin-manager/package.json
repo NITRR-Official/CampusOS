@@ -1,0 +1,19 @@
+{
+  "name": "@campus-os/plugin-manager",
+  "version": "0.0.1",
+  "description": "Super Admin module to manage plugins dynamically",
+  "main": "src/index.js",
+  "dependencies": {
+    "express": "^5.2.1",
+    "zod": "^3.25.76",
+    "@campus-os/shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": "*",
+    "@tanstack/react-query": "^5.101.2"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  }
+}

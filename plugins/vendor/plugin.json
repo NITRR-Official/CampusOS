@@ -1,0 +1,10 @@
+{
+  "name": "vendor",
+  "version": "1.0.0",
+  "description": "Vendor Management Module",
+  "dependencies": {
+    "club": "^1.0.0"
+  },
+  "defaultEnabled": true,
+  "themeColor": "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800"
+}

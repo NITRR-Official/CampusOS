@@ -31,12 +31,13 @@ cd frontend && pnpm dev   # → http://localhost:3000
 
 ## 🛠️ Tech Stack
 
-| Layer        | Technology                                                                |
-| ------------ | ------------------------------------------------------------------------- |
-| **Backend**  | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)        |
-| **Frontend** | [Next.js](https://nextjs.org/) + [React](https://react.dev/)              |
-| **Database** | [MongoDB](https://www.mongodb.com/) + [Mongoose](https://mongoosejs.com/) |
-| **Arch**     | Modular plugin system with dynamic loading                                |
+| Layer          | Technology                                                                |
+| -------------- | ------------------------------------------------------------------------- |
+| **Backend**    | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)        |
+| **Frontend**   | [Next.js](https://nextjs.org/) + [React](https://react.dev/)              |
+| **Database**   | [MongoDB](https://www.mongodb.com/) + [Mongoose](https://mongoosejs.com/) |
+| **Validation** | [Zod](https://zod.dev/) (Unified schema validation across stack)          |
+| **Arch**       | Modular plugin system with dynamic loading                                |
 
 ---
 

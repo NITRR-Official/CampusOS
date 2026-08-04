@@ -1,8 +1,9 @@
 packages:
   - backend
   - frontend
-  - apps/*
+  - plugins/*
   - shared
+  - packages/*
 
 ignoredBuiltDependencies:
   - sharp

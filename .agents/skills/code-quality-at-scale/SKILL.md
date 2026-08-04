@@ -44,7 +44,7 @@ const result = await service.create(data);  // ✅ Always async/await
 
 ### Phase 2: Architecture Rules
 
-- All features in `/apps/<module>/` — backend core handles only middleware and registry
+- All features in `/plugins/<module>/` — backend core handles only middleware and registry
 - No direct imports between modules — use `registry.getService()`
 - Controllers thin, services contain business logic
 - Tests co-located: `service.test.js` next to `service.js`
@@ -65,7 +65,7 @@ const result = await service.create(data);  // ✅ Always async/await
 
 - Minimum: > 80% line coverage
 - Test framework: **Vitest** (not Jest)
-- Run per module: `pnpm -C apps/<module> test -- --coverage`
+- Run per module: `pnpm -C plugins/<module> test -- --coverage`
 
 ### Phase 5: Technical Debt Tracking
 
@@ -79,5 +79,5 @@ const result = await service.create(data);  // ✅ Always async/await
 ```bash
 pnpm lint              # Lint all files
 pnpm lint --fix        # Auto-fix
-pnpm -C apps/vendor test -- --coverage  # Coverage
+pnpm -C plugins/vendor test -- --coverage  # Coverage
 ```

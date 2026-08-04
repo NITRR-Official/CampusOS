@@ -1,0 +1,8 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "description": "Authentication and User Management Module",
+  "dependencies": {},
+  "defaultEnabled": true,
+  "themeColor": "bg-pink-100 text-pink-700 border-pink-200 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800"
+}

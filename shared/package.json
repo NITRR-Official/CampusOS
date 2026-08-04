@@ -3,9 +3,17 @@
   "version": "0.0.1",
   "description": "Shared utilities and types for CampusOS",
   "type": "module",
-  "main": "src/index.js",
+  "main": "src/index.ts",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.ts",
+    "./errors": "./src/errors.js",
+    "./auth-session": "./src/auth-session.ts",
+    "./auth-types": "./src/auth-types.ts",
+    "./api-client": "./src/api-client.ts",
+    "./api-errors": "./src/api-errors.ts",
+    "./auth-provider": "./src/auth-provider.tsx",
+    "./plugin-registry": "./src/plugin-registry.ts",
+    "./extension-point": "./src/extension-point.tsx"
   },
   "scripts": {
     "test": "echo \"No tests yet\" && exit 0",

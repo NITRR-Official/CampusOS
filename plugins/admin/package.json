@@ -1,0 +1,14 @@
+{
+  "name": "@plugins/admin",
+  "version": "1.0.0",
+  "private": true,
+  "main": "backend/index.ts",
+  "peerDependencies": {
+    "lucide-react": "*"
+  },
+  "type": "module",
+  "dependencies": {
+    "@campus-os/shared": "workspace:*",
+    "@campusos/design-system": "workspace:*"
+  }
+}

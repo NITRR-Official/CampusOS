@@ -1,0 +1,8 @@
+{
+  "name": "plugin-manager",
+  "version": "1.0.0",
+  "description": "Plugin Manager API",
+  "dependencies": {},
+  "defaultEnabled": true,
+  "themeColor": "bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-400 dark:border-teal-800"
+}

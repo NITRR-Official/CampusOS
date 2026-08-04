@@ -9,7 +9,7 @@ trigger: model_decision
 
 - **pnpm only** — never use `npm` or `yarn`
 - Install from root: `pnpm install`
-- Module-specific: `pnpm -C apps/vendor add <package>`
+- Module-specific: `pnpm -C plugins/vendor add <package>`
 - Dev dependencies: `pnpm add -D <package>`
 - Lock file: `pnpm-lock.yaml` (never `package-lock.json`)
 

@@ -1,0 +1,10 @@
+{
+  "name": "admin",
+  "version": "1.0.0",
+  "description": "Admin Dashboard",
+  "frontend": true,
+  "backend": false,
+  "dependencies": [],
+  "defaultEnabled": true,
+  "themeColor": "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
+}
