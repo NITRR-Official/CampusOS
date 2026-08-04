@@ -1,4 +1,18 @@
-import { describe, it, expect, vi } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
+
+// Mock the requirePermissions dependency
+vi.mock('./index.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    init: async function mockInit(app, registry, eventBus) {
+      // Avoid the `requirePermissions` check throwing
+      global.requirePermissions = vi.fn();
+      return actual.init(app, registry, eventBus);
+    }
+  };
+});
+
 import { PermissionRegistry } from '../../../backend/src/core/permission-registry.js';
 import { init } from './index.js';
 

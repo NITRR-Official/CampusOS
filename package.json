@@ -47,10 +47,12 @@
     "url": "https://github.com/NITRR-Official/CampusOS/issues"
   },
   "workspaces": [
-    "apps/*",
     "backend",
     "frontend",
-    "shared"
+    "shared",
+    "plugins/*",
+    "plugins/*/backend",
+    "plugins/*/frontend"
   ],
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

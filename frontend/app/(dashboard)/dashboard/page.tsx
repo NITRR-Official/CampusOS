@@ -1,18 +1,5 @@
 import { ExtensionPoint } from '@campus-os/shared/extension-point';
 import { API_BASE_URL } from '@campus-os/shared/api-client';
-import {
-  dashboardStats,
-  dashboardQuickActions,
-  dashboardActivity,
-  dashboardEvents,
-  dashboardTasks
-} from '@/lib/mock/dashboard';
-import { StatCard } from '@/components/dashboard/StatCard';
-import { QuickActionCard } from '@/components/dashboard/QuickActionCard';
-import { RecentActivity } from './components/RecentActivity';
-import { UpcomingEvents } from './components/UpcomingEvents';
-import { TaskList } from './components/TaskList';
-import { DashboardSlot } from './components/DashboardSlot';
 
 export default async function Dashboard() {
   let activePlugins: string[] = [];
@@ -65,62 +52,35 @@ export default async function Dashboard() {
           context={{ dashboard: true }}
         />
 
-        {/* Quick Stats — plugin widgets when available, mock data as fallback */}
-        <div className="mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          <DashboardSlot
-            extensionId="dashboard-stats"
-            activePlugins={activePlugins}
-          >
-            {dashboardStats.map((stat) => (
-              <StatCard key={stat.id} stat={stat} />
-            ))}
-          </DashboardSlot>
-        </div>
+        {/* Quick Stats */}
+        <ExtensionPoint
+          id="dashboard-stats"
+          activePlugins={activePlugins}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10"
+        />
 
-        {/* Quick Actions — plugin widgets when available, mock data as fallback */}
+        {/* Quick Actions */}
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
             Quick Actions
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <DashboardSlot
-              extensionId="dashboard-actions"
-              activePlugins={activePlugins}
-            >
-              {dashboardQuickActions.map((action) => (
-                <QuickActionCard key={action.id} action={action} />
-              ))}
-            </DashboardSlot>
-          </div>
+          <ExtensionPoint
+            id="dashboard-actions"
+            activePlugins={activePlugins}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+          />
         </div>
 
-        {/* Recent Activity + Upcoming Events */}
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
-              Recent Activity
-            </p>
-            <RecentActivity activities={dashboardActivity} />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
-              Upcoming Events
-            </p>
-            <UpcomingEvents events={dashboardEvents} />
-          </div>
-        </div>
-
-        {/* My Tasks */}
+        {/* Recent Activity */}
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground mb-4">
-            My Tasks
+            Recent Activity
           </p>
           <ExtensionPoint
             id="dashboard-activity"
             activePlugins={activePlugins}
             className="space-y-4"
           />
-          <TaskList tasks={dashboardTasks} />
         </div>
       </div>
     </div>
