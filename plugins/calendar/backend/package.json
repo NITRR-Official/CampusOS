@@ -1,0 +1,21 @@
+{
+  "name": "@campus-os/calendar",
+  "version": "0.0.1",
+  "description": "Calendar module for CampusOS - Calendar event management",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "keywords": [
+    "calendar",
+    "events",
+    "event-management",
+    "scheduling"
+  ],
+  "author": "CampusOS Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}
