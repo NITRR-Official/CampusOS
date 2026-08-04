@@ -45,8 +45,16 @@ describe('InstituteService', () => {
 
   describe('listInstitutes', () => {
     it('should list all institutes', async () => {
-      await service.createInstitute({ name: 'Institute 1', createdBy: 'u1' });
-      await service.createInstitute({ name: 'Institute 2', createdBy: 'u2' });
+      await service.createInstitute({
+        name: 'Institute 1',
+        code: 'INST1',
+        createdBy: 'u1'
+      });
+      await service.createInstitute({
+        name: 'Institute 2',
+        code: 'INST2',
+        createdBy: 'u2'
+      });
 
       const institutes = await service.listInstitutes();
       expect(institutes).toHaveLength(2);
