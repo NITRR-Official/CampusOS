@@ -4,7 +4,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   connectDB,
   disconnectDB
-} from '../../../../backend/src/database/connection.js';
+} from '@campusos/backend-core/database/connection.js';
 import { CalendarEvent } from '../schema/calendar.model.js';
 import { MongoCalendarEventRepository } from './mongo-calendar-event.repository.js';
 

@@ -30,7 +30,8 @@ describe('PluginService', () => {
           return { Plugin };
         }
         return null;
-      }
+      },
+      getSettingsConfig: (name) => ({})
     };
 
     initPluginService(mockRegistry);

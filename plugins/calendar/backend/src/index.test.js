@@ -13,7 +13,7 @@ vi.mock('./index.js', async (importOriginal) => {
   };
 });
 
-import { PermissionRegistry } from '../../../backend/src/core/permission-registry.js';
+import { PermissionRegistry } from '@campusos/backend-core/core/permission-registry.js';
 import { init } from './index.js';
 
 /**
@@ -27,7 +27,7 @@ function makeRegistry() {
     permissions: new PermissionRegistry(),
     registerModule: vi.fn(),
     getService: (name) =>
-      name === 'requireRoles' ? () => (req, res, next) => next() : undefined
+      name === 'requirePermissions' ? () => (req, res, next) => next() : undefined
   };
 }
 
@@ -59,7 +59,7 @@ describe('calendar plugin init() core wiring', () => {
 
     // All registered under the 'calendar' module group.
     const grouped = registry.permissions.getAllGrouped();
-    expect(grouped.calendar).toHaveLength(4);
+    expect(grouped.calendar).toHaveLength(5);
     for (const perm of grouped.calendar) {
       expect(perm.module).toBe('calendar');
       expect(perm.description.length).toBeGreaterThan(0);
@@ -77,7 +77,7 @@ describe('calendar plugin init() core wiring', () => {
     );
   });
 
-  it('throws when the requireRoles service is not configured', async () => {
+  it('throws when the requirePermissions service is not configured', async () => {
     const registry = makeRegistry();
     registry.getService = () => undefined;
 

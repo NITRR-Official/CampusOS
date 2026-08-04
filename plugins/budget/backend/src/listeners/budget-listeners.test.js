@@ -71,6 +71,9 @@ describe('Budget Listeners (Integration)', () => {
       expect(() => {
         eventBus.emit('event:deleted', { eventId });
       }).not.toThrow();
+
+      // Wait a tick for async handler to finish
+      await new Promise((resolve) => setTimeout(resolve, 100));
     });
   });
 });
