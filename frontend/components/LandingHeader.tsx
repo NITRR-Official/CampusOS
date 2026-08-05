@@ -4,12 +4,12 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Button } from '@campusos/design-system';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useAuthStore } from '@/lib/store/auth';
+import { useAuth } from '@campus-os/shared/auth-provider';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function LandingHeader() {
   const [mounted, setMounted] = useState(false);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     setMounted(true);

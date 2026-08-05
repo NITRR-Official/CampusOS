@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Button } from '@campusos/design-system';
-import { useAuthStore } from '@/lib/store/auth';
+import { useAuth } from '@campus-os/shared/auth-provider';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function LandingHeroActions() {
   const [mounted, setMounted] = useState(false);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     setMounted(true);
