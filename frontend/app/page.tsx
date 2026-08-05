@@ -15,7 +15,8 @@ import {
   CardHeader,
   CardTitle
 } from '@campusos/design-system';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { LandingHeader } from '@/components/LandingHeader';
+import { LandingHeroActions } from '@/components/LandingHeroActions';
 
 const HIGHLIGHTS = [
   {
@@ -91,64 +92,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.16)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.16)_1px,transparent_1px)] bg-[size:40px_40px] opacity-40 dark:opacity-20" />
       </div>
 
-      <header className="relative z-10">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background">
-              CO
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                CampusOS
-              </p>
-              <p className="text-sm font-medium text-foreground">
-                Operating system for campuses
-              </p>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground lg:flex">
-            <Link
-              href="#features"
-              className="transition-colors hover:text-foreground"
-            >
-              Platform
-            </Link>
-            <Link
-              href="#modules"
-              className="transition-colors hover:text-foreground"
-            >
-              Modules
-            </Link>
-            <Link
-              href="#workflow"
-              className="transition-colors hover:text-foreground"
-            >
-              Workflow
-            </Link>
-            <Link
-              href="#launch"
-              className="transition-colors hover:text-foreground"
-            >
-              Launch
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <Button
-              asChild
-              variant="ghost"
-              className="hidden h-10 lg:inline-flex"
-            >
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button asChild className="h-10 px-5">
-              <Link href="/signup">Get started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main className="relative z-10">
         <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 pb-16 pt-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -168,17 +112,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <Button asChild className="h-11 px-6">
-                <Link href="/dashboard">View dashboard</Link>
-              </Button>
-              <Button asChild variant="outline" className="h-11 px-6">
-                <Link href="/signup">Create account</Link>
-              </Button>
-              <Button asChild variant="ghost" className="h-11 px-6">
-                <Link href="/login">Login</Link>
-              </Button>
-            </div>
+            <LandingHeroActions />
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {[
