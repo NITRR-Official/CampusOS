@@ -158,11 +158,90 @@ describe('CalendarService delegation to repository (no database)', () => {
     });
   });
 
+  describe('updateEvent -> repository.updateEvent', () => {
+    const stored = {
+      id: 'evt-7',
+      startsAt: '2025-06-01T09:00:00.000Z',
+      endsAt: '2025-06-01T10:00:00.000Z'
+    };
+
+    it('delegates non-date changes without reading the stored event', async () => {
+      const sentinel = { id: 'evt-7', title: 'Renamed' };
+      fakeRepo.updateEvent.mockResolvedValue(sentinel);
+
+      const result = await service.updateEvent('evt-7', { title: 'Renamed' });
+
+      expect(fakeRepo.getEventById).not.toHaveBeenCalled();
+      expect(fakeRepo.updateEvent).toHaveBeenCalledWith('evt-7', {
+        title: 'Renamed'
+      });
+      expect(result).toBe(sentinel);
+    });
+
+    it('checks a single-date change against the stored event, then delegates', async () => {
+      const sentinel = { id: 'evt-7' };
+      fakeRepo.getEventById.mockResolvedValue(stored);
+      fakeRepo.updateEvent.mockResolvedValue(sentinel);
+      const changes = { endsAt: '2025-06-01T11:00:00.000Z' };
+
+      const result = await service.updateEvent('evt-7', changes);
+
+      expect(fakeRepo.getEventById).toHaveBeenCalledWith('evt-7');
+      expect(fakeRepo.updateEvent).toHaveBeenCalledWith('evt-7', changes);
+      expect(result).toBe(sentinel);
+    });
+
+    it('throws a 400 on endsAt before stored startsAt without updating', async () => {
+      fakeRepo.getEventById.mockResolvedValue(stored);
+
+      await expect(
+        service.updateEvent('evt-7', { endsAt: '2025-06-01T08:00:00.000Z' })
+      ).rejects.toMatchObject({
+        status: 400,
+        details: [{ field: 'endsAt' }]
+      });
+      expect(fakeRepo.updateEvent).not.toHaveBeenCalled();
+    });
+
+    it('throws a 400 on startsAt after stored endsAt without updating', async () => {
+      fakeRepo.getEventById.mockResolvedValue(stored);
+
+      await expect(
+        service.updateEvent('evt-7', { startsAt: '2025-06-01T11:00:00.000Z' })
+      ).rejects.toMatchObject({ status: 400 });
+      expect(fakeRepo.updateEvent).not.toHaveBeenCalled();
+    });
+
+    it('returns null without updating when a date change targets a missing event', async () => {
+      fakeRepo.getEventById.mockResolvedValue(null);
+
+      const result = await service.updateEvent('missing', {
+        startsAt: '2025-06-01T09:00:00.000Z'
+      });
+
+      expect(result).toBeNull();
+      expect(fakeRepo.updateEvent).not.toHaveBeenCalled();
+    });
+
+    it('returns null exactly as the repository does', async () => {
+      fakeRepo.updateEvent.mockResolvedValue(null);
+      expect(await service.updateEvent('missing', { title: 'x' })).toBeNull();
+    });
+
+    it('propagates repository rejection', async () => {
+      const boom = new Error('update failed');
+      fakeRepo.updateEvent.mockRejectedValue(boom);
+
+      await expect(service.updateEvent('x', { title: 'y' })).rejects.toBe(boom);
+    });
+  });
+
   it('does not call any repository method until a service method is invoked', () => {
     expect(fakeRepo.createEvent).not.toHaveBeenCalled();
     expect(fakeRepo.listEvents).not.toHaveBeenCalled();
     expect(fakeRepo.queryEventsByRange).not.toHaveBeenCalled();
     expect(fakeRepo.getEventById).not.toHaveBeenCalled();
     expect(fakeRepo.deleteEvent).not.toHaveBeenCalled();
+    expect(fakeRepo.updateEvent).not.toHaveBeenCalled();
   });
 });

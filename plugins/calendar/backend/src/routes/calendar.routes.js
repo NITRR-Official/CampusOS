@@ -9,6 +9,11 @@ export function registerCalendarRoutes(
   app.get('/api/v1/calendar/range', calendarController.queryByRange);
   app.get('/api/v1/calendar/:eventId', calendarController.getById);
   app.post('/api/v1/calendar', manageCalendar, calendarController.create);
+  app.patch(
+    '/api/v1/calendar/:eventId',
+    manageCalendar,
+    calendarController.update
+  );
   app.delete(
     '/api/v1/calendar/:eventId',
     manageCalendar,
