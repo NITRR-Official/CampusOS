@@ -14,6 +14,18 @@ export class PluginContractError extends Error {
 }
 
 /**
+ * Thrown when an automated database migration fails during plugin initialization or rollback.
+ */
+export class PluginMigrationError extends PluginContractError {
+  constructor(message, pluginName, migrationName, cause) {
+    super(message, pluginName, { migrationName, cause: cause?.message });
+    this.name = 'PluginMigrationError';
+    this.migrationName = migrationName;
+    this.cause = cause;
+  }
+}
+
+/**
  * Custom error thrown when a plugin violates capability or security sandbox boundaries.
  */
 export class PluginSecurityError extends PluginContractError {

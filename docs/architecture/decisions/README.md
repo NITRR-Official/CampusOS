@@ -26,6 +26,7 @@ This directory contains the key architectural decisions made for CampusOS. Each 
 | [ADR-017](./ADR-017-TWO_TIER_PLUGIN_SANDBOXING.md)                    | Two-Tier Plugin Architecture & Sandboxing       | 💡 Proposed   | 2026-10-20 |
 | [ADR-019](./ADR-019-PLUGIN_LIFECYCLE_TEARDOWN.md)                     | Plugin Lifecycle Teardown & Resource Cleanup    | ✅ Accepted   | 2026-11-05 |
 | [ADR-020](./ADR-020-FRONTEND_SLOT_FILL_SYSTEM.md)                     | Frontend Runtime Slot-Fill & Micro-UI Isolation | ✅ Accepted   | 2026-11-05 |
+| [ADR-021](./ADR-021-PLUGIN_DATABASE_MIGRATIONS.md)                    | Automated Plugin Database Migrations Engine     | ✅ Accepted   | 2026-11-05 |
 
 ## What is an ADR?
 

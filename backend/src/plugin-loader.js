@@ -22,6 +22,7 @@ import {
 } from './core/plugin-provenance.js';
 import { createScopedRegistry } from './core/sandbox-registry.js';
 import { createScopedEventBus } from './core/sandbox-event-bus.js';
+import { runPendingMigrations } from './database/migration-runner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -358,6 +359,15 @@ export async function loadPlugins(app, registry, options = {}) {
       const { init } = validatePluginModule(loadedModule, plugin.name);
 
       const pluginLogger = logger.child({ plugin: plugin.name });
+
+      // Run pending database migrations prior to invoking init (Issue #126)
+      await runPendingMigrations(plugin.name, plugin.modulePath, {
+        logger: pluginLogger,
+        version: plugin.version,
+        registry: effectiveRegistry,
+        storage: options.migrationStorage
+      });
+
       await init(app, effectiveRegistry, effectiveEventBus, pluginLogger);
       registry.registerPluginMetadata(plugin.name, {
         ...plugin.manifest,

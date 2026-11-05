@@ -12,6 +12,17 @@ export class PluginContractError extends Error {
   constructor(message: string, pluginName?: string, details?: unknown);
 }
 
+export class PluginMigrationError extends PluginContractError {
+  migrationName?: string;
+  cause?: unknown;
+  constructor(
+    message: string,
+    pluginName?: string,
+    migrationName?: string,
+    cause?: unknown
+  );
+}
+
 export class PluginSecurityError extends PluginContractError {}
 export class AccessDeniedError extends PluginSecurityError {}
 export class InvalidTierClaimError extends PluginSecurityError {}

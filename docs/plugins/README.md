@@ -15,6 +15,7 @@ Whether you are building a Recruitment system, an Alumni Network, or a custom in
 
 - [The Plugin Manifest (plugin.json)](./backend/manifest.md)
 - [Lifecycle & Teardown Hooks](./backend/lifecycle-and-hooks.md)
+- [Database Schema Migrations](./backend/database-migrations.md)
 - [Services & EventBus](./backend/services-and-events.md)
 - [RBAC & Security Guardrails](./backend/rbac-and-security.md)
 
