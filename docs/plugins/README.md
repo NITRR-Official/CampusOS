@@ -20,6 +20,7 @@ Whether you are building a Recruitment system, an Alumni Network, or a custom in
 
 ### 3. Frontend Development (React/Next.js)
 
+- [Runtime Environment & Design System](./frontend/runtime-environment.md)
 - [UI Integration & Widgets](./frontend/ui-integration.md)
 - [API Client & State](./frontend/api-client.md)
 

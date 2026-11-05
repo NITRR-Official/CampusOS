@@ -44,9 +44,14 @@ CampusOS adopts **Runtime ES Module (ESM) Bundle Injection** for frontend plugin
   ```
 - It automatically mounts the exported component, provides Suspense loading states, and encapsulates render errors within an error boundary to prevent plugin crashes from affecting the parent shell.
 
-### 4. Shared Host Runtime Bridge
+### 4. Shared Host Runtime Bridge & Design System Exposure
 
-- The host window registers a global runtime bridge (`window.__CampusOS_Runtime__` / window-level React sharing or Import Map resolution).
+- The host window registers a global runtime bridge (`window.CampusOS` / `window.__CampusOS_Runtime__` and `window.__CampusOS_DesignSystem__`).
+- Runtime environment provides:
+  - React & ReactDOM (`window.React`, `window.ReactDOM`)
+  - Extension system & registry (`@campus-os/shared`: `registry`, `ExtensionPoint`)
+  - Design system components (`@campusos/design-system`: `Button`, `Card`, `Dialog`, `Sidebar`, `Table`, `Badge`, `Input`, `useToast`, `cn`, etc.) via `window.CampusOS.ui`.
+- The frontend bundler (`scripts/build-plugin-frontend.js`) shims `@campusos/design-system` and `@campus-os/shared` via virtual modules into the host bridge at compile time, eliminating duplicate bundle bloat and preventing unresolvable browser ESM bare module specifiers.
 - When a runtime plugin calls `registry.registerSidebarLink()` or `registry.registerWidget()`, it registers directly into the host's singleton `plugin-registry`, enabling live injection into `<ExtensionPoint id="..." />`.
 
 ### 5. Backward Compatibility & Dual-Mode
