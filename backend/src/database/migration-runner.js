@@ -77,7 +77,7 @@ export class InMemoryMigrationStorage {
 
   async getApplied(pluginName) {
     const applied = [];
-    for (const [key, record] of this.records.entries()) {
+    for (const record of this.records.values()) {
       if (record.pluginName === pluginName) {
         applied.push(record);
       }

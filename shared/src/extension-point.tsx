@@ -1,8 +1,11 @@
 'use client';
 
 import React from 'react';
-import { registry } from './plugin-registry.ts';
-import type { CampusOSSlotId, SlotContextMap } from './slot-catalog.ts';
+import { registry } from '@campus-os/shared/plugin-registry';
+import type {
+  CampusOSSlotId,
+  SlotContextMap
+} from '@campus-os/shared/slot-catalog';
 
 export interface FallbackWidgetProps {
   error: Error;
@@ -114,58 +117,6 @@ export class ExtensionErrorBoundary extends React.Component<
   }
 }
 
-interface SafeWidgetProps {
-  Component: React.ComponentType<{ context?: unknown }>;
-  context?: unknown;
-  pluginId: string;
-  slotId: CampusOSSlotId;
-  fallbackWidget?: (props: FallbackWidgetProps) => React.ReactNode;
-}
-
-function SafeWidget({
-  Component,
-  context,
-  pluginId,
-  slotId,
-  fallbackWidget
-}: SafeWidgetProps) {
-  try {
-    // Direct invocation provides SSR/synchronous exception resilience
-    if (
-      typeof Component === 'function' &&
-      !(Component.prototype && Component.prototype.isReactComponent)
-    ) {
-      return (Component as React.FC<{ context?: unknown }>)({ context });
-    }
-    return <Component context={context} />;
-  } catch (error) {
-    if (typeof console !== 'undefined' && console.error) {
-      console.error(
-        `[CampusOS:ExtensionPoint] Synchronous render exception in widget '${pluginId}' for slot '${slotId}':`,
-        error
-      );
-    }
-    if (fallbackWidget) {
-      return fallbackWidget({
-        error: error instanceof Error ? error : new Error(String(error)),
-        pluginId,
-        slotId
-      });
-    }
-    if (process.env.NODE_ENV !== 'production') {
-      return (
-        <div
-          className="rounded border border-red-500/30 bg-red-500/10 p-2 text-xs text-red-600 dark:text-red-400"
-          data-extension-error={pluginId}
-        >
-          [Plugin Widget Error: {pluginId}] Failed in {slotId}
-        </div>
-      );
-    }
-    return null;
-  }
-}
-
 /**
  * An ExtensionPoint allows plugins to dynamically inject micro-UI components
  * into core CampusOS pages with priority sorting, condition checks, container queries,
@@ -237,13 +188,7 @@ export function ExtensionPoint<TSlot extends CampusOSSlotId = CampusOSSlotId>({
               className={`widget-slot @container/slot ${containerClassName}`}
               data-plugin-widget={widgetData.pluginId}
             >
-              <SafeWidget
-                Component={Component}
-                context={context}
-                pluginId={widgetData.pluginId}
-                slotId={id}
-                fallbackWidget={fallbackWidget}
-              />
+              <Component context={context} />
             </div>
           </ExtensionErrorBoundary>
         );

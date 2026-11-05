@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CampusOSSlotId } from './slot-catalog.ts';
+import type { CampusOSSlotId } from '@campus-os/shared/slot-catalog';
 
 export interface SidebarLink {
   pluginId: string;
