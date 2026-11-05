@@ -11,13 +11,16 @@ export default defineConfig({
     include: [
       'plugins/**/*.test.js',
       'backend/**/*.test.js',
-      'scripts/**/*.test.js'
+      'scripts/**/*.test.js',
+      'shared/**/*.test.{js,ts,tsx}'
     ],
     globals: true
   },
   resolve: {
     alias: {
-      '@campusos/backend-core': path.resolve(__dirname, './backend/src')
+      '@campusos/backend-core': path.resolve(__dirname, './backend/src'),
+      react: path.resolve(__dirname, './frontend/node_modules/react'),
+      'react-dom': path.resolve(__dirname, './frontend/node_modules/react-dom')
     }
   }
 });
