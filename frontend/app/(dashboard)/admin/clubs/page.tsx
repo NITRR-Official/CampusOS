@@ -17,7 +17,7 @@ import {
 import { Badge } from '@campusos/design-system';
 import { Button } from '@campusos/design-system';
 import { Skeleton } from '@campusos/design-system';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import { useToast } from '@campusos/design-system';
 
 interface Club {
@@ -183,14 +183,13 @@ export default function AdminClubsPage() {
                       <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white"
-                        disabled={actionLoading === club.id}
+                        loading={actionLoading === club.id}
                         onClick={() => handleStatusUpdate(club.id, 'approved')}
                       >
-                        {actionLoading === club.id ? (
-                          <Loader2 className="size-4 mr-1 animate-spin" />
-                        ) : (
-                          <CheckCircle2 className="size-4 mr-1" />
-                        )}
+                        <CheckCircle2
+                          className="size-4 mr-1"
+                          data-icon="leading"
+                        />
                         Approve
                       </Button>
                     </div>
