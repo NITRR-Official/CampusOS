@@ -14,6 +14,7 @@ Whether you are building a Recruitment system, an Alumni Network, or a custom in
 ### 2. Backend Development (Node.js/Express)
 
 - [The Plugin Manifest (plugin.json)](./backend/manifest.md)
+- [Lifecycle & Teardown Hooks](./backend/lifecycle-and-hooks.md)
 - [Services & EventBus](./backend/services-and-events.md)
 - [RBAC & Security Guardrails](./backend/rbac-and-security.md)
 

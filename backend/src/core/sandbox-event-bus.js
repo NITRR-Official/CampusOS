@@ -12,9 +12,13 @@ import { PluginSecurityError } from '@campus-os/shared/plugin-contract';
  */
 export function createScopedEventBus(manifest, globalEventBus, options = {}) {
   const pluginName = manifest?.name || 'unknown';
+  const isCore = options.isCore === true;
   const grantedCaps = new Set(
     options.grantedCapabilities || manifest?.capabilities || []
   );
+  if (isCore) {
+    grantedCaps.add('*');
+  }
   const declaredEvents = new Set(manifest?.consumes?.events || []);
 
   // Track listeners registered through this scoped bus to avoid wiping global listeners
@@ -157,6 +161,14 @@ export function createScopedEventBus(manifest, globalEventBus, options = {}) {
 
     eventNames: () => {
       return Array.from(registeredListeners.keys());
+    },
+
+    /**
+     * Clean up all listeners registered by this scoped bus instance (Issue #124).
+     */
+    cleanup: () => {
+      scopedBus.removeAllListeners();
+      return scopedBus;
     }
   };
 

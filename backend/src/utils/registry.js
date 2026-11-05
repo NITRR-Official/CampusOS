@@ -250,6 +250,76 @@ class ModuleRegistry {
   }
 
   /**
+   * Unregister a service
+   */
+  unregisterService(name) {
+    const deleted = this.#services.delete(name);
+    if (deleted) {
+      console.log(`✓ Service unregistered: ${name}`);
+    }
+    return deleted;
+  }
+
+  /**
+   * Unregister a module
+   */
+  unregisterModule(name) {
+    const deleted = this.#modules.delete(name);
+    if (deleted) {
+      console.log(`✓ Module unregistered: ${name}`);
+    }
+    return deleted;
+  }
+
+  /**
+   * Unregister a resolver
+   */
+  unregisterResolver(name) {
+    return this.#resolvers.delete(name);
+  }
+
+  /**
+   * Unregister a context resolver
+   */
+  unregisterContextResolver(routePrefix) {
+    return this.#contextResolvers.delete(routePrefix);
+  }
+
+  /**
+   * Unregister a stat provider
+   */
+  unregisterStatProvider(pluginId) {
+    return this.#statProviders.delete(pluginId);
+  }
+
+  /**
+   * Unregister settings config for a plugin
+   */
+  unregisterSettingsConfig(pluginId) {
+    return this.#settingsConfigs.delete(pluginId);
+  }
+
+  /**
+   * Unregister plugin metadata
+   */
+  unregisterPluginMetadata(pluginId) {
+    return this.#pluginMetadata.delete(pluginId);
+  }
+
+  /**
+   * Unregister public route(s) matching a filter predicate or regex
+   */
+  unregisterPublicRoute(predicate) {
+    if (typeof predicate === 'function') {
+      this.#publicRoutes = this.#publicRoutes.filter((r) => !predicate(r));
+    } else if (predicate instanceof RegExp) {
+      this.#publicRoutes = this.#publicRoutes.filter(
+        (r) => r.regex.source !== predicate.source
+      );
+    }
+  }
+
+  /**
    * Clear all registrations (useful for test teardowns)
    */
   reset() {

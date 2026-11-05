@@ -25,12 +25,28 @@ export type PluginInitFunction = (
   logger?: any
 ) => Promise<void> | void;
 
+export type PluginDestroyFunction = (
+  app?: any,
+  registry?: any,
+  eventBus?: any,
+  logger?: any
+) => Promise<void> | void;
+
+export type PluginTeardownFunction = PluginDestroyFunction;
+
 export interface CampusOSPlugin {
   manifest: PluginManifest;
   init: PluginInitFunction;
+  destroy?: PluginDestroyFunction;
+  teardown?: PluginTeardownFunction;
 }
 
 export function validatePluginManifest(
   rawManifest: unknown,
   folderName?: string
 ): PluginManifest;
+
+export function validatePluginModule(
+  loadedModule: unknown,
+  pluginName?: string
+): { init: PluginInitFunction; destroy?: PluginDestroyFunction };
