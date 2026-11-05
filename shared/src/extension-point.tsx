@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { registry } from './plugin-registry.js';
-import type { CampusOSSlotId, SlotContextMap } from './slot-catalog.js';
+import { registry } from './plugin-registry.ts';
+import type { CampusOSSlotId, SlotContextMap } from './slot-catalog.ts';
 
 export interface FallbackWidgetProps {
   error: Error;

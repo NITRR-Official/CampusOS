@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { registry } from './plugin-registry.js';
-import { ExtensionPoint } from './extension-point.js';
+import { registry } from './plugin-registry.ts';
+import { ExtensionPoint } from './extension-point.tsx';
 
 describe('ExtensionPoint Micro-UI & Registry System (Issues #125, #132, #133)', () => {
   beforeEach(() => {
