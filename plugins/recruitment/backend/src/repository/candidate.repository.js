@@ -28,6 +28,16 @@ export function createCandidateRepository(CandidateModel) {
         { notes },
         { returnDocument: 'after', runValidators: true }
       );
+    },
+
+    async deleteByCampaignIds(campaignIds) {
+      return await CandidateModel.deleteMany({
+        campaignId: { $in: campaignIds }
+      });
+    },
+
+    async deleteByUserId(userId) {
+      return await CandidateModel.deleteMany({ userId });
     }
   };
 }

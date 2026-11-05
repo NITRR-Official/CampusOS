@@ -42,12 +42,13 @@ export async function init(app, registry, eventBus) {
   });
 
   registry.registerContextResolver('/api/v1/schedule', async (req) => {
-    const slotId = req.params?.slotId || req.url.split('/')[4];
+    const slotId = req.params?.slotId || req.path.split('/')[4]?.split('?')[0];
     if (!slotId || slotId === 'conflicts' || slotId === 'venue') return null;
     try {
-      const SlotModel = (await import('./schema/scheduleSlot.model.js'))
-        .ScheduleSlot;
-      const slotDoc = await SlotModel.findById(slotId).select('clubId').lean();
+      const { ScheduleSlot } = await import('./schema/scheduleSlot.model.js');
+      const slotDoc = await ScheduleSlot.findById(slotId)
+        .select('clubId')
+        .lean();
       return slotDoc?.clubId
         ? { type: 'club:member_service', id: slotDoc.clubId.toString() }
         : null;
@@ -57,6 +58,29 @@ export async function init(app, registry, eventBus) {
   });
 
   if (eventBus) {
+    eventBus.on('club:deleted', async (payload) => {
+      try {
+        if (payload && payload.clubId && registry) {
+          const eventService = registry?.getService
+            ? registry.getService('event:service')
+            : null;
+          if (eventService) {
+            const events = await eventService.listEvents(payload.clubId);
+            if (Array.isArray(events)) {
+              for (const ev of events) {
+                await schedulingService.deleteEventSchedule(ev._id || ev.id);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error(
+          '[Scheduling Listener] Error handling club:deleted event:',
+          err
+        );
+      }
+    });
+
     eventBus.on('event:deleted', async (payload) => {
       try {
         if (payload && payload.eventId) {

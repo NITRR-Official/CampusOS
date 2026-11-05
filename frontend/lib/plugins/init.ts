@@ -10,8 +10,11 @@ import { initFrontend as initRecruitment } from '@plugins/recruitment/frontend/i
 import { initFrontend as initTask } from '@plugins/task/frontend/init';
 import { initFrontend as initVendor } from '@plugins/vendor/frontend/init';
 
+import { setupPluginRuntime } from './runtime-env';
+
 export function initializePlugins() {
   if (typeof window !== 'undefined') {
+    setupPluginRuntime();
     // Prevent double initialization in React strict mode / fast refresh
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).__pluginsInitialized) return;

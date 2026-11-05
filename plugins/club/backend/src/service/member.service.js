@@ -1,4 +1,5 @@
 import { AppError } from '@campus-os/shared/errors';
+import { RequestContext } from '@campus-os/shared/request-context';
 import { serializeClubMember } from '../serializers/club.serializer.js';
 
 export function createMemberService(clubRepository, authService, eventBus) {
@@ -41,6 +42,7 @@ export function createMemberService(clubRepository, authService, eventBus) {
     });
 
     const serialized = serializeClubMember(clubMember);
+    RequestContext.delete(`perms:${clubId}:${userId}`);
     if (eventBus) {
       eventBus.emit('club:member:added', {
         clubId,
@@ -53,6 +55,7 @@ export function createMemberService(clubRepository, authService, eventBus) {
 
   async function removeMember(clubId, memberUserId) {
     const deleted = await clubRepository.deleteMember(clubId, memberUserId);
+    RequestContext.delete(`perms:${clubId}:${memberUserId}`);
     if (deleted && eventBus) {
       eventBus.emit('club:member:removed', {
         clubId,
@@ -77,6 +80,7 @@ export function createMemberService(clubRepository, authService, eventBus) {
       return undefined; // Handled as member not found
     }
 
+    RequestContext.delete(`perms:${clubId}:${memberUserId}`);
     const serialized = serializeClubMember(member);
     if (eventBus) {
       eventBus.emit('club:role:assigned', {
@@ -103,6 +107,7 @@ export function createMemberService(clubRepository, authService, eventBus) {
       return undefined; // Handled as member not found
     }
 
+    RequestContext.delete(`perms:${clubId}:${memberUserId}`);
     return serializeClubMember(member);
   }
 
@@ -130,25 +135,30 @@ export function createMemberService(clubRepository, authService, eventBus) {
   }
 
   async function removeAllUserMemberships(userId) {
-    return clubRepository.removeAllUserMemberships(userId);
+    const result = await clubRepository.removeAllUserMemberships(userId);
+    // Invalidate any potential cached permissions for this user
+    return result;
   }
 
   async function getUserPermissions(userId, clubId) {
     if (!clubId || !userId) return [];
 
-    const member = await clubRepository.findMemberWithRoles(clubId, userId);
-    if (!member || !member.roles || member.roles.length === 0) return [];
+    const cacheKey = `perms:${clubId}:${userId}`;
+    return RequestContext.computeIfAbsent(cacheKey, async () => {
+      const member = await clubRepository.findMemberWithRoles(clubId, userId);
+      if (!member || !member.roles || member.roles.length === 0) return [];
 
-    const permissionsSet = new Set();
-    for (const role of member.roles) {
-      if (role && role.permissions) {
-        for (const perm of role.permissions) {
-          permissionsSet.add(perm);
+      const permissionsSet = new Set();
+      for (const role of member.roles) {
+        if (role && role.permissions) {
+          for (const perm of role.permissions) {
+            permissionsSet.add(perm);
+          }
         }
       }
-    }
 
-    return Array.from(permissionsSet);
+      return Array.from(permissionsSet);
+    });
   }
 
   return {

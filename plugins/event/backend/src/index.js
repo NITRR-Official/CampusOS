@@ -67,14 +67,14 @@ export async function init(app, registry, eventBus) {
         return { type: 'club:member_service', id: req.body.clubId };
       }
 
-      const eventId = req.params?.eventId || req.url.split('/')[4];
-      // e.g. /api/v1/events/123/publish -> split gives ['', 'api', 'v1', 'events', '123']
-      if (!eventId) return null;
+      const eventId =
+        req.params?.eventId || req.path.split('/')[4]?.split('?')[0];
+      if (!eventId || eventId === 'public') return null;
       try {
-        const EventModel = (await import('./schema/event.model.js')).Event;
-        const eventDoc = await EventModel.findById(eventId)
-          .select('clubId')
-          .lean();
+        const eventDoc = await eventRepository.getEventById(eventId);
+        if (req.contextCache && eventDoc) {
+          req.contextCache.set(`entity:event:${eventId}`, eventDoc);
+        }
         return eventDoc?.clubId
           ? { type: 'club:member_service', id: eventDoc.clubId.toString() }
           : null;

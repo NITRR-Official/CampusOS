@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { RequestContext } from '@campus-os/shared/request-context';
 import { Event } from '../schema/event.model.js';
 import { EventRegistration } from '../schema/event-registration.model.js';
 
@@ -6,28 +7,56 @@ export function createEventRepository() {
   async function saveEvent(eventData) {
     const eventId = eventData.id || eventData._id;
     if (eventId) {
+      RequestContext.delete(`event:${eventId}`);
       // Update existing
       const { id, _id, ...updateData } = eventData;
-      return Event.findByIdAndUpdate(eventId, updateData, {
-        returnDocument: 'after',
+      const updated = await Event.findByIdAndUpdate(eventId, updateData, {
         returnDocument: 'after'
       })
         .lean()
         .exec();
+      if (updated) {
+        RequestContext.set(`event:${eventId}`, updated);
+      }
+      return updated;
     }
     // Create new
     const event = new Event(eventData);
     await event.save();
-    return event.toObject();
+    const obj = event.toObject();
+    if (obj && obj._id) {
+      RequestContext.set(`event:${obj._id.toString()}`, obj);
+    }
+    return obj;
   }
 
   async function getEventById(eventId) {
-    return Event.findById(eventId).lean().exec();
+    if (!eventId) return null;
+    return RequestContext.computeIfAbsent(`event:${eventId}`, async () => {
+      return Event.findById(eventId).lean().exec();
+    });
   }
 
   async function deleteEvent(eventId) {
+    RequestContext.delete(`event:${eventId}`);
+    await EventRegistration.deleteMany({ eventId });
     const result = await Event.deleteOne({ _id: eventId });
     return result.deletedCount > 0;
+  }
+
+  async function deleteRegistrationsByUserId(userId) {
+    if (!userId) return 0;
+    const registrations = await EventRegistration.find({ userId })
+      .lean()
+      .exec();
+    for (const reg of registrations) {
+      await Event.updateOne(
+        { _id: reg.eventId },
+        { $inc: { registrationsCount: -1 } }
+      ).exec();
+    }
+    const result = await EventRegistration.deleteMany({ userId }).exec();
+    return result.deletedCount || 0;
   }
 
   async function getEventsByClub(clubId) {
@@ -202,6 +231,7 @@ export function createEventRepository() {
     createRegistration,
     incrementRegistrationCount,
     findRegistrationByEmail,
-    findRegistrationsByEvent
+    findRegistrationsByEvent,
+    deleteRegistrationsByUserId
   };
 }

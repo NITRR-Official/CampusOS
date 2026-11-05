@@ -45,3 +45,9 @@ This document tracks technical debt, scaling strategies, and security upgrades t
 
 - **Verifiable Co-Curricular Transcripts:** Because CampusOS atomically tracks RBAC roles and completed tasks, generate cryptographically secure PDFs proving a student's leadership and soft skills.
 - **Recruiter B2B Portal:** Allow corporate recruiters to headhunt top talent directly from the platform, creating a highly lucrative monetization stream.
+
+### 6. Event-Driven Analytics & Behavioral Profiling
+
+- **Dedicated Analytics Plugin:** Introduce an abstracted `analytics` plugin that silently listens to the core `eventBus` (e.g., `user:registered`, `user:checked_in`).
+- **Behavioral Profiles:** Build time-series data and behavioral profiles (e.g., "Attendance Reliability Score") without tightly coupling or polluting the core domain models (`User`, `Event`).
+- **Dashboard Widget Library:** Instead of a complex, query-building BI tool, provide a library of highly optimized, pre-built analytics widgets (charts/graphs) that Admins can drag and drop onto their dashboards (the "YouTube Studio" approach).

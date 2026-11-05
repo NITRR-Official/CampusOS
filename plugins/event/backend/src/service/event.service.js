@@ -160,6 +160,11 @@ export function createEventService(eventRepository, eventBus) {
     return results.filter(Boolean).length;
   }
 
+  async function deleteRegistrationsByUser(userId) {
+    if (!userId) return 0;
+    return await eventRepository.deleteRegistrationsByUserId(userId);
+  }
+
   return {
     createEvent,
     updateEvent,
@@ -171,7 +176,8 @@ export function createEventService(eventRepository, eventBus) {
     registerForEvent,
     deleteEvent,
     deleteEventsByClub,
-    getEventRegistrations
+    getEventRegistrations,
+    deleteRegistrationsByUser
   };
 }
 

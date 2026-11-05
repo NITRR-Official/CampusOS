@@ -29,6 +29,10 @@ export function createCampaignRepository(CampaignModel) {
         returnDocument: 'after',
         runValidators: true
       });
+    },
+
+    async deleteByEntity(entityType, entityId) {
+      return await CampaignModel.deleteMany({ entityType, entityId });
     }
   };
 }

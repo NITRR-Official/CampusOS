@@ -201,6 +201,18 @@ export function createTaskService(taskRepository) {
       });
 
       return serializeTask(updatedTask);
+    },
+
+    async deleteTasksByClub(clubId) {
+      if (!clubId) return 0;
+      const result = await taskRepository.deleteByClubId(clubId);
+      return result?.deletedCount || 0;
+    },
+
+    async unassignTasksByUser(userId) {
+      if (!userId) return 0;
+      const result = await taskRepository.unassignByUserId(userId);
+      return result?.modifiedCount || 0;
     }
   };
 }

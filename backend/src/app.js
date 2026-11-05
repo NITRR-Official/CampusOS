@@ -6,9 +6,10 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import mongoose from 'mongoose';
 import rateLimit from 'express-rate-limit';
 import { loggerMiddleware } from './middleware/logger.js';
+import { requestContextMiddleware } from './middleware/request-context.middleware.js';
+import { RequestContext } from './core/request-context.js';
 import { authMiddleware } from './middleware/auth.js';
 import {
   requirePermissions,
@@ -17,15 +18,21 @@ import {
 import { errorMiddleware, notFoundMiddleware } from './middleware/error.js';
 import { registerJwtAuthenticator } from './auth/jwt-authenticator.js';
 import { loadPlugins } from './plugin-loader.js';
+import { registerPluginBundleRoutes } from './routes/plugin-bundle.routes.js';
 import { User, Plugin } from './database/schemas/index.js';
+import { databaseManager, healthCheck } from './database/connection.js';
+import { rootLogger } from './core/logger.js';
 
 export async function createApp(registry) {
   const app = express();
   app.disable('x-powered-by');
   app.locals.registry = registry;
 
-  // Register Core Models so plugins can use them
+  // Register Core Database Services & Models
+  databaseManager.registerServices(registry);
   registry.registerService('core:models', { User, Plugin });
+  registry.registerService('core:request_context', RequestContext);
+  registry.registerService('core:logger', rootLogger);
 
   // Environment config
   const isDev = process.env.NODE_ENV !== 'production';
@@ -40,7 +47,10 @@ export async function createApp(registry) {
 
   // ============== MIDDLEWARE CHAIN (Order matters!) ==============
 
-  // 0. Security Headers
+  // 0. Request Context (Request-scoped cache & AsyncLocalStorage)
+  app.use(requestContextMiddleware);
+
+  // 1. Security Headers
   app.use(helmet());
 
   // 1. Body parsing
@@ -95,14 +105,15 @@ export async function createApp(registry) {
   app.use(loggerMiddleware);
 
   // 5. Health check endpoint (no auth required)
-  app.get('/health', (req, res) => {
-    const dbState = mongoose.connection.readyState;
-    const isHealthy = dbState === 1;
+  app.get('/health', async (req, res) => {
+    const health = await healthCheck();
+    const isHealthy = health?.healthy === true;
 
     res.status(isHealthy ? 200 : 503).json({
       success: isHealthy,
       status: isHealthy ? 'healthy' : 'unhealthy',
       database: isHealthy ? 'connected' : 'disconnected',
+      databases: health?.databases,
       timestamp: new Date().toISOString()
     });
   });
@@ -118,6 +129,9 @@ export async function createApp(registry) {
     const permissions = registry.permissions.getAllGrouped();
     res.json({ success: true, permissions });
   });
+
+  // Public endpoints for plugin frontend ESM bundles and manifests (ADR-014)
+  registerPluginBundleRoutes(app, { registry });
 
   // 6. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);

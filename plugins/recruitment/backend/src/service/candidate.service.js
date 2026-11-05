@@ -59,6 +59,18 @@ export function createCandidateService(
         throw new AppError('Candidate not found', 404);
       }
       return candidate;
+    },
+
+    async deleteCandidatesByCampaignIds(campaignIds) {
+      if (!campaignIds || !campaignIds.length) return 0;
+      const result = await candidateRepository.deleteByCampaignIds(campaignIds);
+      return result?.deletedCount || 0;
+    },
+
+    async deleteCandidatesByUserId(userId) {
+      if (!userId) return 0;
+      const result = await candidateRepository.deleteByUserId(userId);
+      return result?.deletedCount || 0;
     }
   };
 }

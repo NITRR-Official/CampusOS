@@ -96,6 +96,36 @@ export function createBudgetRepository() {
     return result[0]?.total || 0;
   }
 
+  async function getClubIdByBudgetId(budgetId) {
+    if (!budgetId || !mongoose.Types.ObjectId.isValid(budgetId)) return null;
+    try {
+      const budget = await Budget.findById(budgetId)
+        .populate('eventId', 'clubId')
+        .lean()
+        .exec();
+      return (
+        budget?.clubId?.toString() ||
+        budget?.eventId?.clubId?.toString() ||
+        null
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  async function getBudgetIdByExpenseId(expenseId) {
+    if (!expenseId || !mongoose.Types.ObjectId.isValid(expenseId)) return null;
+    try {
+      const expense = await Expense.findById(expenseId)
+        .select('budgetId')
+        .lean()
+        .exec();
+      return expense?.budgetId?.toString() || null;
+    } catch {
+      return null;
+    }
+  }
+
   return {
     createBudget,
     getBudgetById,
@@ -106,6 +136,8 @@ export function createBudgetRepository() {
     getExpensesByBudget,
     getExpenseById,
     updateExpense,
-    getTotalExpenses
+    getTotalExpenses,
+    getClubIdByBudgetId,
+    getBudgetIdByExpenseId
   };
 }

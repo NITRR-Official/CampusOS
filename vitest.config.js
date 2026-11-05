@@ -8,7 +8,11 @@ const __dirname = path.dirname(__filename);
 export default defineConfig({
   test: {
     environment: 'node',
-    include: ['plugins/**/*.test.js', 'backend/**/*.test.js'],
+    include: [
+      'plugins/**/*.test.js',
+      'backend/**/*.test.js',
+      'scripts/**/*.test.js'
+    ],
     globals: true
   },
   resolve: {

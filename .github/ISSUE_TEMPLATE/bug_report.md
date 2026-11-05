@@ -2,8 +2,12 @@
 name: 🐛 Bug Report
 about: Report a bug or unexpected behavior
 title: '[BUG] '
-labels: ['bug', 'needs-review']
+labels: ['type:bug', 'needs-review']
 ---
+
+**Parent:** None
+**Blocking:** None
+**Blocked By:** None
 
 ## 📋 Description
 

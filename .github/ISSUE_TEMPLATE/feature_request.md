@@ -2,8 +2,12 @@
 name: ✨ Feature Request
 about: Suggest a new feature or enhancement
 title: '[FEATURE] '
-labels: ['feature', 'needs-review']
+labels: ['type:feature', 'needs-review']
 ---
+
+**Parent:** None
+**Blocking:** None
+**Blocked By:** None
 
 ## 🎯 Description
 

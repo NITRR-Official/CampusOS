@@ -54,6 +54,19 @@ export async function init(app, registry, eventBus) {
         );
       }
     });
+
+    eventBus.on('user:deleted', async (payload) => {
+      try {
+        if (payload && payload.userId) {
+          await checkInService.deleteUserCheckIns(payload.userId);
+        }
+      } catch (err) {
+        console.error(
+          '[CheckIn Listener] Error handling user:deleted event:',
+          err
+        );
+      }
+    });
   }
 }
 

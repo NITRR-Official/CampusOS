@@ -1,4 +1,17 @@
 export function registerResourceHandlers(eventBus, registry, resourceService) {
+  eventBus.on('club:deleted', async (payload) => {
+    try {
+      if (payload && payload.clubId) {
+        await resourceService.deleteResourcesByOwner(payload.clubId);
+      }
+    } catch (err) {
+      console.error(
+        '[Resource Listener] Error handling club:deleted event:',
+        err
+      );
+    }
+  });
+
   eventBus.on('event:deleted', async (payload) => {
     try {
       if (payload && payload.eventId) {

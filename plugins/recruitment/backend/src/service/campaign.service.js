@@ -36,6 +36,15 @@ export function createCampaignService(campaignRepository, eventBus) {
         throw new AppError('Campaign not found', 404);
       }
       return campaign;
+    },
+
+    async deleteCampaignsByEntity(entityType, entityId) {
+      if (!entityType || !entityId) return 0;
+      const result = await campaignRepository.deleteByEntity(
+        entityType,
+        entityId
+      );
+      return result?.deletedCount || 0;
     }
   };
 }

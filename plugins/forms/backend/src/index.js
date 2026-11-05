@@ -6,6 +6,7 @@ import { FormModel } from './schema/form.model.js';
 import { FormResponseModel } from './schema/form-response.model.js';
 import { createFormController } from './controller/form.controller.js';
 import { registerFormRoutes } from './routes/form.routes.js';
+import { registerFormHandlers } from './listeners/index.js';
 
 export async function init(app, registry, eventBus) {
   // 1. Get Shared Services
@@ -76,6 +77,10 @@ export async function init(app, registry, eventBus) {
       'POST /api/v1/forms/:formId/responses'
     ]
   });
+
+  if (eventBus) {
+    registerFormHandlers(eventBus, { formService, formResponseService });
+  }
 
   console.log('✓ Loaded plugin: forms');
 }

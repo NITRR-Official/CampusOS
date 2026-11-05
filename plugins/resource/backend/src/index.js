@@ -58,7 +58,8 @@ export async function init(app, registry, eventBus) {
   }
 
   registry.registerContextResolver('/api/v1/resources', async (req) => {
-    const resourceId = req.params?.resourceId || req.url.split('/')[4];
+    const resourceId =
+      req.params?.resourceId || req.path.split('/')[4]?.split('?')[0];
     if (
       !resourceId ||
       resourceId === 'available' ||
@@ -66,11 +67,10 @@ export async function init(app, registry, eventBus) {
     )
       return null;
     try {
-      const ResourceModel = (await import('./schema/resource.model.js'))
-        .Resource;
-      const resDoc = await ResourceModel.findById(resourceId)
-        .select('clubId')
-        .lean();
+      const resDoc = await resourceRepository.findById(resourceId);
+      if (req.contextCache && resDoc) {
+        req.contextCache.set(`entity:resource:${resourceId}`, resDoc);
+      }
       return resDoc?.clubId
         ? { type: 'club:member_service', id: resDoc.clubId.toString() }
         : null;

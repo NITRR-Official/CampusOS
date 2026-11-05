@@ -23,15 +23,15 @@ export function requirePermissions(...allowedPermissions) {
       // Look for explicit context first
       if (req.resolvedContext) {
         context = req.resolvedContext;
-      } else if (req.params?.clubId || req.body?.clubId) {
-        // Fallback for legacy club context
-        context = {
-          type: 'club:member_service',
-          id: req.params?.clubId || req.body?.clubId
-        };
       } else {
         // Use registry context resolvers to dynamically lookup the context
         context = await registry.resolveContext(req);
+        if (context) {
+          req.resolvedContext = context;
+          if (req.contextCache) {
+            req.contextCache.set('resolvedContext', context);
+          }
+        }
       }
 
       // 4. If we have a context, check context-specific permissions

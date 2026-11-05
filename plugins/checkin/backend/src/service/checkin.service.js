@@ -135,6 +135,11 @@ export function createCheckInService(checkInRepository) {
     return checkInRepository.deleteEventCheckIns(eventId);
   }
 
+  async function deleteUserCheckIns(userId) {
+    if (!userId) return 0;
+    return checkInRepository.deleteUserCheckIns(userId);
+  }
+
   return {
     createCheckIn,
     getCheckInById,
@@ -144,7 +149,8 @@ export function createCheckInService(checkInRepository) {
     markAsCheckedInByQRCode,
     getAttendanceStats,
     listAllCheckIns,
-    deleteEventCheckIns
+    deleteEventCheckIns,
+    deleteUserCheckIns
   };
 }
 

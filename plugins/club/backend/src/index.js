@@ -73,9 +73,8 @@ export async function init(app, registry, eventBus) {
     requireSuperAdmin
   );
 
-  // Mount the slug resolver middleware globally for all downstream plugins under /api/v1
-  const slugResolver = createSlugResolver(Club);
-  app.use('/api/v1', slugResolver);
+  // Register scoped parameter pre-condition for :clubId routes
+  app.param('clubId', createSlugResolver(Club));
 
   if (eventBus) {
     registerEventHandlers(eventBus, {
@@ -101,6 +100,26 @@ export async function init(app, registry, eventBus) {
   });
 
   registerClubPermissions(registry);
+
+  registry.registerContextResolver('/api/v1/clubs', async (req) => {
+    const clubId = req.params?.clubId || req.body?.clubId || req.query?.clubId;
+    if (clubId) {
+      return { type: 'club:member_service', id: clubId.toString() };
+    }
+
+    const parts = req.path.split('/');
+    if (parts.length > 4) {
+      const candidateId = parts[4].split('?')[0];
+      if (
+        candidateId &&
+        !['verify', 'approvals', 'new'].includes(candidateId)
+      ) {
+        return { type: 'club:member_service', id: candidateId };
+      }
+    }
+
+    return null;
+  });
 
   // Register Stat Provider for Global Dashboard
   registry.registerStatProvider('club', async (user) => {

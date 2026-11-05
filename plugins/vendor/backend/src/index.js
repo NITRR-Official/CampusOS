@@ -60,13 +60,14 @@ export async function init(app, registry, eventBus) {
   }
 
   registry.registerContextResolver('/api/v1/vendors', async (req) => {
-    const vendorId = req.params?.vendorId || req.url.split('/')[4];
+    const vendorId =
+      req.params?.vendorId || req.path.split('/')[4]?.split('?')[0];
     if (!vendorId || vendorId === 'assignments') return null;
     try {
-      const VendorModel = (await import('./schema/vendor.model.js')).Vendor;
-      const vendorDoc = await VendorModel.findById(vendorId)
-        .select('clubId')
-        .lean();
+      const vendorDoc = await vendorRepository.findById(vendorId);
+      if (req.contextCache && vendorDoc) {
+        req.contextCache.set(`entity:vendor:${vendorId}`, vendorDoc);
+      }
       return vendorDoc?.clubId
         ? { type: 'club:member_service', id: vendorDoc.clubId.toString() }
         : null;

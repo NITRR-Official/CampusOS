@@ -23,6 +23,10 @@ export function createFormRepository(FormModel) {
         returnDocument: 'after',
         runValidators: true
       }).lean();
+    },
+
+    async deleteByEntity(entityType, entityId) {
+      return await FormModel.deleteMany({ entityType, entityId });
     }
   };
 }

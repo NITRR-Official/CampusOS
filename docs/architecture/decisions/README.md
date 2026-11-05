@@ -20,6 +20,10 @@ This directory contains the key architectural decisions made for CampusOS. Each 
 | [ADR-011](./ADR-011-TESTING_STRATEGY.md)                              | Comprehensive Automated Testing Strategy        | ✅ Accepted   | 2026-07-11 |
 | [ADR-012](./ADR-012-DYNAMIC_ATOMIC_RBAC.md)                           | Dynamic Atomic Role-Based Access Control        | ✅ Accepted   | 2026-08-04 |
 | [ADR-013](./ADR-013-FACTORY_PATTERN_SERVICES.md)                      | Factory Pattern Services & Dependency Inversion | ✅ Accepted   | 2026-08-04 |
+| [ADR-014](./ADR-014-RUNTIME_ESM_FRONTEND_PLUGINS.md)                  | Runtime ESM Frontend Plugins                    | 💡 Proposed   | 2026-10-20 |
+| [ADR-015](./ADR-015-CENTRAL_SCOPED_LOGGER.md)                         | Central Scoped Logger & Structured Logging      | 💡 Proposed   | 2026-10-20 |
+| [ADR-016](./ADR-016-POLYGLOT_DATABASE_ADAPTER.md)                     | Polyglot Database Architecture & Adapters       | ✅ Accepted   | 2026-10-20 |
+| [ADR-017](./ADR-017-TWO_TIER_PLUGIN_SANDBOXING.md)                    | Two-Tier Plugin Architecture & Sandboxing       | 💡 Proposed   | 2026-10-20 |
 
 ## What is an ADR?
 

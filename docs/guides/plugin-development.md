@@ -274,9 +274,32 @@ beforeAll(async () => {
 });
 ```
 
+## 8. Validating Your Plugin
+
+Before submitting a PR or distributing your plugin, you can run the CampusOS plugin verification CLI. It inspects your manifest, required architectural layers, backend entrypoint, and guarantees architectural boundary isolation:
+
+```bash
+# Validate all plugins in the repository
+pnpm run plugin:validate
+
+# Validate a specific plugin
+pnpm run plugin:validate recruitment
+
+# Validate an external folder or zip package
+pnpm run plugin:validate /path/to/my-plugin
+pnpm run plugin:validate /path/to/my-plugin.zip
+```
+
+The CLI verifies:
+
+- `plugin.json` schema compliance (kebab-case name, semver version, dependencies).
+- Backend entrypoint `backend/src/index.js` exporting an `init` function.
+- Presence of architectural layers (`routes/`, `service/`, `controller/`, and `repository/`).
+- Architectural boundary isolation (forbids direct relative cross-plugin imports).
+
 ---
 
-## 8. Publishing & Distributing Plugins
+## 9. Publishing & Distributing Plugins
 
 CampusOS makes it incredibly easy to share your plugins with other organizations or the open-source community. You don't need to publish to NPM; you can distribute your plugin directly via GitHub!
 

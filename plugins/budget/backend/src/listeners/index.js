@@ -1,4 +1,27 @@
 export function registerBudgetHandlers(eventBus, registry, budgetService) {
+  eventBus.on('club:deleted', async (payload) => {
+    try {
+      if (payload && payload.clubId && registry) {
+        const eventService = registry?.getService
+          ? registry.getService('event:service')
+          : null;
+        if (eventService) {
+          const events = await eventService.listEvents(payload.clubId);
+          if (Array.isArray(events)) {
+            for (const ev of events) {
+              await budgetService.deleteEventBudget(ev._id || ev.id);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error(
+        '[Budget Listener] Error handling club:deleted event:',
+        err
+      );
+    }
+  });
+
   eventBus.on('event:deleted', async (payload) => {
     try {
       if (payload && payload.eventId) {

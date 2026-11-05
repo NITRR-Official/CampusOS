@@ -1,4 +1,17 @@
 export function registerVendorHandlers(eventBus, registry, vendorService) {
+  eventBus.on('club:deleted', async (payload) => {
+    try {
+      if (payload && payload.clubId) {
+        await vendorService.deleteVendorsByClub(payload.clubId);
+      }
+    } catch (err) {
+      console.error(
+        '[Vendor Listener] Error handling club:deleted event:',
+        err
+      );
+    }
+  });
+
   eventBus.on('event:deleted', async (payload) => {
     try {
       if (payload && payload.eventId) {

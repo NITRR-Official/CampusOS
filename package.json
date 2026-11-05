@@ -16,12 +16,15 @@
     "test": "pnpm -r run test",
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint --fix",
+    "lint:arch": "depcruise --config .dependency-cruiser.cjs plugins backend",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs",
     "plugin:create": "node scripts/plugin.js create",
     "plugin:install": "node scripts/plugin.js install",
     "plugin:uninstall": "node scripts/plugin.js uninstall",
+    "plugin:validate": "node scripts/plugin.js validate",
+    "plugin:build-frontend": "node scripts/plugin.js build-frontend",
     "plugin:sync": "node scripts/plugin.js generate-registry",
     "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -55,9 +58,6 @@
     "plugins/*/frontend"
   ],
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix"
-    ],
     "*.{ts,tsx,js,jsx,json,md}": [
       "prettier --write"
     ]
@@ -75,6 +75,8 @@
     "@commitlint/config-conventional": "^21.0.1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.1.1",
+    "dependency-cruiser": "^16.10.4",
+    "esbuild": "^0.28.2",
     "eslint": "^10.3.0",
     "eslint-plugin-import": "^2.32.0",
     "fast-check": "^3.23.2",

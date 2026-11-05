@@ -431,6 +431,17 @@ export function createVendorService(vendorRepository) {
       } catch (error) {
         return { success: false, error: error.message };
       }
+    },
+
+    /**
+     * Delete all vendors associated with a deleted club (cascading cleanup)
+     * @param {string} clubId
+     * @returns {Promise<number>} Number of deleted vendors
+     */
+    async deleteVendorsByClub(clubId) {
+      if (!clubId) return 0;
+      const result = await vendorRepository.deleteByClubId(clubId);
+      return result?.deletedCount || 0;
     }
   };
 }

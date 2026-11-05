@@ -56,34 +56,20 @@ export async function init(app, registry, eventBus) {
     let budgetId = req.params?.budgetId;
 
     // Handle expense routes where budgetId is not directly in the URL but expenseId is
-    if (req.path.includes('/expense/') && req.params.expenseId) {
-      try {
-        const ExpenseModel = (await import('./schema/expense.model.js'))
-          .Expense;
-        const exp = await ExpenseModel.findById(req.params.expenseId)
-          .select('budgetId')
-          .lean();
-        budgetId = exp?.budgetId;
-      } catch {
-        return null;
+    if (req.path.includes('/expense/')) {
+      const expenseId =
+        req.params?.expenseId || req.path.split('/')[4]?.split('?')[0];
+      if (expenseId) {
+        budgetId = await budgetRepository.getBudgetIdByExpenseId(expenseId);
       }
     } else if (!budgetId) {
-      budgetId = req.url.split('/')[4];
+      budgetId = req.path.split('/')[4]?.split('?')[0];
     }
 
     if (!budgetId || budgetId === 'expense') return null;
 
-    try {
-      const BudgetModel = (await import('./schema/budget.model.js')).Budget;
-      const budgetDoc = await BudgetModel.findById(budgetId)
-        .select('clubId')
-        .lean();
-      return budgetDoc?.clubId
-        ? { type: 'club:member_service', id: budgetDoc.clubId.toString() }
-        : null;
-    } catch {
-      return null;
-    }
+    const clubId = await budgetRepository.getClubIdByBudgetId(budgetId);
+    return clubId ? { type: 'club:member_service', id: clubId } : null;
   });
 
   if (eventBus) {

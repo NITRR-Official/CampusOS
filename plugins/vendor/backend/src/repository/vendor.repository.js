@@ -1,12 +1,23 @@
+import { RequestContext } from '@campus-os/shared/request-context';
 import Vendor from '../schema/vendor.model.js';
 
 export class VendorRepository {
   async create(data) {
-    return await Vendor.create(data);
+    const created = await Vendor.create(data);
+    if (created && created._id) {
+      RequestContext.set(
+        `vendor:${created._id.toString()}`,
+        created.toObject ? created.toObject() : created
+      );
+    }
+    return created;
   }
 
   async findById(id) {
-    return await Vendor.findById(id).lean();
+    if (!id) return null;
+    return RequestContext.computeIfAbsent(`vendor:${id}`, async () => {
+      return await Vendor.findById(id).lean();
+    });
   }
 
   async findOne(query) {
@@ -22,13 +33,23 @@ export class VendorRepository {
   }
 
   async updateById(id, updates) {
-    return await Vendor.findByIdAndUpdate(id, updates, {
+    const updated = await Vendor.findByIdAndUpdate(id, updates, {
       returnDocument: 'after',
       runValidators: true
     });
+    if (updated) {
+      RequestContext.set(
+        `vendor:${id}`,
+        updated.toObject ? updated.toObject() : updated
+      );
+    } else {
+      RequestContext.delete(`vendor:${id}`);
+    }
+    return updated;
   }
 
   async deleteById(id) {
+    RequestContext.delete(`vendor:${id}`);
     return await Vendor.findByIdAndDelete(id);
   }
 
@@ -41,7 +62,15 @@ export class VendorRepository {
   }
 
   async saveDocument(doc) {
-    return await doc.save();
+    const saved = await doc.save();
+    if (saved && saved._id) {
+      RequestContext.delete(`vendor:${saved._id.toString()}`);
+    }
+    return saved;
+  }
+
+  async deleteByClubId(clubId) {
+    return await Vendor.deleteMany({ clubId });
   }
 }
 

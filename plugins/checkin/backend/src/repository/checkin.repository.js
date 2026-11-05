@@ -44,6 +44,11 @@ export function createCheckInRepository() {
     return result.deletedCount;
   }
 
+  async function deleteUserCheckIns(userId) {
+    const result = await CheckIn.deleteMany({ userId });
+    return result.deletedCount;
+  }
+
   return {
     saveCheckIn,
     getCheckInById,
@@ -51,6 +56,7 @@ export function createCheckInRepository() {
     getCheckInsByEventId,
     getUserCheckInStatus,
     listAllCheckIns,
-    deleteEventCheckIns
+    deleteEventCheckIns,
+    deleteUserCheckIns
   };
 }

@@ -16,6 +16,14 @@ export function createFormResponseRepository(FormResponseModel) {
 
     async findById(responseId) {
       return await FormResponseModel.findById(responseId).lean();
+    },
+
+    async deleteByFormIds(formIds) {
+      return await FormResponseModel.deleteMany({ formId: { $in: formIds } });
+    },
+
+    async deleteByUserId(userId) {
+      return await FormResponseModel.deleteMany({ userId });
     }
   };
 }

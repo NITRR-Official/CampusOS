@@ -16,6 +16,23 @@ const pluginSchema = new mongoose.Schema(
       type: String,
       default: '1.0.0'
     },
+    tier: {
+      type: String,
+      enum: ['core', 'community'],
+      default: 'community'
+    },
+    requestedCapabilities: {
+      type: [String],
+      default: []
+    },
+    grantedCapabilities: {
+      type: [String],
+      default: []
+    },
+    trusted: {
+      type: Boolean,
+      default: false
+    },
     settings: {
       type: mongoose.Schema.Types.Mixed,
       default: {}

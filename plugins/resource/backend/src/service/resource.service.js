@@ -378,6 +378,17 @@ export function createResourceService(resourceRepository) {
       }
 
       return normalizeResource(resource);
+    },
+
+    /**
+     * Delete all resources owned by a deleted club
+     * @param {string} owner Club ID
+     * @returns {Promise<number>} Number of deleted resources
+     */
+    async deleteResourcesByOwner(owner) {
+      if (!owner) return 0;
+      const result = await resourceRepository.deleteByOwner(owner);
+      return result?.deletedCount || 0;
     }
   };
 }

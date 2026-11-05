@@ -1,100 +1,50 @@
 /**
- * MongoDB Connection Manager
- * Handles database connection, disconnection, and health checks
+ * Database Connection Facade
+ * Provides backward-compatible exports for existing plugins, tests, and core server,
+ * backed by the extensible DatabaseManager and DatabaseAdapter pattern.
  */
 
-import mongoose from 'mongoose';
+import { databaseManager } from './database-manager.js';
 
-let isConnected = false;
-
-// Suppress deprecation warnings and ensure consistent queries
-mongoose.set('strictQuery', true);
-
-// Listen to native driver events to prevent state drift
-mongoose.connection.on('disconnected', () => {
-  isConnected = false;
-  console.warn('⚠️ MongoDB lost connection!');
-});
-
-mongoose.connection.on('reconnected', () => {
-  isConnected = true;
-  console.log('✅ MongoDB reconnected');
-});
 /**
- * Connect to MongoDB
- * @param {string} uri - MongoDB connection URI
- * @returns {Promise<boolean>} Connection status
+ * Connect to database
+ * @param {string} [uri] - Database connection URI
+ * @returns {Promise<boolean>}
  */
-export async function connectDB(
-  uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/campusos'
-) {
-  if (isConnected) {
-    console.log('MongoDB already connected');
-    return true;
-  }
-
-  try {
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10,
-      minPoolSize: 2
-    });
-
-    isConnected = true;
-    console.log('✅ MongoDB connected successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ MongoDB connection failed:', error.message);
-    throw error;
-  }
+export async function connectDB(uri) {
+  return databaseManager.connect('mongo', uri ? { uri } : {});
 }
 
 /**
- * Disconnect from MongoDB
+ * Disconnect from all databases
  * @returns {Promise<void>}
  */
 export async function disconnectDB() {
-  if (!isConnected) {
-    return;
-  }
-
-  try {
-    await mongoose.disconnect();
-    isConnected = false;
-    console.log('✅ MongoDB disconnected');
-  } catch (error) {
-    console.error('❌ MongoDB disconnection failed:', error.message);
-    throw error;
-  }
+  return databaseManager.closeAll();
 }
 
 /**
  * Check database health
- * @returns {Promise<boolean>}
+ * @returns {Promise<{ healthy: boolean, databases: Record<string, any>, timestamp: string }>}
  */
 export async function healthCheck() {
-  try {
-    const adminDb = mongoose.connection.getClient().admin();
-    const result = await adminDb.ping();
-    return result.ok === 1;
-  } catch (error) {
-    console.error('Health check failed:', error.message);
-    return false;
-  }
+  return databaseManager.getHealth();
 }
 
 /**
- * Get connection status
+ * Get primary database connection status
  * @returns {boolean}
  */
 export function isDBConnected() {
-  return isConnected && mongoose.connection.readyState === 1;
+  return databaseManager.isConnected('mongo');
 }
+
+export { databaseManager };
 
 export default {
   connectDB,
   disconnectDB,
   healthCheck,
-  isDBConnected
+  isDBConnected,
+  databaseManager
 };

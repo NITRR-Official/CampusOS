@@ -1,49 +1,45 @@
 import { AppError } from '@campus-os/shared/errors';
+import mongoose from 'mongoose';
 
 /**
- * Creates a middleware that automatically resolves a club slug to a MongoDB ObjectId
- * for all incoming requests that specify a clubId.
+ * Creates an Express param callback for :clubId parameter that resolves
+ * slugs to ObjectIds and attaches req.clubContext and req.resolvedContext
+ * without mutating req.body or req.query.
  *
  * @param {Object} ClubModel - The Mongoose Club model
- * @returns {Function} Express middleware
+ * @returns {Function} Express param callback (req, res, next, clubId)
  */
-export function createSlugResolver(ClubModel) {
-  return async (req, res, next) => {
+export function createSlugParamHandler(ClubModel) {
+  return async (req, res, next, clubId) => {
     try {
-      // Find clubId in query, params, or body
-      let clubId = req.query?.clubId || req.params?.clubId || req.body?.clubId;
-
-      // Some routes use /clubs/:clubId directly in the path (which ends up in params)
-      // We already checked req.params.clubId above.
-
       if (!clubId) {
         return next();
       }
 
-      // Check if it's already a 24-character MongoDB ObjectId
-      if (typeof clubId === 'string' && /^[0-9a-fA-F]{24}$/.test(clubId)) {
-        return next();
-      }
+      // Check if it's a valid 24-char ObjectId
+      const isObjectId = mongoose.isValidObjectId(clubId);
+      const query = isObjectId
+        ? { $or: [{ _id: clubId }, { slug: clubId }] }
+        : { slug: clubId };
 
-      // If it's not an ObjectId, treat it as a slug and look it up
-      const club = await ClubModel.findOne({ slug: clubId }).select(
+      const club = await ClubModel.findOne(query).select(
         '_id name slug status'
       );
 
       if (!club) {
         return next(
-          new AppError(`Club with slug '${clubId}' not found`, 404, 'NOT_FOUND')
+          new AppError(`Club '${clubId}' not found`, 404, 'NOT_FOUND')
         );
       }
 
       const realObjectId = club._id.toString();
 
-      // Replace the slug with the real ObjectId in the request objects
-      if (req.query?.clubId) req.query.clubId = realObjectId;
-      if (req.params?.clubId) req.params.clubId = realObjectId;
-      if (req.body?.clubId) req.body.clubId = realObjectId;
+      // Normalize params.clubId so controllers expecting ObjectId get it
+      if (req.params) {
+        req.params.clubId = realObjectId;
+      }
 
-      // Attach the context so downstream middleware (like RBAC) doesn't have to query it again
+      // Attach context objects to avoid re-querying in downstream RBAC
       req.clubContext = club;
       req.resolvedContext = { type: 'club:member_service', id: realObjectId };
 
@@ -53,3 +49,8 @@ export function createSlugResolver(ClubModel) {
     }
   };
 }
+
+// Backward-compatible alias for existing imports
+export const createSlugResolver = createSlugParamHandler;
+
+export default createSlugParamHandler;

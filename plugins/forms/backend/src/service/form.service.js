@@ -37,6 +37,12 @@ export function createFormService(formRepository, eventBus) {
         throw new AppError('Form not found', 404);
       }
       return form;
+    },
+
+    async deleteFormsByEntity(entityType, entityId) {
+      if (!entityType || !entityId) return 0;
+      const result = await formRepository.deleteByEntity(entityType, entityId);
+      return result?.deletedCount || 0;
     }
   };
 }

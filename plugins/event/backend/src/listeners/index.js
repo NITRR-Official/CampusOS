@@ -9,6 +9,16 @@ export function registerEventHandlers(eventBus, registry, eventService) {
     }
   });
 
+  eventBus.on('user:deleted', async (payload) => {
+    try {
+      if (payload && payload.userId) {
+        await eventService.deleteRegistrationsByUser(payload.userId);
+      }
+    } catch (err) {
+      console.error('[Event Listener] Error handling user:deleted event:', err);
+    }
+  });
+
   eventBus.on('club:roles_provisioned', async (payload) => {
     try {
       if (!payload || !payload.clubId || !payload.roles) return;

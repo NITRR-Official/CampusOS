@@ -58,10 +58,57 @@ describe('Vendor Listeners (Integration)', () => {
 
       eventBus.emit('event:deleted', { eventId });
 
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const vendorsAfter = await vendorService.getEventVendors(eventId);
       expect(vendorsAfter.length).toBe(0);
+    });
+  });
+
+  describe('club:deleted listener', () => {
+    it('should delete all vendors associated with the deleted club', async () => {
+      const clubId = 'club-to-delete-123';
+
+      await vendorService.createVendor({
+        clubId,
+        name: 'Club Vendor 1',
+        category: 'Audio',
+        contactPerson: 'Jane Doe',
+        email: 'jane@test.com',
+        phone: '9876543210'
+      });
+
+      await vendorService.createVendor({
+        clubId,
+        name: 'Club Vendor 2',
+        category: 'Lighting',
+        contactPerson: 'Bob Smith',
+        email: 'bob@test.com',
+        phone: '9876543211'
+      });
+
+      const otherClubVendor = await vendorService.createVendor({
+        clubId: 'other-club',
+        name: 'Other Club Vendor',
+        category: 'Food',
+        contactPerson: 'Alice',
+        email: 'alice@test.com',
+        phone: '9876543212'
+      });
+
+      const vendorsBefore = await Vendor.find({ clubId });
+      expect(vendorsBefore.length).toBe(2);
+
+      eventBus.emit('club:deleted', { clubId });
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const vendorsAfter = await Vendor.find({ clubId });
+      expect(vendorsAfter.length).toBe(0);
+
+      // Verify other club's vendors are untouched
+      const otherVendors = await Vendor.find({ clubId: 'other-club' });
+      expect(otherVendors.length).toBe(1);
     });
   });
 });

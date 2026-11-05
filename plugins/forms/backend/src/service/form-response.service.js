@@ -73,6 +73,18 @@ export function createFormResponseService(
         throw new AppError('Form response not found', 404);
       }
       return response;
+    },
+
+    async deleteResponsesByFormIds(formIds) {
+      if (!formIds || !formIds.length) return 0;
+      const result = await formResponseRepository.deleteByFormIds(formIds);
+      return result?.deletedCount || 0;
+    },
+
+    async deleteResponsesByUserId(userId) {
+      if (!userId) return 0;
+      const result = await formResponseRepository.deleteByUserId(userId);
+      return result?.deletedCount || 0;
     }
   };
 }

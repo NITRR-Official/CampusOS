@@ -26,6 +26,14 @@ Just like the core CampusOS plugins, your documentation should include:
 
 This guarantees that if other developers want to build dependencies on _your_ plugin, they know exactly what hooks are available!
 
+### Pre-Distribution Verification
+
+Before archiving or releasing your plugin, verify it against the CampusOS architectural standards:
+
+```bash
+pnpm plugin:validate ./my-plugin
+```
+
 ## Installing a Plugin (Server Admins)
 
 CampusOS provides a built-in CLI Installer designed to seamlessly manage 3rd-party plugins. Server admins can install your plugin by running:
@@ -36,9 +44,10 @@ pnpm plugin:install ./path/to/my-plugin-v1.0.0.zip
 
 ### What happens during installation?
 
-1. **Extraction**: The CLI unzips the archive into `plugins/my-plugin/`.
-2. **NPM Dependencies**: If your plugin has a `package.json`, the CLI will merge your dependencies into the workspace.
-3. **Frontend Wiring**: The CLI automatically rewrites `frontend/lib/plugins/init.ts` to include your `frontend/init.ts` React hooks. Next.js will recompile immediately to reflect your UI changes!
+1. **Pre-Extraction Security & Contract Verification**: The CLI inspects the zip archive before extraction to prevent Zip Slip attacks, validate `plugin.json` schema, and ensure required backend entrypoints exist.
+2. **Extraction**: The CLI unzips the validated archive into `plugins/my-plugin/`.
+3. **NPM Dependencies**: If your plugin has a `package.json`, the CLI will merge your dependencies into the workspace.
+4. **Frontend Wiring**: The CLI automatically rewrites `frontend/lib/plugins/init.ts` to include your `frontend/init.ts` React hooks. Next.js will recompile immediately to reflect your UI changes!
 
 ## Uninstalling a Plugin
 
