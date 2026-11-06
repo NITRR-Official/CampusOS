@@ -36,23 +36,34 @@ CampusOS/
 │   ├── scheduling/        #   Time slot scheduling
 │   └── budget/            #   Budget tracking
 │
-├── backend/src/            # Express server core
-│   ├── index.js           #   Entry point
-│   ├── app.js             #   Middleware + plugin loading
-│   ├── server.js          #   HTTP server
-│   ├── plugin-loader.js   #   Scans /plugins/ at startup
-│   ├── auth/              #   JWT authenticator
-│   ├── middleware/         #   auth, error, logger, permissions
-│   ├── database/          #   MongoDB connection + schemas
-│   └── utils/registry.js  #   Service registry (module communication)
+├── shared/                    # @campus-os/shared workspace package
+│   └── src/
+│       ├── plugin-contract.js #   Zod schema & manifest validation
+│       ├── plugin-registry.ts #   Frontend component & slot registry
+│       ├── slot-catalog.ts    #   Core extension slot type definitions
+│       ├── extension-point.tsx#   React <ExtensionPoint> host component
+│       ├── api-client.ts      #   Typed API client wrapper
+│       └── errors.js          #   Standard error definitions
 │
-├── frontend/               # Next.js 16 application
-│   ├── app/               #   Pages (App Router)
-│   ├── components/        #   ThemeToggle + shadcn/ui components
-│   └── lib/               #   API clients, auth session, theme provider
+├── backend/src/               # Express server core
+│   ├── index.js               #   Entry point (loads env, connects DB, starts server)
+│   ├── app.js                 #   Express app factory & middleware pipeline
+│   ├── server.js              #   HTTP server lifecycle wrapper
+│   ├── plugin-loader.js       #   Discovers, validates, & loads /plugins/
+│   ├── auth/                  #   JWT authenticator
+│   ├── middleware/            #   auth, error, logger, permissions
+│   ├── database/              #   MongoDB connection, schemas & migration runner
+│   └── utils/registry.js      #   ModuleRegistry service bus
 │
-├── docs/                   # Documentation (you are here)
-└── .github/                # CI/CD, issue templates, agent configs
+├── frontend/                  # Next.js 16 application
+│   ├── app/                   #   Pages (App Router)
+│   ├── components/            #   ThemeToggle + shadcn/ui components
+│   └── lib/                   #   API clients, auth session, theme provider
+│
+├── apps/docs/                 # Fumadocs Next.js documentation application
+├── docs/                      # Markdown documentation source files
+├── scripts/                   # Developer CLI tools (scripts/plugin.js)
+└── .github/                   # CI/CD workflows, issue templates, agent rules
 ```
 
 See [Project Structure](../project/PROJECT_STRUCTURE.md) for the full breakdown.

@@ -1,0 +1,53 @@
+---
+title: CampusOS Documentation Hub
+description: The Extensible Operating System for Campus Communities — Modular, Event-Driven & Scalable.
+---
+
+Welcome to the **CampusOS Documentation Hub**! CampusOS is an extensible, modular operating system designed for higher education campuses. It enables campus clubs, administrators, and students to manage events, budgets, equipment, room bookings, and custom workflows through an autonomous plugin ecosystem.
+
+---
+
+## Explore by Pillar
+
+<Cards>
+  <Card
+    title="🚀 Getting Started"
+    href="/docs/getting-started/QUICK_START"
+    description="Set up your local environment, connect MongoDB, and run CampusOS in under 5 minutes."
+  />
+  <Card
+    title="🏛️ Core Architecture"
+    href="/docs/architecture/OVERVIEW"
+    description="Deep dive into Express v5 internals, two-tier sandboxing, dynamic RBAC, and lifecycle engines."
+  />
+  <Card
+    title="🧩 Plugin Developer Guide"
+    href="/docs/guides/plugin-development"
+    description="Step-by-step tutorial on building a full-stack plugin with migrations, services, and UI slots."
+  />
+  <Card
+    title="⚡ Inter-Plugin EventBus"
+    href="/docs/guides/EVENT_BUS"
+    description="Decoupled pub/sub messaging patterns, wildcard subscriptions, and error isolation."
+  />
+  <Card
+    title="📖 REST API Reference"
+    href="/docs/api/REFERENCE"
+    description="Complete endpoint documentation and atomic permission tokens across all 16 modular plugins."
+  />
+  <Card
+    title="🤝 Contributing & Standards"
+    href="/docs/contributing/CONTRIBUTING"
+    description="Contribution workflows, conventional commits, PR guidelines, and code of conduct."
+  />
+</Cards>
+
+---
+
+## Architectural Highlights
+
+- **Decoupled Plugin Architecture**: Every feature is an isolated plugin in `/plugins/` with strict zero cross-import boundaries.
+- **Dynamic Atomic RBAC**: Granular permissions declared in manifests and dynamically evaluated at the route layer.
+- **Automated Database Migrations**: Sequential `up()` and `down()` migration runner with SHA-256 tamper verification.
+- **Slot-Fill Micro-UI**: Next.js 16 + React 19 host runtime with per-widget `ExtensionErrorBoundary` isolation.
+- **Zero-Bundle Design System**: Plugins share the `@campusos/design-system` runtime via `window.CampusOS.ui` at zero bundle overhead.

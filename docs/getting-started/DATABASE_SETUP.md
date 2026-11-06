@@ -113,18 +113,33 @@ See [Environment Variables](./ENVIRONMENT.md) for all options.
 
 ## Database Collections
 
-| Collection | Module     | Purpose                 |
-| ---------- | ---------- | ----------------------- |
-| users      | Auth       | User accounts           |
-| vendors    | Vendor     | Vendor information      |
-| resources  | Resource   | Equipment and inventory |
-| timeslots  | Scheduling | Event time slots        |
-| conflicts  | Scheduling | Scheduling conflicts    |
-| budgets    | Budget     | Event budgets           |
-| expenses   | Budget     | Tracked expenses        |
+| Collection                 | Module / System                   | Purpose                                                     |
+| :------------------------- | :-------------------------------- | :---------------------------------------------------------- |
+| `users`                    | Auth (`auth`)                     | User accounts, credentials, and global roles                |
+| `institutes`               | Institute (`institute`)           | Campus institute profiles and global settings               |
+| `clubs`                    | Club (`club`)                     | Student organizations, councils, and clubs                  |
+| `club_memberships`         | Club (`club`)                     | Member associations, roles, and status                      |
+| `events`                   | Event (`event`)                   | Campus and club event management                            |
+| `activities`               | Activity (`activity`)             | System-wide audit and activity event streams                |
+| `checkins`                 | Checkin (`checkin`)               | QR-code event attendance and tickets                        |
+| `forms`                    | Forms (`forms`)                   | Dynamic custom form schemas and fields                      |
+| `form_submissions`         | Forms (`forms`)                   | User submissions to published forms                         |
+| `tasks`                    | Task (`task`)                     | Department and event task assignments                       |
+| `calendars`                | Calendar (`calendar`)             | Shared calendars and schedule feeds                         |
+| `calendar_events`          | Calendar (`calendar`)             | Calendar time allocations                                   |
+| `recruitment_campaigns`    | Recruitment (`recruitment`)       | Hiring campaigns and applications                           |
+| `recruitment_applications` | Recruitment (`recruitment`)       | Candidate application submissions                           |
+| `vendors`                  | Vendor (`vendor`)                 | External vendor records and contracts                       |
+| `resources`                | Resource (`resource`)             | Equipment, halls, and inventory bookings                    |
+| `timeslots`                | Scheduling (`scheduling`)         | Allocated venue and event time slots                        |
+| `conflicts`                | Scheduling (`scheduling`)         | Detected room and equipment scheduling conflicts            |
+| `budgets`                  | Budget (`budget`)                 | Event budgets and financial allocations                     |
+| `expenses`                 | Budget (`budget`)                 | Line-item tracked expenses and receipts                     |
+| `plugins`                  | Plugin Manager (`plugin-manager`) | Dynamic plugin states, capabilities, and trust              |
+| `_plugin_migrations`       | Core Migration Runner             | Applied database migration checksums & run status (ADR-021) |
 
-> [!NOTE]
-> All modules (Auth, Club, Institute, Event, Check-in, Task, Calendar, Vendor, Resource, Scheduling, Budget) are now backed by MongoDB. The legacy in-memory `Map()` storage has been fully deprecated.
+> [!NOTE] Fully Modular MongoDB Storage
+> All 16 modular plugins (Activity, Admin, Auth, Budget, Calendar, Checkin, Club, Event, Forms, Institute, Plugin-Manager, Recruitment, Resource, Scheduling, Task, Vendor) are fully backed by MongoDB. Dynamic automated schema migrations are tracked in `_plugin_migrations`.
 
 ## Backups
 

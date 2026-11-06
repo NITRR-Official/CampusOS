@@ -45,7 +45,7 @@ This Code of Conduct applies within all project spaces, and it also applies when
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at [NITRR Official](mailto:elexcode404@gmail.com) or by opening an issue marked as confidential.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at [NITRR Official](mailto:campusos@nitrr.ac.in) or by opening an issue marked as confidential.
 
 All complaints will be reviewed and investigated promptly and fairly. The project team is obligated to maintain confidentiality with regard to the reporter of an incident.
 

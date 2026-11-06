@@ -1,0 +1,11 @@
+{
+  "title": "Plugin Ecosystem",
+  "pages": [
+    "README",
+    "getting-started",
+    "backend",
+    "frontend",
+    "reference",
+    "dashboard-integration"
+  ]
+}

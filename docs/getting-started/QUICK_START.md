@@ -27,12 +27,29 @@ For other methods, see [Database Setup](./DATABASE_SETUP.md).
 
 ## 3. Start the Servers
 
+You can start both frontend and backend concurrently with a single command from the monorepo root:
+
 ```bash
-# Terminal 1: Backend
+# Option A: Single command (Frontend + Backend concurrently via pnpm workspace)
+pnpm dev
+```
+
+Alternatively, you can run them in separate terminals for dedicated log streams:
+
+```bash
+# Option B: Dedicated terminals
+# Terminal 1: Backend (Express v5 on http://localhost:4000)
 cd backend && pnpm dev
 
-# Terminal 2: Frontend
+# Terminal 2: Frontend (Next.js 16 on http://localhost:3000)
 cd frontend && pnpm dev
+```
+
+To run the documentation site locally:
+
+```bash
+# Terminal 3 (Optional): Documentation site (Fumadocs on http://localhost:3000 or next open port)
+pnpm docs:dev
 ```
 
 You should see:

@@ -1,338 +1,312 @@
-# API Reference
+# REST API Reference
 
-REST endpoint documentation for CampusOS Operations modules.
+Comprehensive endpoint reference for the CampusOS backend engine and all modular plugins.
 
-CampusOS exposes **44 endpoints** across four modules for managing event operations:
-
-- **Vendor Management** — Event vendors and suppliers
-- **Resource Management** — Equipment and inventory tracking
-- **Scheduling** — Time slot management with conflict detection
-- **Budget Management** — Financial planning and expense tracking
-
-> [!NOTE]
-> All non-public endpoints require a JWT token: `Authorization: Bearer <token>`. See [API Standards](../guides/API_STANDARDS.md) for authentication details.
+Base URL: `http://localhost:4000` (development) or `https://api.campusos.edu` (production)  
+All responses follow either **Pattern A** (Wrapped envelope with `{ success, data }`) or **Pattern B** (Direct payload with HTTP status codes). Refer to [API Standards](../guides/API_STANDARDS.md) for details.
 
 ---
 
-## Vendor Module
+## Table of Contents
 
-### Vendor CRUD
-
-**Create Vendor** — `POST /api/v1/vendors`
-
-- Required: name, category, contactPerson, email, phone
-- Categories: catering, decoration, equipment, transportation, other
-- Returns: Vendor object with ID
-
-**List Vendors** — `GET /api/v1/vendors`
-
-- Query params: category, status
-- Returns: { count, vendors[] }
-
-**Get Vendor** — `GET /api/v1/vendors/:vendorId`
-
-- Returns: Vendor object
-
-**Update Vendor** — `PUT /api/v1/vendors/:vendorId`
-
-- Body: Any vendor fields to update
-- Returns: Updated vendor
-
-**Delete Vendor** — `DELETE /api/v1/vendors/:vendorId`
-
-- Returns: { success, message }
-
-### Vendor Assignments
-
-**Assign to Event** — `POST /api/v1/events/:eventId/vendors/:vendorId`
-
-- Body: { amount?, notes? }
-- Returns: Assignment object
-
-**Get Event Vendors** — `GET /api/v1/events/:eventId/vendors`
-
-- Returns: { eventId, count, vendors[] } with vendorDetails
-
-**Get Vendor Assignments** — `GET /api/v1/vendors/:vendorId/assignments`
-
-- Returns: { vendorId, count, assignments[] }
-
-**Update Assignment Status** — `PUT /api/v1/vendors/assignments/:assignmentId/status`
-
-- Body: { status } (assigned, confirmed, completed, cancelled)
-- Returns: Updated assignment
-
-**Rate Vendor** — `POST /api/v1/vendors/:vendorId/rate`
-
-- Body: { rating } (0-5)
-- Returns: Updated vendor with new rating
+- [Core System Endpoints](#core-system-endpoints)
+- [Authentication & Users (`auth`)](#authentication--users-auth)
+- [Club Management (`club`)](#club-management-club)
+- [Event Management (`event`)](#event-management-event)
+- [Calendar & Scheduling (`calendar`)](#calendar--scheduling-calendar)
+- [Task & Kanban Management (`task`)](#task--kanban-management-task)
+- [Dynamic Forms (`forms`)](#dynamic-forms-forms)
+- [QR Check-in & Attendance (`checkin`)](#qr-check-in--attendance-checkin)
+- [Recruitment & Applications (`recruitment`)](#recruitment--applications-recruitment)
+- [Activity Feeds & Audit (`activity`)](#activity-feeds--audit-activity)
+- [Institute & Campus Structure (`institute`)](#institute--campus-structure-institute)
+- [Plugin Manager (`plugin-manager`)](#plugin-manager-plugin-manager)
+- [Vendor Operations (`vendor`)](#vendor-operations-vendor)
+- [Resource & Inventory (`resource`)](#resource--inventory-resource)
+- [Scheduling & Room Conflicts (`scheduling`)](#scheduling--room-conflicts-scheduling)
+- [Budget & Financials (`budget`)](#budget--financials-budget)
 
 ---
 
-## Resource Module
+## Core System Endpoints
 
-### Resource CRUD
+System discovery, health probes, and plugin runtime assets.
 
-**Create Resource** — `POST /api/v1/resources`
-
-- Required: name, type, quantity
-- Types: audio, visual, lighting, seating, stage, decoration, other
-- Returns: Resource object
-
-**List Resources** — `GET /api/v1/resources`
-
-- Query params: type, status, condition
-- Returns: { count, resources[] }
-
-**Get Available Resources** — `GET /api/v1/resources/available`
-
-- Query params: type, status, condition
-- Returns: { count, resources[] } (with availableQuantity > 0)
-
-**Get Resource** — `GET /api/v1/resources/:resourceId`
-
-- Returns: Resource object
-
-**Update Resource** — `PUT /api/v1/resources/:resourceId`
-
-- Body: Any resource fields
-- Returns: Updated resource
-
-**Delete Resource** — `DELETE /api/v1/resources/:resourceId`
-
-- Returns: { success, message }
-
-### Resource Allocation
-
-**Allocate to Event** — `POST /api/v1/events/:eventId/resources/:resourceId`
-
-- Required: allocatedQuantity, startDate, endDate
-- Checks: Availability, Conflict detection
-- Returns: Allocation object or conflict error
-
-**Get Event Resources** — `GET /api/v1/events/:eventId/resources`
-
-- Returns: { eventId, count, resources[] } with resourceDetails
-
-**Get Resource Allocations** — `GET /api/v1/resources/:resourceId/allocations`
-
-- Returns: { resourceId, count, allocations[] }
-
-**Update Allocation Status** — `PUT /api/v1/resources/allocations/:allocationId/status`
-
-- Body: { status } (allocated, in-use, returned, damaged)
-- Returns: Updated allocation (auto-updates availability if returned)
-
-**Update Maintenance** — `PUT /api/v1/resources/:resourceId/maintenance`
-
-- Body: { maintenanceDate }
-- Returns: Updated resource
+| Method | Endpoint                          | Permissions / Auth | Description                                                           |
+| ------ | --------------------------------- | ------------------ | --------------------------------------------------------------------- |
+| `GET`  | `/health`                         | Public             | Returns database connection status and health probe                   |
+| `GET`  | `/api/v1/system/modules`          | Public             | Discovers currently loaded and active plugin modules                  |
+| `GET`  | `/api/v1/system/permissions`      | Public             | Returns all dynamically registered RBAC permissions grouped by module |
+| `GET`  | `/api/v1/system/stats`            | Authenticated      | Aggregates dashboard KPI stats from all active plugin stat providers  |
+| `GET`  | `/api/v1/plugins/:name/manifest`  | Public             | Fetches plugin manifest (`plugin.json`) for frontend runtime          |
+| `GET`  | `/api/v1/plugins/:name/bundle.js` | Public             | Streams compiled frontend ESM micro-bundle for client injection       |
 
 ---
 
-## Scheduling Module
+## Authentication & Users (`auth`)
 
-### Time Slot Management
+User authentication, session verification, and administrator role assignment.
 
-**Create Time Slot** — `POST /api/v1/events/:eventId/schedule`
+| Method  | Endpoint                   | Permissions / Auth    | Description                                            |
+| ------- | -------------------------- | --------------------- | ------------------------------------------------------ |
+| `POST`  | `/api/v1/auth/signup`      | Public (Rate Limited) | Register a new user account                            |
+| `POST`  | `/api/v1/auth/login`       | Public (Rate Limited) | Authenticate user credentials and receive JWT          |
+| `GET`   | `/api/v1/auth/me`          | Authenticated         | Get current authenticated user profile and permissions |
+| `GET`   | `/api/v1/users`            | `requireSuperAdmin`   | List all users across the institute                    |
+| `PATCH` | `/api/v1/users/:id/role`   | `requireSuperAdmin`   | Update system-level role of a user                     |
+| `PATCH` | `/api/v1/users/:id/status` | `requireSuperAdmin`   | Suspend or activate a user account                     |
 
-- Required: venue, startTime, endTime, capacity
-- Automatically detects conflicts
-- Returns: Slot object
-
-**Get Event Schedule** — `GET /api/v1/events/:eventId/schedule`
-
-- Returns: { eventId, count, slots[] }
-
-**Get Time Slot** — `GET /api/v1/schedule/:slotId`
-
-- Returns: Slot object
-
-**Update Time Slot** — `PUT /api/v1/schedule/:slotId`
-
-- Body: Slot fields to update
-- Re-checks conflicts after update
-- Returns: Updated slot
-
-**Delete Time Slot** — `DELETE /api/v1/schedule/:slotId`
-
-- Returns: { success, message }
-
-### Conflict Management
-
-**Get All Conflicts** — `GET /api/v1/schedule/conflicts`
-
-- Query params: resolved (true/false), severity (low/medium/high)
-- Returns: { count, conflicts[] }
-
-**Get Slot Conflicts** — `GET /api/v1/schedule/:slotId/conflicts`
-
-- Returns: { slotId, count, conflicts[] }
-
-**Resolve Conflict** — `PUT /api/v1/schedule/conflicts/:conflictId/resolve`
-
-- Body: { resolution } (description of how it was resolved)
-- Returns: Updated conflict
-
-**Check Venue Availability** — `GET /api/v1/schedule/venue/:venue/available`
-
-- Query params: startTime, endTime
-- Returns: { venue, startTime, endTime, available: boolean }
-
-**Get Schedule Overview** — `GET /api/v1/events/:eventId/schedule/overview`
-
-- Returns: Statistics with totalSlots, totalConflicts, resolved count, slots[], conflicts[]
-
----
-
-## Budget Module
-
-### Budget Management
-
-**Create Budget** — `POST /api/v1/events/:eventId/budget`
-
-- Required: totalAllocation
-- Optional: budgetBreakdown[], currency, notes
-- Returns: Budget object
-
-**Get Event Budget** — `GET /api/v1/events/:eventId/budget`
-
-- Returns: Budget object
-
-**Get Budget** — `GET /api/v1/budget/:budgetId`
-
-- Returns: Budget object
-
-**Update Budget** — `PUT /api/v1/budget/:budgetId`
-
-- Body: Budget fields (blocked if already approved)
-- Returns: Updated budget
-
-**Approve Budget** — `POST /api/v1/budget/:budgetId/approve`
-
-- Body: { userId }
-- Returns: Updated budget with approvalStatus: approved
-
-**Reject Budget** — `POST /api/v1/budget/:budgetId/reject`
-
-- Returns: Updated budget with approvalStatus: rejected
-
-### Expense Management
-
-**Log Expense** — `POST /api/v1/budget/:budgetId/expense`
-
-- Required: category, description, amount
-- Categories: vendor, resource, supplies, personnel, other
-- Checks: Amount doesn't exceed remaining budget
-- Returns: Expense object
-
-**Get Budget Expenses** — `GET /api/v1/budget/:budgetId/expenses`
-
-- Returns: { budgetId, count, expenses[] }
-
-**Get Expense** — `GET /api/v1/budget/expense/:expenseId`
-
-- Returns: Expense object
-
-**Update Expense** — `PUT /api/v1/budget/expense/:expenseId`
-
-- Body: Expense fields (can't update amount if paid)
-- Returns: Updated expense
-
-**Mark as Paid** — `POST /api/v1/budget/expense/:expenseId/mark-paid`
-
-- Body: { paymentMethod }
-- Sets paymentStatus: paid, paidDate: now()
-- Returns: Updated expense
-
-### Budget Reporting
-
-**Get Budget Summary** — `GET /api/v1/budget/:budgetId/summary`
-
-- Returns: Overview with:
-  - totalAllocation, totalExpenses, remaining
-  - utilisationPercent
-  - approvalStatus
-  - expenseCount, paidExpenses, pendingExpenses
-  - expensesByCategory breakdown
-  - expenses array
-
-**Get Budget vs Actual** — `GET /api/v1/budget/:budgetId/vs-actual`
-
-- Returns: Comparison with:
-  - breakdown (planned by category)
-  - actual (spent by category)
-  - variance with difference and variancePercent for each
-
----
-
-## RBAC Rules
-
-| Access Level             | Allowed Operations                                           |
-| ------------------------ | ------------------------------------------------------------ |
-| **Public**               | GET vendors, resources, schedule info, budget summaries      |
-| **Coordinator or Admin** | POST/PUT/DELETE vendors, resources, schedule; log expenses   |
-| **Admin only**           | DELETE resources; approve/reject budgets; update maintenance |
-
----
-
-## Example Workflows
-
-### Assigning a Vendor to an Event
+### Sample: User Signup
 
 ```bash
-# 1. Create vendor
-POST /api/v1/vendors
-{ "name": "Catering Co", "category": "catering", ... }
+POST /api/v1/auth/signup
+Content-Type: application/json
 
-# 2. Assign to event
-POST /api/v1/events/evt-123/vendors/vnd-456
-{ "amount": 50000, "notes": "Full catering" }
-
-# 3. Update status as things progress
-PUT /api/v1/vendors/assignments/asg-789/status
-{ "status": "confirmed" }
-```
-
-### Allocating Resources
-
-```bash
-# 1. Create resource
-POST /api/v1/resources
-{ "name": "Projector", "type": "visual", "quantity": 5 }
-
-# 2. Check availability
-GET /api/v1/resources/available?type=visual
-
-# 3. Allocate to event
-POST /api/v1/events/evt-123/resources/res-456
-{ "allocatedQuantity": 2, "startDate": "2026-05-15T10:00", "endDate": "2026-05-15T18:00" }
-```
-
-### Managing Budget
-
-```bash
-# 1. Create budget
-POST /api/v1/events/evt-123/budget
-{ "totalAllocation": 100000 }
-
-# 2. Log expenses as they occur
-POST /api/v1/budget/bdg-456/expense
-{ "category": "vendor", "description": "Catering", "amount": 50000 }
-
-# 3. Track status
-GET /api/v1/budget/bdg-456/summary
+{
+  "name": "Alex Kumar",
+  "email": "alex@nitrr.ac.in",
+  "password": "Password123!"
+}
 ```
 
 ---
 
-## Frontend Integration
+## Club Management (`club`)
 
-API clients are isolated by plugin and live in `plugins/<module>/frontend/api.ts`.
-React Query hooks for components live in `plugins/<module>/frontend/hooks.ts`.
+Club onboarding, multi-role approval workflow state machine, membership, and custom club roles.
 
-All clients utilize the global `apiClient` (`frontend/lib/api/client.ts`) which automatically handles authentication (Bearer tokens), error propagation, and **Zod schema validation** for strict type safety on responses.
+| Method   | Endpoint                                     | Permissions / Auth               | Description                                                |
+| -------- | -------------------------------------------- | -------------------------------- | ---------------------------------------------------------- |
+| `GET`    | `/api/v1/clubs`                              | Authenticated                    | List all active or pending clubs                           |
+| `POST`   | `/api/v1/clubs`                              | Authenticated                    | Submit club creation request (initiates approval pipeline) |
+| `GET`    | `/api/v1/clubs/verify`                       | Public                           | Verify club advisor or creator email token                 |
+| `PATCH`  | `/api/v1/clubs/:clubId`                      | `club:manage`                    | Update club profile, bio, and metadata                     |
+| `POST`   | `/api/v1/clubs/:clubId/archive`              | Authenticated                    | Archive an active club                                     |
+| `GET`    | `/api/v1/clubs/:clubId/my-permissions`       | Authenticated                    | Get caller's atomic permissions within this club context   |
+| `PATCH`  | `/api/v1/clubs/:clubId/approve`              | `requireSuperAdmin`              | Approve pending club registration                          |
+| `PATCH`  | `/api/v1/clubs/:clubId/reject`               | `requireSuperAdmin`              | Reject pending club registration                           |
+| `GET`    | `/api/v1/clubs/:clubId/members`              | `club:manage` or `member:manage` | List club members and their roles                          |
+| `POST`   | `/api/v1/clubs/:clubId/members`              | `member:manage`                  | Add a member to the club roster                            |
+| `DELETE` | `/api/v1/clubs/:clubId/members/:userId`      | `member:manage`                  | Remove a member from the club                              |
+| `PATCH`  | `/api/v1/clubs/:clubId/members/:userId/role` | `role:manage`                    | Assign custom role to a member                             |
+| `GET`    | `/api/v1/clubs/:clubId/roles`                | `role:manage` or `club:manage`   | List all custom roles defined in club                      |
+| `POST`   | `/api/v1/clubs/:clubId/roles`                | `role:manage`                    | Create a new custom role with atomic permissions           |
+| `PATCH`  | `/api/v1/clubs/:clubId/roles/:roleId`        | `role:manage`                    | Update role permissions and title                          |
+| `DELETE` | `/api/v1/clubs/:clubId/roles/:roleId`        | `role:manage`                    | Delete a custom role                                       |
 
 ---
 
-**See Also**: [API Standards](../guides/API_STANDARDS.md) · [Backend Architecture](../architecture/BACKEND.md) · [Plugin System](../architecture/PLUGIN_SYSTEM.md)
+## Event Management (`event`)
+
+Event creation, drafts, publishing lifecycle, and RSVP registration tickets.
+
+| Method  | Endpoint                                | Permissions / Auth  | Description                              |
+| ------- | --------------------------------------- | ------------------- | ---------------------------------------- |
+| `GET`   | `/api/v1/events`                        | `event:view`        | List internal events for dashboard       |
+| `GET`   | `/api/v1/events/public`                 | Public              | List all published public campus events  |
+| `GET`   | `/api/v1/events/:eventId`               | `event:view`        | Get event details with internal metadata |
+| `GET`   | `/api/v1/events/:eventId/public`        | Public              | Get public event landing data            |
+| `POST`  | `/api/v1/events`                        | `event:create`      | Create a new event draft                 |
+| `PATCH` | `/api/v1/events/:eventId`               | `event:manage`      | Update event information and banner      |
+| `POST`  | `/api/v1/events/:eventId/publish`       | `event:manage`      | Publish draft event to campus catalog    |
+| `POST`  | `/api/v1/events/:eventId/unpublish`     | `event:manage`      | Revert event back to draft               |
+| `POST`  | `/api/v1/events/:eventId/registrations` | Authenticated       | Register/RSVP for an event               |
+| `GET`   | `/api/v1/events/:eventId/registrations` | `event:manage`      | List registered attendees                |
+| `GET`   | `/api/v1/admin/events`                  | `requireSuperAdmin` | Cross-institute global event oversight   |
+
+---
+
+## Calendar & Scheduling (`calendar`)
+
+Persistent calendar event storage, date-range timeline queries, and multi-club calendar synchronization.
+
+| Method   | Endpoint                    | Permissions / Auth | Description                                                |
+| -------- | --------------------------- | ------------------ | ---------------------------------------------------------- |
+| `GET`    | `/api/v1/calendar`          | Authenticated      | List all accessible calendar events                        |
+| `GET`    | `/api/v1/calendar/range`    | Authenticated      | Query events within a date interval (`?start=ISO&end=ISO`) |
+| `GET`    | `/api/v1/calendar/:eventId` | Authenticated      | Get calendar item metadata and recurrence rules            |
+| `POST`   | `/api/v1/calendar`          | `calendar:manage`  | Schedule a calendar event entry                            |
+| `DELETE` | `/api/v1/calendar/:eventId` | `calendar:manage`  | Delete an entry from the calendar                          |
+
+---
+
+## Task & Kanban Management (`task`)
+
+Kanban task workflow, task assignments, deadline priority, and dependency graphs.
+
+| Method   | Endpoint                             | Permissions / Auth | Description                                              |
+| -------- | ------------------------------------ | ------------------ | -------------------------------------------------------- |
+| `GET`    | `/api/v1/tasks`                      | `task:view`        | List tasks filtered by club or event                     |
+| `GET`    | `/api/v1/tasks/:taskId`              | `task:view`        | Get task details, checklist, and history                 |
+| `POST`   | `/api/v1/tasks`                      | `task:manage`      | Create a new task                                        |
+| `PATCH`  | `/api/v1/tasks/:taskId/assign`       | `task:manage`      | Assign task to user(s)                                   |
+| `PATCH`  | `/api/v1/tasks/:taskId/status`       | `task:manage`      | Update task status (`TODO`, `IN_PROGRESS`, `DONE`)       |
+| `PATCH`  | `/api/v1/tasks/:taskId/priority`     | `task:manage`      | Update task priority (`LOW`, `MEDIUM`, `HIGH`, `URGENT`) |
+| `POST`   | `/api/v1/tasks/:taskId/dependencies` | `task:manage`      | Add a prerequisite blocking task                         |
+| `DELETE` | `/api/v1/tasks/:taskId/dependencies` | `task:manage`      | Remove a prerequisite task dependency                    |
+
+---
+
+## Dynamic Forms (`forms`)
+
+Dynamic drag-and-drop form schema builder, survey responses, and attendee data collection.
+
+| Method | Endpoint                                      | Permissions / Auth | Description                                   |
+| ------ | --------------------------------------------- | ------------------ | --------------------------------------------- |
+| `GET`  | `/api/v1/forms`                               | `form:view`        | List forms created under a club or event      |
+| `POST` | `/api/v1/forms`                               | `form:manage`      | Create a new form with JSON schema fields     |
+| `GET`  | `/api/v1/forms/:formId`                       | `form:view`        | Get form schema for preview or editing        |
+| `PUT`  | `/api/v1/forms/:formId`                       | `form:manage`      | Update form fields, validation, and deadlines |
+| `GET`  | `/api/v1/forms/:formId/responses`             | `form:manage`      | List all submitted responses                  |
+| `GET`  | `/api/v1/forms/:formId/responses/:responseId` | `form:manage`      | Get detailed submission answers               |
+| `POST` | `/api/v1/forms/:formId/responses`             | `forms:submit`     | Submit answers to a form                      |
+
+---
+
+## QR Check-in & Attendance (`checkin`)
+
+Real-time QR code ticket generation, mobile camera scanning, and event attendance reconciliation.
+
+| Method | Endpoint                                          | Permissions / Auth | Description                                 |
+| ------ | ------------------------------------------------- | ------------------ | ------------------------------------------- |
+| `GET`  | `/api/v1/events/:eventId/checkins`                | `checkin:manage`   | List all check-in entries for an event      |
+| `POST` | `/api/v1/events/:eventId/checkins`                | `checkin:manage`   | Manually mark an attendee as checked in     |
+| `GET`  | `/api/v1/events/:eventId/checkins/status/:userId` | Authenticated      | Check if a specific attendee is checked in  |
+| `POST` | `/api/v1/checkins/scan`                           | Authenticated      | Validate signed QR payload and verify entry |
+| `GET`  | `/api/v1/events/:eventId/attendance-stats`        | `checkin:manage`   | Live attendance metrics and turnover        |
+
+---
+
+## Recruitment & Applications (`recruitment`)
+
+Club member recruitment drives, application screening, multi-stage interviews, and status pipelines.
+
+| Method  | Endpoint                                                                   | Permissions / Auth   | Description                           |
+| ------- | -------------------------------------------------------------------------- | -------------------- | ------------------------------------- |
+| `GET`   | `/api/v1/recruitment/campaigns`                                            | `recruitment:view`   | List recruitment drives               |
+| `POST`  | `/api/v1/recruitment/campaigns`                                            | `recruitment:manage` | Launch a new recruitment campaign     |
+| `GET`   | `/api/v1/recruitment/campaigns/:campaignId`                                | `recruitment:view`   | Get campaign details and timeline     |
+| `PUT`   | `/api/v1/recruitment/campaigns/:campaignId`                                | `recruitment:manage` | Update campaign rounds and criteria   |
+| `GET`   | `/api/v1/recruitment/campaigns/:campaignId/candidates`                     | `recruitment:manage` | List applicants for campaign          |
+| `GET`   | `/api/v1/recruitment/campaigns/:campaignId/candidates/:candidateId`        | `recruitment:manage` | View applicant profile and scorecards |
+| `PATCH` | `/api/v1/recruitment/campaigns/:campaignId/candidates/:candidateId/status` | `recruitment:manage` | Advance or reject applicant stage     |
+| `PATCH` | `/api/v1/recruitment/campaigns/:campaignId/candidates/:candidateId/notes`  | `recruitment:manage` | Add interviewer feedback notes        |
+
+---
+
+## Activity Feeds & Audit (`activity`)
+
+Immutable audit trails, club activity feeds, and user-centric notifications.
+
+| Method | Endpoint                            | Permissions / Auth | Description                                           |
+| ------ | ----------------------------------- | ------------------ | ----------------------------------------------------- |
+| `GET`  | `/api/v1/activity/global`           | `activity:view`    | System-wide audit log of administrative actions       |
+| `GET`  | `/api/v1/activity/me`               | Authenticated      | Personalized activity feed for current user           |
+| `GET`  | `/api/v1/activity/entity/:entityId` | `activity:view`    | Chronological activity feed for a specific club/event |
+
+---
+
+## Institute & Campus Structure (`institute`)
+
+Campus departments, academic terms, and venue hierarchy configuration.
+
+| Method | Endpoint             | Permissions / Auth  | Description                                   |
+| ------ | -------------------- | ------------------- | --------------------------------------------- |
+| `GET`  | `/api/v1/institutes` | Authenticated       | List campus entities, branches, and venues    |
+| `POST` | `/api/v1/institutes` | `requireSuperAdmin` | Register a new campus institute or department |
+
+---
+
+## Plugin Manager (`plugin-manager`)
+
+Runtime plugin management, hot toggle enablement, and graceful server restarts.
+
+| Method  | Endpoint                         | Permissions / Auth | Description                                                     |
+| ------- | -------------------------------- | ------------------ | --------------------------------------------------------------- |
+| `GET`   | `/api/v1/plugins`                | `super-admin`      | List all discovered plugins with enabled status and tier        |
+| `PUT`   | `/api/v1/plugins/:name/toggle`   | `super-admin`      | Enable or disable a plugin in MongoDB                           |
+| `PATCH` | `/api/v1/plugins/:name/settings` | `super-admin`      | Update plugin-specific runtime settings                         |
+| `POST`  | `/api/v1/plugins/restart`        | `super-admin`      | Gracefully restart Express server (`SIGTERM`) to reload plugins |
+
+---
+
+## Vendor Operations (`vendor`)
+
+Procurement vendors, event equipment suppliers, assignment workflows, and performance ratings.
+
+| Method   | Endpoint                                           | Permissions / Auth | Description                                                    |
+| -------- | -------------------------------------------------- | ------------------ | -------------------------------------------------------------- |
+| `POST`   | `/api/v1/vendors`                                  | `vendor:manage`    | Register a new vendor profile                                  |
+| `GET`    | `/api/v1/vendors`                                  | `vendor:view`      | List all verified suppliers                                    |
+| `GET`    | `/api/v1/vendors/:vendorId`                        | `vendor:view`      | Get vendor details, contact, and rating                        |
+| `PUT`    | `/api/v1/vendors/:vendorId`                        | `vendor:manage`    | Update vendor information                                      |
+| `DELETE` | `/api/v1/vendors/:vendorId`                        | `vendor:manage`    | Delete vendor profile                                          |
+| `POST`   | `/api/v1/events/:eventId/vendors/:vendorId`        | `vendor:manage`    | Assign vendor to deliver services for an event                 |
+| `GET`    | `/api/v1/events/:eventId/vendors`                  | `vendor:view`      | List vendors contracted for an event                           |
+| `GET`    | `/api/v1/vendors/:vendorId/assignments`            | `vendor:view`      | List historical event engagements                              |
+| `PUT`    | `/api/v1/vendors/assignments/:assignmentId/status` | `vendor:manage`    | Update engagement status (`PENDING`, `CONFIRMED`, `COMPLETED`) |
+| `POST`   | `/api/v1/vendors/:vendorId/rate`                   | Authenticated      | Submit vendor quality feedback and rating                      |
+
+---
+
+## Resource & Inventory (`resource`)
+
+Campus physical inventory, audiovisual equipment tracking, maintenance schedules, and event reservations.
+
+| Method   | Endpoint                                             | Permissions / Auth | Description                                                     |
+| -------- | ---------------------------------------------------- | ------------------ | --------------------------------------------------------------- |
+| `POST`   | `/api/v1/resources`                                  | `resource:manage`  | Register equipment item into inventory                          |
+| `GET`    | `/api/v1/resources`                                  | `resource:view`    | List all campus resources with availability counts              |
+| `GET`    | `/api/v1/resources/:resourceId`                      | `resource:view`    | Get resource specifications and reservation status              |
+| `PUT`    | `/api/v1/resources/:resourceId`                      | `resource:manage`  | Update resource details                                         |
+| `DELETE` | `/api/v1/resources/:resourceId`                      | `resource:manage`  | Remove item from inventory                                      |
+| `POST`   | `/api/v1/events/:eventId/resources/:resourceId`      | `resource:manage`  | Reserve resource for an event                                   |
+| `GET`    | `/api/v1/events/:eventId/resources`                  | `resource:view`    | List items allocated to an event                                |
+| `GET`    | `/api/v1/resources/:resourceId/allocations`          | `resource:view`    | View upcoming reservation schedule for item                     |
+| `PUT`    | `/api/v1/resources/allocations/:allocationId/status` | `resource:manage`  | Update allocation status (`RESERVED`, `DISPATCHED`, `RETURNED`) |
+| `PUT`    | `/api/v1/resources/:resourceId/maintenance`          | `resource:manage`  | Log maintenance date and condition                              |
+
+---
+
+## Scheduling & Room Conflicts (`scheduling`)
+
+Time slot reservations, automated conflict detection algorithms, and venue availability queries.
+
+| Method   | Endpoint                                         | Permissions / Auth  | Description                                          |
+| -------- | ------------------------------------------------ | ------------------- | ---------------------------------------------------- |
+| `POST`   | `/api/v1/events/:eventId/schedule`               | `scheduling:manage` | Book a time slot for an event                        |
+| `GET`    | `/api/v1/events/:eventId/schedule`               | Public              | View full timeline schedule for an event             |
+| `GET`    | `/api/v1/schedule/:slotId`                       | Public              | Get specific time slot details                       |
+| `PUT`    | `/api/v1/schedule/:slotId`                       | `scheduling:manage` | Reschedule or adjust time slot boundaries            |
+| `DELETE` | `/api/v1/schedule/:slotId`                       | `scheduling:manage` | Cancel scheduled time slot                           |
+| `GET`    | `/api/v1/schedule/conflicts`                     | Authenticated       | List all overlapping room or time conflicts          |
+| `GET`    | `/api/v1/schedule/:slotId/conflicts`             | Authenticated       | Check if a specific slot clashes with other bookings |
+| `PUT`    | `/api/v1/schedule/conflicts/:conflictId/resolve` | `scheduling:manage` | Mark a venue conflict as resolved                    |
+| `GET`    | `/api/v1/schedule/venue/:venue/available`        | Authenticated       | Query room availability for a given window           |
+| `GET`    | `/api/v1/events/:eventId/schedule/overview`      | Public              | High-level schedule overview with milestones         |
+
+---
+
+## Budget & Financials (`budget`)
+
+Event financial ledgers, line-item expense tracking, approval workflows, and budget vs actual variance reports.
+
+| Method | Endpoint                                      | Permissions / Auth | Description                                     |
+| ------ | --------------------------------------------- | ------------------ | ----------------------------------------------- |
+| `POST` | `/api/v1/events/:eventId/budget`              | `budget:manage`    | Initialize budget ledger for an event           |
+| `GET`  | `/api/v1/events/:eventId/budget`              | `budget:view`      | Get budget ledger and allocated line items      |
+| `GET`  | `/api/v1/budget/:budgetId`                    | `budget:view`      | Get budget record by ID                         |
+| `PUT`  | `/api/v1/budget/:budgetId`                    | `budget:manage`    | Update budget target totals                     |
+| `POST` | `/api/v1/budget/:budgetId/approve`            | `budget:manage`    | Authorize and lock event budget                 |
+| `POST` | `/api/v1/budget/:budgetId/reject`             | `budget:manage`    | Reject budget proposal                          |
+| `POST` | `/api/v1/budget/:budgetId/expense`            | `budget:manage`    | Record an incurred expense                      |
+| `GET`  | `/api/v1/budget/:budgetId/expenses`           | `budget:view`      | List all expense receipts logged against budget |
+| `GET`  | `/api/v1/budget/expense/:expenseId`           | `budget:view`      | Get individual expense details                  |
+| `PUT`  | `/api/v1/budget/expense/:expenseId`           | `budget:manage`    | Modify expense entry                            |
+| `POST` | `/api/v1/budget/expense/:expenseId/mark-paid` | `budget:manage`    | Mark logged expense invoice as paid             |
+| `GET`  | `/api/v1/budget/:budgetId/summary`            | `budget:view`      | Aggregate financial breakdown                   |
+| `GET`  | `/api/v1/budget/:budgetId/vs-actual`          | `budget:view`      | In-depth budget vs actual variance analysis     |
+
+---
+
+**See Also**: [API Standards Guide](../guides/API_STANDARDS.md) · [Backend Architecture](../architecture/BACKEND.md) · [Security Guidelines](../guides/SECURITY.md)

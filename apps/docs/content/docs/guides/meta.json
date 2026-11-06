@@ -1,0 +1,13 @@
+{
+  "title": "Guides & Standards",
+  "pages": [
+    "plugin-development",
+    "EVENT_BUS",
+    "API_STANDARDS",
+    "TESTING",
+    "SECURITY",
+    "GIT_WORKFLOW",
+    "CODE_REVIEW",
+    "CI_CD"
+  ]
+}

@@ -1,165 +1,225 @@
-# Frontend Overview
+# Frontend Architecture Overview
 
-The CampusOS frontend is a Next.js 16 application using the App Router, React 19, TypeScript, and Tailwind CSS v4.
-
-## Tech Stack (actual `package.json`)
-
-| Technology      | Version | Purpose                                                     |
-| --------------- | ------- | ----------------------------------------------------------- |
-| Next.js         | 16.2.2  | Framework — App Router, SSR, file-based routing             |
-| React           | 19.2.4  | UI library                                                  |
-| TypeScript      | 5.x     | Type safety                                                 |
-| Tailwind CSS    | 4.x     | Utility-first styling                                       |
-| shadcn/ui       | 4.6.0   | Pre-built UI components (Button, Card, Dialog, Toast, etc.) |
-| Radix UI        | —       | Accessible primitives (under shadcn/ui)                     |
-| react-hook-form | 7.x     | Form state management                                       |
-| Zod             | 3.x     | Schema validation                                           |
-| Axios           | 1.x     | HTTP client (available, but API clients use `fetch`)        |
-| Lucide React    | 1.x     | Icon library                                                |
-
-## Directory Structure
-
-```
-frontend/
-├── app/                    # Next.js App Router (pages and layouts)
-│   ├── layout.tsx         # Root layout — Manrope + Sora + Geist Mono, ThemeProvider
-│   ├── page.tsx           # Landing page
-│   ├── dashboard/         # Dashboard page
-│   ├── globals.css        # Global styles + Tailwind + CSS variables
-│   ├── login/             # Login page
-│   ├── signup/            # Registration page
-│   ├── forgot-password/   # Password reset
-│   ├── events/            # Event management pages
-│   ├── tasks/             # Task management pages
-│   ├── calendar/          # Calendar view
-│   ├── vendors/           # Vendor management pages
-│   ├── resources/         # Resource management pages
-│   ├── participants/      # Participant dashboard
-│   └── components/        # Page-level components
-│
-├── components/             # Shared components
-│   ├── ThemeToggle.tsx    # Dark/light mode toggle
-│   └── ui/                # shadcn/ui components
-│       ├── button.tsx
-│       ├── card.tsx
-│       ├── dialog.tsx
-│       ├── form.tsx
-│       ├── input.tsx
-│       ├── label.tsx
-│       └── toast.tsx
-│
-└── lib/                    # API clients and utilities
-    ├── auth-api.ts        # Login/signup API calls
-    ├── auth-session.ts    # JWT token storage (localStorage)
-    ├── event-api.ts       # Event endpoints
-    ├── task-api.ts        # Task endpoints
-    ├── calendar-api.ts    # Calendar endpoints
-    ├── checkin-api.ts     # Check-in endpoints
-    ├── vendor-api.ts      # Vendor endpoints
-    ├── resource-api.ts    # Resource endpoints
-    ├── scheduling-api.ts  # Scheduling endpoints
-    ├── budget-api.ts      # Budget endpoints
-    ├── theme-provider.tsx # Dark mode context provider
-    ├── utils.ts           # cn() utility for class merging
-    ├── validations/       # Zod schemas for form validation
-    └── plugins/           # Core plugin infrastructure
-        ├── registry.ts    # PluginRegistry for Sidebar Links & Widgets
-        └── init.ts        # Build-time plugin loader script
-├── plugins/                # Frontend Plugin Implementations
-│   ├── event/             # Event plugin UI components & init
-│   ├── club/              # Club plugin UI components & init
-│   ├── task/              # Task plugin UI components & init
-│   ├── vendor/            # Vendor plugin UI components & init
-│   └── calendar/          # Calendar plugin UI components & init
-```
-
-## How API Calls Work
-
-The frontend uses a centralized `apiClient` located in `lib/api/client.ts`. This wrapper automatically prepends the backend's base URL, handles global error parsing via the `ApiError` class, and injects the JWT access token into the `Authorization` header.
-
-Every backend domain has a corresponding API service file in `lib/` that utilizes this client:
-
-```typescript
-// lib/auth-api.ts — simplified
-import { apiClient } from './api/client';
-export { ApiError } from './api/errors';
-
-export function login(payload: { email: string; password: string }) {
-  return apiClient.post<AuthResponseData>('/api/v1/auth/login', payload);
-}
-```
-
-### Authentication Token Injection
-
-For authenticated endpoints, the token is automatically read from cookies or `localStorage` via `readAccessToken()` in `lib/auth-session.ts` and injected into the request headers by the `apiClient`.
-
-If you are calling an API from a **Server Component**, you can explicitly pass the token into the options:
-
-```typescript
-// Example usage in a Server Component
-const token = cookies().get('campusos_access_token')?.value;
-const tasks = await fetchTasks(token);
-```
-
-## Styling
-
-- **Tailwind CSS v4** for utility classes
-- **CSS variables** in `globals.css` for theming (light/dark mode)
-- **shadcn/ui** for consistent UI components — these live in `components/ui/` and are installed via the shadcn CLI
-- **`cn()` utility** from `lib/utils.ts` — merges Tailwind classes with `clsx` + `tailwind-merge`
-
-## Fonts
-
-The app uses a modern pairing loaded via `next/font/google`:
-
-- `Manrope` (sans-serif) — mapped to `--font-manrope`
-- `Sora` (display/headings) — mapped to `--font-sora`
-- `Geist Mono` (monospace) — mapped to `--font-geist-mono`
-
-## Theme System
-
-Dark mode is managed by a custom `ThemeProvider` in `lib/theme-provider.tsx`:
-
-- Wraps the entire app at the layout level
-- Toggle via `ThemeToggle.tsx` component
-- Uses CSS variables for color scheme switching
-
-## Forms
-
-Forms use `react-hook-form` + `Zod` for validation:
-
-- Form state handled by `useForm()` from react-hook-form
-- Schema validation with `zodResolver(schema)`
-- shadcn/ui `<Form>` wrapper components for consistent field rendering
-
-## Development Commands
-
-```bash
-cd frontend
-
-pnpm dev          # Start dev server (port 3000, webpack bundler)
-pnpm build        # Production build
-pnpm lint         # ESLint
-```
-
-> **Note**: The default dev command uses webpack (`next dev --webpack`). Turbopack is available via `pnpm dev:turbo` but is not the default.
-
-## Available Pages
-
-| Route              | Purpose                      |
-| ------------------ | ---------------------------- |
-| `/`                | Landing page                 |
-| `/dashboard`       | Dashboard                    |
-| `/login`           | User login                   |
-| `/signup`          | User registration            |
-| `/forgot-password` | Password reset               |
-| `/events`          | Event listing and management |
-| `/tasks`           | Task management              |
-| `/calendar`        | Calendar view                |
-| `/vendors`         | Vendor management            |
-| `/resources`       | Resource management          |
-| `/participants`    | Participant dashboard        |
+The CampusOS frontend is built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. It implements a hybrid architecture: a fast, server-rendered host application combined with a dynamic **Slot-Fill micro-UI runtime** that enables plugins to inject interactive widgets without requiring whole-app rebuilds.
 
 ---
 
-**See Also**: [Design System](./DESIGN_SYSTEM.md) · [Dark Mode](./DARK_MODE.md) · [API Standards](../guides/API_STANDARDS.md)
+## 1. Core Architecture Diagram
+
+```mermaid
+flowchart TD
+    subgraph Host ["Host Application (frontend/)"]
+        RootLayout["Root Layout (app/layout.tsx)<br/><small>Providers: Theme · Auth · QueryClient</small>"]
+        Pages["App Router Pages<br/><small>/dashboard, /events, /clubs, /admin</small>"]
+        Slots["<ExtensionPoint name='...' context={...} />"]
+        UIEnv["Host Design System Provider<br/><small>(window.CampusOS.ui)</small>"]
+    end
+
+    subgraph Plugins ["Modular Micro-UIs (plugins/<name>/frontend/)"]
+        Widget1["Calendar Widget<br/><small>plugins/calendar/frontend/</small>"]
+        Widget2["Tasks Card<br/><small>plugins/task/frontend/</small>"]
+        Widget3["Recruitment Tab<br/><small>plugins/recruitment/frontend/</small>"]
+    end
+
+    subgraph SharedPkg ["Shared Core (@campus-os/shared)"]
+        SlotCatalog["slot-catalog.ts (Typed Registry)"]
+        Boundary["ExtensionErrorBoundary (Isolation)"]
+        Store["Zustand Stores & Session State"]
+    end
+
+    RootLayout --> Pages
+    Pages --> Slots
+    Slots --> Boundary
+    Boundary --> Plugins
+    SlotCatalog -.-> Slots
+    UIEnv -.->|Zero-bundle duplication| Plugins
+```
+
+---
+
+## 2. Tech Stack
+
+| Technology         | Version | Architectural Role                                             |
+| ------------------ | ------- | -------------------------------------------------------------- |
+| **Next.js**        | 16.x    | App Router, Server Components (RSC), Turbopack compilation     |
+| **React**          | 19.x    | UI library, React Compiler optimizations, concurrent rendering |
+| **TypeScript**     | 5.x     | End-to-end type safety with shared interfaces                  |
+| **Tailwind CSS**   | v4      | Modern utility-first CSS styling with OKLCH color variables    |
+| **shadcn/ui**      | Latest  | Accessible Radix UI primitives tokenized for dark/light mode   |
+| **Zustand**        | 5.x     | Lightweight, decoupled client-side state stores                |
+| **TanStack Query** | 5.x     | Async server state, caching, and optimistic mutations          |
+| **Lucide React**   | Latest  | Unified icon library                                           |
+
+---
+
+## 3. Directory Layout
+
+```
+frontend/
+├── app/                          # Next.js App Router (Pages, Layouts & Route Handlers)
+│   ├── (auth)/                   # Route group: /login, /signup, /forgot-password
+│   ├── (dashboard)/              # Protected dashboard layouts & navigation
+│   │   ├── dashboard/            # Main dashboard overview
+│   │   ├── clubs/                # Club exploration & management
+│   │   ├── events/               # Event planning & listings
+│   │   ├── tasks/                # Kanban task boards
+│   │   └── calendar/             # Interactive schedule & calendar
+│   ├── layout.tsx                # Root layout with fonts, ThemeProvider & Toast
+│   ├── page.tsx                  # Public landing portal
+│   └── globals.css               # Tailwind CSS v4 variables & color scales
+│
+├── components/                   # Core shared UI components
+│   ├── layout/                   # Navbar, Sidebar, Breadcrumbs, UserDropdown
+│   ├── providers/                # ThemeProvider, QueryClientProvider, AuthProvider
+│   └── ui/                       # @campusos/design-system (Button, Card, Dialog, Form, etc.)
+│
+├── lib/                          # Client utilities and state stores
+│   ├── api/                      # Central API client & error normalizers
+│   ├── stores/                   # Zustand global stores (auth, UI, preferences)
+│   └── hooks/                    # Reusable React hooks
+│
+└── plugins/                      # (Moved to monorepo root: plugins/<name>/frontend/)
+```
+
+---
+
+## 4. State Management Strategy (Zustand + React Query)
+
+CampusOS follows a 3-tier state separation to eliminate unnecessary re-renders:
+
+```mermaid
+flowchart TD
+    State["Application State"] --> ServerState["1. Server State (TanStack React Query)"]
+    State --> ClientState["2. Global Client State (Zustand)"]
+    State --> URLState["3. URL State (nuqs / Next.js SearchParams)"]
+
+    ServerState --- S1["Remote API data, pagination, cache invalidation"]
+    ClientState --- C1["Auth session, active club context, sidebar collapse, theme"]
+    URLState --- U1["Active tab, search queries, filter state (shareable links)"]
+```
+
+### Zustand Store Example:
+
+```typescript
+// frontend/lib/stores/use-auth-store.ts
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+interface AuthState {
+  user: User | null;
+  token: string | null;
+  setSession: (user: User, token: string) => void;
+  clearSession: () => void;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      setSession: (user, token) => set({ user, token }),
+      clearSession: () => set({ user: null, token: null })
+    }),
+    { name: 'campusos-auth-session' }
+  )
+);
+```
+
+---
+
+## 5. Slot-Fill Micro-UI Extension Points (ADR-020)
+
+CampusOS uses the **Slot-Fill System** (`@campus-os/shared`) to allow plugins to register UI components into pre-defined locations across the host app:
+
+### 1. In Host Pages:
+
+```tsx
+import { ExtensionPoint } from '@campus-os/shared';
+
+export function DashboardPage({ user, currentClub }) {
+  return (
+    <div className="space-y-6">
+      <header className="flex justify-between">
+        <h1>Dashboard</h1>
+        {/* Actions slot in header */}
+        <ExtensionPoint
+          name="header.actions"
+          context={{ user, club: currentClub }}
+        />
+      </header>
+
+      {/* Grid of plugin widgets */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <ExtensionPoint
+          name="dashboard.widget"
+          context={{ user, club: currentClub }}
+        />
+      </div>
+    </div>
+  );
+}
+```
+
+### 2. Available Extension Slots:
+
+Defined in `shared/src/slot-catalog.ts`:
+
+- `dashboard.widget` — Dashboard cards and analytical KPI widgets
+- `header.actions` — Action buttons in top navigation
+- `sidebar.nav` — Navigation items injected into main sidebar
+- `event.details.tab` — Additional tabs on event pages (e.g. Budget, Check-in, Scheduling)
+- `club.profile.section` — Custom sections on club profile pages
+- `user.profile.tab` — Custom profile panels
+
+### 3. Error Boundary Isolation:
+
+Every widget injected through `<ExtensionPoint />` is wrapped inside an `ExtensionErrorBoundary`. If a community plugin widget throws a JavaScript error, it displays a compact fallback alert without breaking the rest of the host page:
+
+```tsx
+<ExtensionErrorBoundary pluginId="vendor-widget">
+  <VendorWidget context={context} />
+</ExtensionErrorBoundary>
+```
+
+---
+
+## 6. Runtime ESM Plugin Bundling (ADR-014 & ADR-031)
+
+To keep bundle sizes small and avoid rebuilding the Next.js app whenever a plugin changes:
+
+1. **Dynamic Micro-Bundles**:
+   Frontend plugins are compiled into standalone ESM files served directly by the backend:
+   `GET /api/v1/plugins/:name/bundle.js`
+2. **Host Virtual Module Injection**:
+   The host application exposes React, ReactDOM, and `@campusos/design-system` globally via `window.CampusOS.ui`.
+3. **Zero Redundant Downloads**:
+   Plugins import UI primitives directly from the shared runtime. A plugin bundle is typically under 15KB!
+
+---
+
+## 7. Centralized API Client
+
+All network requests use the typed client (`shared/src/api-client.ts` or `frontend/lib/api/client.ts`):
+
+```typescript
+import { apiClient } from '@/lib/api/client';
+
+export async function fetchEventDetails(eventId: string) {
+  // Automatically attaches Bearer token from authStore and normalizes errors
+  return apiClient.get<EventDetails>(`/api/v1/events/${eventId}`);
+}
+```
+
+- **Prefix Resolution**: Automatically prepends `/api/v1` and the backend port (4000 in local dev).
+- **Zod Error Extraction**: Parses structured validation errors from backend error responses.
+
+---
+
+**See Also**: [Design System Guide](./DESIGN_SYSTEM.md) · [Dark Mode Support](./DARK_MODE.md) · [Slot Catalog](../plugins/frontend/SLOT_CATALOG.md)

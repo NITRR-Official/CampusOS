@@ -161,18 +161,33 @@ Authorization: Bearer <jwt-token>
 
 ### Public routes (no token required)
 
-These are hardcoded in `middleware/auth.js`:
+Core routes bypassed from authentication:
 
-- `POST /api/v1/auth/signup`
-- `POST /api/v1/auth/login`
-- `GET /api/v1/events` (listing)
-- `GET /api/v1/events/:id` (single event)
-- `POST /api/v1/events/:id/registrations`
-- `GET /health`
+- `GET /health` — Health check endpoint
+- `POST /api/v1/auth/signup` — User registration
+- `POST /api/v1/auth/login` — User authentication
+
+Plugins dynamically register additional public endpoints via `registry.registerPublicRoute(regex, method)`:
+
+```javascript
+// Example: Expose public event listing
+registry.registerPublicRoute(/^\/api\/v1\/events(\/.*)?$/, 'GET');
+```
+
+The auth middleware checks `registry.getPublicRoutes()` and automatically permits matching requests.
 
 ### `req.user` shape
 
-After auth middleware, the request object contains:
+After authentication middleware executes, the request object contains:
+
+```javascript
+req.user = {
+  id: '661234567890abcdef123456',
+  email: 'student@example.com',
+  role: 'student', // User global role
+  isSuperAdmin: false // True if superadmin
+};
+```
 
 ```javascript
 req.user = {

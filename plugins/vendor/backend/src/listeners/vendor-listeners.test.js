@@ -58,7 +58,12 @@ describe('Vendor Listeners (Integration)', () => {
 
       eventBus.emit('event:deleted', { eventId });
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Poll until the async event handler completes (prevents CI race conditions)
+      for (let i = 0; i < 20; i++) {
+        const check = await vendorService.getEventVendors(eventId);
+        if (check.length === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
 
       const vendorsAfter = await vendorService.getEventVendors(eventId);
       expect(vendorsAfter.length).toBe(0);
@@ -101,7 +106,12 @@ describe('Vendor Listeners (Integration)', () => {
 
       eventBus.emit('club:deleted', { clubId });
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Poll until the async event handler completes (prevents CI race conditions)
+      for (let i = 0; i < 20; i++) {
+        const check = await Vendor.find({ clubId });
+        if (check.length === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
 
       const vendorsAfter = await Vendor.find({ clubId });
       expect(vendorsAfter.length).toBe(0);
