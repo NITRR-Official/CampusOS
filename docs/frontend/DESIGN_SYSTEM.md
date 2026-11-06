@@ -381,15 +381,25 @@ Dark mode is supported throughout the application. Use the `.dark` class or `dar
 </div>
 ```
 
-## 10. Future Enhancements
+## 10. Plugin Runtime Environment & Design System Exposure (PR #131)
 
-This design system is intentionally flexible and will evolve as the project grows. Consider future additions:
+To allow plugins to render seamless UI widgets without bundling duplicate copies of UI primitives:
 
-- Animation and transition tokens
-- Additional semantic colors
-- Responsive typography scales
-- Component state variations
-- Accessibility patterns
+1. **Host Runtime Injection**: The host application exposes all 21 `@campusos/design-system` primitives on `window.CampusOS.ui`:
+   ```javascript
+   window.CampusOS = {
+     ui: {
+       Button, Card, CardHeader, CardTitle, Dialog, Input, Badge, ...
+     }
+   };
+   ```
+2. **Build Virtual Module Plugin**: When compiling a plugin's frontend via `scripts/build-plugin-frontend.js`, esbuild shims `@campusos/design-system` with an in-memory virtual module:
+   ```javascript
+   // Automatically resolved by esbuild during plugin bundling:
+   const { Button, Card } = window.CampusOS.ui;
+   export { Button, Card };
+   ```
+3. **Zero Bundle Overhead**: Plugin bundles stay lightweight (< 15KB) and automatically inherit platform dark/light themes, focus rings, and radius variables.
 
 ## Resources
 
@@ -399,5 +409,5 @@ This design system is intentionally flexible and will evolve as the project grow
 
 ---
 
-**Last Updated**: May 2, 2026  
-**Maintained By**: CampusOS Team
+**Last Updated**: November 2026  
+**Maintained By**: CampusOS Core Engineering Team

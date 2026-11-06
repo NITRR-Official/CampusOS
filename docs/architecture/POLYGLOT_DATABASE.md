@@ -49,24 +49,29 @@ export class DatabaseAdapter {
 
 ## 2. Accessing Database Clients in Plugins
 
-Plugins never import database drivers directly. Instead, they consume managed instances registered in `ModuleRegistry`:
+> [!IMPORTANT] Two-Tier Security Enforcement (ADR-017)
+> Direct access to `db:mongo`, `db:sql`, and `core:models` via `registry.getService(...)` is **restricted to verified Core plugins**.
+>
+> If a **Community plugin** attempts to call `registry.getService('db:mongo')`, the sandboxed registry throws an `AccessDeniedError`. Community plugins must consume published domain services (e.g. `registry.getService('club:service')`) or perform custom database manipulations exclusively within their isolated schema migrations (`backend/migrations/`) where migration contexts safely provide `{ db, mongoose, logger }`.
 
-### MongoDB Plugins
+### MongoDB Plugins (Core Tier)
 
-Plugins using MongoDB can either define Mongoose models through their Repository or retrieve the Mongoose instance:
+Plugins using MongoDB can either define Mongoose models through their Repository or retrieve the shared Mongoose instance:
 
 ```javascript
-export async function init(app, registry) {
+export async function init(app, registry, eventBus, logger) {
+  // Available to core tier plugins (ADR-017)
   const mongoose = registry.getService('db:mongo');
 }
 ```
 
-### SQL (PostgreSQL) Plugins
+### SQL (PostgreSQL) Plugins (Core Tier)
 
 Plugins using SQL retrieve the managed connection pool:
 
 ```javascript
-export async function init(app, registry) {
+export async function init(app, registry, eventBus, logger) {
+  // Available to core tier plugins (ADR-017)
   const sql = registry.getService('db:sql');
   const pool = sql.getClient();
 

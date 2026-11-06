@@ -58,34 +58,37 @@ All 5 checks run **in parallel** for fast feedback:
 
 ---
 
-## CD — Deployments
+## CD — Deployments & Hosting
 
-CampusOS uses **two separate hosting platforms**:
+CampusOS is designed to be **cloud-agnostic and container-ready**:
 
-| Component    | Platform                     | Method          |
-| ------------ | ---------------------------- | --------------- |
-| **Frontend** | [Vercel](https://vercel.com) | Git Integration |
-| **Backend**  | [Render](https://render.com) | Git Integration |
+- **Frontend**: Built on **Next.js 16 (App Router)**. While it can run in any Docker container, Node.js runtime, AWS Amplify, or Netlify, **Vercel** is the recommended reference host because of native Next.js optimizations and automated zero-config branch preview URLs.
+- **Backend**: Standard **Express v5** service that runs on any container or cloud provider (Render, Railway, Fly.io, Docker Compose, AWS ECS, or a self-hosted Linux VPS).
 
-Both platforms auto-deploy when code is pushed — no GitHub Actions are used for deployment.
+### Reference Deployment Architecture
 
-### Live URLs
+In the official NITRR reference deployment, both platforms auto-deploy when code is pushed to long-lived branches:
 
-| Service         | URL                                                                  |
-| --------------- | -------------------------------------------------------------------- |
-| Backend (main)  | https://campus-os-backend-main.onrender.com                          |
-| Backend (dev)   | https://campus-os-backend.onrender.com                               |
-| Frontend (prod) | https://campus-os-frontend.vercel.app                                |
-| Frontend (dev)  | https://campus-os-frontend-git-dev-techshreyashs-projects.vercel.app |
-| Frontend (PR)   | Auto-generated unique URL per PR (commented by Vercel bot)           |
+| Component    | Reference Platform                                       | Method          | Target Environments                           |
+| :----------- | :------------------------------------------------------- | :-------------- | :-------------------------------------------- |
+| **Frontend** | [Vercel](https://vercel.com) _(Recommended for Next.js)_ | Git Integration | PR Previews, Dev (`dev`), Production (`main`) |
+| **Backend**  | [Render](https://render.com) _(or Docker / PaaS)_        | Git Integration | Dev (`dev`), Production (`main`)              |
+
+### Reference Endpoints
+
+| Environment                | Frontend URL                                | Backend API URL                               |
+| :------------------------- | :------------------------------------------ | :-------------------------------------------- |
+| **Production (`main`)**    | `https://campus-os-frontend.vercel.app`     | `https://campus-os-backend-main.onrender.com` |
+| **Staging / Dev (`dev`)**  | `https://campus-os-frontend-dev.vercel.app` | `https://campus-os-backend.onrender.com`      |
+| **Pull Request (Preview)** | Auto-generated per PR by Vercel bot         | Connected to Dev Backend                      |
 
 ### How Deployments Are Triggered
 
-| Trigger              | Frontend (Vercel)          | Backend (Render)           |
-| -------------------- | -------------------------- | -------------------------- |
-| PR opened/updated    | ✅ Auto-deploys preview    | ❌ No per-PR deployment    |
-| Push/merge to `dev`  | ✅ Auto-deploys dev        | ✅ Auto-deploys dev        |
-| Push/merge to `main` | ✅ Auto-deploys production | ✅ Auto-deploys production |
+| Trigger                  | Frontend (e.g. Vercel)             | Backend (e.g. Render / Docker)               |
+| :----------------------- | :--------------------------------- | :------------------------------------------- |
+| **PR opened/updated**    | ✅ Auto-deploys unique preview URL | ❌ No per-PR deployment (shares dev backend) |
+| **Push/merge to `dev`**  | ✅ Auto-deploys dev frontend       | ✅ Auto-deploys dev backend                  |
+| **Push/merge to `main`** | ✅ Auto-deploys production         | ✅ Auto-deploys production                   |
 
 ---
 
@@ -203,14 +206,14 @@ CampusOS requires **two** Render web services — one for `dev` and one for `mai
 
 4. **Environment Variables**:
 
-| Variable             | Value                                                                                                        | Notes                                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| `NODE_ENV`           | `development`                                                                                                | Dev fallbacks, verbose errors                    |
-| `PORT`               | `10000`                                                                                                      | Render's default port                            |
-| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`                                                                              | MongoDB Atlas connection string                  |
-| `JWT_SECRET`         | `<your-dev-secret>`                                                                                          | Secret for JWT signing                           |
-| `FRONTEND_URLS`      | `https://campus-os-frontend.vercel.app,https://campus-os-frontend-git-dev-techshreyashs-projects.vercel.app` | CORS: allowed origins (prod + dev frontends)     |
-| `ALLOW_PREVIEW_CORS` | `true`                                                                                                       | Allows any `*.vercel.app` origin for PR previews |
+| Variable             | Value                                                                             | Notes                                            |
+| -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `NODE_ENV`           | `development`                                                                     | Dev fallbacks, verbose errors                    |
+| `PORT`               | `10000`                                                                           | Render's default port                            |
+| `MONGODB_URI`        | `mongodb+srv://...campusos-dev`                                                   | MongoDB Atlas connection string                  |
+| `JWT_SECRET`         | `<your-dev-secret>`                                                               | Secret for JWT signing                           |
+| `FRONTEND_URLS`      | `https://campus-os-frontend.vercel.app,https://campus-os-frontend-dev.vercel.app` | CORS: allowed origins (prod + dev frontends)     |
+| `ALLOW_PREVIEW_CORS` | `true`                                                                            | Allows any `*.vercel.app` origin for PR previews |
 
 #### Service 2: Production Backend (`campus-os-backend-main`)
 

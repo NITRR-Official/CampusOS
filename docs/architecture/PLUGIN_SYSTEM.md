@@ -1,262 +1,266 @@
 # Plugin System
 
-Every feature in CampusOS is a plugin module in `/plugins/`. Modules are loaded dynamically at startup — the backend core never hardcodes which modules exist.
+Every feature in CampusOS is an isolated, modular plugin in `/plugins/`. Plugins are loaded dynamically at runtime — the core engine never hardcodes module implementations or schemas.
 
-## How Plugin Loading Works
+## High-Level Architecture
 
-At startup, `plugin-loader.js` does this:
+CampusOS implements a decoupled, two-tier plugin model where backend services and frontend UI widgets live together in a single plugin module:
 
 ```mermaid
 flowchart TD
-    Scan["1. Scan /plugins/ for directories"] --> ForEach["2. For each directory, look for entry file"]
-    ForEach --> Check1{"Check: plugin.js exists?"}
-    Check1 -- Yes --> Import["3. Dynamically import the entry file"]
-    Check1 -- No --> Check2{"Check: src/index.js exists?"}
-    Check2 -- Yes --> Import
-    Check2 -- No --> Fail["Skip module"]
+    subgraph Plugin ["Plugin Module: plugins/<module>/"]
+        M["plugin.json<br/><small>Zod-validated Manifest</small>"]
+        B["backend/<br/><small>Express routes, Services, Repositories</small>"]
+        DB["backend/migrations/<br/><small>up() & down() schema migrations</small>"]
+        F["frontend/<br/><small>React components & Slot registrations</small>"]
+    end
 
-    Import --> Init["4. Call the exported init(app, registry) function"]
-    Init --> Log["5. Log success or failure per module"]
+    subgraph CoreEngine ["Core Backend Engine"]
+        L["PluginLoader"]
+        R["ScopedRegistry & Timers"]
+        EB["ScopedEventBus"]
+        MR["MigrationRunner"]
+    end
+
+    subgraph HostApp ["Frontend Host Application"]
+        SL["ExtensionPoint Engine"]
+        DS["@campusos/design-system<br/><small>window.CampusOS.ui</small>"]
+    end
+
+    M --> L
+    L --> MR
+    MR --> DB
+    L --> R
+    L --> EB
+    B --> R
+    B --> EB
+    F -.->|Compiled ESM Bundle| SL
+    DS -.->|Injected at Runtime| F
 ```
 
-> **Note (ADR-006):** Before loading a plugin, the loader checks the `Plugin` collection in MongoDB. If a plugin is marked as `enabled: false`, it is skipped. New, undiscovered plugins dropped into `/plugins/` are automatically inserted into MongoDB and disabled by default for security.
+## Plugin Manifest Specification (`plugin.json`)
 
-If a module fails to load:
+Every plugin **must** include a `plugin.json` manifest at its root (`plugins/<name>/plugin.json`). The manifest serves as the single source of truth for plugin identity, provenance security tier (`core` vs `community`), capability requests, database engine, and topological dependency resolution.
 
-- **Development**: Error is logged, other modules continue loading
-- **Production**: The entire server crashes (fail-fast)
-
-## Plugin Management (ADR 006)
-
-Plugins are managed via the built-in `plugin-manager` module. This provides a `super-admin` API to list plugins, toggle them in MongoDB, and trigger a safe restart of the server (`SIGTERM`) to apply the new configuration dynamically without breaking the Express router stack.
-
-## Frontend Plugin Architecture (ADR 007)
-
-When a plugin introduces UI components, CampusOS uses **Build-Time Integration**. The frontend components are injected into the frontend directory, and the system runs `pnpm build`. This avoids complex micro-frontend configurations while maintaining perfect type safety and native performance.
-
-## Real Plugin Entry Points
-
-Here's what actual modules look like in the codebase:
-
-### Auth module (`plugins/auth/src/index.js`)
-
-```javascript
-import { createAuthController } from './controller/auth.controller.js';
-import { registerAuthRoutes } from './routes/auth.routes.js';
-
-export async function init(app, registry) {
-  const authController = createAuthController({ registry });
-  registerAuthRoutes(app, authController);
-
-  registry.registerModule('auth', {
-    routes: ['/api/v1/auth/signup', '/api/v1/auth/login', '/api/v1/auth/me']
-  });
+```json
+{
+  "name": "calendar",
+  "version": "1.0.0",
+  "description": "Campus event scheduling and calendar planning",
+  "tier": "community",
+  "defaultEnabled": true,
+  "backend": true,
+  "frontend": true,
+  "dependencies": {
+    "auth": "^1.0.0"
+  },
+  "capabilities": ["service:event", "event:bus:emit"]
 }
 ```
 
-### Vendor module (`plugins/vendor/src/index.js`)
+> **Authoritative Manifest Reference**: For the complete field-by-field specification, Zod validation contract, permission rules, and production examples, refer to the dedicated [Plugin Manifest Specification](/docs/plugins/backend/manifest).
 
-```javascript
-import { registerVendorRoutes } from './routes/vendor.routes.js';
-import { createVendorService } from './service/vendor.service.js';
-import { VendorRepository } from './repository/vendor.repository.js';
-import { createVendorController } from './controller/vendor.controller.js';
+## Plugin Directory Structure
 
-export async function init(app, registry, eventBus) {
-  const requirePermissions = registry.getService('requirePermissions');
-
-  const vendorRepository = new VendorRepository();
-  const vendorService = createVendorService(vendorRepository);
-  const vendorController = createVendorController(vendorService);
-
-  if (eventBus) vendorService.setEventBus(eventBus);
-
-  registerVendorRoutes(app, vendorController, requirePermissions);
-
-  if (registry.permissions) {
-    registry.permissions.register({
-      id: 'vendor:manage',
-      module: 'vendor',
-      label: 'Manage Vendors'
-    });
-  }
-}
-```
-
-### Key patterns to notice:
-
-1. **Export a named `init` function** (or default export) — the loader accepts either
-2. **Receive `(app, registry, eventBus)` as arguments** — `app` is Express, `registry` is the service locator, `eventBus` is for cascade events
-3. **Get shared services from the registry** — like `requirePermissions` for RBAC
-4. **Register your routes directly on `app`** — there's no route aggregator
-5. **Register your module in the registry** — `registry.registerModule('name', { routes })` for discoverability
-
-## Module Directory Structure
-
-Every module follows this layout:
+Every modular plugin adheres to the standardized monorepo layout:
 
 ```
 plugins/<module>/
-├── package.json              # Module dependencies
-├── vitest.config.js          # Test configuration (if tests exist)
-└── src/
-    ├── index.js              # Plugin entry — exports init()
-    ├── controller/
-    │   └── <name>.controller.js
-    ├── routes/
-    │   └── <name>.routes.js
-    ├── schema/
-    │   └── <name>.schema.js  # Mongoose model
-    └── service/
-        ├── <name>.service.js
-        └── <name>.service.test.js
+├── plugin.json                 # Manifest with metadata, permissions & slots
+├── package.json                # Module-specific dependencies
+├── vitest.config.js            # Isolated unit test runner
+│
+├── backend/                    # Backend implementation
+│   ├── src/
+│   │   ├── index.js            # Entrypoint — exports init() and destroy()
+│   │   ├── controller/         # Express HTTP request handlers
+│   │   ├── routes/             # Route definitions & permission bindings
+│   │   ├── repository/         # Database access layer (Mongoose)
+│   │   ├── schema/             # Mongoose schema definitions
+│   │   └── service/            # Core business logic & EventBus hooks
+│   └── migrations/             # Schema migration scripts
+│       └── 001_initial_schema.js
+│
+└── frontend/                   # Frontend micro-UI implementation
+    ├── init.ts                 # Registers components into slot catalog
+    ├── api.ts                  # Typed API client functions
+    ├── hooks/                  # React hooks & queries
+    └── components/             # React UI components & widgets
 ```
 
-## Current Modules
+## Plugin Lifecycle & State Machine (ADR-019)
 
-These are the actual directories in `/plugins/` right now:
+Plugins transition through a deterministic lifecycle managed by `plugin-loader.js`:
 
-| Module         | Directory                 | Layer      |
-| -------------- | ------------------------- | ---------- |
-| Auth           | `plugins/auth/`           | Foundation |
-| Club           | `plugins/club/`           | Foundation |
-| Institute      | `plugins/institute/`      | Foundation |
-| Admin          | `plugins/admin/`          | Foundation |
-| Plugin Manager | `plugins/plugin-manager/` | Foundation |
-| Activity       | `plugins/activity/`       | Foundation |
-| Event          | `plugins/event/`          | Event      |
-| Check-in       | `plugins/checkin/`        | Event      |
-| Forms          | `plugins/forms/`          | Event      |
-| Task           | `plugins/task/`           | Execution  |
-| Calendar       | `plugins/calendar/`       | Execution  |
-| Recruitment    | `plugins/recruitment/`    | Execution  |
-| Vendor         | `plugins/vendor/`         | Operations |
-| Resource       | `plugins/resource/`       | Operations |
-| Scheduling     | `plugins/scheduling/`     | Operations |
-| Budget         | `plugins/budget/`         | Operations |
+```mermaid
+stateDiagram-v2
+    [*] --> DISCOVERED: Loader scans /plugins/
+    DISCOVERED --> VALIDATED: Validate plugin.json with Zod
+    VALIDATED --> PROVENANCE_CHECK: Verify tier & signature (core vs community)
+    PROVENANCE_CHECK --> MIGRATING: Run pending migrations (MigrationRunner)
+    MIGRATING --> ACTIVE: Invoke init(app, registry, eventBus, logger)
+    ACTIVE --> UNLOADING: unloadPlugin(name) triggered
+    UNLOADING --> DESTROYED: Invoke destroy() hook & clear timers/events
+    DESTROYED --> [*]
+```
 
-## Module Communication Rules
+### 1. Initialization (`init`)
 
-Modules cannot import each other. This is enforced by convention:
+Plugins export an `init(app, registry, eventBus, logger)` function:
 
 ```javascript
-// ❌ NEVER — this creates a hard dependency
-import { UserService } from '../../auth/src/service/auth.service.js';
+// plugins/calendar/backend/src/index.js
+import { CalendarRepository } from './repository/calendar.repository.js';
+import { createCalendarService } from './service/calendar.service.js';
+import { registerCalendarRoutes } from './routes/calendar.routes.js';
 
-// ✅ Use the registry — loose coupling
-const requirePermissions = registry.getService('requirePermissions');
-```
+let cleanupTimers = null;
 
-Modules communicate through:
-
-1. **The service registry** — `registry.getService('name')` / `registry.registerService('name', impl)`
-2. **The database** — Modules can read any MongoDB collection, but each module owns its own collections
-
-## Creating a New Module
-
-### Step 1: Scaffold the directory
-
-```bash
-mkdir -p plugins/my-module/src/{controller,routes,schema,service}
-```
-
-### Step 2: Create the Mongoose schema
-
-```javascript
-// plugins/my-module/src/schema/my-module.schema.js
-import mongoose from 'mongoose';
-
-const myModuleSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    status: { type: String, enum: ['active', 'inactive'], default: 'active' }
-  },
-  { timestamps: true }
-);
-
-export const MyModel = mongoose.model('MyModel', myModuleSchema);
-```
-
-### Step 3: Create the repository and service (business logic)
-
-```javascript
-// plugins/my-module/src/service/my-module.service.js
-export function createMyModuleService(repository) {
-  return {
-    async create(data) {
-      const doc = await repository.create(data);
-      return { success: true, data: doc };
-    },
-    async getAll(filters = {}) {
-      const docs = await repository.find(filters);
-      return { success: true, count: docs.length, data: docs };
-    }
-  };
-}
-```
-
-### Step 4: Create the controller (thin HTTP layer)
-
-```javascript
-// plugins/my-module/src/controller/my-module.controller.js
-export function createMyModuleController(service) {
-  return {
-    async create(req, res, next) {
-      try {
-        const result = await service.create(req.body);
-        res.status(201).json(result);
-      } catch (error) {
-        next(error);
-      }
-    },
-    async getAll(req, res, next) {
-      try {
-        const result = await service.getAll(req.query);
-        res.json(result);
-      } catch (error) {
-        next(error);
-      }
-    }
-  };
-}
-```
-
-### Step 5: Create the routes
-
-```javascript
-// plugins/my-module/src/routes/my-module.routes.js
-import { Router } from 'express';
-
-export function registerMyModuleRoutes(app, controller, requirePermissions) {
-  const router = Router();
-
-  router.get('/', controller.getAll);
-  router.post('/', requirePermissions('my-module:manage'), controller.create);
-
-  app.use('/api/v1/my-module', router);
-}
-```
-
-### Step 6: Create the plugin entry
-
-```javascript
-// plugins/my-module/src/index.js
-import { registerMyModuleRoutes } from './routes/my-module.routes.js';
-import { createMyModuleService } from './service/my-module.service.js';
-import { createMyModuleController } from './controller/my-module.controller.js';
-
-export async function init(app, registry, eventBus) {
+export async function init(app, registry, eventBus, logger) {
   const requirePermissions = registry.getService('requirePermissions');
 
-  const service = createMyModuleService(); // Inject repo if used
-  const controller = createMyModuleController(service);
+  const repository = new CalendarRepository();
+  const service = createCalendarService(repository, { eventBus, logger });
 
-  registerMyModuleRoutes(app, controller, requirePermissions);
+  // Register routes
+  registerCalendarRoutes(app, service, requirePermissions);
+
+  // Subscribe to domain events via scoped EventBus
+  eventBus.on('event:published', async (eventData) => {
+    await service.syncEventToCalendar(eventData);
+  });
+
+  // Background recurring sync using scoped timers (prevents leaks)
+  cleanupTimers = registry.timers.setInterval(
+    () => {
+      service.cleanupStaleReservations();
+    },
+    1000 * 60 * 60
+  );
+
+  logger.info('Calendar plugin initialized');
 }
 ```
 
-The module will be automatically discovered and loaded on the next server start.
+### 2. Teardown & Resource Cleanup (`destroy`)
+
+When a plugin is deactivated, `unloadPlugin(name)` invokes the optional `destroy()` hook:
+
+```javascript
+export async function destroy(app, registry, eventBus, logger) {
+  logger.info('Tearing down calendar plugin resources...');
+
+  if (cleanupTimers) {
+    clearInterval(cleanupTimers);
+  }
+
+  // Scoped EventBus and Registry automatically unbind all remaining
+  // listeners and clear scoped timers if not done manually.
+}
+```
+
+- **5000ms Timeout Guard**: Prevents hanging shutdown tasks.
+- **Dependency Guard**: Refuses deactivation if another active plugin depends on this plugin (unless `force: true` is passed).
+
+## Automated Database Migrations (ADR-021)
+
+Plugins manage database schema evolutions via forward `up()` and rollback `down()` migration scripts placed in `backend/migrations/`:
+
+```javascript
+// plugins/calendar/backend/migrations/001_initial_schema.js
+export async function up({ db, mongoose, logger }) {
+  logger.info('Creating calendar collections and compound indexes');
+  const collection = db.collection('calendar_events');
+  await collection.createIndex({ clubId: 1, startTime: 1 });
+  await collection.createIndex({ 'recurrence.until': 1 }, { sparse: true });
+}
+
+export async function down({ db, mongoose, logger }) {
+  logger.info('Dropping calendar_events indexes');
+  const collection = db.collection('calendar_events');
+  await collection.dropIndex('clubId_1_startTime_1');
+}
+```
+
+- **Execution Order**: Migrations execute sequentially during startup before `init()`.
+- **Integrity Tracking**: The `_plugin_migrations` collection stores the execution status, timestamp, and SHA-256 checksum of each migration script. If an applied migration file is tampered with, server startup fails immediately.
+
+## Frontend Extension Point & Slot-Fill System (ADR-020)
+
+CampusOS does not use heavyweight iframe micro-frontends or require full-app rebuilds. Instead, frontend components are injected into designated **Extension Points**:
+
+```mermaid
+flowchart LR
+    Host["Host Page: ExtensionPoint"]
+    SlotCatalog["slot-catalog.ts<br/><small>Type Definitions</small>"]
+    PluginWidget["Plugin Component<br/><small>CalendarWidget.tsx</small>"]
+
+    SlotCatalog -.-> Host
+    PluginWidget -->|Registers into Slot| Host
+```
+
+### How Slot-Fill Works:
+
+1. **Extension Points in Host App**:
+
+   ```tsx
+   import { ExtensionPoint } from '@campus-os/shared/extension-point';
+
+   export function Dashboard({ user, activePlugins }) {
+     return (
+       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+         <ExtensionPoint
+           id="dashboard-stats"
+           context={{ user }}
+           activePlugins={activePlugins}
+         />
+       </div>
+     );
+   }
+   ```
+
+2. **Component Registration in Plugin**:
+
+   ```tsx
+   // plugins/calendar/frontend/init.ts
+   import { registry } from '@campus-os/shared/plugin-registry';
+   import { CalendarWidget } from './components/CalendarWidget';
+
+   export function initFrontend() {
+     registry.registerWidget('dashboard-stats', 'calendar', CalendarWidget, {
+       priority: 20,
+       condition: (ctx) => Boolean(ctx?.user?.id)
+     });
+   }
+   ```
+
+3. **Runtime Error Boundary Isolation**:
+   Every injected widget is wrapped inside an `ExtensionErrorBoundary`. If a community plugin widget throws an unhandled error, only that widget displays a fallback UI; the rest of the application runs unaffected.
+
+## Runtime ESM Bundling & Design System Injection (ADR-014 & ADR-031)
+
+Frontend plugins are compiled to standalone ESM bundles using `esbuild`. The host application serves the precompiled bundles dynamically:
+
+1. **Host Virtual Module Injection**:
+   The host exposes `@campusos/design-system` and React via `window.CampusOS.ui`.
+2. **Zero Bundle Duplication**:
+   Plugin micro-bundles do not re-bundle React, Lucide icons, or UI primitives. They import from the host runtime at zero bandwidth overhead.
+3. **Endpoint**:
+   Frontend plugin bundles are served dynamically via:
+   `GET /api/v1/plugins/:name/bundle.js`
+
+## Two-Tier Security & Provenance Sandboxing (ADR-017)
+
+To protect the host platform from malicious or unstable community plugins:
+
+| Feature             | Core Plugins (`auth`, `admin`, `plugin-manager`) | Community Plugins                           |
+| ------------------- | ------------------------------------------------ | ------------------------------------------- |
+| **Provenance**      | Hardcoded official catalog & root signature      | Verified directory metadata                 |
+| **Registry Scope**  | Unrestricted `registry` access (`['*']`)         | Sandboxed `ScopedRegistry`                  |
+| **EventBus Scope**  | Full broadcast & listen access                   | Restricted to declared event topics         |
+| **Database Access** | Global access to core models (`User`, `Plugin`)  | Restricted to plugin-owned collections      |
+| **Timers**          | System timers permitted                          | Must use `registry.timers` for leak cleanup |
 
 ---
 
-**See Also**: [Backend Architecture](./BACKEND.md) · [Architecture Overview](./OVERVIEW.md) · [API Standards](../guides/API_STANDARDS.md)
+**See Also**: [Backend Architecture](./BACKEND.md) · [Architecture Overview](./OVERVIEW.md) · [Slot Catalog](../plugins/frontend/SLOT_CATALOG.md) · [Event Catalog](./EVENT_CATALOG.md)

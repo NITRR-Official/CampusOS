@@ -1,0 +1,20 @@
+{
+  "title": "CampusOS Docs",
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "getting-started",
+    "---Architecture---",
+    "architecture",
+    "---Plugin Ecosystem---",
+    "plugins",
+    "---Guides & Standards---",
+    "guides",
+    "---API & Reference---",
+    "api",
+    "---Frontend & Design---",
+    "frontend",
+    "---Contributing---",
+    "contributing"
+  ]
+}

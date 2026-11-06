@@ -8,138 +8,133 @@ This guide will walk you through creating a completely isolated CampusOS plugin.
 
 ## 1. Plugin Structure
 
-Every plugin must live in its own directory inside the `plugins/` folder of the CampusOS backend. A typical plugin structure looks like this:
+Every plugin must live in its own directory inside the `plugins/` folder. A typical plugin structure looks like this:
 
 ```text
 plugins/
 └── recruitment/
-    ├── plugin.json         # (Required) Metadata and dependencies
+    ├── plugin.json                 # (Required) Metadata, permissions, capabilities & slots
+    ├── package.json                # (Optional) Module-specific dependencies
+    ├── vitest.config.js            # Isolated test runner configuration
+    │
     ├── backend/
+    │   ├── migrations/             # (Optional) Automated database migrations
+    │   │   └── 001_initial_schema.js
     │   └── src/
-    │       ├── index.js    # (Required) Backend Entry point
-    │       ├── controller/ # Express controllers (Factory pattern)
-    │       ├── routes/     # Express route definitions
-    │       ├── service/    # Business logic (Factory pattern)
-    │       └── schema/     # Mongoose models
-    ├── frontend/
-    │   ├── api/            # API clients & React Query hooks
-    │   ├── components/     # Internal UI components specific to plugin
-    │   ├── hooks/          # Custom React hooks (e.g. useApplications)
-    │   ├── lib/            # Utilities, Zod schemas, helper functions
-    │   └── pages/          # Top-level React page components
-    └── package.json        # (Optional) If you have unique NPM dependencies
+    │       ├── index.js            # (Required) Backend Entry point (init & destroy)
+    │       ├── controller/         # Express controllers (Factory pattern)
+    │       ├── routes/             # Express route definitions
+    │       ├── repository/         # Mongoose repository layer
+    │       ├── service/            # Business logic (Factory pattern)
+    │       └── schema/             # Mongoose models
+    │
+    └── frontend/
+        ├── init.ts                 # Registers components into <ExtensionPoint> slots
+        ├── api.ts                  # Typed API clients & React Query hooks
+        ├── components/             # Internal UI components specific to plugin
+        └── hooks/                  # Custom React hooks (e.g. useApplications)
 ```
 
 ---
 
 ## 2. The Manifest (`plugin.json`)
 
-The plugin loader requires a `plugin.json` manifest to perform dependency resolution and topological sorting. This ensures your plugin doesn't boot until the plugins it relies on are fully initialized.
+The plugin loader requires a `plugin.json` manifest at the root of the plugin directory to perform dependency resolution, capability verification, and topological sorting:
 
 ```json
 {
   "name": "recruitment",
   "version": "1.0.0",
-  "description": "Handles club member applications and interviews",
+  "description": "Handles club member applications and interview workflows",
+  "tier": "community",
   "defaultEnabled": true,
+  "backend": true,
+  "frontend": true,
   "dependencies": {
     "club": "^1.0.0",
     "auth": "^1.0.0"
-  }
-}
-```
-
-> **Note**: CampusOS uses semantic versioning (`semver`). If the platform's `club` module version does not satisfy `^1.0.0`, your plugin will gracefully skip loading to prevent runtime crashes.
-
----
-
-## 3. Frontend Development
-
-CampusOS uses a Monorepo architecture for the frontend. Plugin-related React components and hooks should be housed _inside_ the plugin's `frontend/` directory, **not** in the core `frontend/app` monolith.
-
-### Boilerplate Requirements
-
-If your plugin includes a frontend, you must define the following `peerDependencies` in your plugin's `package.json` to ensure compatibility with the CampusOS host application:
-
-```json
-{
-  "peerDependencies": {
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0",
-    "lucide-react": "*",
-    "@tanstack/react-query": "^5.0.0"
   },
-  "dependencies": {
-    "@campusos/design-system": "workspace:*"
-  }
+  "capabilities": ["service:club", "event:bus:emit"],
+  "consumes": {
+    "resolvers": ["club:getMemberRoles"],
+    "events": ["club.member.resigned"]
+  },
+  "themeColor": "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800"
 }
 ```
 
-### The Design System
-
-CampusOS provides a centralized design system containing all Shadcn UI components, Tailwind configurations, and CSS variables. By importing from this package, your plugin will seamlessly match the platform's premium aesthetic.
-
-1. **Install the Design System:**
-   Run `pnpm add @campusos/design-system --workspace` in your plugin directory.
-2. **Build Your UI:**
-   Import components directly from the design system package:
-
-   ```tsx
-   import { Button, Input, Card } from '@campusos/design-system';
-
-   export function MyPluginDashboard() {
-     return <Button>Click Me</Button>;
-   }
-   ```
-
-3. **Route Integration:**
-   The core Next.js application will import your component and wrap it in a Next.js route:
-
-   ```tsx
-   // frontend/app/(dashboard)/tasks/page.tsx
-   import { TaskDashboard } from '@plugins/task/frontend/TaskDashboard';
-
-   export default function TasksPage() {
-     return <TaskDashboard />;
-   }
-   ```
-
-   This approach keeps plugins self-contained while preserving Next.js server-side rendering (SSR) and build optimizations.
+> **Authoritative Manifest Specification**: For the complete field-by-field specification, validation contracts, and error handling rules, see [The Plugin Manifest Specification](/docs/plugins/backend/manifest).
+>
+> - **Permissions**: Declared dynamically in backend code via `registry.permissions.registerAll()` (see Section 4).
+> - **Slots / UI Extensions**: Registered dynamically in frontend code via `registerExtension()` (see Section 5).
 
 ---
 
-## 4. The Entry Point (`backend/src/index.js`)
+## 3. Database Migrations (`backend/migrations/`)
 
-Your plugin must export an `init` function as its default or named export. The CampusOS plugin loader will dynamically import this file and invoke `init(app, registry, eventBus)`.
+If your plugin introduces new collections or indexes, place migration scripts in `backend/migrations/`. They execute sequentially during server startup **before** `init()` is called:
+
+```javascript
+// plugins/recruitment/backend/migrations/001_initial_schema.js
+export async function up({ db, mongoose, logger }) {
+  logger.info('Creating recruitment campaign and applicant indexes');
+  const campaigns = db.collection('recruitment_campaigns');
+  await campaigns.createIndex({ clubId: 1, status: 1 });
+
+  const candidates = db.collection('recruitment_candidates');
+  await candidates.createIndex({ campaignId: 1, email: 1 }, { unique: true });
+}
+
+export async function down({ db, mongoose, logger }) {
+  logger.info('Rolling back recruitment indexes');
+  const candidates = db.collection('recruitment_candidates');
+  await candidates.dropIndex('campaignId_1_email_1');
+}
+```
+
+CampusOS stores SHA-256 hashes of applied migrations in `_plugin_migrations` to prevent configuration drift.
+
+---
+
+## 4. The Backend Entry Point (`backend/src/index.js`)
+
+Your plugin must export an `init` function (and optionally a `destroy` teardown function):
 
 ```javascript
 import { registerRecruitmentRoutes } from './routes/recruitment.routes.js';
 import { createRecruitmentService } from './service/recruitment.service.js';
+import { RecruitmentRepository } from './repository/recruitment.repository.js';
 import { createRecruitmentController } from './controller/recruitment.controller.js';
 
-export async function init(app, registry, eventBus) {
+let syncTimer = null;
+
+export async function init(app, registry, eventBus, logger) {
   // 1. Fetch cross-plugin services (e.g., RBAC middleware)
   const requirePermissions = registry.getService('requirePermissions');
   if (!requirePermissions) {
     throw new Error('Permission service is missing');
   }
 
-  // 2. Instantiate your factories (Dependency Inversion Principle)
-  const recruitmentService = createRecruitmentService(); // Pass a repository if needed
+  // 2. Instantiate repository and services (Dependency Inversion)
+  const repository = new RecruitmentRepository();
+  const recruitmentService = createRecruitmentService(repository, {
+    eventBus,
+    logger
+  });
   const recruitmentController = createRecruitmentController(recruitmentService);
 
   // 3. Mount your Express routes
   registerRecruitmentRoutes(app, recruitmentController, requirePermissions);
 
-  // 4. Register your module with the system so the Frontend can discover it
+  // 4. Register module with the service registry
   registry.registerModule('recruitment', {
     routes: [
-      'GET /api/v1/recruitment/applications',
-      'POST /api/v1/recruitment/apply'
+      'GET /api/v1/recruitment/campaigns',
+      'POST /api/v1/recruitment/campaigns'
     ]
   });
 
-  // 4. Register your atomic permissions for the RBAC system
+  // 5. Register atomic permissions for RBAC
   if (registry.permissions) {
     registry.permissions.register({
       id: 'recruitment:manage',
@@ -149,98 +144,153 @@ export async function init(app, registry, eventBus) {
     });
   }
 
-  // 5. Optionally export your own services for OTHER plugins to use
-  registry.registerService('recruitmentService', {
-    getApplicantCount: async () => 42
-  });
-
   // 6. Listen for system events
-  eventBus.on('club.approved', (data) => {
-    console.log(
-      `Club ${data.clubId} was approved! Setup recruitment templates...`
+  eventBus.on('club:approved', async (data) => {
+    logger.info(
+      { clubId: data.clubId },
+      'Club approved; initializing campaign defaults'
     );
   });
+
+  // 7. Use registry.timers for periodic background tasks (prevents leaks)
+  syncTimer = registry.timers.setInterval(
+    () => {
+      recruitmentService.archiveExpiredDrives();
+    },
+    1000 * 60 * 60
+  );
 }
 
-export default init;
+// Optional teardown hook for clean runtime unloading (ADR-019)
+export async function destroy(app, registry, eventBus, logger) {
+  logger.info('Tearing down recruitment plugin resources...');
+  if (syncTimer) {
+    clearInterval(syncTimer);
+  }
+}
+
+export default { init, destroy };
 ```
 
 ---
 
-## 4. The Core APIs
+## 5. Frontend Extension Points & Slots (ADR-020)
 
-When your `init` function is called, you are given three powerful objects:
+CampusOS does not require rebuilding the whole frontend to add widgets. Instead, frontend plugins register their components into host **Extension Points** using `@campus-os/shared/plugin-registry`:
 
-### 1. `app` (Express App)
+```tsx
+// plugins/recruitment/frontend/init.ts
+import { registry } from '@campus-os/shared/plugin-registry';
+import { RecruitmentWidget } from './components/RecruitmentWidget';
 
-The raw Express application instance. You can mount your routers directly to it:
-`app.use('/api/v1/recruitment', recruitmentRouter)`
+export function initFrontend() {
+  registry.registerWidget(
+    'dashboard-stats', // Typed slot ID from slot-catalog
+    'recruitment', // Plugin ID matching manifest name
+    RecruitmentWidget, // React widget component
+    {
+      priority: 15, // Higher numbers render first
+      condition: (context) => Boolean(context?.user?.id) // Optional visibility predicate
+    }
+  );
+}
+```
 
-### 2. `registry` (Service Registry)
+### In the Host Next.js Layout:
 
-A centralized dependency injection container.
+The host application renders registered extensions dynamically with isolated error boundaries:
 
-- **`registry.getService(name)`**: Grab an instance exported by another plugin.
-- **`registry.registerService(name, instance)`**: Expose an API from your plugin.
-- **`registry.registerModule(name, metadata)`**: Declare your plugin's existence to the `/api/v1/system/modules` endpoint.
-- **`registry.permissions.register(permissionObj)`**: Inject your plugin's custom atomic permissions into the Discord-style RBAC UI.
+```tsx
+import { ExtensionPoint } from '@campus-os/shared/extension-point';
 
-### 3. `eventBus` (Pub/Sub)
+export function ClubDashboard({ club, activePlugins, user }) {
+  return (
+    <div className="space-y-6">
+      <ExtensionPoint
+        id="dashboard-stats"
+        context={{ club, user }}
+        activePlugins={activePlugins}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4"
+      />
+    </div>
+  );
+}
+```
 
-A global `EventEmitter` for decoupling plugins.
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <ExtensionPoint name="dashboard.widget" context={{ club }} />
+    </div>
 
-- **`eventBus.emit('event.name', data)`**: Broadcast an event.
-- **`eventBus.on('event.name', handler)`**: Listen for events triggered by other plugins.
+);
+}
+
+````
+
+Every injected extension is wrapped in an `ExtensionErrorBoundary`, ensuring that if a widget throws a runtime error, only that widget displays a fallback card while the rest of the application functions normally.
 
 ---
 
-## 5. Routing and RBAC (Role-Based Access Control)
+## 6. Accessing the Design System
 
-CampusOS uses a strictly enforced Discord-style RBAC system. You should protect your endpoints by requiring the atomic permissions you registered in your `init` block.
+Plugins use the shared design system components without bundling duplicate libraries. The host injects UI primitives via `window.CampusOS.ui`:
+
+```tsx
+import { Button, Card, CardHeader, CardTitle, Badge } from '@campusos/design-system';
+
+export function RecruitmentWidget({ context }) {
+  return (
+    <Card className="p-4 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-sm font-semibold">Active Recruitment</CardTitle>
+        <Badge variant="outline">3 Openings</Badge>
+      </CardHeader>
+      <Button size="sm" className="mt-2 w-full">View Applicants</Button>
+    </Card>
+  );
+}
+````
+
+---
+
+## 7. Routing and RBAC
+
+Endpoints should be protected with granular atomic permissions:
 
 ```javascript
 // routes/recruitment.routes.js
-import express from 'express';
+import { Router } from 'express';
 
 export function registerRecruitmentRoutes(app, controller, requirePermissions) {
-  const router = express.Router({ mergeParams: true });
+  const router = Router();
 
-  // Anyone can apply (Requires Authentication via token, but no specific club permission)
-  router.post('/clubs/:clubId/apply', controller.apply);
+  const viewRecruitment = requirePermissions('recruitment:view');
+  const manageRecruitment = requirePermissions('recruitment:manage');
 
-  // Only users with 'recruitment:manage' in this specific club can view applications
-  router.get(
-    '/clubs/:clubId/applications',
-    requirePermissions('recruitment:manage'),
-    controller.getApplications
-  );
+  router.get('/campaigns', viewRecruitment, controller.getCampaigns);
+  router.post('/campaigns', manageRecruitment, controller.createCampaign);
 
-  app.use('/api/v1', router);
+  app.use('/api/v1/recruitment', router);
 }
 ```
 
-> **Dynamic Contexts:** By default, `requirePermissions` looks for a `:clubId` parameter. If your plugin uses a different context (like `:instituteId`), you must register a **Context Resolver** in your `init` block. See the `rbac-and-security.md` documentation for details.
+---
+
+## 8. Best Practices Checklist
+
+1. **Dependency Inversion (DIP)**: Always inject repositories and eventBus into services; never import mongoose models directly across layers.
+2. **Unified Error Handling**: Validate incoming requests with `Zod` and let the global `errorMiddleware` format 400 Bad Request responses.
+3. **No Direct Module Imports**: Never do `import ... from '../../club/...'`. Use `eventBus` or `registry`.
+4. **Scoped Timers**: Never call global `setInterval()`. Always use `registry.timers.setInterval()` so timers are automatically cleared on plugin unload.
+5. **Implement `destroy()`**: Clean up any database listeners, file streams, or sockets.
 
 ---
 
-## 6. Best Practices
+## 9. Testing Plugins with Vitest
 
-1. **Dependency Inversion Principle (DIP)**: Never use classes that directly import Mongoose models. Instead, use Factory Functions (e.g., `createService(repository)`) and inject repositories. This eliminates circular dependencies and makes unit testing trivial.
-2. **Unified Error Handling & Zod**: Never create your own local `createHttpError` functions. Validate incoming data using `Zod` (the global error handler automatically catches `ZodError`), and throw `AppError` from the core for generic domain errors.
-3. **EventBus Hygiene**: Always namespace your events (e.g., `recruitment:applied`), only emit lightweight IDs (not full objects) to avoid mutation traps, and ensure listeners use `async` to prevent blocking the main Node.js event loop.
-4. **Register everything**: Always register your module and permissions so the Frontend UI can render checkboxes and routes dynamically.
-5. **Database Isolation**: Keep your Mongoose models self-contained inside your plugin's `schema/` folder.
-6. **Use Semver**: Always define your `dependencies` in `plugin.json`.
-
----
-
-## 7. Testing Plugins
-
-Plugins are developed in a monorepo structure and tested using `vitest`. When writing unit tests in your plugin directory, you can leverage the `@campusos/backend-core` path alias to resolve core database utilities.
-
-1. **Create `vitest.config.js`** in your plugin's root:
+Every plugin has its own test suite:
 
 ```javascript
+// plugins/recruitment/vitest.config.js
 import { defineConfig } from 'vitest/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -249,11 +299,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@campusos/backend-core': path.resolve(__dirname, '../../backend/src')
-    }
-  },
   test: {
     globals: true,
     environment: 'node'
@@ -261,78 +306,16 @@ export default defineConfig({
 });
 ```
 
-2. **Write Unit Tests**: Use the alias in your `.test.js` files instead of messy relative paths:
-
-```javascript
-import {
-  connectDB,
-  disconnectDB
-} from '@campusos/backend-core/database/connection.js';
-
-beforeAll(async () => {
-  await connectDB(mongoServer.getUri());
-});
-```
-
-## 8. Validating Your Plugin
-
-Before submitting a PR or distributing your plugin, you can run the CampusOS plugin verification CLI. It inspects your manifest, required architectural layers, backend entrypoint, and guarantees architectural boundary isolation:
+Run tests from the workspace root:
 
 ```bash
-# Validate all plugins in the repository
-pnpm run plugin:validate
+# Test single plugin
+pnpm -C plugins/recruitment test -- --run
 
-# Validate a specific plugin
-pnpm run plugin:validate recruitment
-
-# Validate an external folder or zip package
-pnpm run plugin:validate /path/to/my-plugin
-pnpm run plugin:validate /path/to/my-plugin.zip
+# Run all plugin tests
+pnpm test
 ```
-
-The CLI verifies:
-
-- `plugin.json` schema compliance (kebab-case name, semver version, dependencies).
-- Backend entrypoint `backend/src/index.js` exporting an `init` function.
-- Presence of architectural layers (`routes/`, `service/`, `controller/`, and `repository/`).
-- Architectural boundary isolation (forbids direct relative cross-plugin imports).
 
 ---
 
-## 9. Publishing & Distributing Plugins
-
-CampusOS makes it incredibly easy to share your plugins with other organizations or the open-source community. You don't need to publish to NPM; you can distribute your plugin directly via GitHub!
-
-### Repository Structure
-
-To make your plugin installable via GitHub, your repository must follow the exact structure of a generated plugin. **The `plugin.json` file must be at the root of the repository.**
-
-```text
-my-awesome-plugin/
-"""?"? plugin.json         # MUST be at the root
-"""?"? package.json
-"""?"? backend/
-",   """?"? src/
-"""?"? frontend/
-    """?"? pages/
-```
-
-### Installation
-
-Administrators can install your plugin directly from your GitHub repository using the CLI:
-
-```bash
-# Using shorthand (User/Repo)
-pnpm run plugin:install NITRR-Official/campus-os-recruitment
-
-# Using full URL
-pnpm run plugin:install https://github.com/NITRR-Official/campus-os-recruitment
-```
-
-The CLI will automatically:
-
-1. Clone your repository.
-2. Read the `plugin.json` to determine the plugin name.
-3. Install the files into the `plugins/` directory.
-4. Generate the necessary Next.js App Router wrappers for your frontend pages.
-5. Wire up the `PluginRegistry` so your widgets and routes are instantly available!
+**See Also**: [Inter-Plugin EventBus](./EVENT_BUS.md) · [Backend Architecture](../architecture/BACKEND.md) · [Slot Catalog](../plugins/frontend/SLOT_CATALOG.md)

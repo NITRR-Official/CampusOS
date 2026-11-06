@@ -17,9 +17,9 @@
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint --fix",
     "lint:arch": "depcruise --config .dependency-cruiser.cjs plugins backend",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:serve": "vitepress serve docs",
+    "docs:dev": "pnpm --filter docs run dev",
+    "docs:build": "pnpm --filter docs run build",
+    "docs:start": "pnpm --filter docs run start",
     "plugin:create": "node scripts/plugin.js create",
     "plugin:install": "node scripts/plugin.js install",
     "plugin:uninstall": "node scripts/plugin.js uninstall",
@@ -49,7 +49,14 @@
   "bugs": {
     "url": "https://github.com/NITRR-Official/CampusOS/issues"
   },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3"
+    }
+  },
   "workspaces": [
+    "apps/*",
     "backend",
     "frontend",
     "shared",
@@ -85,7 +92,6 @@
     "lint-staged": "^17.0.5",
     "mongodb-memory-server": "^11.1.0",
     "prettier": "^3.8.3",
-    "vitepress": "^1.6.4",
     "vitest": "^1.6.1"
   }
 }

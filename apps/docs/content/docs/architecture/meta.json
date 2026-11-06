@@ -1,0 +1,11 @@
+{
+  "title": "Architecture",
+  "pages": [
+    "OVERVIEW",
+    "BACKEND",
+    "PLUGIN_SYSTEM",
+    "POLYGLOT_DATABASE",
+    "EVENT_CATALOG",
+    "decisions"
+  ]
+}

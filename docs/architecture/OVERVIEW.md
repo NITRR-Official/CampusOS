@@ -1,129 +1,132 @@
 # Architecture Overview
 
-CampusOS is organized around two key ideas: **everything is a plugin module**, and **modules never depend on each other directly**.
+CampusOS is an extensible, modular operating system designed for higher education campuses. It is architected around two core principles: **every business capability is an isolated plugin**, and **plugins never import each other directly**.
 
-## How It Works
+## System Architecture
 
 ```mermaid
 flowchart TD
-    index["index.js<br/><small>Entry point</small>"] --> connectDB["connectDB()<br/><small>MongoDB via Mongoose</small>"]
-    connectDB --> createApp["createApp()<br/><small>Express + middleware</small>"]
-
-    createApp -.-> Middleware
-    subgraph Middleware
-        direction TB
-        p1[Body parsing]
-        p2[CORS]
-        p3[Logger]
-        p4["Auth (JWT)"]
-        p5["Plugin Loader<br/><small>(Reads plugins.json)</small>"] -.-> scan["Scans /plugins/<br/>and loads active modules"]
-        p6[404 handler]
-        p7[Error handler]
+    subgraph Client ["Frontend Layer (Next.js 16 + React 19)"]
+        UI["Host Dashboard & Navigation Layout"]
+        SlotSystem["ExtensionPoint Slot-Fill Engine<br/><small>(@campus-os/shared)</small>"]
+        RuntimeEnv["Runtime ESM Loader<br/><small>(window.CampusOS.ui)</small>"]
+        UI --- SlotSystem
+        SlotSystem --- RuntimeEnv
     end
 
-    createApp --> startServer["startServer()<br/><small>HTTP on port 4000</small>"]
+    subgraph Gateway ["HTTP & API Routing Layer (Express v5)"]
+        MW["Security Middleware<br/><small>Helmet · CORS · RateLimiter · Auth (JWT)</small>"]
+        BundleRoutes["Plugin Bundle Router<br/><small>/api/v1/plugins/:name/bundle.js</small>"]
+        APIRouter["Dynamic Plugin Route Dispatcher"]
+    end
+
+    subgraph CoreEngine ["Core Engine (backend/src/)"]
+        PL["PluginLoader & Provenance Verifier"]
+        MR["MigrationRunner Engine"]
+        EB["Asynchronous EventBus (Pub/Sub)"]
+        PR["Dynamic Atomic RBAC PermissionRegistry"]
+        SR["Scoped ModuleRegistry (Service Locator)"]
+    end
+
+    subgraph PluginsLayer ["Decoupled Plugins Layer (plugins/)"]
+        P1["Foundation: auth, club, institute, admin, plugin-manager, activity"]
+        P2["Events: event, checkin, forms"]
+        P3["Execution: task, calendar, recruitment"]
+        P4["Operations: vendor, resource, scheduling, budget"]
+    end
+
+    subgraph Storage ["Persistence Layer"]
+        MDB[("MongoDB 7+ with Mongoose")]
+        MIG[("_plugin_migrations Collection")]
+    end
+
+    Client -->|HTTP / REST API| Gateway
+    Gateway --> CoreEngine
+    CoreEngine --> PluginsLayer
+    PluginsLayer --> MDB
+    MR --> MIG
+    EB -.->|Decoupled Events| PluginsLayer
+    SR -.->|Service Resolution| PluginsLayer
 ```
 
 ## System Layers
 
-Modules are grouped into layers. Lower layers don't depend on higher ones.
+Modules are organized into 4 vertical layers. Lower foundation layers provide fundamental entities, while higher layers compose them into event and operations workflows:
 
 ```mermaid
 flowchart TD
-    subgraph L5 ["5. Growth Layer (Not yet built)"]
-        G["Sponsorship · Marketing"]
-    end
     subgraph L4 ["4. Operations Layer"]
-        O["Vendor · Resource · Scheduling · Budget<br/>(plugins/vendor, resource, scheduling, budget)"]
+        O["Vendor · Resource · Scheduling · Budget<br/><small>Procurement, equipment reservation, time slots, expense budgets</small>"]
     end
     subgraph L3 ["3. Execution Layer"]
-        E["Task · Calendar · Recruitment<br/>(plugins/task, calendar, recruitment)"]
+        E["Task · Calendar · Recruitment<br/><small>Kanban task assignments, multi-club calendar sync, interview rounds</small>"]
     end
     subgraph L2 ["2. Event Layer"]
-        Ev["Event · Check-in · Forms<br/>(plugins/event, checkin, forms)"]
+        Ev["Event · Check-in · Forms<br/><small>Event lifecycle, QR attendance verification, dynamic form builder</small>"]
     end
     subgraph L1 ["1. Foundation Layer"]
-        F["Auth · Club · Institute · Admin · Plugin Manager · Activity<br/>(plugins/auth, club, institute, admin, plugin-manager, activity)"]
+        F["Auth · Club · Institute · Admin · Plugin Manager · Activity<br/><small>JWT authentication, RBAC, club approval workflow, audit feeds</small>"]
     end
 
-    L5 --> L4
     L4 --> L3
     L3 --> L2
     L2 --> L1
 ```
 
-### What's in each layer
+### Module Distribution & Storage
 
-| Layer          | Modules                                                            | What it handles                                                                | Storage |
-| -------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------- |
-| **Foundation** | `auth`, `club`, `institute`, `admin`, `plugin-manager`, `activity` | User accounts, JWT auth, RBAC, org structure, system config, activity feeds    | MongoDB |
-| **Event**      | `event`, `checkin`, `forms`                                        | Event CRUD, RSVP/registration, QR check-in, dynamic forms                      | MongoDB |
-| **Execution**  | `task`, `calendar`, `recruitment`                                  | Task assignment, dependencies, deadlines, candidate campaigns                  | MongoDB |
-| **Operations** | `vendor`, `resource`, `scheduling`, `budget`                       | Vendor procurement, resource allocation, time slot scheduling, budget tracking | MongoDB |
-| **Growth**     | _(not yet built)_                                                  | Sponsorship, marketing, analytics                                              | —       |
+| Layer          | Modules                                                            | Core Responsibilities                                                                          | Storage Pattern                                               |
+| -------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **Foundation** | `auth`, `club`, `institute`, `admin`, `plugin-manager`, `activity` | User accounts, sessions, multi-role club approval state machine, audit logs, plugin management | MongoDB (`users`, `clubs`, `plugins`, `activities`)           |
+| **Event**      | `event`, `checkin`, `forms`                                        | Event publishing, RSVP tickets, QR check-in scanning, dynamic surveys and submissions          | MongoDB (`events`, `checkins`, `forms`, `form_responses`)     |
+| **Execution**  | `task`, `calendar`, `recruitment`                                  | Kanban task boards, persistent multi-club calendar sync, applicant tracking system             | MongoDB (`tasks`, `calendar_events`, `recruitment_campaigns`) |
+| **Operations** | `vendor`, `resource`, `scheduling`, `budget`                       | Vendor contracts, inventory tracking, conflict-free room scheduling, expense allocations       | MongoDB (`vendors`, `resources`, `schedules`, `budgets`)      |
 
-- `auth`, `club`, `institute`, and others use MongoDB for storage.
+> **Persistence Guarantee**: All plugins utilize MongoDB with Mongoose repositories. Memory-based mock storage has been completely superseded by isolated in-memory MongoDB replica sets during testing (`mongodb-memory-server`).
 
-> **Important**: MongoDB is required to run the server - `connectDB()` runs at startup and the process exits if it fails. All modules (Auth, Event, Task, Calendar, Club, Institute, Vendor, Resource, Scheduling, Budget) are backed by MongoDB with Mongoose. The legacy in-memory Map storage has been completely deprecated.
+## Core Architecture Principles
 
-## Core Principles
+### 1. Every Feature is an Autonomous Plugin
 
-### 1. Every feature is a plugin
+Feature implementations reside exclusively in `/plugins/<module>/`. The backend core (`backend/src/`) provides server orchestration, security middleware, and lifecycle management, but contains zero feature business logic.
 
-All feature code lives in `/plugins/<module>/`. The backend core (`backend/src/`) only handles:
+### 2. Zero Direct Module-to-Module Imports
 
-- Server lifecycle
-- Middleware pipeline
-- Plugin loading
-- The service registry
+Cross-module imports (e.g. `import ... from '../../club/...'`) are strictly prohibited and enforced via architectural linters. Cross-boundary communication happens through 3 sanctioned channels:
 
-### 2. No module-to-module imports
+- **Service Registry (`registry.getService`)**: For synchronous interfaces and domain capabilities. Direct database access is restricted to verified core plugins; community plugins communicate strictly via business services (ADR-017).
+- **Core EventBus (`eventBus.emit` / `eventBus.on`)**: For decoupled domain events (e.g. `club:created`, `event:published`).
+- **Database Repositories**: Read-only access to shared schema contracts through Mongoose models (core plugins only).
 
-Modules talk to each other through:
+### 3. Automated Database Migrations
 
-- **The service registry** — `registry.getService('requirePermissions')`
-- **The EventBus** — `eventBus.emit('club:deleted', { clubId })` to trigger cross-domain actions like cascade deletes
-- **The database** — Modules can read any collection via Mongoose
+Plugins maintain their own database schema evolution via `backend/migrations/`. Migrations execute deterministically upon startup with checksum tamper-proofing, guaranteeing consistent schema state across local, staging, and production environments.
 
-This rule ensures you can add, remove, or disable modules without breaking others.
+### 4. Slot-Fill Frontend Integration
 
-### 3. Build vertically, not horizontally
+The frontend does not bundle separate single-page applications or iframes. Features register modular React widgets into host **Extension Points** (e.g. `dashboard-top`, `dashboard-stats`, `club-header-actions`), wrapped in `ExtensionErrorBoundary` isolators.
 
-When adding a feature, build it top-to-bottom:
+## Tech Stack Overview
 
-1. Mongoose schema → 2. Service → 3. Controller → 4. Routes → 5. Frontend page
+| Component              | Technology                         | Rationale                                                                      |
+| ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------ |
+| **Backend Engine**     | Node.js 18+ & Express **v5**       | Native async handler support without wrapping; modern ES module architecture.  |
+| **Frontend Framework** | Next.js 16 (App Router) + React 19 | Server-side rendering, React Server Components, and Turbopack compiler.        |
+| **Database & ODM**     | MongoDB 7+ & Mongoose              | Flexible schema modeling, compound indexes, and document atomicity.            |
+| **Shared Contracts**   | `@campus-os/shared` (TS / ESM)     | Shared Zod schemas, extension point definitions, and plugin interfaces.        |
+| **Styling & UI**       | Tailwind CSS v4 & shadcn/ui        | Utility-first styling with accessible, tokenized Radix primitives.             |
+| **State Management**   | Zustand                            | Lightweight, hook-based client store decoupled from component tree.            |
+| **Testing**            | Vitest + `mongodb-memory-server`   | Lightning-fast test runner with isolated in-memory MongoDB replica execution.  |
+| **Package Manager**    | pnpm (Monorepo Workspaces)         | Strict dependency isolation, symlinked node_modules, and fast build pipelines. |
 
-Don't build "all services first, then all controllers." This catches integration issues early.
+## Non-Negotiable Architectural Rules
 
-## Tech Stack
-
-| Component       | Technology                              | Why                                                        |
-| --------------- | --------------------------------------- | ---------------------------------------------------------- |
-| **Backend**     | Node.js 18+ with Express **v5**         | ES module support, async middleware natively               |
-| **Frontend**    | Next.js 16 (App Router) + React 19      | SSR, file-based routing, TypeScript                        |
-| **Database**    | MongoDB + Mongoose                      | Flexible schemas, fast prototyping, embedded documents     |
-| **UI**          | Tailwind CSS v4 + shadcn/ui             | Utility-first styling with pre-built accessible components |
-| **Validation**  | Zod (frontend & API schemas) + Mongoose | Schema validation at API layer and Database layer          |
-| **Auth**        | JWT (HS256)                             | Stateless auth, simple to implement                        |
-| **Package mgr** | pnpm (workspaces)                       | Fast, strict, supports monorepo                            |
-
-## Non-Negotiable Rules
-
-1. **Feature code goes in `/plugins/`** — Not in `backend/src/`
-2. **No direct module imports** — Use the registry or database
-3. **Controllers are thin** — Business logic belongs in services
-4. **Every module exports `init(app, registry, eventBus)`** — That's the plugin contract
-5. **ES modules only** — `import`/`export`, never `require()`
-
-## When You're Unsure
-
-Ask these questions:
-
-1. Can this be built as a self-contained module in `/plugins/`? → If yes, do that.
-2. Does this need to import another module directly? → If yes, use the registry instead.
-3. Is this business logic in a controller? → Move it to a service.
-4. Is this a cross-cutting concern (logging, auth, error handling)? → Put it in `backend/src/middleware/`.
+1. **Manifest Required**: Every plugin directory must contain a valid, Zod-compliant `plugin.json` manifest.
+2. **Standardized Directory Layout**: Plugins must follow the `backend/` and `frontend/` separation.
+3. **Lifecycle Compliance**: Plugins must export `init(app, registry, eventBus, logger)` and handle graceful teardown in `destroy()`.
+4. **No Unhandled Background Leaks**: Recurring intervals and timeouts must be registered via `registry.timers` to avoid memory leaks.
+5. **ES Modules Only**: Strict `import`/`export` syntax across both backend and frontend. `require()` is forbidden.
 
 ---
 
-**See Also**: [Backend Architecture](./BACKEND.md) · [Plugin System](./PLUGIN_SYSTEM.md) · [Architecture Decisions](./decisions/)
+**See Also**: [Backend Architecture](./BACKEND.md) · [Plugin System](./PLUGIN_SYSTEM.md) · [Event Catalog](./EVENT_CATALOG.md) · [Architecture Decision Records (ADRs)](./decisions/README.md)

@@ -1,0 +1,10 @@
+{
+  "title": "Backend Plugin Development",
+  "pages": [
+    "manifest",
+    "services-and-events",
+    "lifecycle-and-hooks",
+    "database-migrations",
+    "rbac-and-security"
+  ]
+}
