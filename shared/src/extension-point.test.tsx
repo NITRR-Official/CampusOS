@@ -194,6 +194,28 @@ describe('ExtensionPoint Micro-UI & Registry System (Issues #125, #132, #133)', 
       expect(adminHtml).not.toContain('Student Widget');
     });
 
+    it('evaluates condition predicate even when context is undefined', () => {
+      const ConditionalWidget = () => <div>Feature Flagged Widget</div>;
+      const AlwaysWidget = () => <div>Always Shown Widget</div>;
+
+      registry.registerWidget(
+        'dashboard-stats',
+        'conditional-plugin',
+        ConditionalWidget,
+        {
+          condition: (ctx) => Boolean(ctx) // Fails when context is undefined
+        }
+      );
+      registry.registerWidget('dashboard-stats', 'always-plugin', AlwaysWidget);
+
+      const html = renderToStaticMarkup(
+        <ExtensionPoint id="dashboard-stats" />
+      );
+
+      expect(html).toContain('Always Shown Widget');
+      expect(html).not.toContain('Feature Flagged Widget');
+    });
+
     it('renders fallback when no widgets match or all conditions fail', () => {
       const html = renderToStaticMarkup(
         <ExtensionPoint

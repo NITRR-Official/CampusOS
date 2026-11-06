@@ -125,8 +125,8 @@ export class ExtensionErrorBoundary extends React.Component<
 export function ExtensionPoint<TSlot extends CampusOSSlotId = CampusOSSlotId>({
   id,
   context,
-  className = 'contents',
-  containerClassName = 'contents',
+  className = '',
+  containerClassName = '',
   activePlugins,
   fallback = null,
   fallbackWidget,
@@ -140,24 +140,22 @@ export function ExtensionPoint<TSlot extends CampusOSSlotId = CampusOSSlotId>({
   }
 
   // Filter by optional condition predicate
-  if (context !== undefined) {
-    widgets = widgets.filter((w) => {
-      if (typeof w.condition === 'function') {
-        try {
-          return Boolean(w.condition(context));
-        } catch (err) {
-          if (typeof console !== 'undefined' && console.error) {
-            console.error(
-              `[CampusOS:ExtensionPoint] Condition evaluation failed for plugin '${w.pluginId}' in slot '${id}':`,
-              err
-            );
-          }
-          return false;
+  widgets = widgets.filter((w) => {
+    if (typeof w.condition === 'function') {
+      try {
+        return Boolean(w.condition(context));
+      } catch (err) {
+        if (typeof console !== 'undefined' && console.error) {
+          console.error(
+            `[CampusOS:ExtensionPoint] Condition evaluation failed for plugin '${w.pluginId}' in slot '${id}':`,
+            err
+          );
         }
+        return false;
       }
-      return true;
-    });
-  }
+    }
+    return true;
+  });
 
   if (widgets.length === 0) {
     return fallback ? <>{fallback}</> : null;

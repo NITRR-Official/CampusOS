@@ -68,6 +68,14 @@ const hostVirtualModulesPlugin = {
       })
     );
 
+    /**
+     * NOTE FOR DEVELOPERS & MAINTAINERS:
+     * Whenever new UI primitives or components are added to `@campusos/design-system`
+     * (e.g., `Accordion`, `Carousel`, `Drawer`, etc.), their exported names must also be
+     * added to the virtual module destructuring list below and registered in
+     * `frontend/lib/plugins/runtime-env.ts` (`window.CampusOS.ui`) so plugin ESM bundles
+     * can cleanly resolve and import them at runtime without packaging duplicates.
+     */
     build.onLoad({ filter: /.*/, namespace: 'campusos-ui-virtual' }, () => ({
       contents: `
         const runtime = (typeof window !== 'undefined' && (window.CampusOS || window.__CampusOS_Runtime__)) || {};
