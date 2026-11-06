@@ -14,6 +14,18 @@ export class PluginContractError extends Error {
 }
 
 /**
+ * Thrown when an automated database migration fails during plugin initialization or rollback.
+ */
+export class PluginMigrationError extends PluginContractError {
+  constructor(message, pluginName, migrationName, cause) {
+    super(message, pluginName, { migrationName, cause: cause?.message });
+    this.name = 'PluginMigrationError';
+    this.migrationName = migrationName;
+    this.cause = cause;
+  }
+}
+
+/**
  * Custom error thrown when a plugin violates capability or security sandbox boundaries.
  */
 export class PluginSecurityError extends PluginContractError {
@@ -153,6 +165,52 @@ export function validatePluginManifest(rawManifest, folderName) {
   return manifest;
 }
 
+/**
+ * Validates a plugin module's exported lifecycle functions (init, destroy/teardown).
+ *
+ * @param {object} loadedModule - Evaluated ES module or CommonJS export
+ * @param {string} [pluginName='unknown'] - Plugin identifier
+ * @returns {{ init: Function, destroy?: Function }} Validated lifecycle functions
+ */
+export function validatePluginModule(loadedModule, pluginName = 'unknown') {
+  if (
+    !loadedModule ||
+    (typeof loadedModule !== 'object' && typeof loadedModule !== 'function')
+  ) {
+    throw new PluginContractError(
+      `Plugin '${pluginName}' contract violation: Module must be an object or function`,
+      pluginName
+    );
+  }
+
+  const init =
+    typeof loadedModule === 'function'
+      ? loadedModule
+      : loadedModule.init || loadedModule.default?.init || loadedModule.default;
+
+  if (typeof init !== 'function') {
+    throw new PluginContractError(
+      `Plugin '${pluginName}' contract violation: Module must export an 'init' function or default function`,
+      pluginName
+    );
+  }
+
+  const destroy =
+    loadedModule.destroy ||
+    loadedModule.teardown ||
+    loadedModule.default?.destroy ||
+    loadedModule.default?.teardown;
+
+  if (destroy !== undefined && typeof destroy !== 'function') {
+    throw new PluginContractError(
+      `Plugin '${pluginName}' contract violation: 'destroy' / 'teardown' must be a function if exported`,
+      pluginName
+    );
+  }
+
+  return { init, destroy };
+}
+
 export default {
   PluginContractError,
   PluginSecurityError,
@@ -160,5 +218,6 @@ export default {
   InvalidTierClaimError,
   PluginManifestSchema,
   PluginDependenciesSchema,
-  validatePluginManifest
+  validatePluginManifest,
+  validatePluginModule
 };

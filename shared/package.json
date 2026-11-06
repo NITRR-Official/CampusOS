@@ -14,6 +14,7 @@
     "./auth-provider": "./src/auth-provider.tsx",
     "./plugin-registry": "./src/plugin-registry.ts",
     "./extension-point": "./src/extension-point.tsx",
+    "./slot-catalog": "./src/slot-catalog.ts",
     "./request-context": "./src/request-context.js",
     "./plugin-contract": "./src/plugin-contract.js"
   },

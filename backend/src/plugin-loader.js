@@ -10,6 +10,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import semver from 'semver';
 import {
   validatePluginManifest,
+  validatePluginModule,
   PluginContractError
 } from '@campus-os/shared/plugin-contract';
 import { Plugin } from './database/schemas/index.js';
@@ -21,9 +22,13 @@ import {
 } from './core/plugin-provenance.js';
 import { createScopedRegistry } from './core/sandbox-registry.js';
 import { createScopedEventBus } from './core/sandbox-event-bus.js';
+import { runPendingMigrations } from './database/migration-runner.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// In-memory store of currently loaded and active plugins (Issue #124)
+const activePlugins = new Map();
 
 export async function loadPlugins(app, registry, options = {}) {
   const isProd =
@@ -339,25 +344,48 @@ export async function loadPlugins(app, registry, options = {}) {
         console.log(
           `🔒 Sandboxed registry and eventBus initialized for: ${plugin.name}`
         );
+      } else {
+        effectiveRegistry = createScopedRegistry(plugin.manifest, registry, {
+          grantedCapabilities: ['*'],
+          isCore: true
+        });
+        effectiveEventBus = createScopedEventBus(plugin.manifest, eventBus, {
+          grantedCapabilities: ['*'],
+          isCore: true
+        });
       }
 
       const loadedModule = await import(pathToFileURL(moduleEntryPath).href);
-      const init = loadedModule.init || loadedModule.default;
-
-      if (typeof init !== 'function') {
-        throw new PluginContractError(
-          `Plugin '${plugin.name}' contract violation: Module must export an 'init' function or default function`,
-          plugin.name,
-          { moduleEntryPath }
-        );
-      }
+      const { init } = validatePluginModule(loadedModule, plugin.name);
 
       const pluginLogger = logger.child({ plugin: plugin.name });
+
+      // Run pending database migrations prior to invoking init (Issue #126)
+      await runPendingMigrations(plugin.name, plugin.modulePath, {
+        logger: pluginLogger,
+        version: plugin.version,
+        registry: effectiveRegistry,
+        storage: options.migrationStorage
+      });
+
       await init(app, effectiveRegistry, effectiveEventBus, pluginLogger);
       registry.registerPluginMetadata(plugin.name, {
         ...plugin.manifest,
         effectiveTier: verifiedTier
       });
+
+      activePlugins.set(plugin.name, {
+        name: plugin.name,
+        manifest: plugin.manifest,
+        module: loadedModule,
+        effectiveRegistry,
+        effectiveEventBus,
+        pluginLogger,
+        tier: verifiedTier,
+        app,
+        dependencies: plugin.dependencies || plugin.manifest.dependencies || {}
+      });
+
       console.log(
         `✓ Loaded plugin: ${plugin.name} (v${plugin.version}) [${verifiedTier}]`
       );
@@ -370,7 +398,164 @@ export async function loadPlugins(app, registry, options = {}) {
     }
   }
 
+  // Register core:plugin_loader service in registry for runtime lifecycle management
+  if (
+    typeof registry?.registerService === 'function' &&
+    (!registry.getService || !registry.getService('core:plugin_loader', false))
+  ) {
+    registry.registerService('core:plugin_loader', {
+      unloadPlugin,
+      getActivePlugins,
+      isPluginActive
+    });
+  }
+  if (registry) {
+    registry.unloadPlugin = unloadPlugin;
+  }
+
   console.log('\n✓ Plugin loading complete\n');
+}
+
+/**
+ * Unloads an active plugin gracefully by invoking its destroy() lifecycle hook,
+ * unbinding its event listeners, clearing timers, and pruning registered services (Issue #124).
+ *
+ * @param {string} pluginName - Name of the plugin to unload
+ * @param {object} [options]
+ * @param {number} [options.timeout=5000] - Max time in ms to wait for destroy() before timing out
+ * @param {boolean} [options.force=false] - If true, bypasses dependency checks
+ * @returns {Promise<{ success: boolean, pluginName: string, message?: string }>}
+ */
+export async function unloadPlugin(pluginName, options = {}) {
+  const timeoutMs = options.timeout ?? 5000;
+  const force = options.force === true;
+
+  const pluginRecord = activePlugins.get(pluginName);
+  if (!pluginRecord) {
+    return {
+      success: true,
+      pluginName,
+      message: `Plugin '${pluginName}' was not loaded or already unloaded`
+    };
+  }
+
+  // 1. Dependency check: ensure no other active plugin depends on this plugin
+  if (!force) {
+    for (const [otherName, otherRecord] of activePlugins.entries()) {
+      if (otherName === pluginName) continue;
+      const deps =
+        otherRecord.manifest?.dependencies || otherRecord.dependencies || {};
+      if (deps[pluginName]) {
+        throw new PluginContractError(
+          `Cannot unload plugin '${pluginName}': active plugin '${otherName}' depends on it. Disable '${otherName}' first or use force: true.`,
+          pluginName,
+          { dependentPlugin: otherName }
+        );
+      }
+    }
+  }
+
+  // 2. Invoke destroy / teardown lifecycle hook if exported
+  const destroyFn =
+    pluginRecord.module.destroy ||
+    pluginRecord.module.teardown ||
+    pluginRecord.module.default?.destroy ||
+    pluginRecord.module.default?.teardown;
+
+  if (typeof destroyFn === 'function') {
+    try {
+      let timerId;
+      const timeoutPromise = new Promise((_, reject) => {
+        timerId = setTimeout(() => {
+          reject(
+            new Error(
+              `Plugin '${pluginName}' destroy() timed out after ${timeoutMs}ms`
+            )
+          );
+        }, timeoutMs);
+      });
+
+      try {
+        await Promise.race([
+          Promise.resolve(
+            destroyFn(
+              pluginRecord.app,
+              pluginRecord.effectiveRegistry,
+              pluginRecord.effectiveEventBus,
+              pluginRecord.pluginLogger
+            )
+          ),
+          timeoutPromise
+        ]);
+      } finally {
+        clearTimeout(timerId);
+      }
+    } catch (destroyError) {
+      console.error(
+        `⚠️ Error during destroy() of plugin '${pluginName}':`,
+        destroyError.message
+      );
+      // Proceed to cleanup remaining resources so memory is not leaked even on error
+    }
+  }
+
+  // 3. Clean up event bus listeners
+  try {
+    pluginRecord.effectiveEventBus?.cleanup?.();
+  } catch (busErr) {
+    console.error(
+      `⚠️ Failed to cleanup event bus for '${pluginName}':`,
+      busErr.message
+    );
+  }
+
+  // 4. Clean up registry services, permissions, routes, and timers
+  try {
+    pluginRecord.effectiveRegistry?.cleanup?.();
+  } catch (regErr) {
+    console.error(
+      `⚠️ Failed to cleanup registry for '${pluginName}':`,
+      regErr.message
+    );
+  }
+
+  // 5. Delete from active plugins map
+  activePlugins.delete(pluginName);
+
+  // 6. Emit plugin:unloaded event on core EventBus
+  try {
+    if (typeof eventBus.emitAsync === 'function') {
+      await eventBus.emitAsync('plugin:unloaded', {
+        pluginName,
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      eventBus.emit('plugin:unloaded', {
+        pluginName,
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (emitErr) {
+    console.error(
+      `⚠️ Error emitting 'plugin:unloaded' for '${pluginName}':`,
+      emitErr.message
+    );
+  }
+
+  console.log(`✓ Gracefully unloaded plugin: ${pluginName}`);
+  return { success: true, pluginName };
+}
+
+export function getActivePlugins() {
+  return new Map(activePlugins);
+}
+
+export function isPluginActive(pluginName) {
+  return activePlugins.has(pluginName);
+}
+
+export function resetActivePlugins() {
+  activePlugins.clear();
 }
 
 export default loadPlugins;

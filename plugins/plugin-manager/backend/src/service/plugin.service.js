@@ -40,6 +40,26 @@ export class PluginService {
    */
   async togglePlugin(pluginName, enabled) {
     try {
+      if (!enabled) {
+        // Gracefully unload plugin runtime resources if active (Issue #124)
+        try {
+          const loaderService = globalRegistry?.getService(
+            'core:plugin_loader',
+            false
+          );
+          if (loaderService?.unloadPlugin) {
+            await loaderService.unloadPlugin(pluginName);
+          } else if (typeof globalRegistry?.unloadPlugin === 'function') {
+            await globalRegistry.unloadPlugin(pluginName);
+          }
+        } catch (unloadError) {
+          console.warn(
+            `[PluginService] Notice during teardown of '${pluginName}':`,
+            unloadError.message
+          );
+        }
+      }
+
       const result = await Plugin.findOneAndUpdate(
         { name: pluginName },
         { enabled },

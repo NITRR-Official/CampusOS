@@ -70,4 +70,29 @@ export class PermissionRegistry {
   has(id) {
     return this.#permissions.has(id);
   }
+
+  /**
+   * Unregister a permission by id
+   * @param {string} id
+   * @returns {boolean}
+   */
+  unregister(id) {
+    return this.#permissions.delete(id);
+  }
+
+  /**
+   * Unregister all permissions belonging to a specific module
+   * @param {string} module
+   * @returns {number} Count of removed permissions
+   */
+  unregisterByModule(module) {
+    let deletedCount = 0;
+    for (const [id, perm] of this.#permissions.entries()) {
+      if (perm.module === module) {
+        this.#permissions.delete(id);
+        deletedCount++;
+      }
+    }
+    return deletedCount;
+  }
 }

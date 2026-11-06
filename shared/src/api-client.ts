@@ -46,7 +46,8 @@ async function request<T>(
 
   const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
     ...init,
-    headers
+    headers,
+    signal: init.signal ?? AbortSignal.timeout(10000)
   });
 
   // Safe parsing

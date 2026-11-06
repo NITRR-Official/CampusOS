@@ -14,11 +14,15 @@ Whether you are building a Recruitment system, an Alumni Network, or a custom in
 ### 2. Backend Development (Node.js/Express)
 
 - [The Plugin Manifest (plugin.json)](./backend/manifest.md)
+- [Lifecycle & Teardown Hooks](./backend/lifecycle-and-hooks.md)
+- [Database Schema Migrations](./backend/database-migrations.md)
 - [Services & EventBus](./backend/services-and-events.md)
 - [RBAC & Security Guardrails](./backend/rbac-and-security.md)
 
 ### 3. Frontend Development (React/Next.js)
 
+- [Runtime Environment & Design System](./frontend/runtime-environment.md)
+- [Extension Slot Catalog & Context Specification](./frontend/SLOT_CATALOG.md)
 - [UI Integration & Widgets](./frontend/ui-integration.md)
 - [API Client & State](./frontend/api-client.md)
 

@@ -5,7 +5,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { apiClient } from '@campus-os/shared/api-client';
 import { Skeleton, useToast, Badge } from '@campusos/design-system';
-import { Search, Plus, Store } from 'lucide-react';
+import { Search, Store } from 'lucide-react';
 
 interface PluginSettingsConfig {
   type: string;

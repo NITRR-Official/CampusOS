@@ -53,6 +53,50 @@ describe('Standalone Plugin Frontend Bundler (Issue #118)', () => {
     expect(bundleContent).toContain('export {');
   });
 
+  it('shims @campusos/design-system and @campus-os/shared to host runtime without bundling dependencies (Issue #131)', async () => {
+    const pluginDir = path.join(tempDir, 'ui-plugin');
+    const frontendDir = path.join(pluginDir, 'frontend');
+    fs.mkdirSync(frontendDir, { recursive: true });
+
+    fs.writeFileSync(
+      path.join(frontendDir, 'index.tsx'),
+      `
+      import React from 'react';
+      import { Button, Card } from '@campusos/design-system';
+      import { registry, ExtensionPoint } from '@campus-os/shared';
+
+      export default function Widget() {
+        return (
+          <Card>
+            <Button>Click me</Button>
+          </Card>
+        );
+      }
+      `
+    );
+
+    const result = await buildPluginFrontend('ui-plugin', {
+      pluginsDir: tempDir
+    });
+
+    expect(fs.existsSync(result.outfile)).toBe(true);
+    const bundleContent = fs.readFileSync(result.outfile, 'utf8');
+
+    // Should NOT have bare specifier imports for design-system or shared
+    expect(bundleContent).not.toMatch(
+      /from\s+['"]@campusos\/design-system['"]/
+    );
+    expect(bundleContent).not.toMatch(/from\s+['"]@campus-os\/shared['"]/);
+
+    // Should resolve to host runtime shims
+    expect(bundleContent).toContain('window.CampusOS');
+    expect(bundleContent).toContain('window.__CampusOS_Runtime__');
+    expect(bundleContent).toContain('window.__CampusOS_DesignSystem__');
+
+    // Bundle should remain lightweight (typically < 15KB)
+    expect(result.sizeBytes).toBeLessThan(15000);
+  });
+
   it('throws an error if plugin directory does not exist', async () => {
     await expect(
       buildPluginFrontend('non-existent', { pluginsDir: tempDir })

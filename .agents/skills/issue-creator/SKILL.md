@@ -33,7 +33,14 @@ Every issue generated MUST include the following metadata fields explicitly in i
 Select accurate labels from this **exact allowed list ONLY**:
 api, backend, blocked, calendar, cd, ci, ci-cd, contribution-drive, database, deployment, design, devops, difficulty:critical, difficulty:easy, difficulty:hard, difficulty:medium, docs, duplicate, enhancement, exceptional, figma, frontend, good first issue, help wanted, in-progress, invalid, needs-review, p0-critical, p1-high, p2-medium, p3-low, question, server, type:bug, type:docs, type:feature, type:infra, type:security, ui, ux, web, wontfix, workflow
 
-### Step 4: Generate Issue Content
+### Step 4: Identify Required Documentation Updates (Mandatory)
+
+Every issue (especially features, architecture refactors, or new conventions) MUST include a explicit `## 📚 Required Documentation Updates` section identifying:
+- Guides or tutorials to create/update under `docs/` (e.g. `docs/plugins/`, `docs/guides/`, `docs/api/`).
+- Architecture Decision Records (ADRs) to author under `docs/architecture/decisions/` if architectural patterns or boundaries are altered.
+- Any updates needed in `README.md` or navigation indices.
+
+### Step 5: Generate Issue Content
 
 Generate the issue in Markdown format.
 

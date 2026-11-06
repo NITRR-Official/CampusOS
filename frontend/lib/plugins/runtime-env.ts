@@ -10,12 +10,14 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { registry } from '@campus-os/shared/plugin-registry';
 import { ExtensionPoint } from '@campus-os/shared/extension-point';
+import * as DesignSystem from '@campusos/design-system';
 
 export interface CampusOSRuntime {
   React: typeof React;
   ReactDOM: typeof ReactDOM;
   registry: typeof registry;
   ExtensionPoint: typeof ExtensionPoint;
+  ui: typeof DesignSystem;
   version: string;
   loadedPlugins: Set<string>;
 }
@@ -26,6 +28,7 @@ declare global {
     ReactDOM?: typeof ReactDOM;
     CampusOS?: CampusOSRuntime;
     __CampusOS_Runtime__?: CampusOSRuntime;
+    __CampusOS_DesignSystem__?: typeof DesignSystem;
   }
 }
 
@@ -39,6 +42,7 @@ export function setupPluginRuntime(): CampusOSRuntime {
       ReactDOM,
       registry,
       ExtensionPoint,
+      ui: DesignSystem,
       version: '1.0.0',
       loadedPlugins: new Set()
     };
@@ -50,6 +54,7 @@ export function setupPluginRuntime(): CampusOSRuntime {
       ReactDOM,
       registry,
       ExtensionPoint,
+      ui: DesignSystem,
       version: '1.0.0',
       loadedPlugins: new Set()
     };
@@ -58,6 +63,13 @@ export function setupPluginRuntime(): CampusOSRuntime {
     window.ReactDOM = ReactDOM;
     window.CampusOS = runtime;
     window.__CampusOS_Runtime__ = runtime;
+    window.__CampusOS_DesignSystem__ = DesignSystem;
+  } else if (!window.__CampusOS_Runtime__.ui) {
+    window.__CampusOS_Runtime__.ui = DesignSystem;
+    if (window.CampusOS) {
+      window.CampusOS.ui = DesignSystem;
+    }
+    window.__CampusOS_DesignSystem__ = DesignSystem;
   }
 
   return window.__CampusOS_Runtime__;

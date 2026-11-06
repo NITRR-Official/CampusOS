@@ -53,6 +53,86 @@ function findFrontendEntrypoint(pluginDir) {
 }
 
 /**
+ * esbuild plugin to shim host-provided shared modules (@campusos/design-system and @campus-os/shared)
+ * to window.__CampusOS_Runtime__ without bundling duplicate dependencies or emitting unresolvable bare specifiers (Issue #131).
+ */
+const hostVirtualModulesPlugin = {
+  name: 'campusos-host-virtual-modules',
+  setup(build) {
+    // Intercept @campusos/design-system and its subpaths
+    build.onResolve(
+      { filter: /^@campusos\/design-system(\/.*)?$/ },
+      (args) => ({
+        path: args.path,
+        namespace: 'campusos-ui-virtual'
+      })
+    );
+
+    /**
+     * NOTE FOR DEVELOPERS & MAINTAINERS:
+     * Whenever new UI primitives or components are added to `@campusos/design-system`
+     * (e.g., `Accordion`, `Carousel`, `Drawer`, etc.), their exported names must also be
+     * added to the virtual module destructuring list below and registered in
+     * `frontend/lib/plugins/runtime-env.ts` (`window.CampusOS.ui`) so plugin ESM bundles
+     * can cleanly resolve and import them at runtime without packaging duplicates.
+     */
+    build.onLoad({ filter: /.*/, namespace: 'campusos-ui-virtual' }, () => ({
+      contents: `
+        const runtime = (typeof window !== 'undefined' && (window.CampusOS || window.__CampusOS_Runtime__)) || {};
+        const ui = runtime.ui || (typeof window !== 'undefined' && window.__CampusOS_DesignSystem__) || {};
+        
+        export const {
+          Avatar, AvatarImage, AvatarFallback,
+          Badge, badgeVariants,
+          Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis,
+          Button, buttonVariants,
+          Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent,
+          Checkbox,
+          Dialog, DialogPortal, DialogOverlay, DialogTrigger, DialogClose, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription,
+          DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuGroup, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuRadioGroup,
+          Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField, useFormField,
+          Input,
+          Label,
+          ScrollArea, ScrollBar,
+          Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton,
+          Separator,
+          Sheet, SheetPortal, SheetOverlay, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription,
+          Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarInset, SidebarMenu, SidebarMenuAction, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarProvider, SidebarRail, SidebarSeparator, SidebarTrigger, useSidebar,
+          Skeleton,
+          Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption,
+          Textarea,
+          Toast, ToastProvider, ToastViewport, ToastTitle, ToastDescription, ToastClose, ToastAction,
+          Tooltip, TooltipTrigger, TooltipContent, TooltipProvider,
+          cn, useToast, toast
+        } = ui;
+        
+        export default ui;
+      `,
+      loader: 'js'
+    }));
+
+    // Intercept @campus-os/shared
+    build.onResolve({ filter: /^@campus-os\/shared(\/.*)?$/ }, (args) => ({
+      path: args.path,
+      namespace: 'campusos-shared-virtual'
+    }));
+
+    build.onLoad(
+      { filter: /.*/, namespace: 'campusos-shared-virtual' },
+      () => ({
+        contents: `
+        const runtime = (typeof window !== 'undefined' && (window.CampusOS || window.__CampusOS_Runtime__)) || {};
+        export const registry = runtime.registry || (typeof window !== 'undefined' && window.CampusOS?.registry);
+        export const ExtensionPoint = runtime.ExtensionPoint || (typeof window !== 'undefined' && window.CampusOS?.ExtensionPoint);
+        export default { registry, ExtensionPoint };
+      `,
+        loader: 'js'
+      })
+    );
+  }
+};
+
+/**
  * Builds a standalone frontend ESM bundle for a specified plugin.
  *
  * @param {string} pluginName - Name of plugin in /plugins/
@@ -90,6 +170,7 @@ export async function buildPluginFrontend(pluginName, options = {}) {
     platform: 'browser',
     target: ['es2022'],
     jsx: 'automatic',
+    plugins: [hostVirtualModulesPlugin],
     loader: {
       '.ts': 'ts',
       '.tsx': 'tsx',
@@ -97,14 +178,7 @@ export async function buildPluginFrontend(pluginName, options = {}) {
       '.jsx': 'jsx',
       '.css': 'css'
     },
-    external: [
-      'react',
-      'react-dom',
-      'react/jsx-runtime',
-      '@campus-os/shared',
-      '@campus-os/shared/*',
-      '@campusos/design-system'
-    ],
+    external: ['react', 'react-dom', 'react/jsx-runtime'],
     banner: {
       js: 'const React = window.React || (window.__CampusOS_Runtime__ && window.__CampusOS_Runtime__.React); const ReactDOM = window.ReactDOM || (window.__CampusOS_Runtime__ && window.__CampusOS_Runtime__.ReactDOM);'
     },

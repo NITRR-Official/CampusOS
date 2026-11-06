@@ -15,10 +15,24 @@ import {
  */
 export function createScopedRegistry(manifest, globalRegistry, options = {}) {
   const pluginName = manifest?.name || 'unknown';
+  const isCore = options.isCore === true;
   const grantedCaps = new Set(
     options.grantedCapabilities || manifest?.capabilities || []
   );
+  if (isCore) {
+    grantedCaps.add('*');
+  }
   const declaredResolvers = new Set(manifest?.consumes?.resolvers || []);
+
+  // Track all resources registered by this scoped registry for graceful teardown (Issue #124)
+  const registeredServices = new Set();
+  const registeredResolvers = new Set();
+  const registeredContextResolvers = new Set();
+  const registeredStatProviders = new Set();
+  const registeredSettingsConfigs = new Set();
+  const registeredPermissions = new Set();
+  const registeredPublicRoutes = new Set();
+  const activeTimers = new Set();
 
   const FORBIDDEN_SERVICES = new Set([
     'db:mongo',
@@ -33,13 +47,14 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
   ]);
 
   function isForbiddenService(serviceName) {
+    if (isCore) return false;
     if (FORBIDDEN_SERVICES.has(serviceName)) return true;
     if (serviceName.startsWith('db:')) return true;
     return false;
   }
 
   function hasServiceCapability(serviceName) {
-    if (grantedCaps.has('*')) return true;
+    if (isCore || grantedCaps.has('*')) return true;
     if (grantedCaps.has(serviceName)) return true;
 
     for (const cap of grantedCaps) {
@@ -60,17 +75,61 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
     return false;
   }
 
+  // Scoped timer utilities automatically tracked and cleared on teardown
+  const timers = {
+    setInterval: (callback, ms, ...args) => {
+      const timer = setInterval(callback, ms, ...args);
+      activeTimers.add(timer);
+      return timer;
+    },
+    clearInterval: (timer) => {
+      clearInterval(timer);
+      activeTimers.delete(timer);
+    },
+    setTimeout: (callback, ms, ...args) => {
+      const timer = setTimeout(
+        (...cbArgs) => {
+          activeTimers.delete(timer);
+          callback(...cbArgs);
+        },
+        ms,
+        ...args
+      );
+      activeTimers.add(timer);
+      return timer;
+    },
+    clearTimeout: (timer) => {
+      clearTimeout(timer);
+      activeTimers.delete(timer);
+    },
+    clearAll: () => {
+      for (const t of activeTimers) {
+        clearInterval(t);
+        clearTimeout(t);
+      }
+      activeTimers.clear();
+    },
+    get count() {
+      return activeTimers.size;
+    }
+  };
+
   // Scoped permissions proxy to prevent permission squatting
   const scopedPermissions = {
     register: (permObj) => {
-      const permName = permObj?.name || '';
-      if (!permName.startsWith(`${pluginName}:`) && permName !== pluginName) {
+      const permName = permObj?.name || permObj?.id || '';
+      if (
+        !isCore &&
+        !permName.startsWith(`${pluginName}:`) &&
+        permName !== pluginName
+      ) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register permission '${permName}'. Permission name must be prefixed with '${pluginName}:'.`,
           pluginName,
           { permission: permName }
         );
       }
+      registeredPermissions.add(permObj.id || permObj.name);
       return globalRegistry.permissions.register(permObj);
     },
     registerAll: (permArray) => {
@@ -87,6 +146,10 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
   const scopedRegistry = {
     get permissions() {
       return scopedPermissions;
+    },
+
+    get timers() {
+      return timers;
     },
 
     getService: (name, throwOnMissing = true) => {
@@ -114,18 +177,24 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
     },
 
     registerService: (name, service) => {
-      if (!name.startsWith(`${pluginName}:`) && name !== pluginName) {
+      if (
+        !isCore &&
+        !name.startsWith(`${pluginName}:`) &&
+        name !== pluginName
+      ) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register service '${name}'. Community plugins may only register services prefixed with '${pluginName}:'.`,
           pluginName,
           { attemptedName: name }
         );
       }
+      registeredServices.add(name);
       return globalRegistry.registerService(name, service);
     },
 
     getResolver: (name, throwOnMissing = true) => {
       if (
+        !isCore &&
         !grantedCaps.has('*') &&
         !declaredResolvers.has('*') &&
         !declaredResolvers.has(name)
@@ -140,19 +209,25 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
     },
 
     registerResolver: (name, resolver) => {
-      if (!name.startsWith(`${pluginName}:`) && name !== pluginName) {
+      if (
+        !isCore &&
+        !name.startsWith(`${pluginName}:`) &&
+        name !== pluginName
+      ) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register resolver '${name}'. Community plugins may only register resolvers prefixed with '${pluginName}:'.`,
           pluginName,
           { attemptedName: name }
         );
       }
+      registeredResolvers.add(name);
       return globalRegistry.registerResolver(name, resolver);
     },
 
     registerContextResolver: (routePrefix, resolverFunc) => {
       const allowedNamespace = `/api/v1/${pluginName}`;
       if (
+        !isCore &&
         !routePrefix.startsWith(allowedNamespace) &&
         !routePrefix.startsWith(`/api/${pluginName}`)
       ) {
@@ -162,40 +237,44 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
           { routePrefix, allowedNamespace }
         );
       }
+      registeredContextResolvers.add(routePrefix);
       return globalRegistry.registerContextResolver(routePrefix, resolverFunc);
     },
 
     registerPublicRoute: (regex, method = null) => {
       const regexStr = regex.toString();
-      if (!regexStr.includes(pluginName)) {
+      if (!isCore && !regexStr.includes(pluginName)) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register public route '${regexStr}'. Regex must be scoped to plugin path.`,
           pluginName,
           { regex: regexStr }
         );
       }
+      registeredPublicRoutes.add(regex);
       return globalRegistry.registerPublicRoute(regex, method);
     },
 
     registerStatProvider: (pluginId, fetcherFunction) => {
-      if (pluginId !== pluginName) {
+      if (!isCore && pluginId !== pluginName) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register stat provider for '${pluginId}'.`,
           pluginName,
           { pluginId }
         );
       }
+      registeredStatProviders.add(pluginId);
       return globalRegistry.registerStatProvider(pluginId, fetcherFunction);
     },
 
     registerSettingsConfig: (pluginId, schema) => {
-      if (pluginId !== pluginName) {
+      if (!isCore && pluginId !== pluginName) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register settings config for '${pluginId}'.`,
           pluginName,
           { pluginId }
         );
       }
+      registeredSettingsConfigs.add(pluginId);
       return globalRegistry.registerSettingsConfig(pluginId, schema);
     },
 
@@ -214,7 +293,7 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
       globalRegistry.getAuthenticator(name, throwOnMissing),
 
     registerPluginMetadata: (pluginId, metadata) => {
-      if (pluginId !== pluginName) {
+      if (!isCore && pluginId !== pluginName) {
         throw new PluginSecurityError(
           `Security error: Plugin '${pluginName}' cannot register metadata for '${pluginId}'.`,
           pluginName,
@@ -222,6 +301,52 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
         );
       }
       return globalRegistry.registerPluginMetadata(pluginId, metadata);
+    },
+
+    /**
+     * Gracefully cleans up all resources registered through this scoped registry (Issue #124).
+     */
+    cleanup: () => {
+      timers.clearAll();
+
+      for (const sName of registeredServices) {
+        globalRegistry.unregisterService?.(sName);
+      }
+      registeredServices.clear();
+
+      for (const rName of registeredResolvers) {
+        globalRegistry.unregisterResolver?.(rName);
+      }
+      registeredResolvers.clear();
+
+      for (const prefix of registeredContextResolvers) {
+        globalRegistry.unregisterContextResolver?.(prefix);
+      }
+      registeredContextResolvers.clear();
+
+      for (const id of registeredStatProviders) {
+        globalRegistry.unregisterStatProvider?.(id);
+      }
+      registeredStatProviders.clear();
+
+      for (const id of registeredSettingsConfigs) {
+        globalRegistry.unregisterSettingsConfig?.(id);
+      }
+      registeredSettingsConfigs.clear();
+
+      for (const permId of registeredPermissions) {
+        globalRegistry.permissions?.unregister?.(permId);
+      }
+      registeredPermissions.clear();
+
+      for (const regex of registeredPublicRoutes) {
+        globalRegistry.unregisterPublicRoute?.(
+          (r) => r.regex?.source === regex.source
+        );
+      }
+      registeredPublicRoutes.clear();
+
+      globalRegistry.unregisterPluginMetadata?.(pluginName);
     }
   };
 
