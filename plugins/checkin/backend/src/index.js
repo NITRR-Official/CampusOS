@@ -41,6 +41,13 @@ export async function init(app, registry, eventBus) {
     });
   }
 
+  // Public/self route to scan attendance QR codes
+  registry.registerPublicRoute(/^\/api\/v1\/checkins\/scan$/, 'POST');
+  registry.registerPublicRoute(
+    /^\/api\/v1\/events\/[^/]+\/checkins\/status\/[^/]+$/,
+    'GET'
+  );
+
   if (eventBus) {
     eventBus.on('event:deleted', async (payload) => {
       try {
@@ -65,6 +72,22 @@ export async function init(app, registry, eventBus) {
           '[CheckIn Listener] Error handling user:deleted event:',
           err
         );
+      }
+    });
+
+    eventBus.on('event:registered', async (payload) => {
+      try {
+        if (payload && payload.eventId && payload.userId) {
+          await checkInService.createCheckIn(payload.eventId, payload.userId);
+        }
+      } catch (err) {
+        // If check-in record already exists, duplicate key error (code 11000) can be safely ignored
+        if (err?.code !== 11000) {
+          console.error(
+            '[CheckIn Listener] Error handling event:registered event:',
+            err
+          );
+        }
       }
     });
   }

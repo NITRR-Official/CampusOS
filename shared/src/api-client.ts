@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ApiError } from './api-errors.ts';
-import { readAccessToken } from './auth-session.ts';
+import { readAccessToken, clearAuthSession } from './auth-session.ts';
 import { z } from 'zod';
 
 const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -54,6 +54,9 @@ async function request<T>(
   const json = await response.json().catch(() => null);
 
   if (!response.ok) {
+    if (response.status === 401 && typeof window !== 'undefined') {
+      clearAuthSession();
+    }
     throw new ApiError(
       json?.message || json?.error || 'Request failed',
       response.status,

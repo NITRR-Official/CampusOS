@@ -11,14 +11,14 @@ export function registerCheckInRoutes(
   // List check-ins for event (admin/coordinator only)
   app.get(
     '/api/v1/events/:eventId/checkins',
-    requirePermissions('checkin:manage'),
+    requirePermissions('checkin:manage', 'event:manage'),
     checkInController.listCheckIns
   );
 
   // Create check-in record (admin/coordinator only)
   app.post(
     '/api/v1/events/:eventId/checkins',
-    requirePermissions('checkin:manage'),
+    requirePermissions('checkin:manage', 'event:manage'),
     checkInController.createCheckIn
   );
 
@@ -34,7 +34,7 @@ export function registerCheckInRoutes(
   // Get attendance stats (admin/coordinator only)
   app.get(
     '/api/v1/events/:eventId/attendance-stats',
-    requirePermissions('checkin:manage'),
+    requirePermissions('checkin:manage', 'event:manage'),
     checkInController.getAttendanceStats
   );
 }

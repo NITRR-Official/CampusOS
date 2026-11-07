@@ -104,8 +104,9 @@ export function createEventController(eventService, registry) {
       const resolvedClubId = await resolveClubId(clubId);
 
       const options = {};
-      if (myEvents === 'true' && req.user?.email) {
-        options.participantEmail = req.user.email;
+      if (myEvents === 'true' && req.user) {
+        if (req.user.email) options.participantEmail = req.user.email;
+        if (req.user.id) options.participantUserId = req.user.id;
       }
 
       const events = await eventService.listEvents(resolvedClubId, options);
@@ -182,9 +183,28 @@ export function createEventController(eventService, registry) {
         return;
       }
 
+      let isRegistered = false;
+      if (req.user) {
+        const registrations = await eventService.getEventRegistrations(eventId);
+        if (registrations && registrations.length > 0) {
+          isRegistered = registrations.some(
+            (r) =>
+              (req.user.id &&
+                r.userId &&
+                String(r.userId) === String(req.user.id)) ||
+              (req.user.email &&
+                r.attendeeEmail &&
+                r.attendeeEmail.toLowerCase() === req.user.email.toLowerCase())
+          );
+        }
+      }
+
       res.status(200).json({
         success: true,
-        data: publicEvent
+        data: {
+          ...publicEvent,
+          isRegistered
+        }
       });
     } catch (error) {
       next(error);

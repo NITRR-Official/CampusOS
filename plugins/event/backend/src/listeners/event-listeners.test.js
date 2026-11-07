@@ -81,7 +81,12 @@ describe('Event Listeners (Integration)', () => {
 
       eventBus.emit('club:deleted', { clubId });
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Poll until the async event handler completes (prevents CI race conditions)
+      for (let i = 0; i < 20; i++) {
+        const check = await Event.find({ clubId });
+        if (check.length === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
 
       const eventsAfter = await Event.find({ clubId });
       expect(eventsAfter.length).toBe(0);
@@ -125,7 +130,12 @@ describe('Event Listeners (Integration)', () => {
 
       eventBus.emit('user:deleted', { userId: 'user-to-delete-123' });
 
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Poll until the async event handler completes (prevents CI race conditions)
+      for (let i = 0; i < 20; i++) {
+        const check = await Event.findById(ev._id);
+        if (check && check.registrationsCount === 1) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
 
       const evAfter = await Event.findById(ev._id);
       expect(evAfter.registrationsCount).toBe(1);

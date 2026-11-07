@@ -6,6 +6,11 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import type { UserRole } from '@campus-os/shared/auth-types';
 import { useAuth } from '@campus-os/shared/auth-provider';
+import {
+  ensureAuthCookie,
+  clearAuthSession,
+  parseJwtExp
+} from '@campus-os/shared/auth-session';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -87,15 +92,52 @@ export function RequireAuth({ children, allowedRoles }: RequireAuthProps) {
 
 export function RequireGuest({ children }: RequireGuestProps) {
   const router = useRouter();
-  const { status, isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+  const { status, isAuthenticated, session, refreshSession } = useAuth();
+  const [isRedirecting, setIsRedirecting] = React.useState(false);
 
   React.useEffect(() => {
-    if (status !== 'authenticated') {
+    // When mounting on guest routes, verify session freshness
+    refreshSession();
+  }, [refreshSession]);
+
+  React.useEffect(() => {
+    if (status !== 'authenticated' || !session?.accessToken) {
       return;
     }
 
-    router.replace('/dashboard');
-  }, [router, status]);
+    const exp = parseJwtExp(session.accessToken);
+    if (exp && Date.now() >= exp * 1000) {
+      clearAuthSession();
+      return;
+    }
+
+    ensureAuthCookie(session);
+    setIsRedirecting(true);
+
+    const next = searchParams?.get('next') || '/dashboard';
+    const target =
+      next.startsWith('/') &&
+      !next.startsWith('/login') &&
+      !next.startsWith('/signup')
+        ? next
+        : '/dashboard';
+
+    router.replace(target);
+
+    // Fallback: if soft navigation gets stuck after 1.2s, force hard navigation
+    const timeout = setTimeout(() => {
+      if (
+        typeof window !== 'undefined' &&
+        (window.location.pathname === '/login' ||
+          window.location.pathname.startsWith('/login'))
+      ) {
+        window.location.href = target;
+      }
+    }, 1200);
+
+    return () => clearTimeout(timeout);
+  }, [router, status, session, searchParams]);
 
   if (status === 'loading') {
     return (
@@ -103,10 +145,22 @@ export function RequireGuest({ children }: RequireGuestProps) {
     );
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated || isRedirecting) {
     return (
-      <div className="text-sm text-muted-foreground">
-        Redirecting to dashboard...
+      <div className="flex min-h-[50vh] flex-col items-center justify-center p-6 text-center">
+        <div className="text-sm text-muted-foreground">
+          Redirecting to dashboard...
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            clearAuthSession();
+            window.location.href = '/login';
+          }}
+          className="mt-4 text-xs text-primary underline underline-offset-4 hover:opacity-80 cursor-pointer"
+        >
+          Having trouble? Clear session and log in
+        </button>
       </div>
     );
   }

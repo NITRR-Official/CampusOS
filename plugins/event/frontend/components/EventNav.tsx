@@ -8,7 +8,8 @@ import {
   Users,
   Settings,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  QrCode
 } from 'lucide-react';
 import { cn } from '@campusos/design-system';
 import { Button } from '@campusos/design-system';
@@ -30,9 +31,9 @@ export function EventNav({ clubId, eventId }: EventNavProps) {
       exact: true
     },
     {
-      name: 'Participants',
+      name: 'Attendance & Check-In',
       href: `/workspace/${clubId}/events/${eventId}/participants`,
-      icon: Users,
+      icon: QrCode,
       exact: false
     },
     {

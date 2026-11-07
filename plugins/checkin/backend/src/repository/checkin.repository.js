@@ -7,7 +7,7 @@ export function createCheckInRepository() {
       // Update existing
       const { id, _id, ...updateData } = checkInData;
       return CheckIn.findByIdAndUpdate(checkInId, updateData, {
-        returnDocument: 'after',
+        new: true,
         returnDocument: 'after'
       })
         .lean()

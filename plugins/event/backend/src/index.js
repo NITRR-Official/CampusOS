@@ -16,6 +16,7 @@ export async function init(app, registry, eventBus) {
 
   const eventRepository = createEventRepository();
   const eventService = createEventService(eventRepository, eventBus);
+  registry.registerService('event:service', eventService);
   const eventController = createEventController(eventService, registry);
   registerEventRoutes(
     app,

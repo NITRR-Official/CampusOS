@@ -5,6 +5,7 @@ import * as React from 'react';
 import type { AuthResponseData, UserRole } from '@campus-os/shared/auth-types';
 import {
   clearAuthSession,
+  ensureAuthCookie,
   readAuthSession,
   subscribeAuthSession
 } from '@campus-os/shared/auth-session';
@@ -91,6 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Keep cookie synchronized with localStorage session
+    ensureAuthCookie(normalized);
+
     setSession(normalized);
     setStatus('authenticated');
   }, []);
@@ -107,13 +111,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshSession();
       }
     };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshSession();
+      }
+    };
+
     window.addEventListener('pageshow', handlePageShow);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Periodic safety check every 30 seconds
+    const interval = setInterval(() => {
+      const raw = readAuthSession();
+      const normalized = normalizeSession(raw);
+      if (!normalized) {
+        clearAuthSession();
+        setSession(null);
+        setStatus('unauthenticated');
+      }
+    }, 30000);
 
     return () => {
       unsubscribe();
       window.removeEventListener('pageshow', handlePageShow);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
     };
   }, [refreshSession]);
+
+  // Proactive timer to immediately transition when JWT expires
+  React.useEffect(() => {
+    if (!session?.accessToken) {
+      return;
+    }
+
+    const payload = parseJwtPayload(session.accessToken);
+    if (!payload?.exp) {
+      return;
+    }
+
+    const remainingMs = payload.exp * 1000 - Date.now();
+    if (remainingMs <= 0) {
+      clearAuthSession();
+      setSession(null);
+      setStatus('unauthenticated');
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      clearAuthSession();
+      setSession(null);
+      setStatus('unauthenticated');
+    }, remainingMs);
+
+    return () => clearTimeout(timer);
+  }, [session?.accessToken]);
 
   const logout = React.useCallback(() => {
     clearAuthSession();

@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { cookies } from 'next/headers';
 import { RequireAuth } from '@/app/components/auth/AuthGuard';
+import { WorkspaceGuard } from '@/app/components/auth/WorkspaceGuard';
 import { AppSidebar } from '@/components/AppSidebar';
 import { Header } from '@/components/Header';
 import { SidebarInset, SidebarProvider } from '@campusos/design-system';
@@ -48,7 +49,7 @@ export default async function WorkspaceLayout({
           <Header />
           <main className="relative flex-1 bg-background/50 overflow-hidden min-w-0">
             <div className="relative z-10 p-5 md:p-8 pb-20 w-full min-w-0">
-              {children}
+              <WorkspaceGuard clubSlug={clubId}>{children}</WorkspaceGuard>
             </div>
           </main>
         </SidebarInset>

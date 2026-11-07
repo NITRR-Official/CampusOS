@@ -73,10 +73,19 @@ export function createEventRepository() {
       query.clubId = clubId;
     }
 
-    if (options.participantEmail) {
-      const regs = await EventRegistration.find({
-        attendeeEmail: options.participantEmail.toLowerCase()
-      })
+    if (options.participantEmail || options.participantUserId) {
+      const orConditions = [];
+      if (options.participantEmail) {
+        orConditions.push({
+          attendeeEmail: options.participantEmail.toLowerCase()
+        });
+      }
+      if (options.participantUserId) {
+        orConditions.push({ userId: options.participantUserId });
+      }
+      const regs = await EventRegistration.find(
+        orConditions.length > 1 ? { $or: orConditions } : orConditions[0]
+      )
         .select('eventId')
         .lean()
         .exec();

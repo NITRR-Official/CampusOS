@@ -57,6 +57,8 @@ Thumbs.db
 # Project specific
 .env.local
 config.local.js
+.credentials.local.md
+*.local.md
 
 # ESLint
 .eslintcache

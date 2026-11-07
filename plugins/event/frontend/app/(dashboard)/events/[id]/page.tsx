@@ -63,10 +63,12 @@ export default function PublicEventDetailPage({
         );
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const resData = response as any;
-        if (resData && resData.data) {
-          setEvent(resData.data);
-        } else {
-          setEvent(resData);
+        const eventData = resData && resData.data ? resData.data : resData;
+        if (eventData) {
+          setEvent(eventData);
+          if (eventData.isRegistered) {
+            setIsRegistered(true);
+          }
         }
       } catch (err) {
         toast({
@@ -286,13 +288,23 @@ export default function PublicEventDetailPage({
                     Event has ended
                   </Button>
                 ) : isRegistered ? (
-                  <Button
-                    variant="secondary"
-                    className="w-full text-green-500"
-                    disabled
-                  >
-                    ✓ You are registered
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      variant="secondary"
+                      className="w-full text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 font-semibold"
+                      disabled
+                    >
+                      ✓ You are registered
+                    </Button>
+                    <Button
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+                      asChild
+                    >
+                      <Link href="/my-events">
+                        View Digital Pass in My Events
+                      </Link>
+                    </Button>
+                  </div>
                 ) : seatsLeft === 0 ? (
                   <Button variant="secondary" className="w-full" disabled>
                     Fully Booked

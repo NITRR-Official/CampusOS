@@ -11,22 +11,43 @@ const PUBLIC_ROUTES = new Set([
 ]);
 
 export function authMiddleware(req, res, next) {
-  if (PUBLIC_ROUTES.has(req.path)) {
-    return next();
-  }
+  let isPublic = PUBLIC_ROUTES.has(req.path);
 
   const registry = req.app?.locals?.registry;
-  if (registry) {
+  if (!isPublic && registry) {
     const publicRoutes = registry.getPublicRoutes();
     for (const route of publicRoutes) {
       const methodMatches = !route.method || route.method === req.method;
       if (methodMatches && route.regex.test(req.path)) {
-        return next();
+        isPublic = true;
+        break;
       }
     }
   }
 
   const authHeader = req.headers.authorization;
+
+  // On public routes, optionally authenticate if Bearer token is provided
+  if (isPublic) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const jwtAuthenticator = registry?.getAuthenticator('jwt');
+      if (jwtAuthenticator) {
+        try {
+          const decoded = jwtAuthenticator.verify(token);
+          req.user = {
+            id: decoded.sub || decoded.id || null,
+            email: decoded.email || null,
+            role: decoded.role || 'user',
+            isSuperAdmin: !!decoded.isSuperAdmin
+          };
+        } catch {
+          // Token is invalid/expired; continue as unauthenticated guest for public routes
+        }
+      }
+    }
+    return next();
+  }
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({

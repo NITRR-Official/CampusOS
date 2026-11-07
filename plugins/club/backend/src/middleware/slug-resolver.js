@@ -22,9 +22,15 @@ export function createSlugParamHandler(ClubModel) {
         ? { $or: [{ _id: clubId }, { slug: clubId }] }
         : { slug: clubId };
 
-      const club = await ClubModel.findOne(query).select(
-        '_id name slug status'
-      );
+      let club = await ClubModel.findOne(query).select('_id name slug status');
+
+      // Fallback in case document was stored with string _id in raw collection
+      if (!club && ClubModel.collection) {
+        club = await ClubModel.collection.findOne(
+          { $or: [{ _id: clubId }, { slug: clubId }] },
+          { projection: { _id: 1, name: 1, slug: 1, status: 1 } }
+        );
+      }
 
       if (!club) {
         return next(
