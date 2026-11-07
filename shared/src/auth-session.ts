@@ -1,4 +1,4 @@
-import type { AuthResponseData } from './auth-types';
+import type { AuthResponseData } from './auth-types.js';
 
 const AUTH_STORAGE_KEY = 'campusos.auth-session';
 const AUTH_SESSION_EVENT = 'campusos.auth-session-change';

@@ -28,6 +28,38 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@campus-os/shared/auth-provider';
 import { useUIStore } from '@/lib/store';
 
+const ROUTE_LABELS: Record<string, string> = {
+  'my-events': 'My Events',
+  checkin: 'Check-In',
+  events: 'Events',
+  dashboard: 'Dashboard',
+  clubs: 'Clubs',
+  forms: 'Forms',
+  recruitment: 'Recruitment',
+  admin: 'Admin Panel',
+  activity: 'Activity Log',
+  profile: 'Profile',
+  settings: 'Settings',
+  tasks: 'Tasks',
+  calendar: 'Calendar',
+  participants: 'Participants',
+  budget: 'Budget',
+  resources: 'Resources',
+  vendors: 'Vendors',
+  new: 'Create'
+};
+
+function formatCrumbLabel(part: string): string {
+  const lower = part.toLowerCase();
+  if (ROUTE_LABELS[lower]) {
+    return ROUTE_LABELS[lower];
+  }
+  return part
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 function getInitials(value: string) {
   const parts = value.split(' ').filter(Boolean);
   const letters = parts.length > 1 ? parts[0][0] + parts[1][0] : value[0];
@@ -67,7 +99,7 @@ export function Header() {
       for (let i = 2; i < parts.length; i++) {
         currentPath += `/${parts[i]}`;
         crumbs.push({
-          label: parts[i].charAt(0).toUpperCase() + parts[i].slice(1),
+          label: formatCrumbLabel(parts[i]),
           href: currentPath
         });
       }
@@ -75,7 +107,7 @@ export function Header() {
       for (const part of parts) {
         currentPath += `/${part}`;
         crumbs.push({
-          label: part.charAt(0).toUpperCase() + part.slice(1),
+          label: formatCrumbLabel(part),
           href: currentPath
         });
       }
@@ -112,7 +144,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 shrink-0 items-center gap-4 border-b bg-background/60 backdrop-blur-xl px-4 md:px-6 transition-[width,height] ease-linear">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-4 border-b bg-background/60 backdrop-blur-xl px-4 md:px-6 transition-[width,height] ease-linear">
       <div className="flex items-center gap-4">
         <SidebarTrigger className="-ml-1" />
         <div className="hidden md:block">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { X, Camera, RefreshCw, AlertCircle } from 'lucide-react';
 
@@ -120,10 +121,10 @@ export function CameraScannerModal({
     };
   }, [isOpen, selectedCameraId, onScan, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-150">
       <div className="w-full max-w-md overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-2xl space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border/60 pb-3">
@@ -193,6 +194,7 @@ export function CameraScannerModal({
           pass.
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
