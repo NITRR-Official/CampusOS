@@ -10,9 +10,11 @@ import {
   ArrowLeft,
   ScanLine,
   History,
-  Sparkles
+  Sparkles,
+  Camera
 } from 'lucide-react';
 import { scanQRCode, type CheckInRecord } from '@plugins/checkin/frontend/api';
+import { CameraScannerModal } from '@/components/qr/CameraScannerModal';
 
 interface ScanLogItem {
   id: string;
@@ -26,6 +28,7 @@ interface ScanLogItem {
 export default function FastCheckInKioskPage() {
   const [passInput, setPassInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [activeAlert, setActiveAlert] = useState<{
     type: 'success' | 'error';
     title: string;
@@ -34,9 +37,7 @@ export default function FastCheckInKioskPage() {
   const [scanHistory, setScanHistory] = useState<ScanLogItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  async function handleScan(e: FormEvent) {
-    e.preventDefault();
-    const rawCode = passInput.trim();
+  async function processPassCode(rawCode: string) {
     if (!rawCode) return;
 
     // Clean PASS- prefix if present
@@ -104,6 +105,11 @@ export default function FastCheckInKioskPage() {
     }
   }
 
+  async function handleScan(e: FormEvent) {
+    e.preventDefault();
+    await processPassCode(passInput.trim());
+  }
+
   return (
     <div className="mx-auto max-w-4xl space-y-8 pb-16">
       {/* Navigation */}
@@ -144,29 +150,39 @@ export default function FastCheckInKioskPage() {
 
         {/* Scan Input Form */}
         <form onSubmit={handleScan} className="mt-8 space-y-4">
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-muted-foreground">
-              <QrCode className="size-6 text-primary" />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-muted-foreground">
+                <QrCode className="size-6 text-primary" />
+              </div>
+              <input
+                ref={inputRef}
+                type="text"
+                value={passInput}
+                onChange={(e) => setPassInput(e.target.value)}
+                placeholder="Scan or paste student ticket pass code (e.g. 650DDF36DB...)"
+                className="w-full rounded-2xl border-2 border-primary/30 bg-background py-4 pl-14 pr-36 font-mono text-base font-bold text-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm"
+                autoFocus
+                disabled={isProcessing}
+              />
+              <div className="absolute inset-y-0 right-2 flex items-center">
+                <button
+                  type="submit"
+                  disabled={isProcessing || !passInput.trim()}
+                  className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
+                >
+                  {isProcessing ? 'Verifying...' : 'Verify Pass'}
+                </button>
+              </div>
             </div>
-            <input
-              ref={inputRef}
-              type="text"
-              value={passInput}
-              onChange={(e) => setPassInput(e.target.value)}
-              placeholder="Scan or paste student ticket pass code (e.g. 650DDF36DB...)"
-              className="w-full rounded-2xl border-2 border-primary/30 bg-background py-4 pl-14 pr-36 font-mono text-base font-bold text-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm"
-              autoFocus
-              disabled={isProcessing}
-            />
-            <div className="absolute inset-y-0 right-2 flex items-center">
-              <button
-                type="submit"
-                disabled={isProcessing || !passInput.trim()}
-                className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
-              >
-                {isProcessing ? 'Verifying...' : 'Verify Pass'}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsCameraOpen(true)}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border-2 border-primary/30 bg-primary/10 px-6 py-4 text-sm font-bold text-primary shadow-xs transition hover:bg-primary/20 cursor-pointer shrink-0"
+            >
+              <Camera className="size-5" />
+              Camera Scan
+            </button>
           </div>
         </form>
 
@@ -252,6 +268,19 @@ export default function FastCheckInKioskPage() {
           </div>
         )}
       </div>
+
+      {/* Live Camera Scanner Modal */}
+      <CameraScannerModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onScan={async (decodedText) => {
+          const clean = decodedText.startsWith('PASS-')
+            ? decodedText.replace('PASS-', '')
+            : decodedText;
+          setPassInput(clean);
+          await processPassCode(clean);
+        }}
+      />
     </div>
   );
 }

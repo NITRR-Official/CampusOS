@@ -11,8 +11,10 @@ import {
   Copy,
   Check,
   AlertCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Camera
 } from 'lucide-react';
+import { CameraScannerModal } from '@/components/qr/CameraScannerModal';
 import {
   fetchCheckIns,
   fetchAttendanceStats,
@@ -51,6 +53,7 @@ export function CheckInDesk({
     text: string;
   } | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [selectedAttendee, setSelectedAttendee] =
     useState<RegistrationItem | null>(null);
 
@@ -349,6 +352,14 @@ export function CheckInDesk({
             />
           </div>
           <button
+            type="button"
+            onClick={() => setIsCameraOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-5 py-3 text-sm font-semibold text-primary shadow-xs transition hover:bg-primary/20 cursor-pointer shrink-0"
+          >
+            <Camera className="size-4" />
+            Camera Scan
+          </button>
+          <button
             type="submit"
             disabled={isScanning || !scannerInput.trim()}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
@@ -640,6 +651,40 @@ export function CheckInDesk({
           </div>
         </div>
       )}
+      {/* Live Camera Scanner Modal */}
+      <CameraScannerModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onScan={async (decodedText) => {
+          const clean = decodedText.startsWith('PASS-')
+            ? decodedText.replace('PASS-', '')
+            : decodedText;
+          setScannerInput(clean);
+          setIsScanning(true);
+          try {
+            const result = await scanQRCode(clean);
+            setScanMessage({
+              type: 'success',
+              text: `Success! Attendee verified and checked in at ${new Date(result.checkedInAt || Date.now()).toLocaleTimeString()}`
+            });
+            await loadData();
+          } catch (err: unknown) {
+            const error = err as {
+              response?: { data?: { message?: string } };
+              message?: string;
+            };
+            setScanMessage({
+              type: 'error',
+              text:
+                error?.response?.data?.message ||
+                error?.message ||
+                'Invalid pass code or attendee is already checked in.'
+            });
+          } finally {
+            setIsScanning(false);
+          }
+        }}
+      />
     </div>
   );
 }

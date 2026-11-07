@@ -29,85 +29,11 @@ import {
   CheckInRecord,
   CheckInApiError
 } from '@plugins/checkin/frontend/api';
+import { QRCodeVisual } from '@/components/qr/QRCodeVisual';
 
 interface UserEventWithCheckIn extends EventItem {
   checkInStatus?: CheckInRecord;
   checkInError?: string;
-}
-
-/**
- * Deterministic SVG QR-like visual barcode pattern for ticket rendering
- */
-function TicketQRVisual({ code }: { code: string }) {
-  // Generate deterministic grid pattern based on characters of the code
-  const size = 6;
-  const hash = code
-    .split('')
-    .reduce((acc, char, i) => acc + char.charCodeAt(0) * (i + 1), 0);
-
-  return (
-    <div className="relative flex size-20 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-background p-1.5 shadow-sm">
-      <svg
-        viewBox="0 0 24 24"
-        className="size-full text-foreground/90"
-        fill="currentColor"
-      >
-        {/* Corner alignment markers */}
-        <rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor" />
-        <rect
-          x="3.5"
-          y="3.5"
-          width="3"
-          height="3"
-          rx="0.5"
-          fill="var(--background)"
-        />
-        <rect x="4.5" y="4.5" width="1" height="1" fill="currentColor" />
-
-        <rect x="16" y="2" width="6" height="6" rx="1" fill="currentColor" />
-        <rect
-          x="17.5"
-          y="3.5"
-          width="3"
-          height="3"
-          rx="0.5"
-          fill="var(--background)"
-        />
-        <rect x="18.5" y="4.5" width="1" height="1" fill="currentColor" />
-
-        <rect x="2" y="16" width="6" height="6" rx="1" fill="currentColor" />
-        <rect
-          x="3.5"
-          y="17.5"
-          width="3"
-          height="3"
-          rx="0.5"
-          fill="var(--background)"
-        />
-        <rect x="4.5" y="18.5" width="1" height="1" fill="currentColor" />
-
-        {/* Dynamic inner dots */}
-        {Array.from({ length: size }).map((_, r) =>
-          Array.from({ length: size }).map((_, c) => {
-            const isPattern = ((hash >> (r * size + c)) & 1) === 1;
-            const x = 9 + (c % 3) * 2;
-            const y = 9 + (r % 3) * 2;
-            return isPattern ? (
-              <rect
-                key={`${r}-${c}`}
-                x={x}
-                y={y}
-                width="1.5"
-                height="1.5"
-                rx="0.3"
-                fill="currentColor"
-              />
-            ) : null;
-          })
-        )}
-      </svg>
-    </div>
-  );
 }
 
 export default function ParticipantDashboard() {
@@ -380,8 +306,8 @@ export default function ParticipantDashboard() {
                             </p>
                           </div>
 
-                          <div className="flex flex-col items-center gap-1.5">
-                            <TicketQRVisual code={qrPassCode} />
+                          <div className="flex flex-col items-center gap-1.5 shrink-0">
+                            <QRCodeVisual value={qrPassCode} size={84} />
                             <button
                               type="button"
                               onClick={() => copyPassCode(qrPassCode, eventId)}

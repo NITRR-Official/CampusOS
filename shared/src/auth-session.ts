@@ -11,7 +11,7 @@ function emitAuthSessionChange() {
   window.dispatchEvent(new Event(AUTH_SESSION_EVENT));
 }
 
-function parseJwtExp(token: string): number | null {
+export function parseJwtExp(token: string): number | null {
   try {
     const parts = token.split('.');
     if (parts.length < 2) return null;
@@ -22,6 +22,14 @@ function parseJwtExp(token: string): number | null {
   } catch {
     return null;
   }
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(
+    new RegExp('(^|;\\s*)' + name + '=([^;]*)')
+  );
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 function calculateCookieMaxAge(token: string): number {
@@ -45,12 +53,8 @@ export function ensureAuthCookie(data: AuthResponseData | null) {
     return;
   }
 
-  const cookies = document.cookie.split(';');
-  const hasValidCookie = cookies.some((c) =>
-    c.trim().startsWith('campusos_access_token=')
-  );
-
-  if (!hasValidCookie) {
+  const currentCookie = getCookie('campusos_access_token');
+  if (currentCookie !== data.accessToken) {
     const isSecure = window.location.protocol === 'https:' ? 'Secure;' : '';
     document.cookie = `campusos_access_token=${data.accessToken}; path=/; max-age=${maxAge}; SameSite=Lax; ${isSecure}`;
   }

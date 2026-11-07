@@ -25,10 +25,13 @@ export function proxy(request: NextRequest) {
   const isAuthRoute = pathname === '/login' || pathname === '/signup';
   const isProtectedRoute =
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/workspace') ||
     pathname.startsWith('/events') ||
     pathname.startsWith('/tasks') ||
     pathname.startsWith('/calendar') ||
     pathname.startsWith('/participants') ||
+    pathname.startsWith('/checkin') ||
+    pathname.startsWith('/my-events') ||
     pathname.startsWith('/settings');
 
   if (isProtectedRoute && !hasValidToken) {
@@ -55,10 +58,13 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/workspace/:path*',
     '/events/:path*',
     '/tasks/:path*',
     '/calendar/:path*',
     '/participants/:path*',
+    '/checkin/:path*',
+    '/my-events/:path*',
     '/settings/:path*',
     '/login',
     '/signup'
