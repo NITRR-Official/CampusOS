@@ -1,6 +1,7 @@
 import {
   createCalendarEventSchema,
-  queryCalendarEventsSchema
+  queryCalendarEventsSchema,
+  updateCalendarEventSchema
 } from '../schema/calendar.schema.js';
 import { getCalendarService } from '../service/calendar.service.js';
 
@@ -111,6 +112,33 @@ export function createCalendarController({ eventBus } = {}) {
     }
   }
 
+  async function update(req, res, next) {
+    const { eventId } = req.params;
+
+    try {
+      const changes = updateCalendarEventSchema.parse(req.body);
+      const event = await calendarService.updateEvent(eventId, changes);
+
+      if (!event) {
+        next(
+          createHttpError(
+            404,
+            'Calendar event not found',
+            'CALENDAR_EVENT_NOT_FOUND'
+          )
+        );
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        data: event
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async function deleteEvent(req, res, next) {
     const { eventId } = req.params;
 
@@ -144,6 +172,7 @@ export function createCalendarController({ eventBus } = {}) {
     list,
     queryByRange,
     getById,
+    update,
     deleteEvent
   };
 }
