@@ -17,7 +17,16 @@ export function registerEventRoutes(
     );
   }
 
-  app.get('/api/v1/events', viewEvents, eventController.list);
+  app.get(
+    '/api/v1/events',
+    (req, res, next) => {
+      if (req.query.myEvents === 'true') {
+        return next();
+      }
+      return viewEvents(req, res, next);
+    },
+    eventController.list
+  );
   app.get('/api/v1/events/public', eventController.listPublic);
   app.get('/api/v1/events/:eventId', viewEvents, eventController.getById);
   app.get('/api/v1/events/:eventId/public', eventController.getPublicById);

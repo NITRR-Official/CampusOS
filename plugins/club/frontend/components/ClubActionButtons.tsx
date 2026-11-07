@@ -36,10 +36,18 @@ export function ClubActionButtons({
 
   return (
     <div className="w-full md:w-auto flex shrink-0 gap-3">
+      {(canManage || data?.isMember) && (
+        <Link
+          href={`/workspace/${clubSlug}`}
+          className="w-full md:w-auto inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-all active:scale-95"
+        >
+          Enter Workspace
+        </Link>
+      )}
       {canManage && (
         <Link
           href={`/workspace/${clubSlug}/settings`}
-          className="w-full md:w-auto inline-flex items-center justify-center rounded-xl bg-secondary px-6 py-2.5 text-sm font-medium text-secondary-foreground shadow-sm hover:bg-secondary/90 transition-all active:scale-95 border border-border"
+          className="w-full md:w-auto inline-flex items-center justify-center rounded-xl bg-secondary px-5 py-2.5 text-sm font-medium text-secondary-foreground shadow-sm hover:bg-secondary/90 transition-all active:scale-95 border border-border"
         >
           Settings
         </Link>

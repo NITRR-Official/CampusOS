@@ -6,9 +6,13 @@ import { Button } from '@campusos/design-system';
 import { Input } from '@campusos/design-system';
 import { Label } from '@campusos/design-system';
 import { Textarea } from '@campusos/design-system';
-import { ChevronLeft } from 'lucide-react';
+import { Checkbox } from '@campusos/design-system';
+import { ChevronLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { createEvent } from '../api';
+import { FormBuilder } from '@plugins/forms/frontend';
+import { createForm } from '@plugins/forms/frontend/api';
+import type { FormField } from '@plugins/forms/frontend/types/form';
 
 export function CreateEventPage() {
   const router = useRouter();
@@ -17,6 +21,8 @@ export function CreateEventPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasCustomForm, setHasCustomForm] = useState(false);
+  const [customFields, setCustomFields] = useState<FormField[]>([]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,7 +37,7 @@ export function CreateEventPage() {
     const description = formData.get('description') as string;
 
     const payload = {
-      title: formData.get('title'),
+      title: formData.get('title') as string,
       description: description ? description : undefined,
       venue: venue ? venue : undefined,
       startsAt: startsAtStr ? new Date(startsAtStr).toISOString() : undefined,
@@ -44,6 +50,22 @@ export function CreateEventPage() {
     try {
       const res = await createEvent(payload);
       const newEventId = res.id || res._id;
+
+      if (newEventId && hasCustomForm && customFields.length > 0) {
+        try {
+          await createForm({
+            title: `${payload.title} Registration Form`,
+            description:
+              'Please fill in the required questions to register for this event.',
+            entityType: 'event',
+            entityId: newEventId,
+            fields: customFields,
+            status: 'active'
+          });
+        } catch (formErr) {
+          console.error('Failed to attach custom form to event:', formErr);
+        }
+      }
 
       router.refresh();
 
@@ -143,6 +165,47 @@ export function CreateEventPage() {
                 placeholder="Leave blank for unlimited"
               />
             </div>
+          </div>
+
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <FileText className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Custom Registration Questions
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Require attendees to provide extra details (e.g. Roll No,
+                    Branch, GitHub, Resume).
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="custom-form-toggle"
+                  checked={hasCustomForm}
+                  onCheckedChange={(checked) => setHasCustomForm(!!checked)}
+                />
+                <Label
+                  htmlFor="custom-form-toggle"
+                  className="text-xs font-medium cursor-pointer"
+                >
+                  Enable
+                </Label>
+              </div>
+            </div>
+
+            {hasCustomForm && (
+              <div className="pt-3 border-t border-border/50">
+                <FormBuilder
+                  initialFields={customFields}
+                  onChange={setCustomFields}
+                />
+              </div>
+            )}
           </div>
 
           {error && (

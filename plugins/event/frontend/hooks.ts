@@ -21,8 +21,11 @@ export function useRegisterForEvent(eventId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { attendeeName: string; attendeeEmail: string }) =>
-      registerForEvent(eventId, payload),
+    mutationFn: (payload: {
+      attendeeName: string;
+      attendeeEmail: string;
+      customResponses?: Record<string, any>;
+    }) => registerForEvent(eventId, payload),
     onSuccess: () => {
       // Invalidate the specific event to fetch the new registration
       queryClient.invalidateQueries({ queryKey: ['events', eventId] });

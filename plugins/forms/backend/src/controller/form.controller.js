@@ -26,6 +26,32 @@ export function createFormController({
         return true;
       }
     }
+
+    if (entityType === 'event') {
+      const eventService = registry.getService('event:service');
+      const clubService = registry.getService('club:member_service');
+      if (eventService) {
+        const event = await eventService.getEvent(entityId);
+        if (event) {
+          if (event.createdBy === user.id) return true;
+          if (event.clubId && clubService) {
+            const userPerms = await clubService.getUserPermissions(
+              user.id,
+              event.clubId
+            );
+            const userPermsSet = new Set(userPerms);
+            if (
+              userPermsSet.has('administrator') ||
+              userPermsSet.has('forms:manage') ||
+              userPermsSet.has('event:manage')
+            ) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
     throw new AppError(
       'Forbidden: Insufficient permissions for this entity',
       403

@@ -3,6 +3,8 @@ import { FormBuilder } from './components/FormBuilder';
 import { FormRenderer } from './components/FormRenderer';
 
 export * from './types/form';
+export * from './api';
+export * from './hooks';
 export { FormBuilder, FormRenderer };
 export { createDynamicSchema } from './utils/dynamic-zod';
 

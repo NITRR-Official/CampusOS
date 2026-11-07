@@ -21,6 +21,10 @@ const eventRegistrationSchema = new mongoose.Schema(
     userId: {
       type: String, // Store external system user ID if available
       default: null
+    },
+    customResponses: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {}
     }
   },
   {

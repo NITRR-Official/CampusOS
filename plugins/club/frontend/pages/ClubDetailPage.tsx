@@ -1,6 +1,15 @@
 import { notFound } from 'next/navigation';
 import { fetchClubBySlug } from '../api';
-import { Users, Building2, Calendar, ChevronLeft, Info } from 'lucide-react';
+import { fetchPublicEvents } from '@plugins/event/frontend/api';
+import {
+  Users,
+  Building2,
+  Calendar,
+  ChevronLeft,
+  Info,
+  MapPin,
+  ArrowRight
+} from 'lucide-react';
 import Link from 'next/link';
 import { ClubActionButtons } from '../components/ClubActionButtons';
 
@@ -15,6 +24,11 @@ export async function ClubDetailPage(props: {
   if (!club) {
     notFound();
   }
+
+  const clubId =
+    club.id || ((club as unknown as Record<string, unknown>)._id as string);
+
+  const events = await fetchPublicEvents(clubId).catch(() => []);
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
@@ -110,13 +124,75 @@ export async function ClubDetailPage(props: {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Calendar className="size-5 text-primary" />
-              Upcoming Events
-            </h2>
-            <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur p-12 text-center text-muted-foreground">
-              No upcoming events scheduled yet.
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold flex items-center gap-2 text-foreground">
+                <Calendar className="size-5 text-primary" />
+                Upcoming Events ({events.length})
+              </h2>
             </div>
+
+            {events.length === 0 ? (
+              <div className="rounded-2xl border border-border/50 bg-card/30 backdrop-blur p-10 text-center text-muted-foreground">
+                No upcoming events scheduled yet. Check back soon!
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {events.map((evt) => {
+                  const evtId = evt.id || (evt as any)._id;
+                  const formattedDate = new Date(
+                    evt.startsAt
+                  ).toLocaleDateString([], {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                  });
+                  const formattedTime = new Date(
+                    evt.startsAt
+                  ).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+
+                  return (
+                    <div
+                      key={evtId}
+                      className="group rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md hover:border-primary/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1">
+                        <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
+                          {evt.title}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="size-3.5 text-primary" />
+                            {formattedDate} at {formattedTime}
+                          </span>
+                          {evt.venue && (
+                            <span className="flex items-center gap-1.5">
+                              <MapPin className="size-3.5 text-primary" />
+                              {evt.venue}
+                            </span>
+                          )}
+                          {evt.registrationsCount !== undefined && (
+                            <span className="flex items-center gap-1.5">
+                              <Users className="size-3.5 text-primary" />
+                              {evt.registrationsCount} Registered
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <Link
+                        href={`/events/${evtId}`}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition shadow-sm shrink-0 self-start sm:self-center"
+                      >
+                        View & Register <ArrowRight className="size-3.5" />
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </section>
         </div>
 

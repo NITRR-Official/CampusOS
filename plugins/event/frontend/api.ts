@@ -89,7 +89,11 @@ export function fetchEventById(eventId: string, accessToken?: string | null) {
 
 export function registerForEvent(
   eventId: string,
-  payload: { attendeeName: string; attendeeEmail: string }
+  payload: {
+    attendeeName: string;
+    attendeeEmail: string;
+    customResponses?: Record<string, any>;
+  }
 ) {
   return apiClient.post(`/events/${eventId}/registrations`, payload);
 }

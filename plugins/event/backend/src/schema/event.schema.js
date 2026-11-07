@@ -90,6 +90,7 @@ export const registrationSchema = z
       .string()
       .trim()
       .toLowerCase()
-      .email('Attendee email must be valid')
+      .email('Attendee email must be valid'),
+    customResponses: z.record(z.string(), z.any()).optional().default({})
   })
   .strict();

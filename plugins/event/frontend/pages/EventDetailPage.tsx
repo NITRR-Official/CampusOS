@@ -173,7 +173,12 @@ export async function EventDetailPage({
               <p className="text-sm text-muted-foreground mb-6">
                 Reserve your spot now. Limited seats may be available.
               </p>
-              <RegisterForm eventId={event.id} />
+              <RegisterForm
+                eventId={event.id || (event as any)._id}
+                capacity={event.capacity}
+                currentCount={event.registrations?.length || 0}
+                initialRegistrations={event.registrations || []}
+              />
             </div>
           </section>
         </div>

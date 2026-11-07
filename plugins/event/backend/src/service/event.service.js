@@ -116,11 +116,23 @@ export function createEventService(eventRepository, eventBus) {
         eventId,
         attendeeName: registrationPayload.attendeeName,
         attendeeEmail: registrationPayload.attendeeEmail,
-        userId: registrationPayload.userId || null
+        userId: registrationPayload.userId || null,
+        customResponses: registrationPayload.customResponses || {}
       };
 
       const registration =
         await eventRepository.createRegistration(registrationData);
+
+      if (eventBus) {
+        eventBus.emit('event:registered', {
+          eventId,
+          registrationId: registration._id || registration.id,
+          userId: registrationData.userId,
+          attendeeEmail: registrationData.attendeeEmail,
+          attendeeName: registrationData.attendeeName,
+          customResponses: registrationData.customResponses
+        });
+      }
 
       return {
         type: 'REGISTERED',
