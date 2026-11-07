@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { apiClient } from '@campus-os/shared/api-client';
-import { Skeleton, useToast, Badge } from '@campusos/design-system';
+import { CardSkeleton, useToast, Badge } from '@campusos/design-system';
 import { Search, Store } from 'lucide-react';
 
 interface PluginSettingsConfig {
