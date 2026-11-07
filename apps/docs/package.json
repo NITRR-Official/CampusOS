@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build --webpack",
-    "dev": "next dev --webpack",
+    "dev": "next dev -p 3001 --webpack",
     "start": "next start",
     "types:check": "next typegen && tsc --noEmit"
   },

@@ -5,6 +5,7 @@ import * as React from 'react';
 import type { AuthResponseData, UserRole } from '@campus-os/shared/auth-types';
 import {
   clearAuthSession,
+  ensureAuthCookie,
   readAuthSession,
   subscribeAuthSession
 } from '@campus-os/shared/auth-session';
@@ -90,6 +91,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setStatus('unauthenticated');
       return;
     }
+
+    // Keep cookie synchronized with localStorage session
+    ensureAuthCookie(normalized);
 
     setSession(normalized);
     setStatus('authenticated');

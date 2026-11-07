@@ -6,6 +6,10 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import type { UserRole } from '@campus-os/shared/auth-types';
 import { useAuth } from '@campus-os/shared/auth-provider';
+import {
+  ensureAuthCookie,
+  clearAuthSession
+} from '@campus-os/shared/auth-session';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -87,15 +91,19 @@ export function RequireAuth({ children, allowedRoles }: RequireAuthProps) {
 
 export function RequireGuest({ children }: RequireGuestProps) {
   const router = useRouter();
-  const { status, isAuthenticated } = useAuth();
+  const { status, isAuthenticated, session } = useAuth();
 
   React.useEffect(() => {
     if (status !== 'authenticated') {
       return;
     }
 
+    if (session) {
+      ensureAuthCookie(session);
+    }
+
     router.replace('/dashboard');
-  }, [router, status]);
+  }, [router, status, session]);
 
   if (status === 'loading') {
     return (
@@ -105,8 +113,20 @@ export function RequireGuest({ children }: RequireGuestProps) {
 
   if (isAuthenticated) {
     return (
-      <div className="text-sm text-muted-foreground">
-        Redirecting to dashboard...
+      <div className="flex min-h-[50vh] flex-col items-center justify-center p-6 text-center">
+        <div className="text-sm text-muted-foreground">
+          Redirecting to dashboard...
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            clearAuthSession();
+            window.location.href = '/login';
+          }}
+          className="mt-4 text-xs text-primary underline underline-offset-4 hover:opacity-80 cursor-pointer"
+        >
+          Having trouble? Clear session and log in
+        </button>
       </div>
     );
   }

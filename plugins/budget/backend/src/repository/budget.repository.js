@@ -31,9 +31,49 @@ export function createBudgetRepository() {
       .exec();
   }
 
+  let _budgetTransactionsSupported = null;
+
+  async function _logExpenseDirect(budgetId, expenseData) {
+    const budget = await Budget.findById(budgetId).lean().exec();
+    if (!budget) {
+      throw new Error('Budget not found');
+    }
+
+    const result = await Expense.aggregate([
+      { $match: { budgetId: budget._id } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+
+    const currentTotal = result[0]?.total || 0;
+    if (currentTotal + expenseData.amount > budget.totalAllocation) {
+      throw new Error(
+        `Expense exceeds budget. Remaining: ${budget.totalAllocation - currentTotal}`
+      );
+    }
+
+    const [expense] = await Expense.create([{ ...expenseData, budgetId }]);
+    return expense.toObject();
+  }
+
   async function logExpenseAtomic(budgetId, expenseData, budgetDoc) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    if (_budgetTransactionsSupported === false) {
+      return _logExpenseDirect(budgetId, expenseData);
+    }
+
+    let session = null;
+    try {
+      session = await mongoose.startSession();
+      session.startTransaction();
+    } catch {
+      _budgetTransactionsSupported = false;
+      if (session) {
+        try {
+          session.endSession();
+        } catch {}
+      }
+      return _logExpenseDirect(budgetId, expenseData);
+    }
+
     try {
       // Re-fetch budget within transaction to lock it (if using causal consistency)
       const budget = await Budget.findById(budgetId)
@@ -61,12 +101,34 @@ export function createBudgetRepository() {
       });
 
       await session.commitTransaction();
-      session.endSession();
+      _budgetTransactionsSupported = true;
       return expense.toObject();
     } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
+      if (session) {
+        await session.abortTransaction().catch(() => {});
+      }
+
+      const isReplicaSetError =
+        error?.code === 20 ||
+        error?.codeName === 'IllegalOperation' ||
+        error?.errorResponse?.code === 20 ||
+        error?.originalError?.code === 20 ||
+        String(error?.message || '').includes('replica set') ||
+        String(error?.message || '').includes('Transaction numbers') ||
+        String(error?.errorResponse?.errmsg || '').includes('replica set');
+
+      if (isReplicaSetError) {
+        _budgetTransactionsSupported = false;
+        return _logExpenseDirect(budgetId, expenseData);
+      }
+
       throw error;
+    } finally {
+      if (session) {
+        try {
+          session.endSession();
+        } catch {}
+      }
     }
   }
 

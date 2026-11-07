@@ -168,18 +168,58 @@ export function createClubRepository(Club, ClubMember, ClubRole, User) {
     return result.deletedCount > 0;
   }
 
+  let _transactionsSupported = null;
+
   async function withTransaction(callback) {
-    const session = await Club.startSession();
-    session.startTransaction();
+    if (_transactionsSupported === false) {
+      return callback(undefined);
+    }
+
+    let session = null;
+    try {
+      session = await Club.startSession();
+      session.startTransaction();
+    } catch {
+      _transactionsSupported = false;
+      if (session) {
+        try {
+          session.endSession();
+        } catch {}
+      }
+      return callback(undefined);
+    }
+
     try {
       const result = await callback(session);
       await session.commitTransaction();
+      _transactionsSupported = true;
       return result;
     } catch (error) {
-      await session.abortTransaction();
+      if (session) {
+        await session.abortTransaction().catch(() => {});
+      }
+
+      const isReplicaSetError =
+        error?.code === 20 ||
+        error?.codeName === 'IllegalOperation' ||
+        error?.errorResponse?.code === 20 ||
+        error?.originalError?.code === 20 ||
+        String(error?.message || '').includes('replica set') ||
+        String(error?.message || '').includes('Transaction numbers') ||
+        String(error?.errorResponse?.errmsg || '').includes('replica set');
+
+      if (isReplicaSetError) {
+        _transactionsSupported = false;
+        return callback(undefined);
+      }
+
       throw error;
     } finally {
-      session.endSession();
+      if (session) {
+        try {
+          session.endSession();
+        } catch {}
+      }
     }
   }
 

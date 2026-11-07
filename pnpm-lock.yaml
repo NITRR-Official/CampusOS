@@ -40,6 +40,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.0(jiti@2.7.0))
+      '@faker-js/faker':
+        specifier: ^10.6.0
+        version: 10.6.0
       '@types/node':
         specifier: ^26.1.1
         version: 26.1.1
@@ -442,7 +445,7 @@ importers:
         version: link:../../packages/design-system
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
 
   plugins/auth:
     dependencies:
@@ -487,10 +490,10 @@ importers:
         version: link:../../packages/design-system
       '@tanstack/react-query':
         specifier: ^5.101.2
-        version: 5.101.2(react@19.3.1)
+        version: 5.101.2(react@19.2.4)
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -533,10 +536,10 @@ importers:
         version: link:../../packages/design-system
       '@tanstack/react-query':
         specifier: ^5.101.2
-        version: 5.101.2(react@19.3.1)
+        version: 5.101.2(react@19.2.4)
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -660,13 +663,13 @@ importers:
         version: link:../../shared
       '@tanstack/react-query':
         specifier: ^5.101.2
-        version: 5.101.2(react@19.3.1)
+        version: 5.101.2(react@19.2.4)
       express:
         specifier: ^5.2.1
         version: 5.2.1
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -714,10 +717,10 @@ importers:
         version: link:../../packages/design-system
       '@tanstack/react-query':
         specifier: ^5.101.2
-        version: 5.101.2(react@19.3.1)
+        version: 5.101.2(react@19.2.4)
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -736,10 +739,10 @@ importers:
         version: link:../../packages/design-system
       '@tanstack/react-query':
         specifier: ^5.101.2
-        version: 5.101.2(react@19.3.1)
+        version: 5.101.2(react@19.2.4)
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -782,10 +785,10 @@ importers:
         version: link:../../packages/design-system
       '@tanstack/react-query':
         specifier: ^5.101.2
-        version: 5.101.2(react@19.3.1)
+        version: 5.101.2(react@19.2.4)
       lucide-react:
         specifier: '*'
-        version: 1.16.0(react@19.3.1)
+        version: 1.16.0(react@19.2.4)
       zod:
         specifier: ^3.25.76
         version: 3.25.76
@@ -1625,6 +1628,10 @@ packages:
   '@eslint/plugin-kit@0.7.1':
     resolution: {integrity: sha512-rZAP3aVgB9ds9KOeUSL+zZ21hPmo8dh6fnIFwRQj5EAZl9gzR7wxYbYXYysAM8CTqGmUGyp2S4kUdV17MnGuWQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@faker-js/faker@10.6.0':
+    resolution: {integrity: sha512-3RQHgEtvL1Frl/d1cSreo7qhJ3Gk1OdNUai/CtZ8G+wYeRQnJih3s9xJ9/kgYekPQRdwgh0HXRPqMlzWGwivIQ==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@floating-ui/core@1.7.5':
     resolution: {integrity: sha512-1Ih4WTWyw0+lKyFMcBHGbb5U5FtuHJuujoyyr5zTaWS5EYMeT6Jb2AuDeftsCsEuchO+mM2ij5+q9crhydzLhQ==}
@@ -7620,10 +7627,6 @@ packages:
     resolution: {integrity: sha512-9nfp2hYpCwOjAN+8TZFGhtWEwgvWHXqESH8qT89AT/lWklpLON22Lc8pEtnpsZz7VmawabSU0gCjnj8aC0euHQ==}
     engines: {node: '>=0.10.0'}
 
-  react@19.3.1:
-    resolution: {integrity: sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw==}
-    engines: {node: '>=0.10.0'}
-
   read-cache@1.0.0:
     resolution: {integrity: sha512-Owdv/Ft7IjOgm/i0xvNDZ1LrRANRfew4b2prF3OWMQLxLfu3bS8FVhCsrSCMK4lR56Y9ya+AThoTpDCTxCmpRA==}
 
@@ -9525,6 +9528,8 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
+  '@faker-js/faker@10.6.0': {}
+
   '@floating-ui/core@1.7.5':
     dependencies:
       '@floating-ui/utils': 0.2.11
@@ -11353,11 +11358,6 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.101.2
       react: 19.2.4
-
-  '@tanstack/react-query@5.101.2(react@19.3.1)':
-    dependencies:
-      '@tanstack/query-core': 5.101.2
-      react: 19.3.1
 
   '@ts-morph/common@0.27.0':
     dependencies:
@@ -15039,10 +15039,6 @@ snapshots:
     dependencies:
       react: 19.2.4
 
-  lucide-react@1.16.0(react@19.3.1):
-    dependencies:
-      react: 19.3.1
-
   lucide-react@1.69.0(@types/react@19.2.14)(react@19.2.4):
     dependencies:
       react: 19.2.4
@@ -16337,8 +16333,6 @@ snapshots:
       '@types/react': 19.2.14
 
   react@19.2.4: {}
-
-  react@19.3.1: {}
 
   read-cache@1.0.0:
     dependencies:

@@ -35,7 +35,11 @@ export function proxy(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', pathname);
-    return NextResponse.redirect(url);
+    const response = NextResponse.redirect(url);
+    if (token) {
+      response.cookies.delete('campusos_access_token');
+    }
+    return response;
   }
 
   if (isAuthRoute && hasValidToken) {

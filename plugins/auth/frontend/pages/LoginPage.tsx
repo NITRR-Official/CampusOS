@@ -35,6 +35,14 @@ function getRedirectPath(value: string | null) {
     return '/dashboard';
   }
 
+  if (
+    value === '/login' ||
+    value.startsWith('/login?') ||
+    value === '/logout'
+  ) {
+    return '/dashboard';
+  }
+
   return value;
 }
 

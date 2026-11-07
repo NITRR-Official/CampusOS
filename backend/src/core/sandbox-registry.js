@@ -32,6 +32,7 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
   const registeredSettingsConfigs = new Set();
   const registeredPermissions = new Set();
   const registeredPublicRoutes = new Set();
+  const registeredModules = new Set();
   const activeTimers = new Set();
 
   const FORBIDDEN_SERVICES = new Set([
@@ -303,11 +304,28 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
       return globalRegistry.registerPluginMetadata(pluginId, metadata);
     },
 
+    registerModule: (name, module) => {
+      if (!isCore && name !== pluginName) {
+        throw new PluginSecurityError(
+          `Security error: Plugin '${pluginName}' cannot register module '${name}'.`,
+          pluginName,
+          { name }
+        );
+      }
+      registeredModules.add(name);
+      return globalRegistry.registerModule(name, module);
+    },
+
     /**
      * Gracefully cleans up all resources registered through this scoped registry (Issue #124).
      */
     cleanup: () => {
       timers.clearAll();
+
+      for (const mName of registeredModules) {
+        globalRegistry.unregisterModule?.(mName);
+      }
+      registeredModules.clear();
 
       for (const sName of registeredServices) {
         globalRegistry.unregisterService?.(sName);
