@@ -1,4 +1,4 @@
-import { fetchEventById } from '../api';
+import { fetchEventById, fetchEventRegistrations } from '../api';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { CheckInDesk } from '@plugins/checkin/frontend';
@@ -14,18 +14,22 @@ export async function EventParticipantsPage({
   const cookieStore = await cookies();
   const token = cookieStore.get('campusos_access_token')?.value;
 
-  const event = await fetchEventById(eventId, token).catch(() => null);
+  const [event, regData] = await Promise.all([
+    fetchEventById(eventId, token).catch(() => null),
+    fetchEventRegistrations(eventId, token).catch(() => null)
+  ]);
 
   if (!event) {
     notFound();
   }
 
-  const registrations = (event.registrations || []).map((r: any) => ({
-    id: r.id || r._id,
-    userId: r.userId,
+  const rawList = regData?.registrations || event.registrations || [];
+  const registrations = rawList.map((r: any) => ({
+    id: r.id || (r._id ? String(r._id) : Math.random().toString()),
+    userId: r.userId ? String(r.userId) : undefined,
     attendeeName: r.attendeeName,
     attendeeEmail: r.attendeeEmail,
-    createdAt: r.createdAt || new Date().toISOString(),
+    createdAt: r.createdAt ? String(r.createdAt) : new Date().toISOString(),
     customResponses: r.customResponses || {}
   }));
 

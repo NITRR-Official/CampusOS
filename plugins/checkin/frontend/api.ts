@@ -2,16 +2,29 @@ import { z } from 'zod';
 import { apiClient } from '@campus-os/shared/api-client';
 export { ApiError as CheckInApiError } from '@campus-os/shared/api-errors';
 
-export const CheckInRecordSchema = z.object({
-  id: z.string(),
-  eventId: z.string(),
-  userId: z.string(),
-  qrCode: z.string(),
-  status: z.enum(['pending', 'checked-in']),
-  checkedInAt: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string()
-});
+export const CheckInRecordSchema = z
+  .object({
+    id: z.string().optional(),
+    _id: z.any().optional(),
+    eventId: z.any().transform((v) => String(v)),
+    userId: z.any().transform((v) => String(v)),
+    qrCode: z.string(),
+    status: z.enum(['pending', 'checked-in']),
+    checkedInAt: z.any().nullable().optional(),
+    createdAt: z.any().optional(),
+    updatedAt: z.any().optional()
+  })
+  .transform((record) => ({
+    ...record,
+    id: record.id || (record._id ? String(record._id) : record.qrCode),
+    checkedInAt: record.checkedInAt ? String(record.checkedInAt) : null,
+    createdAt: record.createdAt
+      ? String(record.createdAt)
+      : new Date().toISOString(),
+    updatedAt: record.updatedAt
+      ? String(record.updatedAt)
+      : new Date().toISOString()
+  }));
 
 export type CheckInRecord = z.infer<typeof CheckInRecordSchema>;
 
@@ -20,7 +33,7 @@ export const AttendanceStatsSchema = z.object({
   totalRegistered: z.number(),
   checkedIn: z.number(),
   pending: z.number(),
-  checkInRate: z.string()
+  checkInRate: z.union([z.string(), z.number()]).transform((v) => String(v))
 });
 
 export type AttendanceStats = z.infer<typeof AttendanceStatsSchema>;

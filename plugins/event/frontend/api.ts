@@ -87,6 +87,33 @@ export function fetchEventById(eventId: string, accessToken?: string | null) {
   });
 }
 
+export const EventRegistrationItemSchema = z.object({
+  id: z.string().optional(),
+  _id: z.string().optional(),
+  eventId: z.string().optional(),
+  userId: z.string().nullable().optional(),
+  attendeeName: z.string(),
+  attendeeEmail: z.string(),
+  createdAt: z.string().optional(),
+  customResponses: z.record(z.any()).optional()
+});
+
+export type EventRegistrationItem = z.infer<typeof EventRegistrationItemSchema>;
+
+export function fetchEventRegistrations(
+  eventId: string,
+  accessToken?: string | null
+) {
+  return apiClient.get<{
+    eventId: string;
+    totalRegistrations: number;
+    registrations: EventRegistrationItem[];
+  }>(`/events/${eventId}/registrations`, {
+    accessToken,
+    cache: 'no-store'
+  });
+}
+
 export function registerForEvent(
   eventId: string,
   payload: {

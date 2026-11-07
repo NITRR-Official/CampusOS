@@ -15,6 +15,7 @@ import {
   Camera
 } from 'lucide-react';
 import { CameraScannerModal } from '@/components/qr/CameraScannerModal';
+import { apiClient } from '@campus-os/shared/api-client';
 import {
   fetchCheckIns,
   fetchAttendanceStats,
@@ -61,16 +62,43 @@ export function CheckInDesk({
   const [checkIns, setCheckIns] = useState<CheckInRecord[]>([]);
   const [stats, setStats] = useState<AttendanceStats | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [attendeeList, setAttendeeList] =
+    useState<RegistrationItem[]>(initialRegistrations);
+
+  // Synchronize when initialRegistrations updates
+  useEffect(() => {
+    if (initialRegistrations.length > 0) {
+      setAttendeeList(initialRegistrations);
+    }
+  }, [initialRegistrations]);
 
   const loadData = useCallback(async () => {
     if (!eventId) return;
     try {
-      const [records, statistics] = await Promise.all([
+      const [records, statistics, regResponse] = await Promise.all([
         fetchCheckIns(eventId).catch(() => []),
-        fetchAttendanceStats(eventId).catch(() => null)
+        fetchAttendanceStats(eventId).catch(() => null),
+        apiClient
+          .get<{ registrations?: any[] }>(`/events/${eventId}/registrations`)
+          .catch(() => null)
       ]);
       setCheckIns(records);
       setStats(statistics);
+
+      if (regResponse?.registrations && regResponse.registrations.length > 0) {
+        setAttendeeList(
+          regResponse.registrations.map((r: any) => ({
+            id: r.id || (r._id ? String(r._id) : Math.random().toString()),
+            userId: r.userId ? String(r.userId) : undefined,
+            attendeeName: r.attendeeName,
+            attendeeEmail: r.attendeeEmail,
+            createdAt: r.createdAt
+              ? String(r.createdAt)
+              : new Date().toISOString(),
+            customResponses: r.customResponses || {}
+          }))
+        );
+      }
     } catch {
       // Graceful error fallback
     }
@@ -96,7 +124,7 @@ export function CheckInDesk({
 
   // Combine event registrations with check-in records
   const attendeesWithStatus = useMemo(() => {
-    return initialRegistrations.map((reg) => {
+    return attendeeList.map((reg) => {
       const record = reg.userId ? checkInMap.get(reg.userId) : undefined;
       return {
         ...reg,
@@ -106,14 +134,14 @@ export function CheckInDesk({
         checkedInAt: record?.checkedInAt || null
       };
     });
-  }, [initialRegistrations, checkInMap]);
+  }, [attendeeList, checkInMap]);
 
-  // Dynamic metrics
-  const totalCount = initialRegistrations.length;
-  const checkedInCount = attendeesWithStatus.filter(
-    (a) => a.isCheckedIn
-  ).length;
-  const pendingCount = Math.max(0, totalCount - checkedInCount);
+  // Dynamic metrics: Prefer stats if available, fallback to computed
+  const totalCount = stats?.totalRegistered ?? attendeeList.length;
+  const checkedInCount =
+    stats?.checkedIn ?? attendeesWithStatus.filter((a) => a.isCheckedIn).length;
+  const pendingCount =
+    stats?.pending ?? Math.max(0, totalCount - checkedInCount);
   const turnoutRate =
     totalCount > 0 ? Math.round((checkedInCount / totalCount) * 100) : 0;
 

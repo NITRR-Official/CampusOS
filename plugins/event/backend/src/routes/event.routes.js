@@ -45,7 +45,7 @@ export function registerEventRoutes(
   app.post('/api/v1/events/:eventId/registrations', eventController.register);
   app.get(
     '/api/v1/events/:eventId/registrations',
-    manageEvents,
+    requirePermissions('event:manage', 'event:view'),
     eventController.listRegistrations
   );
 }
