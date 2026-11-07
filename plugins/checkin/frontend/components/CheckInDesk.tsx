@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, FormEvent } from 'react';
+import { useState, useMemo, useEffect, useCallback, FormEvent } from 'react';
 import {
   Users,
   CheckCircle2,
@@ -11,15 +11,15 @@ import {
   Copy,
   Check,
   AlertCircle,
-  FileSpreadsheet,
-  HelpCircle
+  FileSpreadsheet
 } from 'lucide-react';
 import {
-  useEventCheckIns,
-  useEventAttendanceStats,
-  useScanQRCode
-} from '../hooks';
-import type { CheckInRecord } from '../api';
+  fetchCheckIns,
+  fetchAttendanceStats,
+  scanQRCode,
+  type CheckInRecord,
+  type AttendanceStats
+} from '../api';
 
 interface RegistrationItem {
   id: string;
@@ -54,12 +54,28 @@ export function CheckInDesk({
   const [selectedAttendee, setSelectedAttendee] =
     useState<RegistrationItem | null>(null);
 
-  // Queries & Mutations
-  const { data: checkIns = [], refetch: refetchCheckIns } =
-    useEventCheckIns(eventId);
-  const { data: stats, refetch: refetchStats } =
-    useEventAttendanceStats(eventId);
-  const scanMutation = useScanQRCode();
+  // Self-contained data fetching
+  const [checkIns, setCheckIns] = useState<CheckInRecord[]>([]);
+  const [stats, setStats] = useState<AttendanceStats | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  const loadData = useCallback(async () => {
+    if (!eventId) return;
+    try {
+      const [records, statistics] = await Promise.all([
+        fetchCheckIns(eventId).catch(() => []),
+        fetchAttendanceStats(eventId).catch(() => null)
+      ]);
+      setCheckIns(records);
+      setStats(statistics);
+    } catch {
+      // Graceful error fallback
+    }
+  }, [eventId]);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   // Create lookup map of check-in records by userId or qrCode
   const checkInMap = useMemo(() => {
@@ -129,24 +145,30 @@ export function CheckInDesk({
       ? rawCode.replace('PASS-', '')
       : rawCode;
 
+    setIsScanning(true);
     try {
-      const result = await scanMutation.mutateAsync(cleanCode);
+      const result = await scanQRCode(cleanCode);
       setScanMessage({
         type: 'success',
         text: `Success! Attendee verified and checked in at ${new Date(result.checkedInAt || Date.now()).toLocaleTimeString()}`
       });
       setScannerInput('');
-      void refetchCheckIns();
-      void refetchStats();
-    } catch (err: any) {
+      await loadData();
+    } catch (err: unknown) {
+      const error = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       const errMsg =
-        err?.response?.data?.message ||
-        err?.message ||
+        error?.response?.data?.message ||
+        error?.message ||
         'Invalid pass code or attendee is already checked in.';
       setScanMessage({
         type: 'error',
         text: errMsg
       });
+    } finally {
+      setIsScanning(false);
     }
   }
 
@@ -160,20 +182,28 @@ export function CheckInDesk({
       return;
     }
 
+    setIsScanning(true);
     try {
-      await scanMutation.mutateAsync(qrCode);
+      await scanQRCode(qrCode);
       setScanMessage({
         type: 'success',
         text: `✓ ${attendeeName} checked in successfully!`
       });
-      void refetchCheckIns();
-      void refetchStats();
-    } catch (err: any) {
+      await loadData();
+    } catch (err: unknown) {
+      const error = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       setScanMessage({
         type: 'error',
         text:
-          err?.response?.data?.message || `Unable to check in ${attendeeName}.`
+          error?.response?.data?.message ||
+          error?.message ||
+          `Unable to check in ${attendeeName}.`
       });
+    } finally {
+      setIsScanning(false);
     }
   }
 
@@ -320,10 +350,10 @@ export function CheckInDesk({
           </div>
           <button
             type="submit"
-            disabled={scanMutation.isPending || !scannerInput.trim()}
+            disabled={isScanning || !scannerInput.trim()}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
           >
-            {scanMutation.isPending ? 'Verifying...' : 'Verify & Check In'}
+            {isScanning ? 'Verifying...' : 'Verify & Check In'}
           </button>
         </form>
 
@@ -533,7 +563,7 @@ export function CheckInDesk({
                               attendee.attendeeName
                             )
                           }
-                          disabled={scanMutation.isPending || !attendee.qrCode}
+                          disabled={isScanning || !attendee.qrCode}
                           className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
                         >
                           Check In
