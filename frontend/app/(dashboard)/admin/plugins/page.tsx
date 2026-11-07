@@ -4,7 +4,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { apiClient } from '@campus-os/shared/api-client';
-import { Skeleton, useToast, Badge } from '@campusos/design-system';
+import { CardSkeleton, useToast, Badge } from '@campusos/design-system';
 import { Search, Store } from 'lucide-react';
 
 interface PluginSettingsConfig {
@@ -173,19 +173,10 @@ export default function AdminPluginsPage() {
       {loading ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
+            <CardSkeleton
               key={i}
-              className="border border-border/50 rounded-md p-4 bg-card/50 backdrop-blur-sm space-y-3"
-            >
-              <div className="flex justify-between items-start">
-                <Skeleton className="h-5 w-[120px]" />
-                <Skeleton className="h-6 w-[60px]" />
-              </div>
-              <Skeleton className="h-4 w-full" />
-              <div className="pt-4 border-t border-border/50">
-                <Skeleton className="h-8 w-full" />
-              </div>
-            </div>
+              className="border-border/50 bg-card/50 backdrop-blur-sm"
+            />
           ))}
         </div>
       ) : filteredPlugins.length === 0 ? (
