@@ -307,7 +307,14 @@ export default function ParticipantDashboard() {
                           </div>
 
                           <div className="flex flex-col items-center gap-1.5 shrink-0">
-                            <QRCodeVisual value={qrPassCode} size={84} />
+                            <QRCodeVisual
+                              value={qrPassCode}
+                              size={84}
+                              expandable
+                              title={event.title}
+                              subtitle={`Attendee: ${user?.name || 'Student'} • ${event.venue || 'Campus'}`}
+                              passCode={qrPassCode}
+                            />
                             <button
                               type="button"
                               onClick={() => copyPassCode(qrPassCode, eventId)}
