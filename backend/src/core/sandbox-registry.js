@@ -326,7 +326,6 @@ export function createScopedRegistry(manifest, globalRegistry, options = {}) {
         globalRegistry.unregisterModule?.(mName);
       }
       registeredModules.clear();
-
       for (const sName of registeredServices) {
         globalRegistry.unregisterService?.(sName);
       }
