@@ -37,24 +37,79 @@ export interface WidgetRegistration<TContext = unknown> {
 export class PluginRegistry {
   private sidebarLinks: SidebarLink[] = [];
   private widgets: Map<string, WidgetRegistration<any>[]> = new Map();
+  private listeners: Set<() => void> = new Set();
 
   /**
-   * Register a link in the main navigation sidebar
+   * Subscribe to registry changes (widgets or sidebar links added/removed).
+   * @param listener Callback invoked when registrations change.
+   * @returns Unsubscribe cleanup function.
+   */
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notify() {
+    for (const listener of this.listeners) {
+      try {
+        listener();
+      } catch (err) {
+        if (typeof console !== 'undefined' && console.error) {
+          console.error(
+            '[CampusOS:PluginRegistry] Listener notification failed:',
+            err
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Register a link in the main navigation sidebar.
+   * Automatically deduplicates by pluginId and URL.
    */
   registerSidebarLink(link: SidebarLink) {
-    this.sidebarLinks.push(link);
+    const existingIndex = this.sidebarLinks.findIndex(
+      (l) => l.pluginId === link.pluginId && l.url === link.url
+    );
+    if (existingIndex !== -1) {
+      this.sidebarLinks[existingIndex] = link;
+    } else {
+      this.sidebarLinks.push(link);
+    }
+    this.notify();
+  }
+
+  /**
+   * Unregister sidebar links for a plugin (optionally targeting a specific URL).
+   */
+  unregisterSidebarLink(pluginId: string, url?: string): boolean {
+    const initialLen = this.sidebarLinks.length;
+    this.sidebarLinks = this.sidebarLinks.filter((l) => {
+      if (l.pluginId !== pluginId) return true;
+      if (url && l.url !== url) return true;
+      return false;
+    });
+    const changed = this.sidebarLinks.length < initialLen;
+    if (changed) {
+      this.notify();
+    }
+    return changed;
   }
 
   /**
    * Get all registered sidebar links
    */
   getSidebarLinks(): SidebarLink[] {
-    return this.sidebarLinks;
+    return [...this.sidebarLinks];
   }
 
   /**
    * Register a widget to be injected at a specific extension point slot.
    * Supports optional priority (higher renders first) and conditional rendering predicates.
+   * Automatically deduplicates if the same component or metadata.id is re-registered by the plugin.
    */
   registerWidget<TContext = unknown>(
     extensionPointId: CampusOSSlotId,
@@ -65,6 +120,7 @@ export class PluginRegistry {
     if (!this.widgets.has(extensionPointId)) {
       this.widgets.set(extensionPointId, []);
     }
+    const list = this.widgets.get(extensionPointId)!;
     const entry: WidgetRegistration<TContext> = {
       pluginId,
       component,
@@ -72,7 +128,21 @@ export class PluginRegistry {
       condition: options?.condition,
       metadata: options?.metadata
     };
-    this.widgets.get(extensionPointId)!.push(entry as WidgetRegistration<any>);
+
+    const existingIndex = list.findIndex(
+      (w) =>
+        w.pluginId === pluginId &&
+        (w.component === component ||
+          (options?.metadata?.id && w.metadata?.id === options.metadata.id))
+    );
+
+    if (existingIndex !== -1) {
+      list[existingIndex] = entry as WidgetRegistration<any>;
+    } else {
+      list.push(entry as WidgetRegistration<any>);
+    }
+
+    this.notify();
   }
 
   /**
@@ -100,7 +170,11 @@ export class PluginRegistry {
     const initialLen = list.length;
     const filtered = list.filter((w) => w.pluginId !== pluginId);
     this.widgets.set(extensionPointId, filtered);
-    return filtered.length < initialLen;
+    const changed = filtered.length < initialLen;
+    if (changed) {
+      this.notify();
+    }
+    return changed;
   }
 
   /**
@@ -116,7 +190,17 @@ export class PluginRegistry {
     this.sidebarLinks = this.sidebarLinks.filter(
       (l) => l.pluginId !== pluginId
     );
+    if (removed > 0) {
+      this.notify();
+    }
     return removed;
+  }
+
+  /**
+   * Alias for unregisterWidgetsByPlugin (called during dynamic plugin uninstall/disable).
+   */
+  unregisterPlugin(pluginId: string): number {
+    return this.unregisterWidgetsByPlugin(pluginId);
   }
 
   /**
@@ -125,6 +209,7 @@ export class PluginRegistry {
   clear() {
     this.sidebarLinks = [];
     this.widgets.clear();
+    this.notify();
   }
 }
 

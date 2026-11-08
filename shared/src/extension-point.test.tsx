@@ -84,6 +84,87 @@ describe('ExtensionPoint Micro-UI & Registry System (Issues #125, #132, #133)', 
       expect(registry.getSidebarLinks()).toHaveLength(1);
       expect(registry.getSidebarLinks()[0].pluginId).toBe('good-plugin');
     });
+
+    it('deduplicates sidebar links and widgets on repeated registrations (Issue #161)', () => {
+      const DummyWidget = () => <div>Dummy</div>;
+
+      // Register same widget 3 times
+      registry.registerWidget('dashboard-stats', 'plugin-dup', DummyWidget);
+      registry.registerWidget('dashboard-stats', 'plugin-dup', DummyWidget);
+      registry.registerWidget('dashboard-stats', 'plugin-dup', DummyWidget);
+
+      expect(registry.getWidgets('dashboard-stats')).toHaveLength(1);
+
+      // Register same sidebar link 3 times
+      registry.registerSidebarLink({
+        pluginId: 'plugin-dup',
+        title: 'Dup',
+        url: '/dup'
+      });
+      registry.registerSidebarLink({
+        pluginId: 'plugin-dup',
+        title: 'Dup Updated',
+        url: '/dup'
+      });
+      registry.registerSidebarLink({
+        pluginId: 'plugin-dup',
+        title: 'Dup Final',
+        url: '/dup'
+      });
+
+      expect(registry.getSidebarLinks()).toHaveLength(1);
+      expect(registry.getSidebarLinks()[0].title).toBe('Dup Final');
+    });
+
+    it('unregisters links via unregisterSidebarLink and plugins via unregisterPlugin (Issue #161)', () => {
+      const DummyWidget = () => <div>Dummy</div>;
+      registry.registerWidget('dashboard-stats', 'plugin-x', DummyWidget);
+      registry.registerSidebarLink({
+        pluginId: 'plugin-x',
+        title: 'X',
+        url: '/x'
+      });
+      registry.registerSidebarLink({
+        pluginId: 'plugin-x',
+        title: 'X Sub',
+        url: '/x/sub'
+      });
+
+      // Unregister specific link
+      const unlinked = registry.unregisterSidebarLink('plugin-x', '/x/sub');
+      expect(unlinked).toBe(true);
+      expect(registry.getSidebarLinks()).toHaveLength(1);
+
+      // Unregister whole plugin
+      registry.unregisterPlugin('plugin-x');
+      expect(registry.getWidgets('dashboard-stats')).toHaveLength(0);
+      expect(registry.getSidebarLinks()).toHaveLength(0);
+    });
+
+    it('notifies subscribers when registrations or teardowns occur (Issue #161)', () => {
+      let callCount = 0;
+      const unsubscribe = registry.subscribe(() => {
+        callCount++;
+      });
+
+      const Dummy = () => <div>Dummy</div>;
+      registry.registerWidget('dashboard-stats', 'plugin-listen', Dummy);
+      expect(callCount).toBe(1);
+
+      registry.registerSidebarLink({
+        pluginId: 'plugin-listen',
+        title: 'L',
+        url: '/l'
+      });
+      expect(callCount).toBe(2);
+
+      registry.unregisterPlugin('plugin-listen');
+      expect(callCount).toBe(3);
+
+      unsubscribe();
+      registry.registerWidget('dashboard-stats', 'plugin-listen', Dummy);
+      expect(callCount).toBe(3); // no longer notified after unsubscribing
+    });
   });
 
   describe('ExtensionPoint Component', () => {
