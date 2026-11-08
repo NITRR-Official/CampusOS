@@ -42,7 +42,17 @@ export class PluginService {
     try {
       const plugins = await Plugin.find(
         {},
-        { name: 1, enabled: 1, version: 1, settings: 1, _id: 0 }
+        {
+          name: 1,
+          enabled: 1,
+          version: 1,
+          settings: 1,
+          tier: 1,
+          trusted: 1,
+          requestedCapabilities: 1,
+          grantedCapabilities: 1,
+          _id: 0
+        }
       ).lean();
 
       // Inject configSchema for each plugin
