@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { PluginCapabilityBadge } from '@/components/admin/PluginCapabilityBadge';
 import { PluginUploadDropzone } from '@/components/admin/PluginUploadDropzone';
+import { MarketplaceGrid } from '@/components/marketplace/MarketplaceGrid';
 
 interface PluginSettingsConfig {
   type: string;
@@ -645,34 +646,7 @@ export default function AdminPluginsPage() {
 
       {/* TAB 3: MARKETPLACE */}
       {activeTab === 'marketplace' && (
-        <div className="text-center py-16 space-y-4 max-w-xl mx-auto border border-dashed border-border/80 rounded-2xl bg-card/30 p-8">
-          <div className="size-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-            <Store className="size-8" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-foreground">
-              CampusOS Community Marketplace
-            </h3>
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              Explore and install verified extensions, themes, and department
-              modules directly from the verified community registry.
-            </p>
-          </div>
-          <div className="pt-2">
-            <Button
-              onClick={() => {
-                toast({
-                  title: 'Marketplace Integration',
-                  description:
-                    'Marketplace Catalog service is initializing (Sub-Issue #165).'
-                });
-              }}
-              className="text-xs font-semibold"
-            >
-              Browse Public Catalog
-            </Button>
-          </div>
-        </div>
+        <MarketplaceGrid onPluginInstalled={loadPlugins} />
       )}
     </div>
   );
