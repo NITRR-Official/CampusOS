@@ -1,8 +1,12 @@
+import { installPluginPackage } from './plugin-installer.service.js';
+
 let Plugin;
 let globalRegistry;
+let globalEventBus;
 
-export function initPluginService(registry) {
+export function initPluginService(registry, eventBus) {
   globalRegistry = registry;
+  globalEventBus = eventBus || registry?.getService('eventBus', false);
   const models = registry.getService('core:models');
   if (models && models.Plugin) {
     Plugin = models.Plugin;
@@ -11,6 +15,26 @@ export function initPluginService(registry) {
   }
 }
 export class PluginService {
+  constructor(options = {}) {
+    this.pluginsDir = options.pluginsDir;
+  }
+
+  setPluginsDir(dir) {
+    this.pluginsDir = dir;
+  }
+
+  /**
+   * Install a plugin package from a zip file or remote URL (Issue #163)
+   */
+  async installPlugin(options = {}) {
+    return installPluginPackage({
+      ...options,
+      pluginsDir: options.pluginsDir || this.pluginsDir,
+      dbModel: Plugin,
+      eventBus: globalEventBus
+    });
+  }
+
   /**
    * Get all installed plugins and their status
    */

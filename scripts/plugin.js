@@ -1,14 +1,17 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import AdmZip from 'adm-zip';
-import { execSync } from 'child_process';
-import os from 'os';
 import {
   validatePluginManifest,
   PluginContractError
 } from '../shared/src/plugin-contract.js';
 import { buildPluginFrontend } from './build-plugin-frontend.js';
+import {
+  validatePluginZip,
+  installPluginPackage
+} from '../plugins/plugin-manager/backend/src/service/plugin-installer.service.js';
+
+export { validatePluginZip, installPluginPackage };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -262,158 +265,6 @@ export function validatePluginDirectory(pluginDir, options = {}) {
 }
 
 /**
- * Validates a plugin zip archive before extraction.
- * Protects against Zip Slip, validates manifest schema, and verifies backend entrypoint.
- * @param {AdmZip|string} zipOrPath - AdmZip instance or file path to zip
- * @returns {{ valid: boolean, errors: string[], warnings: string[], manifest?: object, basePath?: string, zip?: AdmZip }}
- */
-export function validatePluginZip(zipOrPath) {
-  const errors = [];
-  const warnings = [];
-
-  let zip;
-  if (typeof zipOrPath === 'string') {
-    if (!fs.existsSync(zipOrPath)) {
-      return {
-        valid: false,
-        errors: [`Zip archive file not found: ${zipOrPath}`],
-        warnings: []
-      };
-    }
-    try {
-      zip = new AdmZip(zipOrPath);
-    } catch (err) {
-      return {
-        valid: false,
-        errors: [`Failed to read zip archive: ${err.message}`],
-        warnings: []
-      };
-    }
-  } else {
-    zip = zipOrPath;
-  }
-
-  const zipEntries = zip.getEntries();
-  if (zipEntries.length === 0) {
-    return {
-      valid: false,
-      errors: ['Zip archive is empty'],
-      warnings: []
-    };
-  }
-
-  // 1. Zip Slip / Path Traversal Protection
-  for (const entry of zipEntries) {
-    const entryName = entry.entryName;
-    const parts = entryName.split(/[\/\\]/);
-    if (
-      parts.includes('..') ||
-      path.isAbsolute(entryName) ||
-      entryName.startsWith('/') ||
-      entryName.startsWith('\\') ||
-      /^[a-zA-Z]:/.test(entryName)
-    ) {
-      errors.push(
-        `Security violation (Zip Slip): entry '${entryName}' contains dangerous path traversal`
-      );
-    }
-  }
-
-  if (errors.length > 0) {
-    return { valid: false, errors, warnings, zip };
-  }
-
-  // 2. Locate plugin.json
-  const manifestEntry = zipEntries.find(
-    (e) => e.entryName === 'plugin.json' || e.entryName.endsWith('/plugin.json')
-  );
-
-  if (!manifestEntry) {
-    errors.push("Invalid plugin archive: no 'plugin.json' manifest found");
-    return { valid: false, errors, warnings, zip };
-  }
-
-  const basePath = manifestEntry.entryName.replace('plugin.json', '');
-
-  let rawManifest;
-  try {
-    const manifestContent = zip.readAsText(manifestEntry);
-    rawManifest = JSON.parse(manifestContent);
-  } catch (err) {
-    errors.push(
-      `'plugin.json' in archive contains invalid JSON: ${err.message}`
-    );
-    return { valid: false, errors, warnings, zip };
-  }
-
-  let manifest;
-  try {
-    manifest = validatePluginManifest(rawManifest);
-  } catch (err) {
-    if (err instanceof PluginContractError && err.details) {
-      if (Array.isArray(err.details)) {
-        err.details.forEach((d) => {
-          errors.push(
-            `Manifest schema: [${d.path.join('.') || 'root'}]: ${d.message}`
-          );
-        });
-      } else {
-        errors.push(err.message);
-      }
-    } else {
-      errors.push(`Manifest validation failed: ${err.message}`);
-    }
-    return {
-      valid: false,
-      errors,
-      warnings,
-      manifest: rawManifest,
-      basePath,
-      zip
-    };
-  }
-
-  // 3. Verify backend entrypoint if backend !== false
-  if (manifest.backend !== false) {
-    const indexEntryPath = `${basePath}backend/src/index.js`;
-    const pluginEntryPath = `${basePath}backend/plugin.js`;
-
-    const backendEntry = zipEntries.find(
-      (e) => e.entryName === indexEntryPath || e.entryName === pluginEntryPath
-    );
-
-    if (!backendEntry) {
-      errors.push(
-        "Archive missing required backend entrypoint: 'backend/src/index.js' (or 'backend/plugin.js')"
-      );
-    } else {
-      const backendContent = zip.readAsText(backendEntry);
-      const exportsInit =
-        /export\s+(async\s+)?function\s+init\b/.test(backendContent) ||
-        /export\s+(const|let|var)\s+init\b/.test(backendContent) ||
-        /export\s*\{[^}]*\binit\b/.test(backendContent) ||
-        /exports\.init\s*=/.test(backendContent) ||
-        /module\.exports\s*=\s*\{[^}]*\binit\b/.test(backendContent);
-
-      if (!exportsInit) {
-        errors.push(
-          `Backend entrypoint in archive ('${backendEntry.entryName}') does not export an 'init' function`
-        );
-      }
-    }
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-    warnings,
-    manifest,
-    basePath,
-    zip
-  };
-}
-
-/**
  * Validates a target (name in plugins/, directory path, or zip path).
  * Formats results with colors and icons.
  * @param {string} [target] - Plugin name, folder path, zip path, or undefined (validates all)
@@ -611,7 +462,7 @@ export function validatePlugin(target, options = {}) {
   return true;
 }
 
-function generateNextjsWrapper(pluginName) {
+function generateNextjsWrapper() {
   // Deprecated in favor of generic catch-all routes (ADR-018 / Issue #159):
   // - Global plugins mount dynamically at /plugins/[pluginId]/[[...path]]
   // - Workspace plugins mount dynamically at /workspace/[slug]/plugins/[pluginId]/[[...path]]
@@ -825,7 +676,7 @@ function installFromDirectory(absoluteSource) {
   return pluginName;
 }
 
-function installPlugin(sourcePath) {
+async function installPlugin(sourcePath) {
   if (!sourcePath) {
     console.error(
       '❌ Error: Please provide a source path (.zip, folder, or GitHub repo).'
@@ -849,27 +700,16 @@ function installPlugin(sourcePath) {
     /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/.test(sourcePath);
 
   if (isGithubUrl) {
-    const repoUrl = sourcePath.startsWith('http')
-      ? sourcePath
-      : `https://github.com/${sourcePath}.git`;
-    console.log(`🌐 Fetching plugin from GitHub: ${repoUrl}`);
-
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'campusos-plugin-'));
-    try {
-      execSync(`git clone --depth 1 ${repoUrl} ${tempDir}`, {
-        stdio: 'inherit'
-      });
-      fs.rmSync(path.join(tempDir, '.git'), { recursive: true, force: true });
-
-      pluginName = installFromDirectory(tempDir);
-    } catch (error) {
-      console.error(`❌ Error cloning repository: ${error.message}`);
+    console.log(`🌐 Fetching plugin from GitHub/URL: ${sourcePath}`);
+    const result = await installPluginPackage({
+      packageUrl: sourcePath,
+      pluginsDir: PLUGINS_DIR
+    });
+    if (!result.success) {
+      console.error(`❌ Cannot install plugin: ${result.error}`);
       process.exit(1);
-    } finally {
-      if (fs.existsSync(tempDir)) {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-      }
     }
+    pluginName = result.plugin.name;
   } else {
     const absoluteSource = path.resolve(sourcePath);
     if (!fs.existsSync(absoluteSource)) {
@@ -880,44 +720,16 @@ function installPlugin(sourcePath) {
     const stat = fs.statSync(absoluteSource);
 
     if (stat.isFile() && absoluteSource.endsWith('.zip')) {
-      console.log(`📦 Inspecting zip archive: ${sourcePath}...`);
-      const validation = validatePluginZip(absoluteSource);
-      if (!validation.valid) {
-        console.error('❌ Cannot install plugin: archive validation failed.');
-        validation.errors.forEach((err) => console.error(`   ✗ ${err}`));
+      console.log(`📦 Installing zip archive: ${sourcePath}...`);
+      const result = await installPluginPackage({
+        file: { path: absoluteSource },
+        pluginsDir: PLUGINS_DIR
+      });
+      if (!result.success) {
+        console.error(`❌ Cannot install plugin: ${result.error}`);
         process.exit(1);
       }
-
-      pluginName = validation.manifest.name;
-      const targetDir = path.join(PLUGINS_DIR, pluginName);
-      if (fs.existsSync(targetDir)) {
-        console.error(
-          `❌ Error: Plugin directory already exists at ${targetDir}. Please uninstall it first.`
-        );
-        process.exit(1);
-      }
-
-      console.log(`📦 Extracting validated zip archive: ${sourcePath}...`);
-      const zip = validation.zip;
-      const basePath = validation.basePath;
-      fs.mkdirSync(targetDir, { recursive: true });
-
-      const zipEntries = zip.getEntries();
-      for (const entry of zipEntries) {
-        if (entry.entryName.startsWith(basePath) && !entry.isDirectory) {
-          const relativePath = entry.entryName.substring(basePath.length);
-          const destPath = path.resolve(targetDir, relativePath);
-          if (!destPath.startsWith(path.resolve(targetDir))) {
-            console.error(
-              `❌ Security error: Path traversal detected for entry ${entry.entryName}`
-            );
-            fs.rmSync(targetDir, { recursive: true, force: true });
-            process.exit(1);
-          }
-          fs.mkdirSync(path.dirname(destPath), { recursive: true });
-          fs.writeFileSync(destPath, entry.getData());
-        }
-      }
+      pluginName = result.plugin.name;
     } else if (stat.isDirectory()) {
       pluginName = installFromDirectory(absoluteSource);
     } else {
@@ -973,7 +785,7 @@ if (isMain) {
       createPlugin(args[1]);
       break;
     case 'install':
-      installPlugin(args[1]);
+      await installPlugin(args[1]);
       break;
     case 'uninstall':
       uninstallPlugin(args[1]);

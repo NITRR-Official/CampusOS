@@ -1,3 +1,12 @@
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterAll,
+  vi
+} from 'vitest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import {
   connectDB,
@@ -31,7 +40,7 @@ describe('PluginService', () => {
         }
         return null;
       },
-      getSettingsConfig: (name) => ({})
+      getSettingsConfig: () => ({})
     };
 
     initPluginService(mockRegistry);
