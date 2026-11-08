@@ -612,111 +612,11 @@ export function validatePlugin(target, options = {}) {
 }
 
 function generateNextjsWrapper(pluginName) {
-  const pluginFrontendAppDir = path.join(
-    PLUGINS_DIR,
-    pluginName,
-    'frontend',
-    'app'
-  );
-
-  if (fs.existsSync(pluginFrontendAppDir)) {
-    const walkSync = (dir, filelist = []) => {
-      fs.readdirSync(dir).forEach((file) => {
-        const filepath = path.join(dir, file);
-        if (fs.statSync(filepath).isDirectory()) {
-          filelist = walkSync(filepath, filelist);
-        } else {
-          filelist.push(filepath);
-        }
-      });
-      return filelist;
-    };
-
-    const appFiles = walkSync(pluginFrontendAppDir);
-
-    appFiles.forEach((file) => {
-      const basename = path.basename(file);
-      if (
-        ![
-          'page.tsx',
-          'layout.tsx',
-          'loading.tsx',
-          'error.tsx',
-          'not-found.tsx'
-        ].includes(basename)
-      ) {
-        return;
-      }
-
-      const relativePath = path.relative(pluginFrontendAppDir, file);
-      const targetPath = path.join(__dirname, '../frontend/app', relativePath);
-      const targetDir = path.dirname(targetPath);
-
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
-      }
-
-      let importPath = relativePath.replace(/\\/g, '/');
-      if (importPath.endsWith('.tsx')) {
-        importPath = importPath.substring(0, importPath.length - 4);
-      }
-
-      const wrapperContent = `// AUTO-GENERATED - DO NOT EDIT\nexport * from '@plugins/${pluginName}/frontend/app/${importPath}';\nexport { default } from '@plugins/${pluginName}/frontend/app/${importPath}';\n`;
-
-      fs.writeFileSync(targetPath, wrapperContent, 'utf8');
-      console.log(
-        `✅ Generated Next.js wrapper route at frontend/app/${relativePath.replace(/\\/g, '/')}`
-      );
-    });
-
-    return;
-  }
-
-  const pluginFrontendPagesDir = path.join(
-    PLUGINS_DIR,
-    pluginName,
-    'frontend',
-    'pages'
-  );
-  if (!fs.existsSync(pluginFrontendPagesDir)) {
-    return;
-  }
-
-  const files = fs.readdirSync(pluginFrontendPagesDir);
-  const mainPageFile = files.find(
-    (f) => f.endsWith('Page.tsx') || f === 'index.tsx' || f === 'page.tsx'
-  );
-
-  if (mainPageFile) {
-    const mainPagePath = path.join(pluginFrontendPagesDir, mainPageFile);
-    const content = fs.readFileSync(mainPagePath, 'utf8');
-    if (!content.includes('export default')) {
-      console.log(
-        `⏭️  Skipping legacy wrapper for /${pluginName} (no default export found)`
-      );
-      return;
-    }
-
-    const componentNameMatch = mainPageFile.match(/^([a-zA-Z0-9]+)\.tsx$/);
-    let componentName = componentNameMatch
-      ? componentNameMatch[1]
-      : 'PluginPage';
-    if (componentName === 'index' || componentName === 'page') {
-      componentName = 'PluginPage';
-    }
-    const importName = mainPageFile.replace('.tsx', '');
-    const routeDir = path.join(FRONTEND_APP_DIR, pluginName);
-
-    if (!fs.existsSync(routeDir)) {
-      fs.mkdirSync(routeDir, { recursive: true });
-    }
-
-    const wrapperContent = `import ${componentName} from '@plugins/${pluginName}/frontend/pages/${importName}';\n\nexport default function Page() {\n  return <${componentName} />;\n}\n`;
-
-    const wrapperFile = path.join(routeDir, 'page.tsx');
-    fs.writeFileSync(wrapperFile, wrapperContent, 'utf8');
-    console.log(`✅ Generated legacy Next.js wrapper route at /${pluginName}`);
-  }
+  // Deprecated in favor of generic catch-all routes (ADR-018 / Issue #159):
+  // - Global plugins mount dynamically at /plugins/[pluginId]/[[...path]]
+  // - Workspace plugins mount dynamically at /workspace/[slug]/plugins/[pluginId]/[[...path]]
+  // No build-time wrapper files are generated inside frontend/app/.
+  return;
 }
 
 function removeNextjsWrapper(pluginName) {

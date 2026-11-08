@@ -24,6 +24,26 @@ const nextConfig: NextConfig = {
   transpilePackages: pluginPackages,
   experimental: {
     externalDir: true
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/recruitment',
+        destination: '/plugins/recruitment'
+      },
+      {
+        source: '/recruitment/:path*',
+        destination: '/plugins/recruitment/:path*'
+      },
+      {
+        source: '/workspace/:slug/recruitment',
+        destination: '/workspace/:slug/plugins/recruitment'
+      },
+      {
+        source: '/workspace/:slug/recruitment/:path*',
+        destination: '/workspace/:slug/plugins/recruitment/:path*'
+      }
+    ];
   }
 };
 

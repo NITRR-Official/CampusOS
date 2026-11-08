@@ -113,7 +113,7 @@ export async function loadPluginBundle(
   }
 
   const runtime = setupPluginRuntime();
-  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   const url =
     bundleUrl || `${baseApiUrl}/api/v1/plugins/${pluginName}/bundle.js`;
 

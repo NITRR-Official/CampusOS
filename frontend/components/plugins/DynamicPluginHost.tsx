@@ -12,6 +12,16 @@ export interface DynamicPluginHostProps {
   componentName?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   props?: Record<string, any>;
+  routeProps?: {
+    path?: string[];
+    slug?: string[];
+    context?: 'global' | 'workspace';
+    clubSlug?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    params?: Record<string, any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    searchParams?: Record<string, any>;
+  };
   fallback?: React.ReactNode;
   errorFallback?: (error: Error, retry: () => void) => React.ReactNode;
   className?: string;
@@ -102,6 +112,7 @@ export function DynamicPluginHost({
   cssUrl,
   componentName = 'default',
   props = {},
+  routeProps,
   fallback,
   errorFallback,
   className
@@ -120,7 +131,7 @@ export function DynamicPluginHost({
     try {
       // 1. Optionally attach CSS bundle if provided or available
       const baseApiUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
       const resolvedCssUrl =
         cssUrl || `${baseApiUrl}/api/v1/plugins/${pluginName}/bundle.css`;
 
@@ -229,7 +240,7 @@ export function DynamicPluginHost({
       onRetry={handleRetry}
     >
       <div className={className}>
-        <LoadedComponent {...props} />
+        <LoadedComponent {...props} routeProps={routeProps} />
       </div>
     </PluginErrorBoundary>
   );
