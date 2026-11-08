@@ -124,11 +124,41 @@ const hostVirtualModulesPlugin = {
         const runtime = (typeof window !== 'undefined' && (window.CampusOS || window.__CampusOS_Runtime__)) || {};
         export const registry = runtime.registry || (typeof window !== 'undefined' && window.CampusOS?.registry);
         export const ExtensionPoint = runtime.ExtensionPoint || (typeof window !== 'undefined' && window.CampusOS?.ExtensionPoint);
-        export default { registry, ExtensionPoint };
+        export const apiClient = runtime.apiClient || (typeof window !== 'undefined' && (window.CampusOS?.apiClient || window.__CampusOS_Runtime__?.apiClient));
+        export default { registry, ExtensionPoint, apiClient };
       `,
         loader: 'js'
       })
     );
+
+    // Intercept lucide-react (Issue #160)
+    build.onResolve({ filter: /^lucide-react$/ }, (args) => ({
+      path: args.path,
+      namespace: 'campusos-icons-virtual'
+    }));
+
+    build.onLoad({ filter: /.*/, namespace: 'campusos-icons-virtual' }, () => ({
+      contents: `
+        const runtime = (typeof window !== 'undefined' && (window.CampusOS || window.__CampusOS_Runtime__)) || {};
+        const icons = runtime.icons || (typeof window !== 'undefined' && window.__CampusOS_Icons__) || {};
+
+        export const {
+          Activity, AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, Award,
+          BookOpen, Briefcase, Calendar, Check, CheckCircle, CheckCircle2,
+          CheckSquare, ChevronDown, ChevronLeft, ChevronRight, ChevronUp,
+          Clock, Copy, Download, Edit, Edit2, ExternalLink, Eye, EyeOff,
+          FileText, Filter, Folder, Globe, GripVertical, HelpCircle, Home,
+          Info, LayoutGrid, List, Loader2, Lock, LogOut, Mail, MapPin,
+          Menu, MoreHorizontal, MoreVertical, Plus, PlusCircle, RefreshCw,
+          Search, Settings, Share2, Shield, ShieldAlert, Sparkles, Star,
+          Tag, Target, Trash, Trash2, Upload, User, UserCheck, UserPlus,
+          Users, X, XCircle
+        } = icons;
+
+        export default icons;
+      `,
+      loader: 'js'
+    }));
   }
 };
 

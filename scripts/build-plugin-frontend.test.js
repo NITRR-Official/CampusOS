@@ -97,6 +97,52 @@ describe('Standalone Plugin Frontend Bundler (Issue #118)', () => {
     expect(result.sizeBytes).toBeLessThan(15000);
   });
 
+  it('shims lucide-react and apiClient to host runtime environment (Issue #160)', async () => {
+    const pluginDir = path.join(tempDir, 'icons-plugin');
+    const frontendDir = path.join(pluginDir, 'frontend');
+    fs.mkdirSync(frontendDir, { recursive: true });
+
+    fs.writeFileSync(
+      path.join(frontendDir, 'index.tsx'),
+      `
+      import React from 'react';
+      import { Calendar, Users, Plus } from 'lucide-react';
+      import { apiClient } from '@campus-os/shared';
+
+      export default function EventsWidget() {
+        if (apiClient) {
+          console.log('Using apiClient');
+        }
+        return (
+          <div>
+            <Calendar />
+            <Users />
+            <Plus />
+          </div>
+        );
+      }
+      `
+    );
+
+    const result = await buildPluginFrontend('icons-plugin', {
+      pluginsDir: tempDir
+    });
+
+    expect(fs.existsSync(result.outfile)).toBe(true);
+    const bundleContent = fs.readFileSync(result.outfile, 'utf8');
+
+    // Should NOT have bare specifier imports for lucide-react or shared
+    expect(bundleContent).not.toMatch(/from\s+['"]lucide-react['"]/);
+    expect(bundleContent).not.toMatch(/from\s+['"]@campus-os\/shared['"]/);
+
+    // Should resolve to host runtime icons and apiClient
+    expect(bundleContent).toContain('window.__CampusOS_Icons__');
+    expect(bundleContent).toContain('apiClient');
+
+    // Bundle should remain lightweight (< 15KB) because lucide-react was not packed
+    expect(result.sizeBytes).toBeLessThan(15000);
+  });
+
   it('throws an error if plugin directory does not exist', async () => {
     await expect(
       buildPluginFrontend('non-existent', { pluginsDir: tempDir })
