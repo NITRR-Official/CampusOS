@@ -9,7 +9,7 @@ import { buildPluginFrontend } from './build-plugin-frontend.js';
 import {
   validatePluginZip,
   installPluginPackage
-} from '../plugins/plugin-manager/backend/src/service/plugin-installer.service.js';
+} from '../backend/src/services/plugin-installer.service.js';
 
 export { validatePluginZip, installPluginPackage };
 

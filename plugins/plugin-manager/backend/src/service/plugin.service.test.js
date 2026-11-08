@@ -38,6 +38,15 @@ describe('PluginService', () => {
         if (name === 'core:models') {
           return { Plugin };
         }
+        if (name === 'core:plugin_installer') {
+          return {
+            installPluginPackage: vi.fn().mockResolvedValue({
+              success: true,
+              statusCode: 201,
+              message: "Plugin 'test-plugin' installed successfully"
+            })
+          };
+        }
         return null;
       },
       getSettingsConfig: () => ({})
@@ -101,6 +110,15 @@ describe('PluginService', () => {
 
       killSpy.mockRestore();
       vi.useRealTimers();
+    });
+  });
+
+  describe('installPlugin', () => {
+    it('should delegate installation to core:plugin_installer service', async () => {
+      const result = await service.installPlugin({ packageUrl: 'owner/repo' });
+      expect(result.success).toBe(true);
+      expect(result.statusCode).toBe(201);
+      expect(result.message).toContain('installed successfully');
     });
   });
 });

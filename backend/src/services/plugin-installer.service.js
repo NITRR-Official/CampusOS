@@ -7,21 +7,17 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { fileURLToPath } from 'url';
 import AdmZip from 'adm-zip';
 import {
   validatePluginManifest,
   PluginContractError
 } from '@campus-os/shared/plugin-contract';
-import { buildPluginFrontend } from '../../../../../scripts/build-plugin-frontend.js';
+import {
+  buildPluginFrontend,
+  DEFAULT_PLUGINS_DIR
+} from './plugin-bundler.service.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export const DEFAULT_PLUGINS_DIR = path.resolve(
-  __dirname,
-  '../../../../../plugins'
-);
+export { DEFAULT_PLUGINS_DIR };
 
 /**
  * Validates a plugin zip archive before extraction.
@@ -347,6 +343,7 @@ export async function installPluginPackage({
     if (hasFrontend && !bundleExists && buildFrontend) {
       try {
         await buildPluginFrontend(pluginName, {
+          pluginsDir,
           minify: process.env.NODE_ENV === 'production'
         });
       } catch (buildErr) {

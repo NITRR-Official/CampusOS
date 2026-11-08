@@ -8,7 +8,7 @@ import {
   validatePluginZip,
   checkCrossPluginImports,
   validatePlugin
-} from '../../../scripts/plugin.js';
+} from './plugin.js';
 
 describe('Plugin Validator & Secure Package Installer (Issue #115)', () => {
   let tempDir;

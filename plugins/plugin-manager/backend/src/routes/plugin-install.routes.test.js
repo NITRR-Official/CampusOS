@@ -35,10 +35,36 @@ describe('Plugin Installation API (POST /api/v1/plugins/install - Issue #163)', 
       emitAsync: vi.fn()
     };
 
+    const mockInstaller = {
+      installPluginPackage: vi
+        .fn()
+        .mockImplementation(async ({ file, packageUrl }) => {
+          if (
+            file?.originalname?.includes('evil') ||
+            file?.path?.includes('evil')
+          ) {
+            return {
+              success: false,
+              statusCode: 400,
+              error:
+                'Security violation (Zip Slip): entry contains dangerous path traversal'
+            };
+          }
+          const name = file ? 'upload-success-plugin' : 'url-plugin';
+          return {
+            success: true,
+            statusCode: 201,
+            message: `Plugin '${name}' installed successfully`,
+            plugin: { name, version: '1.0.0' }
+          };
+        })
+    };
+
     const mockRegistry = {
       getService: (name) => {
         if (name === 'core:models') return { Plugin: mockPluginModel };
         if (name === 'eventBus') return mockEventBus;
+        if (name === 'core:plugin_installer') return mockInstaller;
         return null;
       },
       getSettingsConfig: () => ({})

@@ -25,6 +25,30 @@ module.exports = {
       to: {
         path: '^backend/'
       }
+    },
+    {
+      name: 'no-plugin-to-scripts-imports',
+      comment:
+        'Plugins must not import from scripts. CLI tooling must not be a dependency of plugins.',
+      severity: 'error',
+      from: {
+        path: '^plugins/'
+      },
+      to: {
+        path: '^scripts/'
+      }
+    },
+    {
+      name: 'no-backend-to-scripts-imports',
+      comment:
+        'Backend code must not import from scripts. CLI scripts may import backend services, not vice versa.',
+      severity: 'error',
+      from: {
+        path: '^backend/'
+      },
+      to: {
+        path: '^scripts/'
+      }
     }
   ],
   options: {

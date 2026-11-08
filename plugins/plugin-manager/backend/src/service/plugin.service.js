@@ -1,5 +1,3 @@
-import { installPluginPackage } from './plugin-installer.service.js';
-
 let Plugin;
 let globalRegistry;
 let globalEventBus;
@@ -27,7 +25,17 @@ export class PluginService {
    * Install a plugin package from a zip file or remote URL (Issue #163)
    */
   async installPlugin(options = {}) {
-    return installPluginPackage({
+    const installer =
+      globalRegistry?.getService('core:plugin_installer', false) ||
+      options.installer;
+
+    if (!installer?.installPluginPackage) {
+      throw new Error(
+        'Plugin installer service (core:plugin_installer) not available in registry'
+      );
+    }
+
+    return installer.installPluginPackage({
       ...options,
       pluginsDir: options.pluginsDir || this.pluginsDir,
       dbModel: Plugin,
