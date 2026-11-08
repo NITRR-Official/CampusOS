@@ -381,7 +381,7 @@ Dark mode is supported throughout the application. Use the `.dark` class or `dar
 </div>
 ```
 
-## 10. Plugin Runtime Environment & Design System Exposure (PR #131)
+## 10. Plugin Runtime Environment & Design System Exposure (PR #131 / Issue #160)
 
 To allow plugins to render seamless UI widgets without bundling duplicate copies of UI primitives:
 
@@ -389,7 +389,27 @@ To allow plugins to render seamless UI widgets without bundling duplicate copies
    ```javascript
    window.CampusOS = {
      ui: {
-       Button, Card, CardHeader, CardTitle, Dialog, Input, Badge, ...
+       Avatar,
+       Badge,
+       Breadcrumb,
+       Button,
+       Card,
+       Checkbox,
+       Dialog,
+       DropdownMenu,
+       Form,
+       Input,
+       Label,
+       ScrollArea,
+       Select,
+       Separator,
+       Sheet,
+       Sidebar,
+       Skeleton,
+       Table,
+       Textarea,
+       Toast,
+       Tooltip
      }
    };
    ```
@@ -400,6 +420,379 @@ To allow plugins to render seamless UI widgets without bundling duplicate copies
    export { Button, Card };
    ```
 3. **Zero Bundle Overhead**: Plugin bundles stay lightweight (< 15KB) and automatically inherit platform dark/light themes, focus rings, and radius variables.
+
+## 11. Complete 21-Component API Reference
+
+All 21 UI components below are exported directly by `@campusos/design-system` and are available both in the core Next.js shell and inside plugin bundles.
+
+### 1. Button
+
+Variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`.  
+Sizes: `default` (h-9), `sm` (h-8), `lg` (h-10), `icon` (size-9).
+
+```tsx
+import { Button } from '@campusos/design-system';
+
+<Button variant="outline" size="sm" onClick={() => console.log('Clicked')}>
+  Click Me
+</Button>;
+```
+
+### 2. Badge
+
+Variants: `default`, `secondary`, `destructive`, `outline`.
+
+```tsx
+import { Badge } from '@campusos/design-system';
+
+<Badge variant="secondary">Active</Badge>;
+```
+
+### 3. Card
+
+Compound components: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`.
+
+```tsx
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
+} from '@campusos/design-system';
+
+<Card>
+  <CardHeader>
+    <CardTitle>Card Title</CardTitle>
+    <CardDescription>Supporting description</CardDescription>
+  </CardHeader>
+  <CardContent>Body content</CardContent>
+</Card>;
+```
+
+### 4. Input & Textarea
+
+Standard accessible inputs with focus rings and disabled states.
+
+```tsx
+import { Input, Textarea, Label } from '@campusos/design-system';
+
+<Label htmlFor="title">Title</Label>
+<Input id="title" placeholder="Enter title" />
+<Textarea placeholder="Enter detailed description" rows={3} />
+```
+
+### 5. Checkbox
+
+```tsx
+import { Checkbox, Label } from '@campusos/design-system';
+
+<div className="flex items-center space-x-2">
+  <Checkbox id="terms" />
+  <Label htmlFor="terms">Accept terms & conditions</Label>
+</div>;
+```
+
+### 6. Select
+
+Accessible dropdown select powered by Radix UI.
+
+```tsx
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@campusos/design-system';
+
+<Select onValueChange={(val) => console.log(val)}>
+  <SelectTrigger className="w-[180px]">
+    <SelectValue placeholder="Select role" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="admin">Administrator</SelectItem>
+    <SelectItem value="member">Club Member</SelectItem>
+  </SelectContent>
+</Select>;
+```
+
+### 7. Dialog (Modal)
+
+Compound components: `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`.
+
+```tsx
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Button
+} from '@campusos/design-system';
+
+<Dialog>
+  <DialogTrigger asChild>
+    <Button>Open Modal</Button>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Confirmation</DialogTitle>
+    </DialogHeader>
+    <p className="text-sm text-muted-foreground">Are you sure?</p>
+  </DialogContent>
+</Dialog>;
+```
+
+### 8. DropdownMenu
+
+Action menus, overflow menus, and profile triggers.
+
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  Button
+} from '@campusos/design-system';
+
+<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="ghost" size="sm">
+      Actions
+    </Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem onClick={() => {}}>Edit</DropdownMenuItem>
+    <DropdownMenuItem onClick={() => {}}>Delete</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>;
+```
+
+### 9. Sheet (Slide-Over Drawer)
+
+Slide-over panels from `top`, `bottom`, `left`, or `right` side of the viewport.
+
+```tsx
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  Button
+} from '@campusos/design-system';
+
+<Sheet>
+  <SheetTrigger asChild>
+    <Button variant="outline">Open Drawer</Button>
+  </SheetTrigger>
+  <SheetContent side="right">
+    <SheetHeader>
+      <SheetTitle>Filter Settings</SheetTitle>
+    </SheetHeader>
+    <div className="py-4">Filter controls...</div>
+  </SheetContent>
+</Sheet>;
+```
+
+### 10. Table
+
+Data table presentation components: `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell`.
+
+```tsx
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
+} from '@campusos/design-system';
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Plugin</TableHead>
+      <TableHead>Status</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell className="font-medium">Events</TableCell>
+      <TableCell>Active</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>;
+```
+
+### 11. Toast
+
+Notification system with `useToast` hook.
+
+```tsx
+import { useToast, Button } from '@campusos/design-system';
+
+function MyWidget() {
+  const { toast } = useToast();
+  return (
+    <Button
+      onClick={() =>
+        toast({ title: 'Saved!', description: 'Changes persisted.' })
+      }
+    >
+      Show Toast
+    </Button>
+  );
+}
+```
+
+### 12. Tooltip
+
+```tsx
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+  Button
+} from '@campusos/design-system';
+
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button variant="outline" size="icon">
+        ?
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>Helpful tooltip text</p>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>;
+```
+
+### 13. Avatar
+
+User and organization profile pictures with fallback initials.
+
+```tsx
+import { Avatar, AvatarImage, AvatarFallback } from '@campusos/design-system';
+
+<Avatar>
+  <AvatarImage src="/avatar.png" alt="User" />
+  <AvatarFallback>JD</AvatarFallback>
+</Avatar>;
+```
+
+### 14. Breadcrumb
+
+Hierarchical page location trail.
+
+```tsx
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage
+} from '@campusos/design-system';
+
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbPage>Plugins</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>;
+```
+
+### 15. Form
+
+Accessible React Hook Form integration with validation messaging.
+
+```tsx
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage
+} from '@campusos/design-system';
+```
+
+### 16. ScrollArea
+
+Custom scrollbar container for constrained viewports.
+
+```tsx
+import { ScrollArea } from '@campusos/design-system';
+
+<ScrollArea className="h-48 w-full rounded-md border p-4">
+  Scrollable content...
+</ScrollArea>;
+```
+
+### 17. Separator
+
+Horizontal or vertical divider rule.
+
+```tsx
+import { Separator } from '@campusos/design-system';
+
+<Separator className="my-4" />;
+```
+
+### 18. Sidebar
+
+Primary navigation shell with responsive rail and drawer states.
+
+```tsx
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton
+} from '@campusos/design-system';
+```
+
+### 19. Skeleton
+
+Loading placeholders for content layouts.
+
+```tsx
+import { Skeleton, CardSkeleton } from '@campusos/design-system';
+
+<Skeleton className="h-4 w-32" />
+<CardSkeleton />
+```
+
+### 20. Label
+
+Accessible HTML form labels.
+
+```tsx
+import { Label } from '@campusos/design-system';
+
+<Label htmlFor="email">Email Address</Label>;
+```
+
+### 21. ThemeProvider
+
+Context provider managing dark/light modes and CSS variables.
+
+```tsx
+import { ThemeProvider } from '@campusos/design-system';
+```
 
 ## Resources
 
