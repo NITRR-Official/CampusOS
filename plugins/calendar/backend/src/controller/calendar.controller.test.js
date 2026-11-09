@@ -21,7 +21,8 @@ import { createCalendarController } from './calendar.controller.js';
 import { registerCalendarRoutes } from '../routes/calendar.routes.js';
 import {
   createCalendarEventSchema,
-  queryCalendarEventsSchema
+  queryCalendarEventsSchema,
+  updateCalendarEventSchema
 } from '../schema/calendar.schema.js';
 
 const LONG_TIMEOUT = 120000;
@@ -120,6 +121,61 @@ describe('Calendar controller and middleware wiring', () => {
       expect(deleteRes.statusCode).toBe(200);
       expect(emit).toHaveBeenCalledTimes(1);
       expect(emit).toHaveBeenCalledWith('calendar:deleted', { eventId: id });
+    });
+
+    it('emits calendar:updated with id + eventType after a successful update', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+
+      const createRes = makeRes();
+      await controller.create(
+        { body: validBody, user: { id: 'user-1' } },
+        createRes,
+        vi.fn()
+      );
+      const { id } = createRes.body.data;
+      emit.mockClear();
+
+      const updateRes = makeRes();
+      // Capture the response status at emit time to prove the event fires
+      // only after the successful response has been written.
+      let statusAtEmit;
+      emit.mockImplementation(() => {
+        statusAtEmit = updateRes.statusCode;
+      });
+
+      await controller.update(
+        {
+          params: { eventId: id },
+          body: { title: 'Renamed Sync', eventType: 'milestone' },
+          user: { id: 'user-1' }
+        },
+        updateRes,
+        vi.fn()
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(emit).toHaveBeenCalledWith('calendar:updated', {
+        eventId: id,
+        eventType: 'milestone'
+      });
+      expect(statusAtEmit).toBe(200);
+    });
+
+    it('does not emit calendar:updated when the event does not exist', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+      const next = vi.fn();
+
+      await controller.update(
+        { params: { eventId: 'missing-id' }, body: { title: 'Renamed Sync' } },
+        makeRes(),
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(emit).not.toHaveBeenCalled();
     });
 
     it('does not emit when validation fails', async () => {
@@ -375,12 +431,197 @@ describe('Calendar controller and middleware wiring', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Issue #23 - PATCH /api/v1/calendar/:eventId
+  // ---------------------------------------------------------------------------
+
+  describe('event update', () => {
+    const datedBody = {
+      ...validBody,
+      startsAt: '2025-06-01T09:00:00.000Z',
+      endsAt: '2025-06-01T10:00:00.000Z',
+      description: 'Weekly sync'
+    };
+
+    async function createStored(body = datedBody) {
+      return service.createEvent({ ...body, createdBy: 'user-1' });
+    }
+
+    // Runs the update handler through the real error middleware so failures
+    // are asserted on the HTTP response the client would actually receive.
+    async function patch(eventId, body) {
+      const controller = createCalendarController();
+      const req = {
+        params: { eventId },
+        body,
+        user: { id: 'u', role: 'admin' }
+      };
+      const res = makeRes();
+      await controller.update(req, res, (err) => {
+        errorMiddleware(err, req, res, () => {});
+      });
+      return res;
+    }
+
+    function erroredFields(res) {
+      return res.body.details.map((d) => d.field);
+    }
+
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    it('updates only the supplied fields and persists the change', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, { title: 'Renamed Sync' });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data).toMatchObject({
+        id: created.id,
+        title: 'Renamed Sync',
+        eventType: created.eventType,
+        startsAt: created.startsAt,
+        endsAt: created.endsAt,
+        description: created.description,
+        createdBy: 'user-1'
+      });
+
+      const stored = await service.getEvent(created.id);
+      expect(stored.title).toBe('Renamed Sync');
+      expect(stored.description).toBe('Weekly sync');
+    });
+
+    it('accepts a startsAt-only change that stays before the stored endsAt', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, {
+        startsAt: '2025-06-01T09:30:00.000Z'
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.startsAt).toBe('2025-06-01T09:30:00.000Z');
+      expect(res.body.data.endsAt).toBe(created.endsAt);
+    });
+
+    it('rejects an endsAt-only change that falls before the stored startsAt', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, {
+        endsAt: '2025-06-01T08:00:00.000Z'
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Validation Error');
+      expect(erroredFields(res)).toContain('endsAt');
+      expect(await service.getEvent(created.id)).toEqual(created);
+    });
+
+    it('rejects a startsAt-only change that moves past the stored endsAt', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, {
+        startsAt: '2025-06-01T11:00:00.000Z'
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(erroredFields(res)).toContain('endsAt');
+      expect(await service.getEvent(created.id)).toEqual(created);
+    });
+
+    it('allows any startsAt when the stored event has no endsAt', async () => {
+      const created = await createStored(validBody);
+
+      const res = await patch(created.id, {
+        startsAt: '2030-01-01T00:00:00.000Z'
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.startsAt).toBe('2030-01-01T00:00:00.000Z');
+      expect(res.body.data.endsAt).toBeNull();
+    });
+
+    it('clears endsAt when it is explicitly set to null', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, { endsAt: null });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.endsAt).toBeNull();
+    });
+
+    it('rejects a body whose own dates form an invalid range', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, {
+        startsAt: '2025-07-01T10:00:00.000Z',
+        endsAt: '2025-07-01T09:00:00.000Z'
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(erroredFields(res)).toContain('endsAt');
+      expect(await service.getEvent(created.id)).toEqual(created);
+    });
+
+    it('rejects invalid field values with the create rules', async () => {
+      const created = await createStored();
+
+      const res = await patch(created.id, {
+        title: 'ab',
+        eventType: 'party',
+        startsAt: 'not-a-date'
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(erroredFields(res)).toEqual(
+        expect.arrayContaining(['title', 'eventType', 'startsAt'])
+      );
+    });
+
+    it('rejects an empty body and fields that are not editable', () => {
+      expect(updateCalendarEventSchema.safeParse({}).success).toBe(false);
+      expect(
+        updateCalendarEventSchema.safeParse({ createdBy: 'someone-else' })
+          .success
+      ).toBe(false);
+      expect(
+        updateCalendarEventSchema.safeParse({ status: 'cancelled' }).success
+      ).toBe(false);
+    });
+
+    it('responds 404 CALENDAR_EVENT_NOT_FOUND for a missing event', async () => {
+      const res = await patch('missing-id', { title: 'Renamed Sync' });
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe('CALENDAR_EVENT_NOT_FOUND');
+    });
+
+    it('responds 404 rather than 400 for a date-only change to a missing event', async () => {
+      const res = await patch('missing-id', {
+        endsAt: '2025-06-01T08:00:00.000Z'
+      });
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe('CALENDAR_EVENT_NOT_FOUND');
+    });
+
+    it('validates the body before touching the service', async () => {
+      const updateSpy = vi.spyOn(service, 'updateEvent');
+
+      const res = await patch('any-id', { title: 'x' });
+
+      expect(res.statusCode).toBe(400);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Task 7.2 - Route authorization (Req 11.1 - 11.7)
   // ---------------------------------------------------------------------------
 
   describe('route authorization', () => {
     function makeFakeApp() {
-      const routes = { get: {}, post: {}, delete: {} };
+      const routes = { get: {}, post: {}, patch: {}, delete: {} };
       return {
         routes,
         get(path, ...handlers) {
@@ -388,6 +629,9 @@ describe('Calendar controller and middleware wiring', () => {
         },
         post(path, ...handlers) {
           routes.post[path] = handlers;
+        },
+        patch(path, ...handlers) {
+          routes.patch[path] = handlers;
         },
         delete(path, ...handlers) {
           routes.delete[path] = handlers;
@@ -494,6 +738,77 @@ describe('Calendar controller and middleware wiring', () => {
       expect(advanced).toBe(false);
       expect(res.statusCode).toBe(403);
       expect(deleteSpy).not.toHaveBeenCalled();
+    });
+
+    it('registers PATCH behind the calendar:manage guard (issue #23)', () => {
+      const controller = createCalendarController();
+      const app = makeFakeApp();
+      const guard = vi.fn();
+      const requested = [];
+      registerCalendarRoutes(app, controller, (perm) => {
+        requested.push(perm);
+        return guard;
+      });
+
+      expect(requested).toEqual(['calendar:manage']);
+      expect(app.routes.patch['/api/v1/calendar/:eventId']).toEqual([
+        guard,
+        controller.update
+      ]);
+    });
+
+    it('rejects PATCH for a non-privileged role with no side effect (issue #23)', async () => {
+      const { app } = buildRoutes();
+      const handlers = app.routes.patch['/api/v1/calendar/:eventId'];
+      const updateSpy = vi
+        .spyOn(service, 'updateEvent')
+        .mockResolvedValue({ id: 'abc' });
+
+      const req = {
+        user: { role: 'volunteer' },
+        params: { eventId: 'abc' },
+        body: { title: 'Renamed Sync' }
+      };
+      const res = makeRes();
+
+      let advanced = false;
+      handlers[0](req, res, () => {
+        advanced = true;
+      });
+      if (advanced) {
+        await handlers[1](req, res, () => {});
+      }
+
+      expect(advanced).toBe(false);
+      expect(res.statusCode).toBe(403);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it('allows an authorized role to reach the update operation (issue #23)', async () => {
+      const { app } = buildRoutes();
+      const handlers = app.routes.patch['/api/v1/calendar/:eventId'];
+      const updateSpy = vi
+        .spyOn(service, 'updateEvent')
+        .mockResolvedValue({ id: 'abc' });
+
+      const req = {
+        user: { id: 'admin-1', role: 'admin' },
+        params: { eventId: 'abc' },
+        body: { title: 'Renamed Sync' }
+      };
+      const res = makeRes();
+
+      let advanced = false;
+      handlers[0](req, res, () => {
+        advanced = true;
+      });
+      if (advanced) {
+        await handlers[1](req, res, () => {});
+      }
+
+      expect(advanced).toBe(true);
+      expect(updateSpy).toHaveBeenCalledWith('abc', { title: 'Renamed Sync' });
+      expect(res.statusCode).toBe(200);
     });
 
     it('allows an authorized role to reach the create operation (Req 11.4)', async () => {

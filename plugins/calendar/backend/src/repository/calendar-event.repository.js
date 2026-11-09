@@ -154,9 +154,8 @@ export class CalendarEventRepository {
    * Apply partial changes to an existing event.
    *
    * Only the fields present in `changes` are modified; omitted fields are left
-   * unchanged. This method is part of the repository contract to support future
-   * event editing (forward-looking for issue #23) even though the current
-   * service does not yet expose an update operation.
+   * unchanged. Exposed through `CalendarService.updateEvent` and
+   * `PATCH /api/v1/calendar/:eventId` (issue #23).
    *
    * @abstract
    * @param {string} id The domain identifier of the event to update.

@@ -453,12 +453,13 @@ describe('CalendarService (MongoDB-backed)', () => {
       createdBy: 'user-1'
     };
 
-    it('exposes exactly the five service methods (Req 3.1)', () => {
+    it('exposes exactly the six service methods (Req 3.1)', () => {
       for (const method of [
         'createEvent',
         'listEvents',
         'getEventsBetween',
         'getEvent',
+        'updateEvent',
         'deleteEvent'
       ]) {
         expect(typeof service[method]).toBe('function');
