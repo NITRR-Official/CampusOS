@@ -198,9 +198,72 @@ describe('CalendarService delegation to repository (no database)', () => {
         service.updateEvent('evt-7', { endsAt: '2025-06-01T08:00:00.000Z' })
       ).rejects.toMatchObject({
         status: 400,
+        code: 'VALIDATION_ERROR',
         details: [{ field: 'endsAt' }]
       });
       expect(fakeRepo.updateEvent).not.toHaveBeenCalled();
+    });
+
+    it('delegates a full date range without reading the stored event', async () => {
+      const sentinel = { id: 'evt-7' };
+      fakeRepo.updateEvent.mockResolvedValue(sentinel);
+      const changes = {
+        startsAt: '2025-07-01T09:00:00.000Z',
+        endsAt: '2025-07-01T10:00:00.000Z'
+      };
+
+      const result = await service.updateEvent('evt-7', changes);
+
+      expect(fakeRepo.getEventById).not.toHaveBeenCalled();
+      expect(fakeRepo.updateEvent).toHaveBeenCalledWith('evt-7', changes);
+      expect(result).toBe(sentinel);
+    });
+
+    it('delegates endsAt: null without reading the stored event', async () => {
+      const sentinel = { id: 'evt-7', endsAt: null };
+      fakeRepo.updateEvent.mockResolvedValue(sentinel);
+
+      const result = await service.updateEvent('evt-7', { endsAt: null });
+
+      expect(fakeRepo.getEventById).not.toHaveBeenCalled();
+      expect(fakeRepo.updateEvent).toHaveBeenCalledWith('evt-7', {
+        endsAt: null
+      });
+      expect(result).toBe(sentinel);
+    });
+
+    it('delegates startsAt with endsAt: null without reading the stored event', async () => {
+      fakeRepo.updateEvent.mockResolvedValue({ id: 'evt-7' });
+      const changes = { startsAt: '2030-01-01T00:00:00.000Z', endsAt: null };
+
+      await service.updateEvent('evt-7', changes);
+
+      expect(fakeRepo.getEventById).not.toHaveBeenCalled();
+      expect(fakeRepo.updateEvent).toHaveBeenCalledWith('evt-7', changes);
+    });
+
+    it('reads the stored event for a startsAt-only change', async () => {
+      fakeRepo.getEventById.mockResolvedValue(stored);
+      fakeRepo.updateEvent.mockResolvedValue({ id: 'evt-7' });
+
+      await service.updateEvent('evt-7', {
+        startsAt: '2025-06-01T09:30:00.000Z'
+      });
+
+      expect(fakeRepo.getEventById).toHaveBeenCalledWith('evt-7');
+      expect(fakeRepo.updateEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns null from the repository for a full date range on a missing event', async () => {
+      fakeRepo.updateEvent.mockResolvedValue(null);
+
+      const result = await service.updateEvent('missing', {
+        startsAt: '2025-07-01T09:00:00.000Z',
+        endsAt: '2025-07-01T10:00:00.000Z'
+      });
+
+      expect(fakeRepo.getEventById).not.toHaveBeenCalled();
+      expect(result).toBeNull();
     });
 
     it('throws a 400 on startsAt after stored endsAt without updating', async () => {

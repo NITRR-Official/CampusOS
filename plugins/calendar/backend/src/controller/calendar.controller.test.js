@@ -123,6 +123,61 @@ describe('Calendar controller and middleware wiring', () => {
       expect(emit).toHaveBeenCalledWith('calendar:deleted', { eventId: id });
     });
 
+    it('emits calendar:updated with id + eventType after a successful update', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+
+      const createRes = makeRes();
+      await controller.create(
+        { body: validBody, user: { id: 'user-1' } },
+        createRes,
+        vi.fn()
+      );
+      const { id } = createRes.body.data;
+      emit.mockClear();
+
+      const updateRes = makeRes();
+      // Capture the response status at emit time to prove the event fires
+      // only after the successful response has been written.
+      let statusAtEmit;
+      emit.mockImplementation(() => {
+        statusAtEmit = updateRes.statusCode;
+      });
+
+      await controller.update(
+        {
+          params: { eventId: id },
+          body: { title: 'Renamed Sync', eventType: 'milestone' },
+          user: { id: 'user-1' }
+        },
+        updateRes,
+        vi.fn()
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(emit).toHaveBeenCalledWith('calendar:updated', {
+        eventId: id,
+        eventType: 'milestone'
+      });
+      expect(statusAtEmit).toBe(200);
+    });
+
+    it('does not emit calendar:updated when the event does not exist', async () => {
+      const emit = vi.fn();
+      const controller = createCalendarController({ eventBus: { emit } });
+      const next = vi.fn();
+
+      await controller.update(
+        { params: { eventId: 'missing-id' }, body: { title: 'Renamed Sync' } },
+        makeRes(),
+        next
+      );
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(emit).not.toHaveBeenCalled();
+    });
+
     it('does not emit when validation fails', async () => {
       const emit = vi.fn();
       const controller = createCalendarController({ eventBus: { emit } });

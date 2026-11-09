@@ -134,6 +134,11 @@ export function createCalendarController({ eventBus } = {}) {
         success: true,
         data: event
       });
+
+      emitEvent('calendar:updated', {
+        eventId: event.id,
+        eventType: event.eventType
+      });
     } catch (err) {
       next(err);
     }

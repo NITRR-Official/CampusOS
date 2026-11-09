@@ -58,7 +58,7 @@ export class CalendarService {
    *   end before it starts.
    */
   async updateEvent(eventId, changes) {
-    if (changes.startsAt !== undefined || changes.endsAt !== undefined) {
+    if (needsStoredDateRange(changes)) {
       const existing = await this.repository.getEventById(eventId);
 
       if (!existing) {
@@ -82,11 +82,31 @@ export class CalendarService {
   }
 }
 
+// The stored event is only needed when the body supplies one side of the range
+// and the other side must come from the database:
+// - startsAt and endsAt together are already range-checked by the schema;
+// - endsAt: null clears the end date, so there is no range to check.
+function needsStoredDateRange(changes) {
+  const hasStartsAt = changes.startsAt !== undefined;
+  const hasEndsAt = changes.endsAt !== undefined;
+
+  if (hasStartsAt && hasEndsAt) {
+    return false;
+  }
+
+  if (hasStartsAt) {
+    return true;
+  }
+
+  return hasEndsAt && changes.endsAt !== null;
+}
+
 // Shaped like the schema's range error so clients see the same 400 response
 // whether the bad range comes from the body alone or from the stored event.
 function createDateRangeError() {
   const error = new Error('endsAt cannot be before startsAt');
   error.status = 400;
+  error.code = 'VALIDATION_ERROR';
   error.details = [
     { field: 'endsAt', message: 'endsAt cannot be before startsAt' }
   ];
