@@ -113,22 +113,37 @@ export function DashboardPage({ activePlugins, user }) {
 
 ---
 
-## 4. Teardown and Unregistration
+## 4. Teardown, Unregistration & Hot-Toggling (Issue #161 / ADR-018)
 
-When a plugin is unloaded dynamically, its widgets and navigation links are safely pruned from the registry:
+When an administrator disables a plugin via the Admin UI, the host runtime immediately unmounts all widgets and navigation links across the active DOM without requiring a browser refresh:
 
 ```typescript
 import { registry } from '@campus-os/shared/plugin-registry';
 
-// Unregister a specific widget
-registry.unregisterWidget('dashboard-stats', 'recruitment');
+// Completely tear down all navigation links and extension slot widgets for a plugin
+registry.unregisterPlugin('recruitment');
 
-// Or unregister all widgets and sidebar links registered by this plugin
-registry.unregisterWidgetsByPlugin('recruitment');
+// Or listen to live registry mutations in custom host shells
+const unsubscribe = registry.subscribe(() => {
+  console.log(
+    'Plugin registry updated - extension slots automatically re-render'
+  );
+});
 ```
 
 ---
 
-## 5. Official Slot Identifiers
+## 5. Zero-Touch Dynamic Catch-All Routing (ADR-018)
+
+Under ADR-018, plugins never modify the core Next.js routing tree. Instead, core provides two catch-all routers that dynamically import and mount plugin views at runtime via `DynamicPluginHost`:
+
+- **Global Plugins:** Mounted automatically at `/plugins/[pluginId]/[[...path]]`
+- **Workspace Plugins:** Mounted automatically at `/workspace/[slug]/plugins/[pluginId]/[[...path]]`
+
+Legacy routes (e.g. `/activity`, `/recruitment`) are handled transparently via Next.js server rewrites in `next.config.ts`.
+
+---
+
+## 6. Official Slot Identifiers
 
 For the complete list of strongly typed slots, parameters, and context contracts, see the **[Extension Slots Catalog](./SLOT_CATALOG.md)**.

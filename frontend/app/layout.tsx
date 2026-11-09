@@ -3,6 +3,7 @@ import './globals.css';
 import { TooltipProvider, ThemeProvider } from '@campusos/design-system';
 import { AuthProvider } from '@campus-os/shared/auth-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
+import { PluginRuntimeProvider } from '@/components/providers/plugin-runtime-provider';
 
 export const metadata: Metadata = {
   title: 'CampusOS',
@@ -25,7 +26,9 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <TooltipProvider>{children}</TooltipProvider>
+              <PluginRuntimeProvider>
+                <TooltipProvider>{children}</TooltipProvider>
+              </PluginRuntimeProvider>
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>

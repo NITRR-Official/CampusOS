@@ -16,13 +16,13 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy
 } from '@dnd-kit/sortable';
-import { Role } from '@plugins/club/frontend/api';
+import { Role } from '../../api';
 import {
   useClubRoles,
   useSystemPermissions,
   useDeleteRole,
   useUpdateRole
-} from '@plugins/club/frontend/hooks';
+} from '../../hooks';
 import { RoleItem } from './RoleItem';
 import { RoleEditorSheet } from './RoleEditorSheet';
 import { Button } from '@campusos/design-system';

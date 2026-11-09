@@ -2,7 +2,7 @@ import { registerPluginRoutes } from './routes/plugin.routes.js';
 import { initPluginService } from './service/plugin.service.js';
 
 export async function init(app, registry, eventBus) {
-  initPluginService(registry);
+  initPluginService(registry, eventBus);
   const requirePermissions = registry.getService('requirePermissions');
 
   if (typeof requirePermissions !== 'function') {
@@ -15,7 +15,9 @@ export async function init(app, registry, eventBus) {
     routes: [
       'GET /api/v1/plugins',
       'PUT /api/v1/plugins/:name/toggle',
-      'POST /api/v1/plugins/restart'
+      'PATCH /api/v1/plugins/:name/settings',
+      'POST /api/v1/plugins/restart',
+      'POST /api/v1/plugins/install'
     ]
   });
 }

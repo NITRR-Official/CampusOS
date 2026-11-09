@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
-import { fetchClubBySlug } from '../api';
-import { fetchPublicEvents } from '@plugins/event/frontend/api';
+import { fetchClubBySlug, fetchClubPublicEvents } from '../api';
 import {
   Users,
   Building2,
@@ -28,7 +27,7 @@ export async function ClubDetailPage(props: {
   const clubId =
     club.id || ((club as unknown as Record<string, unknown>)._id as string);
 
-  const events = await fetchPublicEvents(clubId).catch(() => []);
+  const events = await fetchClubPublicEvents(clubId);
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">

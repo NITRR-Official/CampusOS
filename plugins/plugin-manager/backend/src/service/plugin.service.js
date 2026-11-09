@@ -1,8 +1,10 @@
 let Plugin;
 let globalRegistry;
+let globalEventBus;
 
-export function initPluginService(registry) {
+export function initPluginService(registry, eventBus) {
   globalRegistry = registry;
+  globalEventBus = eventBus || registry?.getService('eventBus', false);
   const models = registry.getService('core:models');
   if (models && models.Plugin) {
     Plugin = models.Plugin;
@@ -11,6 +13,36 @@ export function initPluginService(registry) {
   }
 }
 export class PluginService {
+  constructor(options = {}) {
+    this.pluginsDir = options.pluginsDir;
+  }
+
+  setPluginsDir(dir) {
+    this.pluginsDir = dir;
+  }
+
+  /**
+   * Install a plugin package from a zip file or remote URL (Issue #163)
+   */
+  async installPlugin(options = {}) {
+    const installer =
+      globalRegistry?.getService('core:plugin_installer', false) ||
+      options.installer;
+
+    if (!installer?.installPluginPackage) {
+      throw new Error(
+        'Plugin installer service (core:plugin_installer) not available in registry'
+      );
+    }
+
+    return installer.installPluginPackage({
+      ...options,
+      pluginsDir: options.pluginsDir || this.pluginsDir,
+      dbModel: Plugin,
+      eventBus: globalEventBus
+    });
+  }
+
   /**
    * Get all installed plugins and their status
    */
@@ -18,7 +50,17 @@ export class PluginService {
     try {
       const plugins = await Plugin.find(
         {},
-        { name: 1, enabled: 1, version: 1, settings: 1, _id: 0 }
+        {
+          name: 1,
+          enabled: 1,
+          version: 1,
+          settings: 1,
+          tier: 1,
+          trusted: 1,
+          requestedCapabilities: 1,
+          grantedCapabilities: 1,
+          _id: 0
+        }
       ).lean();
 
       // Inject configSchema for each plugin

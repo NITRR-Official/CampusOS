@@ -23,6 +23,8 @@ describe('Architectural Boundary Enforcement (Issue #114)', () => {
 
     expect(ruleNames).toContain('no-cross-plugin-file-imports');
     expect(ruleNames).toContain('no-plugin-to-backend-internal-imports');
+    expect(ruleNames).toContain('no-plugin-to-scripts-imports');
+    expect(ruleNames).toContain('no-backend-to-scripts-imports');
 
     const crossPluginRule = rules.find(
       (r) => r.name === 'no-cross-plugin-file-imports'

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import AuthShell from '@plugins/auth/frontend/components/AuthShell';
+import AuthShell from '../components/AuthShell';
 import { Input } from '@campusos/design-system';
 import { Button } from '@campusos/design-system';
 import {
@@ -17,7 +17,7 @@ import {
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormData
-} from '@plugins/auth/frontend/lib/validations';
+} from '../lib/validations';
 
 export function ForgotPasswordPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);

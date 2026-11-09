@@ -24,8 +24,10 @@
   },
   "dependencies": {
     "@campus-os/shared": "workspace:*",
+    "adm-zip": "^0.5.17",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
+    "esbuild": "^0.28.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.3.0",

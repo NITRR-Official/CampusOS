@@ -4,16 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@campus-os/shared/auth-provider';
-import {
-  Calendar,
-  Home,
-  Users,
-  Ticket,
-  CheckSquare,
-  Settings,
-  ShieldAlert,
-  ChevronsUpDown
-} from 'lucide-react';
+import { Home, Settings, ShieldAlert, ChevronsUpDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,11 +33,8 @@ const navigation = [
 ];
 
 import { registry } from '@campus-os/shared/plugin-registry';
-import { initializePlugins } from '@/lib/plugins/init';
-import { useClubs } from '@plugins/club/frontend/hooks';
-
-// Call it once when module is loaded on client
-initializePlugins();
+import { useWorkspaces } from '@/lib/hooks/use-workspaces';
+import { resolveLucideIcon } from '@/components/DynamicIcon';
 
 export function AppSidebar({
   activePlugins = [],
@@ -59,18 +47,15 @@ export function AppSidebar({
   const { user } = useAuth();
   const { isMobile } = useSidebar();
 
-  const { data: clubs } = useClubs();
+  const { data: clubs } = useWorkspaces();
+  const [, setRegistryTick] = React.useState(0);
 
-  // Map string icons back to Lucide components
-  const iconMap: Record<string, React.ElementType> = {
-    Ticket,
-    CheckSquare,
-    Calendar,
-    Users,
-    Settings,
-    Home,
-    ShieldAlert
-  };
+  // Subscribe to registry updates so sidebar links react in real-time when plugins are enabled/disabled
+  React.useEffect(() => {
+    return registry.subscribe(() => {
+      setRegistryTick((prev) => prev + 1);
+    });
+  }, []);
 
   // Combine core navigation with plugin navigation
   const pluginLinks = registry
@@ -88,7 +73,7 @@ export function AppSidebar({
         clubId && link.context !== 'global'
           ? `/workspace/${clubId}${link.url}`
           : link.url,
-      icon: link.icon && iconMap[link.icon] ? iconMap[link.icon] : Settings
+      icon: resolveLucideIcon(link.icon)
     }));
 
   const allNavigation = clubId

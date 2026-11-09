@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { TaskCard } from './components/TaskCard';
 import { CreateTaskForm } from './components/CreateTaskForm';
 import { useTasks } from './hooks/useTasks';
-import type { TaskItem } from '@plugins/task/frontend/api';
+import type { TaskItem } from './api';
 
 export function TaskDashboard({ clubId }: { clubId: string }) {
   const { accessToken, tasks, isLoading, taskCounts } = useTasks(clubId);

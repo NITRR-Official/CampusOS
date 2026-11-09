@@ -9,7 +9,7 @@ import {
   removeTaskDependency,
   TaskApiError,
   type TaskItem
-} from '@plugins/task/frontend/api';
+} from '../api';
 import {
   readAccessToken,
   clearAuthSession

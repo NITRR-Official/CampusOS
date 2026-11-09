@@ -5,13 +5,10 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { Router } from 'express';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const DEFAULT_PLUGINS_DIR = path.resolve(__dirname, '../../../plugins');
+const DEFAULT_PLUGINS_DIR =
+  process.env.PLUGINS_DIR || path.resolve(process.cwd(), 'plugins');
 
 /**
  * Creates and mounts plugin bundle routes on the express app.

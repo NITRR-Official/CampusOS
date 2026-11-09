@@ -1,12 +1,15 @@
-import RecruitmentPage from '@plugins/recruitment/frontend/page';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import { useParams } from 'next/navigation';
+import { DynamicPluginHost } from '@/components/plugins/DynamicPluginHost';
 
-export default async function Page({
-  params
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const resolvedParams = await params;
-  return <RecruitmentPage entityId={resolvedParams.slug} entityType="club" />;
+export default function WorkspaceRecruitmentPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  return (
+    <DynamicPluginHost
+      pluginName="recruitment"
+      routeProps={{ context: 'workspace', clubSlug: slug }}
+    />
+  );
 }

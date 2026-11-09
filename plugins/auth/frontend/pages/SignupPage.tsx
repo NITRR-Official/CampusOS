@@ -6,9 +6,9 @@ import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import AuthShell from '@plugins/auth/frontend/components/AuthShell';
-import { ApiError } from '@plugins/auth/frontend/api';
-import { useSignup } from '@plugins/auth/frontend/hooks';
+import AuthShell from '../components/AuthShell';
+import { ApiError } from '../api';
+import { useSignup } from '../hooks';
 import { storeAuthSession } from '@campus-os/shared/auth-session';
 import { Input } from '@campusos/design-system';
 import { Button } from '@campusos/design-system';
@@ -20,10 +20,7 @@ import {
   FormLabel,
   FormMessage
 } from '@campusos/design-system';
-import {
-  signupSchema,
-  type SignupFormData
-} from '@plugins/auth/frontend/lib/validations';
+import { signupSchema, type SignupFormData } from '../lib/validations';
 
 function getRedirectPath(value: string | null) {
   if (!value) {

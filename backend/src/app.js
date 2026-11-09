@@ -19,9 +19,15 @@ import { errorMiddleware, notFoundMiddleware } from './middleware/error.js';
 import { registerJwtAuthenticator } from './auth/jwt-authenticator.js';
 import { loadPlugins } from './plugin-loader.js';
 import { registerPluginBundleRoutes } from './routes/plugin-bundle.routes.js';
+import { registerMarketplaceRoutes } from './routes/marketplace.routes.js';
 import { User, Plugin } from './database/schemas/index.js';
 import { databaseManager, healthCheck } from './database/connection.js';
 import { rootLogger } from './core/logger.js';
+import {
+  installPluginPackage,
+  validatePluginZip
+} from './services/plugin-installer.service.js';
+import { buildPluginFrontend } from './services/plugin-bundler.service.js';
 
 export async function createApp(registry) {
   const app = express();
@@ -33,6 +39,16 @@ export async function createApp(registry) {
   registry.registerService('core:models', { User, Plugin });
   registry.registerService('core:request_context', RequestContext);
   registry.registerService('core:logger', rootLogger);
+  registry.registerService('core:plugin_installer', {
+    installPluginPackage: (options = {}) =>
+      installPluginPackage({
+        dbModel: Plugin,
+        eventBus: registry.eventBus,
+        ...options
+      }),
+    validatePluginZip
+  });
+  registry.registerService('core:plugin_bundler', { buildPluginFrontend });
 
   // Environment config
   const isDev = process.env.NODE_ENV !== 'production';
@@ -132,6 +148,9 @@ export async function createApp(registry) {
 
   // Public endpoints for plugin frontend ESM bundles and manifests (ADR-014)
   registerPluginBundleRoutes(app, { registry });
+
+  // Community Marketplace catalog & installation routes (Issue #165)
+  registerMarketplaceRoutes(app, { registry, requireSuperAdmin });
 
   // 6. Authentication - Verify JWT before protected routes
   registerJwtAuthenticator(registry);

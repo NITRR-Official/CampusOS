@@ -11,6 +11,8 @@ import * as ReactDOM from 'react-dom';
 import { registry } from '@campus-os/shared/plugin-registry';
 import { ExtensionPoint } from '@campus-os/shared/extension-point';
 import * as DesignSystem from '@campusos/design-system';
+import * as LucideIcons from 'lucide-react';
+import { apiClient } from '@campus-os/shared/api-client';
 
 export interface CampusOSRuntime {
   React: typeof React;
@@ -18,6 +20,8 @@ export interface CampusOSRuntime {
   registry: typeof registry;
   ExtensionPoint: typeof ExtensionPoint;
   ui: typeof DesignSystem;
+  icons: typeof LucideIcons;
+  apiClient: typeof apiClient;
   version: string;
   loadedPlugins: Set<string>;
 }
@@ -29,6 +33,7 @@ declare global {
     CampusOS?: CampusOSRuntime;
     __CampusOS_Runtime__?: CampusOSRuntime;
     __CampusOS_DesignSystem__?: typeof DesignSystem;
+    __CampusOS_Icons__?: typeof LucideIcons;
   }
 }
 
@@ -43,6 +48,8 @@ export function setupPluginRuntime(): CampusOSRuntime {
       registry,
       ExtensionPoint,
       ui: DesignSystem,
+      icons: LucideIcons,
+      apiClient,
       version: '1.0.0',
       loadedPlugins: new Set()
     };
@@ -55,6 +62,8 @@ export function setupPluginRuntime(): CampusOSRuntime {
       registry,
       ExtensionPoint,
       ui: DesignSystem,
+      icons: LucideIcons,
+      apiClient,
       version: '1.0.0',
       loadedPlugins: new Set()
     };
@@ -64,12 +73,24 @@ export function setupPluginRuntime(): CampusOSRuntime {
     window.CampusOS = runtime;
     window.__CampusOS_Runtime__ = runtime;
     window.__CampusOS_DesignSystem__ = DesignSystem;
-  } else if (!window.__CampusOS_Runtime__.ui) {
-    window.__CampusOS_Runtime__.ui = DesignSystem;
+    window.__CampusOS_Icons__ = LucideIcons;
+  } else {
+    if (!window.__CampusOS_Runtime__.ui) {
+      window.__CampusOS_Runtime__.ui = DesignSystem;
+    }
+    if (!window.__CampusOS_Runtime__.icons) {
+      window.__CampusOS_Runtime__.icons = LucideIcons;
+    }
+    if (!window.__CampusOS_Runtime__.apiClient) {
+      window.__CampusOS_Runtime__.apiClient = apiClient;
+    }
     if (window.CampusOS) {
-      window.CampusOS.ui = DesignSystem;
+      window.CampusOS.ui = window.__CampusOS_Runtime__.ui;
+      window.CampusOS.icons = window.__CampusOS_Runtime__.icons;
+      window.CampusOS.apiClient = window.__CampusOS_Runtime__.apiClient;
     }
     window.__CampusOS_DesignSystem__ = DesignSystem;
+    window.__CampusOS_Icons__ = LucideIcons;
   }
 
   return window.__CampusOS_Runtime__;
@@ -92,7 +113,7 @@ export async function loadPluginBundle(
   }
 
   const runtime = setupPluginRuntime();
-  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
   const url =
     bundleUrl || `${baseApiUrl}/api/v1/plugins/${pluginName}/bundle.js`;
 

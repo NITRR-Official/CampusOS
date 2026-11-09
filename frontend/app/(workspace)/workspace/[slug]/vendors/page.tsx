@@ -1,10 +1,15 @@
-import { VendorsPage } from '@plugins/vendor/frontend/pages/VendorsPage';
+'use client';
 
-export default async function Page({
-  params
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const resolvedParams = await params;
-  return <VendorsPage clubId={resolvedParams.slug} />;
+import { useParams } from 'next/navigation';
+import { DynamicPluginHost } from '@/components/plugins/DynamicPluginHost';
+
+export default function WorkspaceVendorsPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  return (
+    <DynamicPluginHost
+      pluginName="vendor"
+      routeProps={{ context: 'workspace', clubSlug: slug }}
+    />
+  );
 }

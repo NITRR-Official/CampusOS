@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Role, SystemPermissionGroup } from '@plugins/club/frontend/api';
-import { useCreateRole, useUpdateRole } from '@plugins/club/frontend/hooks';
+import { Role, SystemPermissionGroup } from '../../api';
+import { useCreateRole, useUpdateRole } from '../../hooks';
 import {
   Sheet,
   SheetContent,

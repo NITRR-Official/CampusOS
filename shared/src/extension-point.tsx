@@ -132,6 +132,14 @@ export function ExtensionPoint<TSlot extends CampusOSSlotId = CampusOSSlotId>({
   fallbackWidget,
   isolate = true
 }: ExtensionPointProps<TSlot>) {
+  const [, setTick] = React.useState(0);
+
+  React.useEffect(() => {
+    return registry.subscribe(() => {
+      setTick((prev) => prev + 1);
+    });
+  }, []);
+
   let widgets = registry.getWidgets(id);
 
   // Filter by active plugins if active list is provided

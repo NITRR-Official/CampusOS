@@ -4,16 +4,21 @@
   "description": "Super Admin module to manage plugins dynamically",
   "main": "src/index.js",
   "dependencies": {
+    "@campus-os/shared": "workspace:*",
+    "adm-zip": "^0.5.17",
     "express": "^5.2.1",
-    "zod": "^3.25.76",
-    "@campus-os/shared": "workspace:*"
+    "multer": "^2.5.0",
+    "zod": "^3.25.76"
   },
   "peerDependencies": {
-    "lucide-react": "*",
-    "@tanstack/react-query": "^5.101.2"
+    "@tanstack/react-query": "^5.101.2",
+    "lucide-react": "*"
   },
   "type": "module",
   "scripts": {
     "test": "vitest run"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
   }
 }

@@ -1,7 +1,7 @@
-import { AdminOverviewPage } from '@plugins/admin/frontend/pages/AdminOverviewPage';
+'use client';
 
-export const dynamic = 'force-dynamic';
+import { DynamicPluginHost } from '@/components/plugins/DynamicPluginHost';
 
-export default function Page() {
-  return <AdminOverviewPage />;
+export default function AdminPage() {
+  return <DynamicPluginHost pluginName="admin" />;
 }

@@ -11,7 +11,7 @@ import {
   Plus,
   Search
 } from 'lucide-react';
-import { useMyClubPermissions } from '@plugins/club/frontend/hooks';
+import { useClubPermissions } from '../hooks';
 import type { EventItem } from '../api';
 
 function formatDate(isoDate: string) {
@@ -32,7 +32,7 @@ export function WorkspaceEventList({
   events: EventItem[];
   clubId: string;
 }) {
-  const { data: permissionsData } = useMyClubPermissions(clubId);
+  const { data: permissionsData } = useClubPermissions(clubId);
   const canCreate =
     permissionsData?.permissions?.includes('event:create') ||
     permissionsData?.permissions?.includes('*') ||

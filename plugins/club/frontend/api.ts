@@ -246,3 +246,28 @@ export async function revokeClubMemberRole(
   );
   return ClubMemberSchema.parse(response);
 }
+
+export interface PublicClubEvent {
+  id?: string;
+  _id?: string;
+  title: string;
+  description?: string;
+  startsAt: string;
+  venue?: string;
+  registrationsCount?: number;
+}
+
+export async function fetchClubPublicEvents(
+  clubId: string
+): Promise<PublicClubEvent[]> {
+  try {
+    const res = await apiClient.get<
+      PublicClubEvent[] | { data: PublicClubEvent[] }
+    >(`/events/public?clubId=${clubId}`);
+    if (Array.isArray(res)) return res;
+    if (res && Array.isArray((res as any).data)) return (res as any).data;
+    return [];
+  } catch {
+    return [];
+  }
+}

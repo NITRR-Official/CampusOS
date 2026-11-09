@@ -6,7 +6,7 @@ import {
   type TaskItem,
   type TaskPriority,
   type TaskStatus
-} from '@plugins/task/frontend/api';
+} from '../api';
 import {
   useAssignTask,
   useUpdateTaskStatus,

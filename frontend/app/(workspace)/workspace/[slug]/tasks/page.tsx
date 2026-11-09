@@ -1,10 +1,15 @@
-import { TaskDashboard } from '@plugins/task/frontend/TaskDashboard';
+'use client';
 
-export default async function TasksPage({
-  params
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const resolvedParams = await params;
-  return <TaskDashboard clubId={resolvedParams.slug} />;
+import { useParams } from 'next/navigation';
+import { DynamicPluginHost } from '@/components/plugins/DynamicPluginHost';
+
+export default function WorkspaceTasksPage() {
+  const params = useParams();
+  const slug = params?.slug as string;
+  return (
+    <DynamicPluginHost
+      pluginName="task"
+      routeProps={{ context: 'workspace', clubSlug: slug }}
+    />
+  );
 }

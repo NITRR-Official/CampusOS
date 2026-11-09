@@ -1,14 +1,17 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import AdmZip from 'adm-zip';
-import { execSync } from 'child_process';
-import os from 'os';
 import {
   validatePluginManifest,
   PluginContractError
 } from '../shared/src/plugin-contract.js';
 import { buildPluginFrontend } from './build-plugin-frontend.js';
+import {
+  validatePluginZip,
+  installPluginPackage
+} from '../backend/src/services/plugin-installer.service.js';
+
+export { validatePluginZip, installPluginPackage };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -262,158 +265,6 @@ export function validatePluginDirectory(pluginDir, options = {}) {
 }
 
 /**
- * Validates a plugin zip archive before extraction.
- * Protects against Zip Slip, validates manifest schema, and verifies backend entrypoint.
- * @param {AdmZip|string} zipOrPath - AdmZip instance or file path to zip
- * @returns {{ valid: boolean, errors: string[], warnings: string[], manifest?: object, basePath?: string, zip?: AdmZip }}
- */
-export function validatePluginZip(zipOrPath) {
-  const errors = [];
-  const warnings = [];
-
-  let zip;
-  if (typeof zipOrPath === 'string') {
-    if (!fs.existsSync(zipOrPath)) {
-      return {
-        valid: false,
-        errors: [`Zip archive file not found: ${zipOrPath}`],
-        warnings: []
-      };
-    }
-    try {
-      zip = new AdmZip(zipOrPath);
-    } catch (err) {
-      return {
-        valid: false,
-        errors: [`Failed to read zip archive: ${err.message}`],
-        warnings: []
-      };
-    }
-  } else {
-    zip = zipOrPath;
-  }
-
-  const zipEntries = zip.getEntries();
-  if (zipEntries.length === 0) {
-    return {
-      valid: false,
-      errors: ['Zip archive is empty'],
-      warnings: []
-    };
-  }
-
-  // 1. Zip Slip / Path Traversal Protection
-  for (const entry of zipEntries) {
-    const entryName = entry.entryName;
-    const parts = entryName.split(/[\/\\]/);
-    if (
-      parts.includes('..') ||
-      path.isAbsolute(entryName) ||
-      entryName.startsWith('/') ||
-      entryName.startsWith('\\') ||
-      /^[a-zA-Z]:/.test(entryName)
-    ) {
-      errors.push(
-        `Security violation (Zip Slip): entry '${entryName}' contains dangerous path traversal`
-      );
-    }
-  }
-
-  if (errors.length > 0) {
-    return { valid: false, errors, warnings, zip };
-  }
-
-  // 2. Locate plugin.json
-  const manifestEntry = zipEntries.find(
-    (e) => e.entryName === 'plugin.json' || e.entryName.endsWith('/plugin.json')
-  );
-
-  if (!manifestEntry) {
-    errors.push("Invalid plugin archive: no 'plugin.json' manifest found");
-    return { valid: false, errors, warnings, zip };
-  }
-
-  const basePath = manifestEntry.entryName.replace('plugin.json', '');
-
-  let rawManifest;
-  try {
-    const manifestContent = zip.readAsText(manifestEntry);
-    rawManifest = JSON.parse(manifestContent);
-  } catch (err) {
-    errors.push(
-      `'plugin.json' in archive contains invalid JSON: ${err.message}`
-    );
-    return { valid: false, errors, warnings, zip };
-  }
-
-  let manifest;
-  try {
-    manifest = validatePluginManifest(rawManifest);
-  } catch (err) {
-    if (err instanceof PluginContractError && err.details) {
-      if (Array.isArray(err.details)) {
-        err.details.forEach((d) => {
-          errors.push(
-            `Manifest schema: [${d.path.join('.') || 'root'}]: ${d.message}`
-          );
-        });
-      } else {
-        errors.push(err.message);
-      }
-    } else {
-      errors.push(`Manifest validation failed: ${err.message}`);
-    }
-    return {
-      valid: false,
-      errors,
-      warnings,
-      manifest: rawManifest,
-      basePath,
-      zip
-    };
-  }
-
-  // 3. Verify backend entrypoint if backend !== false
-  if (manifest.backend !== false) {
-    const indexEntryPath = `${basePath}backend/src/index.js`;
-    const pluginEntryPath = `${basePath}backend/plugin.js`;
-
-    const backendEntry = zipEntries.find(
-      (e) => e.entryName === indexEntryPath || e.entryName === pluginEntryPath
-    );
-
-    if (!backendEntry) {
-      errors.push(
-        "Archive missing required backend entrypoint: 'backend/src/index.js' (or 'backend/plugin.js')"
-      );
-    } else {
-      const backendContent = zip.readAsText(backendEntry);
-      const exportsInit =
-        /export\s+(async\s+)?function\s+init\b/.test(backendContent) ||
-        /export\s+(const|let|var)\s+init\b/.test(backendContent) ||
-        /export\s*\{[^}]*\binit\b/.test(backendContent) ||
-        /exports\.init\s*=/.test(backendContent) ||
-        /module\.exports\s*=\s*\{[^}]*\binit\b/.test(backendContent);
-
-      if (!exportsInit) {
-        errors.push(
-          `Backend entrypoint in archive ('${backendEntry.entryName}') does not export an 'init' function`
-        );
-      }
-    }
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-    warnings,
-    manifest,
-    basePath,
-    zip
-  };
-}
-
-/**
  * Validates a target (name in plugins/, directory path, or zip path).
  * Formats results with colors and icons.
  * @param {string} [target] - Plugin name, folder path, zip path, or undefined (validates all)
@@ -611,112 +462,12 @@ export function validatePlugin(target, options = {}) {
   return true;
 }
 
-function generateNextjsWrapper(pluginName) {
-  const pluginFrontendAppDir = path.join(
-    PLUGINS_DIR,
-    pluginName,
-    'frontend',
-    'app'
-  );
-
-  if (fs.existsSync(pluginFrontendAppDir)) {
-    const walkSync = (dir, filelist = []) => {
-      fs.readdirSync(dir).forEach((file) => {
-        const filepath = path.join(dir, file);
-        if (fs.statSync(filepath).isDirectory()) {
-          filelist = walkSync(filepath, filelist);
-        } else {
-          filelist.push(filepath);
-        }
-      });
-      return filelist;
-    };
-
-    const appFiles = walkSync(pluginFrontendAppDir);
-
-    appFiles.forEach((file) => {
-      const basename = path.basename(file);
-      if (
-        ![
-          'page.tsx',
-          'layout.tsx',
-          'loading.tsx',
-          'error.tsx',
-          'not-found.tsx'
-        ].includes(basename)
-      ) {
-        return;
-      }
-
-      const relativePath = path.relative(pluginFrontendAppDir, file);
-      const targetPath = path.join(__dirname, '../frontend/app', relativePath);
-      const targetDir = path.dirname(targetPath);
-
-      if (!fs.existsSync(targetDir)) {
-        fs.mkdirSync(targetDir, { recursive: true });
-      }
-
-      let importPath = relativePath.replace(/\\/g, '/');
-      if (importPath.endsWith('.tsx')) {
-        importPath = importPath.substring(0, importPath.length - 4);
-      }
-
-      const wrapperContent = `// AUTO-GENERATED - DO NOT EDIT\nexport * from '@plugins/${pluginName}/frontend/app/${importPath}';\nexport { default } from '@plugins/${pluginName}/frontend/app/${importPath}';\n`;
-
-      fs.writeFileSync(targetPath, wrapperContent, 'utf8');
-      console.log(
-        `✅ Generated Next.js wrapper route at frontend/app/${relativePath.replace(/\\/g, '/')}`
-      );
-    });
-
-    return;
-  }
-
-  const pluginFrontendPagesDir = path.join(
-    PLUGINS_DIR,
-    pluginName,
-    'frontend',
-    'pages'
-  );
-  if (!fs.existsSync(pluginFrontendPagesDir)) {
-    return;
-  }
-
-  const files = fs.readdirSync(pluginFrontendPagesDir);
-  const mainPageFile = files.find(
-    (f) => f.endsWith('Page.tsx') || f === 'index.tsx' || f === 'page.tsx'
-  );
-
-  if (mainPageFile) {
-    const mainPagePath = path.join(pluginFrontendPagesDir, mainPageFile);
-    const content = fs.readFileSync(mainPagePath, 'utf8');
-    if (!content.includes('export default')) {
-      console.log(
-        `⏭️  Skipping legacy wrapper for /${pluginName} (no default export found)`
-      );
-      return;
-    }
-
-    const componentNameMatch = mainPageFile.match(/^([a-zA-Z0-9]+)\.tsx$/);
-    let componentName = componentNameMatch
-      ? componentNameMatch[1]
-      : 'PluginPage';
-    if (componentName === 'index' || componentName === 'page') {
-      componentName = 'PluginPage';
-    }
-    const importName = mainPageFile.replace('.tsx', '');
-    const routeDir = path.join(FRONTEND_APP_DIR, pluginName);
-
-    if (!fs.existsSync(routeDir)) {
-      fs.mkdirSync(routeDir, { recursive: true });
-    }
-
-    const wrapperContent = `import ${componentName} from '@plugins/${pluginName}/frontend/pages/${importName}';\n\nexport default function Page() {\n  return <${componentName} />;\n}\n`;
-
-    const wrapperFile = path.join(routeDir, 'page.tsx');
-    fs.writeFileSync(wrapperFile, wrapperContent, 'utf8');
-    console.log(`✅ Generated legacy Next.js wrapper route at /${pluginName}`);
-  }
+function generateNextjsWrapper() {
+  // Deprecated in favor of generic catch-all routes (ADR-018 / Issue #159):
+  // - Global plugins mount dynamically at /plugins/[pluginId]/[[...path]]
+  // - Workspace plugins mount dynamically at /workspace/[slug]/plugins/[pluginId]/[[...path]]
+  // No build-time wrapper files are generated inside frontend/app/.
+  return;
 }
 
 function removeNextjsWrapper(pluginName) {
@@ -870,21 +621,20 @@ function generateRegistry() {
     generateNextjsWrapper(plugin);
   }
 
-  const imports = activePlugins
-    .map(
-      (p) =>
-        `import { initFrontend as ${p.varName} } from '@plugins/${p.name}/frontend/init';`
-    )
-    .join('\n');
-  const initializers = activePlugins.map((p) => `  ${p.varName}();`).join('\n');
+  const pluginList = activePlugins.map((p) => `  '${p.name}'`).join(',\n');
 
   const registryContent = `// AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
-// This file is generated by the CampusOS Plugin CLI Installer.
+// This file is generated by the CampusOS Plugin CLI Installer (Issue #158 / #162).
 
-${imports}
+import { setupPluginRuntime } from './runtime-env';
 
-export function initializePlugins() {
+const ACTIVE_PLUGINS = [
+${pluginList}
+];
+
+export async function initializePlugins() {
   if (typeof window !== 'undefined') {
+    setupPluginRuntime();
     // Prevent double initialization in React strict mode / fast refresh
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).__pluginsInitialized) return;
@@ -892,9 +642,22 @@ export function initializePlugins() {
     (window as any).__pluginsInitialized = true;
   }
 
-  // Initialize all known frontend plugin UI components
-${initializers}
+  // Fault-tolerant dynamic bootstrap: missing or uninstalled plugins do not crash build
+  for (const name of ACTIVE_PLUGINS) {
+    try {
+      const mod = await import(
+        /* webpackIgnore: true */ \`@plugins/\${name}/frontend/init\`
+      );
+      if (typeof mod.initFrontend === 'function') {
+        mod.initFrontend();
+      }
+    } catch {
+      // Dynamic runtime ESM bundle will be loaded via PluginRuntimeProvider
+    }
+  }
 }
+
+export default initializePlugins;
 `;
 
   fs.writeFileSync(REGISTRY_FILE, registryContent, 'utf8');
@@ -925,7 +688,7 @@ function installFromDirectory(absoluteSource) {
   return pluginName;
 }
 
-function installPlugin(sourcePath) {
+async function installPlugin(sourcePath) {
   if (!sourcePath) {
     console.error(
       '❌ Error: Please provide a source path (.zip, folder, or GitHub repo).'
@@ -949,27 +712,16 @@ function installPlugin(sourcePath) {
     /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/.test(sourcePath);
 
   if (isGithubUrl) {
-    const repoUrl = sourcePath.startsWith('http')
-      ? sourcePath
-      : `https://github.com/${sourcePath}.git`;
-    console.log(`🌐 Fetching plugin from GitHub: ${repoUrl}`);
-
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'campusos-plugin-'));
-    try {
-      execSync(`git clone --depth 1 ${repoUrl} ${tempDir}`, {
-        stdio: 'inherit'
-      });
-      fs.rmSync(path.join(tempDir, '.git'), { recursive: true, force: true });
-
-      pluginName = installFromDirectory(tempDir);
-    } catch (error) {
-      console.error(`❌ Error cloning repository: ${error.message}`);
+    console.log(`🌐 Fetching plugin from GitHub/URL: ${sourcePath}`);
+    const result = await installPluginPackage({
+      packageUrl: sourcePath,
+      pluginsDir: PLUGINS_DIR
+    });
+    if (!result.success) {
+      console.error(`❌ Cannot install plugin: ${result.error}`);
       process.exit(1);
-    } finally {
-      if (fs.existsSync(tempDir)) {
-        fs.rmSync(tempDir, { recursive: true, force: true });
-      }
     }
+    pluginName = result.plugin.name;
   } else {
     const absoluteSource = path.resolve(sourcePath);
     if (!fs.existsSync(absoluteSource)) {
@@ -980,44 +732,16 @@ function installPlugin(sourcePath) {
     const stat = fs.statSync(absoluteSource);
 
     if (stat.isFile() && absoluteSource.endsWith('.zip')) {
-      console.log(`📦 Inspecting zip archive: ${sourcePath}...`);
-      const validation = validatePluginZip(absoluteSource);
-      if (!validation.valid) {
-        console.error('❌ Cannot install plugin: archive validation failed.');
-        validation.errors.forEach((err) => console.error(`   ✗ ${err}`));
+      console.log(`📦 Installing zip archive: ${sourcePath}...`);
+      const result = await installPluginPackage({
+        file: { path: absoluteSource },
+        pluginsDir: PLUGINS_DIR
+      });
+      if (!result.success) {
+        console.error(`❌ Cannot install plugin: ${result.error}`);
         process.exit(1);
       }
-
-      pluginName = validation.manifest.name;
-      const targetDir = path.join(PLUGINS_DIR, pluginName);
-      if (fs.existsSync(targetDir)) {
-        console.error(
-          `❌ Error: Plugin directory already exists at ${targetDir}. Please uninstall it first.`
-        );
-        process.exit(1);
-      }
-
-      console.log(`📦 Extracting validated zip archive: ${sourcePath}...`);
-      const zip = validation.zip;
-      const basePath = validation.basePath;
-      fs.mkdirSync(targetDir, { recursive: true });
-
-      const zipEntries = zip.getEntries();
-      for (const entry of zipEntries) {
-        if (entry.entryName.startsWith(basePath) && !entry.isDirectory) {
-          const relativePath = entry.entryName.substring(basePath.length);
-          const destPath = path.resolve(targetDir, relativePath);
-          if (!destPath.startsWith(path.resolve(targetDir))) {
-            console.error(
-              `❌ Security error: Path traversal detected for entry ${entry.entryName}`
-            );
-            fs.rmSync(targetDir, { recursive: true, force: true });
-            process.exit(1);
-          }
-          fs.mkdirSync(path.dirname(destPath), { recursive: true });
-          fs.writeFileSync(destPath, entry.getData());
-        }
-      }
+      pluginName = result.plugin.name;
     } else if (stat.isDirectory()) {
       pluginName = installFromDirectory(absoluteSource);
     } else {
@@ -1073,7 +797,7 @@ if (isMain) {
       createPlugin(args[1]);
       break;
     case 'install':
-      installPlugin(args[1]);
+      await installPlugin(args[1]);
       break;
     case 'uninstall':
       uninstallPlugin(args[1]);

@@ -16,3 +16,11 @@ export const updateSettingsSchema = z
     })
   })
   .strict();
+
+export const installPluginSchema = z.object({
+  packageUrl: z.string().optional(),
+  url: z.string().optional(),
+  githubUrl: z.string().optional(),
+  force: z.union([z.boolean(), z.enum(['true', 'false'])]).optional(),
+  overwrite: z.union([z.boolean(), z.enum(['true', 'false'])]).optional()
+});

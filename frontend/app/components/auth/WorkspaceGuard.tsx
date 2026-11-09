@@ -4,7 +4,7 @@ import { ReactNode } from 'react';
 import Link from 'next/link';
 import { ShieldAlert, ArrowLeft, Building2 } from 'lucide-react';
 import { useAuth } from '@campus-os/shared/auth-provider';
-import { useMyClubPermissions } from '@plugins/club/frontend/hooks';
+import { useWorkspacePermissions } from '@/lib/hooks/use-workspaces';
 
 interface WorkspaceGuardProps {
   children: ReactNode;
@@ -17,7 +17,7 @@ export function WorkspaceGuard({ children, clubSlug }: WorkspaceGuardProps) {
     data: permData,
     isLoading,
     error
-  } = useMyClubPermissions(isAuthenticated ? clubSlug : '');
+  } = useWorkspacePermissions(isAuthenticated ? clubSlug : '');
 
   if (isLoading) {
     return (

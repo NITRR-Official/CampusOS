@@ -4,7 +4,7 @@ import {
   CardHeader,
   CardTitle
 } from '@campusos/design-system';
-import { fetchClubs } from '@plugins/club/frontend/api';
+import { apiClient } from '@campus-os/shared/api-client';
 import {
   Building2,
   AlertCircle,
@@ -19,9 +19,19 @@ import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
+async function fetchClubsByStatus(status?: string): Promise<any[]> {
+  try {
+    const query = status ? `?status=${status}` : '';
+    const res = await apiClient.get<any>(`/clubs${query}`);
+    return Array.isArray(res) ? res : res?.clubs || [];
+  } catch {
+    return [];
+  }
+}
+
 export async function AdminOverviewPage() {
-  const pendingClubs = await fetchClubs('pending').catch(() => []);
-  const activeClubs = await fetchClubs('approved').catch(() => []);
+  const pendingClubs = await fetchClubsByStatus('pending');
+  const activeClubs = await fetchClubsByStatus('approved');
 
   return (
     <div className="space-y-6">
