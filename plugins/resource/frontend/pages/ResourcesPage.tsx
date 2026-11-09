@@ -1,6 +1,6 @@
 'use client';
 
-import { useAllResources } from '@plugins/resource/frontend/hooks';
+import { useAllResources } from '../hooks';
 
 export function ResourcesPage() {
   const { data: resources = [], isLoading, error } = useAllResources();

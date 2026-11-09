@@ -1,3 +1,12 @@
-// AUTO-GENERATED - DO NOT EDIT
-export * from '@plugins/activity/frontend/app/(dashboard)/admin/activity/page';
-export { default } from '@plugins/activity/frontend/app/(dashboard)/admin/activity/page';
+'use client';
+
+import { DynamicPluginHost } from '@/components/plugins/DynamicPluginHost';
+
+export default function AdminActivityPage() {
+  return (
+    <DynamicPluginHost
+      pluginName="activity"
+      routeProps={{ context: 'global', path: ['admin', 'activity'] }}
+    />
+  );
+}

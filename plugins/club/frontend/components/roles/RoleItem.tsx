@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Role } from '@plugins/club/frontend/api';
+import { Role } from '../../api';
 import { GripVertical, Edit2, ShieldAlert, Trash2 } from 'lucide-react';
 import { Button } from '@campusos/design-system';
 import { Badge } from '@campusos/design-system';

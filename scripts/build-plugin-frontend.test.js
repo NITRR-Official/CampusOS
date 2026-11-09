@@ -143,6 +143,54 @@ describe('Standalone Plugin Frontend Bundler (Issue #118)', () => {
     expect(result.sizeBytes).toBeLessThan(15000);
   });
 
+  it('dynamically discovers and shims arbitrary Lucide icons and UI primitives without hardcoding (Issue #162)', async () => {
+    const pluginDir = path.join(tempDir, 'dynamic-arbitrary-plugin');
+    const frontendDir = path.join(pluginDir, 'frontend');
+    fs.mkdirSync(frontendDir, { recursive: true });
+
+    fs.writeFileSync(
+      path.join(frontendDir, 'index.tsx'),
+      `
+      import React from 'react';
+      import { Flame, Zap, Trophy, TrendingUp } from 'lucide-react';
+      import { CardSkeleton, AvatarGroup } from '@campusos/design-system';
+
+      export default function ArbitraryComponent() {
+        return (
+          <div>
+            <Flame />
+            <Zap />
+            <Trophy />
+            <TrendingUp />
+            <CardSkeleton />
+            <AvatarGroup />
+          </div>
+        );
+      }
+      `
+    );
+
+    const result = await buildPluginFrontend('dynamic-arbitrary-plugin', {
+      pluginsDir: tempDir
+    });
+
+    expect(fs.existsSync(result.outfile)).toBe(true);
+    const bundleContent = fs.readFileSync(result.outfile, 'utf8');
+
+    // Should NOT have bare specifiers
+    expect(bundleContent).not.toMatch(/from\s+['"]lucide-react['"]/);
+    expect(bundleContent).not.toMatch(
+      /from\s+['"]@campusos\/design-system['"]/
+    );
+
+    // Should contain references to the dynamic icons and UI primitives
+    expect(bundleContent).toContain('Flame');
+    expect(bundleContent).toContain('Zap');
+    expect(bundleContent).toContain('Trophy');
+    expect(bundleContent).toContain('TrendingUp');
+    expect(result.sizeBytes).toBeLessThan(15000);
+  });
+
   it('throws an error if plugin directory does not exist', async () => {
     await expect(
       buildPluginFrontend('non-existent', { pluginsDir: tempDir })

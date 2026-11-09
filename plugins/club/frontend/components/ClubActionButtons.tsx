@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMyClubPermissions } from '@plugins/club/frontend/hooks';
+import { useMyClubPermissions } from '../hooks';
 import { useAuth } from '@campus-os/shared/auth-provider';
 
 interface ClubActionButtonsProps {

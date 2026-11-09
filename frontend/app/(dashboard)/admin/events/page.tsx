@@ -4,7 +4,6 @@
 
 import { useEffect, useState } from 'react';
 import { apiClient } from '@campus-os/shared/api-client';
-import { fetchClubs } from '@plugins/club/frontend/api';
 import {
   Table,
   TableBody,
@@ -38,10 +37,21 @@ export default function AdminEventsPage() {
   async function loadData() {
     try {
       setLoading(true);
+      const fetchClubsByStatus = async (status: string) => {
+        try {
+          const res = await apiClient.get<any>(`/clubs?status=${status}`);
+          if (Array.isArray(res)) return res;
+          if (res && Array.isArray(res.data)) return res.data;
+          return [];
+        } catch {
+          return [];
+        }
+      };
+
       const [eventsData, approvedClubs, pendingClubs] = await Promise.all([
         apiClient.get<any>('/admin/events').catch(() => []),
-        fetchClubs('approved').catch(() => []),
-        fetchClubs('pending').catch(() => [])
+        fetchClubsByStatus('approved'),
+        fetchClubsByStatus('pending')
       ]);
 
       if (Array.isArray(eventsData)) {

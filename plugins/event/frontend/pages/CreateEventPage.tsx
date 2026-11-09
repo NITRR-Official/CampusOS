@@ -10,9 +10,17 @@ import { Checkbox } from '@campusos/design-system';
 import { ChevronLeft, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { createEvent } from '../api';
-import { FormBuilder } from '@plugins/forms/frontend';
-import { createForm } from '@plugins/forms/frontend/api';
-import type { FormField } from '@plugins/forms/frontend/types/form';
+import { ExtensionPoint } from '@campus-os/shared/extension-point';
+import { apiClient } from '@campus-os/shared/api-client';
+
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+  required?: boolean;
+  placeholder?: string;
+  options?: string[];
+}
 
 export function CreateEventPage() {
   const router = useRouter();
@@ -53,7 +61,7 @@ export function CreateEventPage() {
 
       if (newEventId && hasCustomForm && customFields.length > 0) {
         try {
-          await createForm({
+          await apiClient.post('/forms', {
             title: `${payload.title} Registration Form`,
             description:
               'Please fill in the required questions to register for this event.',
@@ -200,9 +208,17 @@ export function CreateEventPage() {
 
             {hasCustomForm && (
               <div className="pt-3 border-t border-border/50">
-                <FormBuilder
-                  initialFields={customFields}
-                  onChange={setCustomFields}
+                <ExtensionPoint
+                  id="forms:builder"
+                  context={{
+                    initialFields: customFields,
+                    onChange: setCustomFields
+                  }}
+                  fallback={
+                    <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                      Form Builder extension is not active or available.
+                    </div>
+                  }
                 />
               </div>
             )}

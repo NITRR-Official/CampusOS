@@ -4,10 +4,26 @@ import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Ticket, AlertCircle } from 'lucide-react';
 import { useAuth } from '@campus-os/shared/auth-provider';
-import { EventApiError } from '@plugins/event/frontend/api';
-import { useRegisterForEvent } from '@plugins/event/frontend/hooks';
-import { useEntityForms, useSubmitFormResponse } from '@plugins/forms/frontend';
-import type { FormField } from '@plugins/forms/frontend/types/form';
+import { apiClient } from '@campus-os/shared/api-client';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { EventApiError } from '../api';
+import { useRegisterForEvent } from '../hooks';
+
+interface FormField {
+  id: string;
+  label: string;
+  type: string;
+  required?: boolean;
+  placeholder?: string;
+  options?: string[];
+}
+
+interface AttachedForm {
+  id?: string;
+  _id?: string;
+  title?: string;
+  fields?: FormField[];
+}
 
 interface RegisterFormProps {
   eventId: string;
@@ -42,16 +58,35 @@ export function RegisterForm({
   }, [user, attendeeName, attendeeEmail]);
 
   // Query custom dynamic forms attached to this event
-  const { data: entityForms } = useEntityForms('event', eventId);
+  const { data: entityForms } = useQuery<AttachedForm[]>({
+    queryKey: ['forms', 'event', eventId],
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get<any>(
+          `/forms?entityType=event&entityId=${eventId}`
+        );
+        if (Array.isArray(res)) return res as AttachedForm[];
+        if (res && Array.isArray(res.data)) return res.data as AttachedForm[];
+        return [];
+      } catch {
+        return [];
+      }
+    },
+    enabled: !!eventId
+  });
   const activeForm =
     Array.isArray(entityForms) && entityForms.length > 0
       ? entityForms[0]
       : null;
 
   const registerMutation = useRegisterForEvent(eventId);
-  const submitFormMutation = useSubmitFormResponse(
-    activeForm?.id || activeForm?._id || ''
-  );
+  const submitFormMutation = useMutation({
+    mutationFn: async (answers: Record<string, any>) => {
+      const formId = activeForm?.id || activeForm?._id;
+      if (!formId) return;
+      return apiClient.post(`/forms/${formId}/responses`, { answers });
+    }
+  });
 
   const isAlreadyRegistered =
     Boolean(success) ||

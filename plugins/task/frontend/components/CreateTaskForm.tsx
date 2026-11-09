@@ -1,11 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import {
-  TaskApiError,
-  type TaskPriority,
-  type TaskItem
-} from '@plugins/task/frontend/api';
+import { TaskApiError, type TaskPriority, type TaskItem } from '../api';
 import { useCreateTask } from '../hooks/useTasks';
 
 const PRIORITY_OPTIONS: TaskPriority[] = ['low', 'medium', 'high'];

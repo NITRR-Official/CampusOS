@@ -13,7 +13,25 @@ import {
   Sparkles,
   Camera
 } from 'lucide-react';
-import { scanQRCode, type CheckInRecord } from '@plugins/checkin/frontend/api';
+import { apiClient } from '@campus-os/shared/api-client';
+
+interface CheckInRecord {
+  id?: string;
+  status: 'checked-in' | 'pending';
+  qrCode?: string;
+  checkInTime?: string;
+  eventId?: string;
+  userId?: string;
+  attendeeName?: string;
+  eventTitle?: string;
+}
+
+async function scanQRCode(qrCode: string): Promise<CheckInRecord> {
+  const data = await apiClient.post<
+    { checkIn?: CheckInRecord } & CheckInRecord
+  >('/checkins/scan', { qrCode });
+  return data?.checkIn || data;
+}
 import { CameraScannerModal } from '@/components/qr/CameraScannerModal';
 
 interface ScanLogItem {

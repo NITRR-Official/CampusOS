@@ -26,34 +26,40 @@ import {
 } from '@campusos/design-system';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@campus-os/shared/auth-provider';
+import { registry } from '@campus-os/shared/plugin-registry';
 import { useUIStore } from '@/lib/store';
 
-const ROUTE_LABELS: Record<string, string> = {
-  'my-events': 'My Events',
-  checkin: 'Check-In',
-  events: 'Events',
+const CORE_ROUTE_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
-  clubs: 'Clubs',
-  forms: 'Forms',
-  recruitment: 'Recruitment',
   admin: 'Admin Panel',
-  activity: 'Activity Log',
   profile: 'Profile',
   settings: 'Settings',
-  tasks: 'Tasks',
-  calendar: 'Calendar',
-  participants: 'Participants',
-  budget: 'Budget',
-  resources: 'Resources',
-  vendors: 'Vendors',
+  plugins: 'Plugins',
+  marketplace: 'Marketplace',
   new: 'Create'
 };
 
 function formatCrumbLabel(part: string): string {
   const lower = part.toLowerCase();
-  if (ROUTE_LABELS[lower]) {
-    return ROUTE_LABELS[lower];
+  if (CORE_ROUTE_LABELS[lower]) {
+    return CORE_ROUTE_LABELS[lower];
   }
+
+  try {
+    const matchedLink = registry
+      .getSidebarLinks()
+      .find(
+        (link) =>
+          link.url.toLowerCase().endsWith(`/${lower}`) ||
+          link.pluginId.toLowerCase() === lower
+      );
+    if (matchedLink?.title) {
+      return matchedLink.title;
+    }
+  } catch {
+    // Registry not initialized on SSR
+  }
+
   return part
     .split('-')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))

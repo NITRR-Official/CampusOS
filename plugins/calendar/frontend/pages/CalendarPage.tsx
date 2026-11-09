@@ -7,12 +7,12 @@ import {
   CalendarApiError,
   type CalendarEvent,
   type CalendarEventType
-} from '@plugins/calendar/frontend/api';
+} from '../api';
 import {
   useCalendarEventsByRange,
   useCreateCalendarEvent,
   useDeleteCalendarEvent
-} from '@plugins/calendar/frontend/hooks';
+} from '../hooks';
 
 const EVENT_TYPES: CalendarEventType[] = [
   'task-deadline',

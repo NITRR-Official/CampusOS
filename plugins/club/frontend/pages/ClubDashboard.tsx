@@ -4,8 +4,11 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { fetchClubBySlug, fetchMyClubPermissions } from '../api';
-import { fetchPublicEvents } from '@plugins/event/frontend/api';
+import {
+  fetchClubBySlug,
+  fetchMyClubPermissions,
+  fetchClubPublicEvents
+} from '../api';
 import {
   Building2,
   Users,
@@ -33,7 +36,7 @@ export function ClubDashboard({ slug }: { slug: string }) {
 
   const { data: publicEvents, isLoading: isLoadingEvents } = useQuery({
     queryKey: ['club', slug, 'public-events'],
-    queryFn: () => fetchPublicEvents(slug),
+    queryFn: () => fetchClubPublicEvents(slug),
     enabled: !!club
   });
 

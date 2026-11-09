@@ -1,5 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@campus-os/shared/api-client';
 import { fetchEventById, fetchEvents, registerForEvent } from './api';
+
+export function useClubPermissions(clubId: string) {
+  return useQuery({
+    queryKey: ['club-permissions', clubId],
+    queryFn: async () => {
+      try {
+        return await apiClient.get<{
+          permissions: string[];
+          isSuperAdmin?: boolean;
+        }>(`/clubs/${clubId}/my-permissions`);
+      } catch {
+        return { permissions: [], isSuperAdmin: false };
+      }
+    },
+    enabled: !!clubId
+  });
+}
 
 export function useEvents(clubId: string) {
   return useQuery({

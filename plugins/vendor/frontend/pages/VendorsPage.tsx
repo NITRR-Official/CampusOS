@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useAllVendors } from '@plugins/vendor/frontend/hooks';
+import { useAllVendors } from '../hooks';
 
 export function VendorsPage({ clubId }: { clubId: string }) {
   const { data: vendors = [], isLoading, error } = useAllVendors(clubId);

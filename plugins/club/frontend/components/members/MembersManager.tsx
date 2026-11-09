@@ -9,8 +9,8 @@ import {
   useRevokeClubMemberRole,
   useClubRoles,
   useMyClubPermissions
-} from '@plugins/club/frontend/hooks';
-import { ClubMember, Role } from '@plugins/club/frontend/api';
+} from '../../hooks';
+import { ClubMember, Role } from '../../api';
 import { Button } from '@campusos/design-system';
 import { Input } from '@campusos/design-system';
 import {

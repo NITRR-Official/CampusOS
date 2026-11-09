@@ -1,7 +1,7 @@
 import { fetchEventById, fetchEventRegistrations } from '../api';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { CheckInDesk } from '@plugins/checkin/frontend';
+import { ExtensionPoint } from '@campus-os/shared/extension-point';
 
 export async function EventParticipantsPage({
   params
@@ -45,10 +45,21 @@ export async function EventParticipantsPage({
         </p>
       </div>
 
-      <CheckInDesk
-        eventId={eventId}
-        eventTitle={event.title}
-        initialRegistrations={registrations}
+      <ExtensionPoint
+        id="event-checkin-desk"
+        context={{ eventId, eventTitle: event.title, registrations }}
+        fallback={
+          <div className="rounded-2xl border border-dashed border-border p-12 text-center space-y-3">
+            <h3 className="font-semibold text-lg text-foreground">
+              Attendee List ({registrations.length} registered)
+            </h3>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Live barcode/QR check-in verification is managed by the Check-In
+              plugin. Enable or install the Check-In plugin to scan tickets and
+              record attendance.
+            </p>
+          </div>
+        }
       />
     </div>
   );

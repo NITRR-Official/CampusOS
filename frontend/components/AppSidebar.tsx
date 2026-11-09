@@ -33,20 +33,8 @@ const navigation = [
 ];
 
 import { registry } from '@campus-os/shared/plugin-registry';
-import { initializePlugins } from '@/lib/plugins/init';
 import { useWorkspaces } from '@/lib/hooks/use-workspaces';
-import * as LucideIcons from 'lucide-react';
-
-// Call it once when module is loaded on client
-initializePlugins();
-
-function resolveLucideIcon(iconName?: string): React.ElementType {
-  if (!iconName) return Settings;
-  const Icon = (LucideIcons as unknown as Record<string, React.ElementType>)[
-    iconName
-  ];
-  return typeof Icon === 'function' ? Icon : Settings;
-}
+import { resolveLucideIcon } from '@/components/DynamicIcon';
 
 export function AppSidebar({
   activePlugins = [],

@@ -7,9 +7,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import AuthShell from '@plugins/auth/frontend/components/AuthShell';
-import { ApiError } from '@plugins/auth/frontend/api';
-import { useLogin } from '@plugins/auth/frontend/hooks';
+import AuthShell from '../components/AuthShell';
+import { ApiError } from '../api';
+import { useLogin } from '../hooks';
 import { storeAuthSession } from '@campus-os/shared/auth-session';
 import { Input } from '@campusos/design-system';
 import { Button } from '@campusos/design-system';
@@ -21,10 +21,7 @@ import {
   FormLabel,
   FormMessage
 } from '@campusos/design-system';
-import {
-  loginSchema,
-  type LoginFormData
-} from '@plugins/auth/frontend/lib/validations';
+import { loginSchema, type LoginFormData } from '../lib/validations';
 
 function getRedirectPath(value: string | null) {
   if (!value) {

@@ -1,5 +1,7 @@
-import PluginPage from '@plugins/activity/frontend/pages/index';
+'use client';
 
-export default function Page() {
-  return <PluginPage />;
+import { DynamicPluginHost } from '@/components/plugins/DynamicPluginHost';
+
+export default function ActivityPage() {
+  return <DynamicPluginHost pluginName="activity" />;
 }

@@ -19,16 +19,28 @@ import {
   readAccessToken,
   clearAuthSession
 } from '@campus-os/shared/auth-session';
-import {
-  fetchEvents,
-  EventItem,
-  EventApiError
-} from '@plugins/event/frontend/api';
-import {
-  getCheckInStatus,
-  CheckInRecord,
-  CheckInApiError
-} from '@plugins/checkin/frontend/api';
+import { apiClient } from '@campus-os/shared/api-client';
+import { fetchEvents, EventItem, EventApiError } from '../../../api';
+
+interface CheckInRecord {
+  id?: string;
+  status: 'checked-in' | 'pending';
+  qrCode?: string;
+  checkInTime?: string;
+}
+
+async function fetchUserCheckInStatus(
+  eventId: string,
+  userId: string
+): Promise<CheckInRecord | null> {
+  try {
+    return await apiClient.get<CheckInRecord>(
+      `/events/${eventId}/checkins/status/${userId}`
+    );
+  } catch {
+    return null;
+  }
+}
 import { QRCodeVisual } from '@/components/qr/QRCodeVisual';
 
 interface UserEventWithCheckIn extends EventItem {
@@ -66,12 +78,15 @@ export default function ParticipantDashboard() {
             }
 
             try {
-              const checkInStatus = await getCheckInStatus(eventId, user.id);
-              return { ...event, checkInStatus };
-            } catch (err: any) {
-              if (err instanceof CheckInApiError && err.status === 404) {
-                return { ...event, checkInError: 'Not checked in yet' };
+              const checkInStatus = await fetchUserCheckInStatus(
+                eventId,
+                user.id
+              );
+              if (checkInStatus) {
+                return { ...event, checkInStatus };
               }
+              return { ...event, checkInError: 'Not checked in yet' };
+            } catch {
               return event;
             }
           })
